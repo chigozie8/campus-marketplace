@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { FloatingNav } from '@/components/floating-nav'
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
+import { NavigationProgress } from '@/components/navigation-progress'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -291,6 +292,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <NavigationProgress />
           {children}
           <FloatingNav />
           <ServiceWorkerRegistration />
