@@ -51,3 +51,9 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+NEXT_PUBLIC_BACKEND_URL = "https://fa75bd1a-5f2d-4cc8-828f-85270cdb330d-00-3nm0oboepxdxj.picard.replit.dev:3001"
+FRONTEND_URL = "https://fa75bd1a-5f2d-4cc8-828f-85270cdb330d-00-3nm0oboepxdxj.picard.replit.dev"

@@ -5,7 +5,7 @@ import {
   ShoppingBag, Plus, Eye, MessageCircle, Star,
   Package, Settings, LogOut, LayoutDashboard,
   BadgeCheck, Bot, TrendingUp, ArrowUpRight,
-  ChevronRight, Zap, BarChart3, Users,
+  ChevronRight, Zap, BarChart3, Users, ClipboardList,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -82,6 +82,7 @@ export default async function DashboardPage() {
           <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             {[
               { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
+              { href: '/dashboard/orders', icon: ClipboardList, label: 'My Orders', active: false },
               { href: '/seller/new', icon: Plus, label: 'New Listing', active: false },
               { href: '/marketplace', icon: ShoppingBag, label: 'Marketplace', active: false },
               { href: '/assistant', icon: Bot, label: 'AI Assistant', active: false },

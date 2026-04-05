@@ -21,7 +21,7 @@ export async function initializePayment(params: {
     amount: Math.round(params.amount * 100),
     reference,
     metadata: { order_id: params.orderId },
-    callback_url: `${process.env.APP_URL ?? 'http://localhost:3001'}/api/orders/verify/${reference}`,
+    callback_url: `${process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'}/payment/callback`,
   }
 
   const { data } = await paystackClient.post('/transaction/initialize', payload)

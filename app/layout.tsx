@@ -10,6 +10,7 @@ import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { ChatWidget } from '@/components/chat-widget'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
+import { Providers } from '@/components/providers'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -264,15 +265,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SplashScreen />
-          <NavigationProgress />
-          {children}
-          <FloatingNav />
-          <ServiceWorkerRegistration />
-          <PwaInstallPrompt />
-          <ChatWidget />
-          <Toaster richColors position="top-right" />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <Providers>
+            <SplashScreen />
+            <NavigationProgress />
+            {children}
+            <FloatingNav />
+            <ServiceWorkerRegistration />
+            <PwaInstallPrompt />
+            <ChatWidget />
+            <Toaster richColors position="top-right" />
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
