@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Zap, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,23 +35,35 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-1/2 hero-gradient items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-white/20 blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-64 h-64 rounded-full bg-white/20 blur-3xl" />
-        </div>
-        <div className="relative z-10 text-center text-white px-12">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold mb-3">CampusCart</h1>
-          <p className="text-white/80 text-lg leading-relaxed max-w-xs mx-auto">
-            The #1 campus marketplace powered by WhatsApp. Buy and sell smarter.
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden mesh-bg">
+        <div
+          className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)' }}
+        />
+        <div className="relative z-10 text-center px-12">
+          <Link href="/" className="flex items-center gap-2.5 justify-center mb-8">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center glow-green-sm">
+              <Zap className="w-5 h-5 text-primary-foreground" strokeWidth={2.5} />
+            </div>
+            <span className="font-bold text-2xl tracking-tight text-foreground">
+              Vendoor<span className="text-primary">X</span>
+            </span>
+          </Link>
+          <h1 className="text-2xl font-bold text-foreground mb-3 text-balance">
+            The campus commerce OS built for{' '}
+            <span className="gradient-text">winners</span>
+          </h1>
+          <p className="text-muted-foreground leading-relaxed max-w-xs mx-auto mb-10">
+            Discover, chat, and close deals instantly via WhatsApp, Instagram, and Facebook.
           </p>
-          <div className="mt-10 grid grid-cols-2 gap-4 text-left">
+          <div className="grid grid-cols-2 gap-3 text-left">
             {['50K+ Students', '120K+ Products', '2M+ WhatsApp Chats', '4.9/5 Rating'].map(stat => (
-              <div key={stat} className="bg-white/10 rounded-xl px-4 py-3">
-                <p className="text-white font-semibold text-sm">{stat}</p>
+              <div key={stat} className="glass-card rounded-xl px-4 py-3">
+                <p className="text-foreground font-semibold text-sm">{stat}</p>
               </div>
             ))}
           </div>
@@ -59,18 +71,18 @@ export default function LoginPage() {
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-background">
         <div className="w-full max-w-md">
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Zap className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-xl">Campus<span className="text-primary">Cart</span></span>
+            <span className="font-bold text-xl tracking-tight">Vendoor<span className="text-primary">X</span></span>
           </div>
 
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-foreground mb-1">Welcome back</h2>
-            <p className="text-muted-foreground">Sign in to your account to continue</p>
+            <p className="text-muted-foreground">Sign in to your VendoorX account</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
@@ -116,7 +128,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 hero-gradient border-0 text-white hover:opacity-90"
+              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-green-sm"
               disabled={loading}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

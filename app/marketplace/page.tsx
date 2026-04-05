@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Plus } from 'lucide-react'
+import { Zap, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/marketplace/product-card'
@@ -47,10 +47,10 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
   if (error || !products || products.length === 0) {
     return (
       <div className="text-center py-20">
-        <ShoppingBag className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <Zap className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-2">No products found</h3>
         <p className="text-muted-foreground mb-6">Be the first to list something in this category!</p>
-        <Button asChild className="hero-gradient border-0 text-white">
+        <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 glow-green-sm font-semibold">
           <Link href="/seller/new">
             <Plus className="w-4 h-4 mr-2" />
             List an Item
@@ -84,20 +84,20 @@ export default async function MarketplacePage({
       <header className="sticky top-0 z-40 glass border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-white" />
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center glow-green-sm">
+                <Zap className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
               </div>
-              <span className="font-bold text-lg">Campus<span className="text-primary">Cart</span></span>
+              <span className="font-bold text-lg tracking-tight">Vendoor<span className="text-primary">X</span></span>
             </Link>
 
             <div className="flex items-center gap-3">
               {user ? (
                 <>
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" className="border-border" asChild>
                     <Link href="/dashboard">Dashboard</Link>
                   </Button>
-                  <Button size="sm" className="hero-gradient border-0 text-white" asChild>
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-green-sm" asChild>
                     <Link href="/seller/new">
                       <Plus className="w-4 h-4 mr-1.5" />
                       Sell
@@ -106,10 +106,10 @@ export default async function MarketplacePage({
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
                     <Link href="/auth/login">Sign In</Link>
                   </Button>
-                  <Button size="sm" className="hero-gradient border-0 text-white" asChild>
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" asChild>
                     <Link href="/auth/sign-up">Start Selling</Link>
                   </Button>
                 </>

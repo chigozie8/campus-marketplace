@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ShoppingBag,
+  Zap,
   Plus,
   TrendingUp,
   Eye,
@@ -56,11 +56,11 @@ export default async function DashboardPage() {
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-60 border-r border-border bg-sidebar fixed h-full z-30">
           <div className="p-5 border-b border-sidebar-border">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-white" />
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center glow-green-sm">
+                <Zap className="w-4 h-4 text-primary-foreground" strokeWidth={2.5} />
               </div>
-              <span className="font-bold text-base">Campus<span className="text-primary">Cart</span></span>
+              <span className="font-bold text-base tracking-tight">Vendoor<span className="text-primary">X</span></span>
             </Link>
           </div>
 
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
           {/* User info */}
           <div className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-full hero-gradient flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
                 {profile?.full_name?.charAt(0) || user.email?.charAt(0) || '?'}
               </div>
               <div className="flex-1 min-w-0">
@@ -110,14 +110,14 @@ export default async function DashboardPage() {
         </aside>
 
         {/* Mobile top bar */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-border/50 h-14 flex items-center justify-between px-4">
+        <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-border h-14 flex items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 hero-gradient rounded-lg flex items-center justify-center">
-              <ShoppingBag className="w-3.5 h-3.5 text-white" />
+            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
+              <Zap className="w-3.5 h-3.5 text-primary-foreground" strokeWidth={2.5} />
             </div>
-            <span className="font-bold">Campus<span className="text-primary">Cart</span></span>
+            <span className="font-bold tracking-tight">Vendoor<span className="text-primary">X</span></span>
           </Link>
-          <Button size="sm" className="hero-gradient border-0 text-white h-8" asChild>
+          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 font-semibold" asChild>
             <Link href="/seller/new">
               <Plus className="w-3.5 h-3.5 mr-1" />
               Sell
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
                 </h1>
                 <p className="text-muted-foreground text-sm mt-0.5">Here&apos;s what&apos;s happening with your listings</p>
               </div>
-              <Button className="hero-gradient border-0 text-white hidden sm:flex" asChild>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold glow-green-sm hidden sm:flex" asChild>
                 <Link href="/seller/new">
                   <Plus className="w-4 h-4 mr-2" />
                   New Listing
@@ -185,7 +185,7 @@ export default async function DashboardPage() {
 
               {!products || products.length === 0 ? (
                 <div className="text-center py-14 border border-dashed border-border rounded-2xl">
-                  <ShoppingBag className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <Package className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                   <h3 className="font-semibold text-foreground mb-1">No listings yet</h3>
                   <p className="text-sm text-muted-foreground mb-5">List your first item and start receiving WhatsApp inquiries</p>
                   <Button className="hero-gradient border-0 text-white" asChild>
