@@ -1,69 +1,87 @@
 'use client'
 
-import { Star, Quote, Verified } from 'lucide-react'
+import { Star, BadgeCheck } from 'lucide-react'
 
 const TESTIMONIALS = [
   {
     name: 'Adaeze Okonkwo',
-    role: 'Fashion Seller, UNILAG',
+    role: 'Fashion Seller',
+    school: 'UNILAG',
     avatar: 'AO',
-    avatarColor: 'from-pink-500 to-rose-600',
+    color: 'from-pink-500 to-rose-600',
     rating: 5,
+    revenue: '₦180,000',
+    period: 'first month',
     quote: 'I made ₦180,000 in my first month selling clothes on VendoorX. The WhatsApp button is genius — buyers just chat me directly and we close the deal in minutes.',
     verified: true,
   },
   {
     name: 'Chukwuemeka Eze',
-    role: 'Electronics Reseller, UI Ibadan',
+    role: 'Electronics Reseller',
+    school: 'UI Ibadan',
     avatar: 'CE',
-    avatarColor: 'from-blue-500 to-indigo-600',
+    color: 'from-blue-500 to-indigo-600',
     rating: 5,
+    revenue: '3 Laptops',
+    period: 'in one week',
     quote: 'Sold 3 laptops in one week just from listing them here. The platform is clean, fast, and the seller dashboard shows me exactly how many people viewed my listings.',
     verified: true,
   },
   {
     name: 'Fatimah Al-Hassan',
-    role: 'Food Vendor, ABU Zaria',
+    role: 'Food Vendor',
+    school: 'ABU Zaria',
     avatar: 'FA',
-    avatarColor: 'from-orange-500 to-red-600',
+    color: 'from-orange-500 to-red-600',
     rating: 5,
-    quote: 'My jollof rice business blew up after I listed on VendoorX. I get daily orders from students across campus now. It\'s literally the best business decision I made.',
+    revenue: 'Daily Orders',
+    period: 'from campus',
+    quote: 'My jollof rice business blew up after I listed on VendoorX. I get daily orders from students across campus now. Best business decision I ever made.',
     verified: true,
   },
   {
     name: 'Oluwafemi Adeyemi',
-    role: 'Textbook Seller, OAU',
+    role: 'Textbook Seller',
+    school: 'OAU',
     avatar: 'OA',
-    avatarColor: 'from-emerald-500 to-green-600',
+    color: 'from-emerald-500 to-green-600',
     rating: 5,
+    revenue: 'School Fees',
+    period: 'recouped',
     quote: 'Made back my school fees selling used textbooks! Students are always looking for affordable books and VendoorX puts me right in front of them.',
     verified: false,
   },
   {
     name: 'Blessing Nwosu',
-    role: 'Beauty Entrepreneur, FUTA',
+    role: 'Beauty Entrepreneur',
+    school: 'FUTA',
     avatar: 'BN',
-    avatarColor: 'from-rose-500 to-pink-600',
+    color: 'from-rose-500 to-pink-600',
     rating: 5,
+    revenue: '3x Sales',
+    period: 'after badge',
     quote: 'The verified seller badge gives buyers confidence. My sales tripled once I got verified. VendoorX is the real deal for serious campus entrepreneurs.',
     verified: true,
   },
   {
     name: 'Ibrahim Musa',
-    role: 'Service Provider, BUK',
+    role: 'Tech Repair Service',
+    school: 'BUK',
     avatar: 'IM',
-    avatarColor: 'from-indigo-500 to-violet-600',
+    color: 'from-indigo-500 to-violet-600',
     rating: 5,
-    quote: 'I offer laptop repairs and VendoorX has been sending me steady clients. The AI assistant even helped me write better service descriptions. Amazing platform!',
+    revenue: 'Steady Clients',
+    period: 'every week',
+    quote: 'I offer laptop repairs and VendoorX sends me steady clients. The AI assistant even helped me write better service descriptions. Amazing platform!',
     verified: true,
   },
 ]
 
-function StarRating({ rating }: { rating: number }) {
+function Stars({ count }: { count: number }) {
   return (
     <div className="flex gap-0.5">
-      {Array.from({ length: rating }).map((_, i) => (
-        <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
+      {Array.from({ length: count }).map((_, i) => (
+        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
       ))}
     </div>
   )
@@ -71,65 +89,95 @@ function StarRating({ rating }: { rating: number }) {
 
 export function TestimonialsSection() {
   return (
-    <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background overflow-hidden relative">
-      {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
-      </div>
+    <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background overflow-hidden">
+      <div className="max-w-7xl mx-auto">
 
-      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-            Testimonials
+          <span className="inline-flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-[0.2em] mb-5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Real Stories
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mt-4 mb-5">
-            Loved by <span className="text-primary">campus entrepreneurs</span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground text-balance mt-4 mb-5 leading-tight">
+            Campus entrepreneurs{' '}
+            <span className="text-primary">love VendoorX</span>
           </h2>
-          <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
-            Join thousands of students and young entrepreneurs already making money on VendoorX.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+            Join thousands of students and young entrepreneurs already making real money on VendoorX.
           </p>
         </div>
 
-        {/* Testimonial grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Aggregate rating bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-14 p-6 rounded-2xl bg-primary/5 border border-primary/15 max-w-2xl mx-auto">
+          <div className="text-center sm:text-left">
+            <p className="text-6xl font-black text-foreground leading-none">4.9</p>
+            <Stars count={5} />
+            <p className="text-xs text-muted-foreground mt-1">Average rating</p>
+          </div>
+          <div className="w-px h-12 bg-border hidden sm:block" />
+          <div className="flex flex-col gap-1.5 flex-1 w-full sm:w-auto">
+            {[5, 4, 3].map((star, i) => (
+              <div key={star} className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground w-3">{star}</span>
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
+                <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-amber-400 transition-all"
+                    style={{ width: i === 0 ? '92%' : i === 1 ? '6%' : '2%' }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-8">{i === 0 ? '92%' : i === 1 ? '6%' : '2%'}</span>
+              </div>
+            ))}
+          </div>
+          <div className="w-px h-12 bg-border hidden sm:block" />
+          <div className="text-center sm:text-left shrink-0">
+            <p className="text-3xl font-black text-foreground leading-none">50K+</p>
+            <p className="text-xs text-muted-foreground mt-1">Active vendors</p>
+            <p className="text-xs text-primary font-semibold mt-0.5">120+ campuses</p>
+          </div>
+        </div>
+
+        {/* Cards grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {TESTIMONIALS.map((t) => (
             <div
               key={t.name}
-              className="group relative flex flex-col gap-5 rounded-3xl border border-border bg-card/80 backdrop-blur-sm p-7 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2"
+              className="group relative flex flex-col rounded-3xl border border-border bg-card overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/8 transition-all duration-500 hover:-translate-y-1.5"
             >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${t.avatarColor} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
-              
-              {/* Quote icon */}
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Quote className="w-5 h-5 text-primary" />
-              </div>
+              {/* Top color strip */}
+              <div className={`h-1.5 w-full bg-gradient-to-r ${t.color}`} />
 
-              {/* Quote text */}
-              <p className="text-base text-muted-foreground leading-relaxed flex-1 text-pretty relative z-10">
-                &ldquo;{t.quote}&rdquo;
-              </p>
+              <div className="flex flex-col gap-5 p-6 flex-1">
+                {/* Metric highlight */}
+                <div className="flex items-start justify-between">
+                  <div className={`px-3 py-1.5 rounded-xl bg-gradient-to-br ${t.color} bg-opacity-10`}>
+                    <p className="text-lg font-black text-white leading-none">{t.revenue}</p>
+                    <p className="text-[10px] text-white/80 font-medium mt-0.5">{t.period}</p>
+                  </div>
+                  <Stars count={t.rating} />
+                </div>
 
-              {/* Author info */}
-              <div className="flex items-center justify-between pt-5 border-t border-border relative z-10">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${t.avatarColor} flex items-center justify-center text-white text-sm font-bold shadow-lg`}
-                  >
+                {/* Quote */}
+                <p className="text-sm text-muted-foreground leading-relaxed flex-1 text-pretty">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+
+                {/* Author */}
+                <div className="flex items-center gap-3 pt-4 border-t border-border">
+                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-sm font-black shadow-md shrink-0`}>
                     {t.avatar}
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-foreground">{t.name}</p>
+                      <p className="text-sm font-bold text-foreground truncate">{t.name}</p>
                       {t.verified && (
-                        <Verified className="w-4 h-4 text-primary fill-primary/20" />
+                        <BadgeCheck className="w-4 h-4 text-primary shrink-0" />
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                    <p className="text-xs text-muted-foreground truncate">{t.role} · {t.school}</p>
                   </div>
                 </div>
-                <StarRating rating={t.rating} />
               </div>
             </div>
           ))}

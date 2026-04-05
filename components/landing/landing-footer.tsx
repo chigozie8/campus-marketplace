@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { ArrowRight, MessageCircle, Instagram, Facebook, Twitter, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight } from 'lucide-react'
-import { VendoorXIcon } from '@/components/vendoorx-logo'
 
 const LINKS = {
   Marketplace: [
@@ -93,18 +92,13 @@ export function LandingFooter() {
 
           {/* Left — brand */}
           <div className="flex flex-col gap-5">
-            <Link href="/" className="flex items-center gap-3.5 w-fit group">
-              <div className="transition-transform group-hover:scale-105 duration-200">
-                <VendoorXIcon size={44} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[28px] font-black tracking-tight text-foreground leading-none">
-                  Vendoor<span className="text-primary">X</span>
-                </span>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-semibold mt-0.5">
-                  Campus Marketplace
-                </span>
-              </div>
+            <Link href="/" className="flex flex-col w-fit group select-none">
+              <span className="text-[1.6rem] font-black tracking-tight text-foreground leading-none group-hover:opacity-80 transition-opacity">
+                Vendoor<span className="text-primary">X</span>
+              </span>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-semibold mt-1">
+                Campus Marketplace
+              </span>
             </Link>
 
             <p className="text-muted-foreground text-sm leading-relaxed max-w-md">

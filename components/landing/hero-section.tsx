@@ -115,16 +115,14 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group cursor-pointer select-none">
-        <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 group-hover:text-primary transition-colors duration-300">
+      {/* Scroll indicator — sits below the content flow, not overlapping */}
+      <div className="pb-10 flex flex-col items-center gap-2 group cursor-pointer select-none">
+        <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground/50 group-hover:text-primary transition-colors duration-300">
           Scroll
         </span>
         <div className="relative w-10 h-10 flex items-center justify-center">
-          {/* Pulsing ring */}
-          <span className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping opacity-60" />
-          <span className="absolute inset-1 rounded-full border border-primary/20" />
-          {/* Arrow */}
+          <span className="absolute inset-0 rounded-full border-2 border-primary/25 animate-ping opacity-50" />
+          <span className="absolute inset-1 rounded-full border border-primary/15" />
           <svg
             className="w-5 h-5 text-primary animate-bounce relative z-10"
             fill="none"
