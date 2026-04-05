@@ -4,9 +4,10 @@ import Link from 'next/link'
 import {
   ShoppingBag, Plus, Eye, MessageCircle, Star,
   Package, Settings, LogOut, LayoutDashboard,
-  BadgeCheck, Bot, TrendingUp, ArrowUpRight,
-  ChevronRight, Zap, BarChart3, Users,
+  BadgeCheck, Bot, TrendingUp,
+  ChevronRight, Zap, BarChart3, Users, Bell, ClipboardList,
 } from 'lucide-react'
+import { DashboardActions } from '@/components/dashboard-actions'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
@@ -84,6 +85,9 @@ export default async function DashboardPage() {
               { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
               { href: '/seller/new', icon: Plus, label: 'New Listing', active: false },
               { href: '/marketplace', icon: ShoppingBag, label: 'Marketplace', active: false },
+              { href: '/orders', icon: ClipboardList, label: 'My Orders', active: false },
+              { href: '/favorites', icon: ShoppingBag, label: 'Saved Items', active: false },
+              { href: '/notifications', icon: Bell, label: 'Notifications', active: false },
               { href: '/assistant', icon: Bot, label: 'AI Assistant', active: false },
               { href: '/profile', icon: Settings, label: 'Profile & Settings', active: false },
             ].map(({ href, icon: Icon, label, active }) => (
@@ -296,12 +300,7 @@ export default async function DashboardPage() {
                         }`}>
                           {product.is_available ? 'Active' : 'Sold'}
                         </span>
-                        <Link
-                          href={`/marketplace/${product.id}`}
-                          className="opacity-0 group-hover:opacity-100 text-[11px] text-primary hover:underline flex items-center gap-0.5 transition-opacity"
-                        >
-                          View <ArrowUpRight className="w-3 h-3" />
-                        </Link>
+                        <DashboardActions productId={product.id} isAvailable={product.is_available} />
                       </div>
                     </div>
                   ))}
