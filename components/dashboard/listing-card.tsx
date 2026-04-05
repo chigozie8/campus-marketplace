@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -16,6 +16,8 @@ type Props = { product: Product }
 export function ListingCard({ product }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
   const [deleting, setDeleting] = useState(false)
   const [toggling, setToggling] = useState(false)
   const [isAvailable, setIsAvailable] = useState(product.is_available)
@@ -118,7 +120,17 @@ export function ListingCard({ product }: Props) {
       {/* Action menu */}
       <div className="relative">
         <button
-          onClick={() => setOpen(v => !v)}
+          ref={btnRef}
+          onClick={() => {
+            if (!open && btnRef.current) {
+              const rect = btnRef.current.getBoundingClientRect()
+              setMenuPos({
+                top: rect.bottom + 6,
+                right: window.innerWidth - rect.right,
+              })
+            }
+            setOpen(v => !v)
+          }}
           className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
         >
           <MoreVertical className="w-4 h-4" />
@@ -126,39 +138,42 @@ export function ListingCard({ product }: Props) {
 
         {open && (
           <>
-            <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-            <div className="absolute right-0 top-8 z-20 w-44 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden">
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+            <div
+              className="fixed z-50 w-48 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-xl shadow-xl shadow-black/10 overflow-hidden"
+              style={{ top: menuPos.top, right: menuPos.right }}
+            >
               <Link
                 href={`/marketplace/${product.id}`}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+                className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
                 onClick={() => setOpen(false)}
               >
-                <Eye className="w-4 h-4 text-gray-400" />
+                <Eye className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 View listing
               </Link>
               <Link
                 href={`/seller/${product.id}/edit`}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+                className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
                 onClick={() => setOpen(false)}
               >
-                <Edit2 className="w-4 h-4 text-gray-400" />
+                <Edit2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 Edit listing
               </Link>
               <button
                 onClick={handleToggleAvailability}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-3 text-sm text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors"
               >
                 {isAvailable
-                  ? <><XCircle className="w-4 h-4 text-gray-400" />Mark as sold</>
-                  : <><CheckCircle className="w-4 h-4 text-emerald-500" />Mark as available</>
+                  ? <><XCircle className="w-4 h-4 text-gray-400 flex-shrink-0" /><span>Mark as sold</span></>
+                  : <><CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" /><span>Mark as available</span></>
                 }
               </button>
               <div className="border-t border-gray-100 dark:border-border" />
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                className="flex items-center gap-2.5 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 flex-shrink-0" />
                 Delete listing
               </button>
             </div>
