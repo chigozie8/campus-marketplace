@@ -64,8 +64,8 @@ function ProgressBarInner() {
             transitionProperty: 'width, opacity',
             transitionDuration: progress === 100 ? '150ms, 300ms' : '250ms, 0ms',
             transitionTimingFunction: 'ease-out',
-            background: 'linear-gradient(90deg, #0a0a0a 0%, #16a34a 60%, #22c55e 100%)',
-            boxShadow: '0 0 6px 0px rgba(22,163,74,0.7)',
+            background: '#0a0a0a',
+            boxShadow: '0 0 6px 0px rgba(10,10,10,0.5)',
           }}
         />
       </div>
@@ -92,23 +92,17 @@ function ProgressBarInner() {
               stroke="#e5e7eb"
               strokeWidth="2"
             />
-            {/* Active arc — black + green gradient */}
+            {/* Active arc — solid black */}
             <circle
               cx="10"
               cy="10"
               r="8"
-              stroke="url(#spinner-grad)"
+              stroke="#0a0a0a"
               strokeWidth="2"
               strokeLinecap="round"
               strokeDasharray="30 20"
               strokeDashoffset="0"
             />
-            <defs>
-              <linearGradient id="spinner-grad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#0a0a0a" />
-                <stop offset="100%" stopColor="#16a34a" />
-              </linearGradient>
-            </defs>
           </svg>
         </div>
       )}
