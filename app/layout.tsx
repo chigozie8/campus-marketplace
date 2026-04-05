@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { FloatingNav } from '@/components/floating-nav'
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
+import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -293,6 +294,7 @@ export default function RootLayout({
           {children}
           <FloatingNav />
           <ServiceWorkerRegistration />
+          <PwaInstallPrompt />
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
