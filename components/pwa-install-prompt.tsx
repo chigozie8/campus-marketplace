@@ -9,16 +9,24 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-type PromptState = 'hidden' | 'banner' | 'ios'
+type PromptState = 'hidden' | 'banner' | 'ios' | 'mini'
 
 const DISMISSED_KEY = 'pwa-prompt-dismissed-until'
-const DISMISS_DURATION_MS = 3 * 24 * 60 * 60 * 1000 // 3 days
+const VERSION_KEY = 'pwa-prompt-version'
+const CURRENT_VERSION = '2'
+const DISMISS_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 function isDismissed(): boolean {
   try {
     const val = localStorage.getItem(DISMISSED_KEY)
     if (!val) return false
-    return Date.now() < Number(val)
+    const expiry = Number(val)
+    // Guard against corrupted / NaN values
+    if (isNaN(expiry)) {
+      localStorage.removeItem(DISMISSED_KEY)
+      return false
+    }
+    return Date.now() < expiry
   } catch {
     return false
   }
@@ -35,13 +43,27 @@ export function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
+    // Clear stale dismiss state on new version
+    try {
+      if (localStorage.getItem(VERSION_KEY) !== CURRENT_VERSION) {
+        localStorage.removeItem(DISMISSED_KEY)
+        localStorage.setItem(VERSION_KEY, CURRENT_VERSION)
+      }
+    } catch {}
+
     // Already installed as standalone — no need to prompt
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       ('standalone' in window.navigator &&
         (window.navigator as { standalone?: boolean }).standalone === true)
 
-    if (isStandalone || isDismissed()) return
+    if (isStandalone) return
+
+    // Show mini pill if previously dismissed
+    if (isDismissed()) {
+      setState('mini')
+      return
+    }
 
     // iOS Safari — no beforeinstallprompt, show manual instructions
     const ua = window.navigator.userAgent
@@ -52,11 +74,11 @@ export function PwaInstallPrompt() {
       !/chrome/i.test(ua)
 
     if (isIos) {
-      const t = setTimeout(() => setState('ios'), 2500)
+      const t = setTimeout(() => setState('ios'), 1500)
       return () => clearTimeout(t)
     }
 
-    // Chrome / Android — listen for native prompt
+    // Chrome / Android — listen for native beforeinstallprompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
@@ -65,10 +87,11 @@ export function PwaInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // Show banner after 2.5s as fallback (e.g. already met criteria but prompt fired early)
+    // Fallback: show banner after 1.5s even if beforeinstallprompt never fires
+    // (covers browsers that don't support it or already met install criteria)
     const fallbackTimer = setTimeout(() => {
       setState((prev) => (prev === 'hidden' ? 'banner' : prev))
-    }, 2500)
+    }, 1500)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
@@ -78,7 +101,7 @@ export function PwaInstallPrompt() {
 
   const dismiss = useCallback(() => {
     markDismissed()
-    setState('hidden')
+    setState('mini')
   }, [])
 
   const install = useCallback(async () => {
@@ -96,6 +119,20 @@ export function PwaInstallPrompt() {
   }, [deferredPrompt])
 
   if (state === 'hidden') return null
+
+  // Mini persistent pill — shown after dismissal
+  if (state === 'mini') {
+    return (
+      <button
+        onClick={() => setState('banner')}
+        className="fixed bottom-28 md:bottom-8 left-4 z-[60] flex items-center gap-2 bg-[#0a0a0a] text-white text-[12px] font-bold px-3 py-2 rounded-full shadow-lg hover:bg-[#1a1a1a] active:scale-95 transition-all animate-in slide-in-from-left-4 duration-300"
+        aria-label="Install VendoorX app"
+      >
+        <Download className="w-3.5 h-3.5 text-[#16a34a]" />
+        Install App
+      </button>
+    )
+  }
 
   return (
     <div
