@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Heart, Eye, MessageCircle, Share2, Check, Link as LinkIcon } from 'lucide-react'
+import { Heart, Eye, MessageCircle, Share2, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 

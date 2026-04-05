@@ -8,7 +8,8 @@ import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
-import { ProductInteractions, ShareButton } from '@/components/product/product-interactions'
+import { ProductInteractions } from '@/components/product/product-interactions'
+import { ShareButton } from '@/components/product/share-button'
 import { ProductGallery } from '@/components/product/product-gallery'
 
 type Props = { params: Promise<{ id: string }> }
