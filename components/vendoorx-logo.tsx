@@ -1,13 +1,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
-export function VendoorXIcon({ size = 40 }: { size?: number }) {
+/** Renders the full VendoorX logo PNG (bag + wordmark) at a given height.
+ *  The logo image is approximately 3:1 landscape, so width = height * 3.
+ */
+export function VendoorXIcon({ height = 36 }: { height?: number }) {
   return (
     <Image
       src="/logo.png"
       alt="VendoorX"
-      width={size}
-      height={size}
+      width={height * 3}
+      height={height}
       className="object-contain"
       priority
     />
@@ -27,11 +30,11 @@ export function VendoorXWordmark({ className = '' }: { className?: string }) {
   )
 }
 
-export function VendoorXLogo({ size = 140, href = '/' }: { size?: number; href?: string }) {
+export function VendoorXLogo({ height = 36, href = '/' }: { height?: number; href?: string }) {
   return (
-    <Link href={href} className="flex items-center gap-3 group flex-shrink-0">
+    <Link href={href} className="flex items-center flex-shrink-0 group">
       <div className="transition-transform duration-200 group-hover:scale-105">
-        <VendoorXIcon size={size} />
+        <VendoorXIcon height={height} />
       </div>
     </Link>
   )
