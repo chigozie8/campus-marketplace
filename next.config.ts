@@ -91,19 +91,12 @@ const nextConfig: NextConfig = {
         source: '/admin(.*)',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
-      {
-        // Long-lived cache for static assets in production only (files have content hashes)
-        // In dev, use no-store so browsers always pick up code changes
+      // Long-lived cache for static assets in production only (files have content hashes)
+      // In dev, let Next.js/Turbopack manage its own cache-control — overriding it breaks HMR
+      ...(isDev ? [] : [{
         source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: isDev
-              ? 'no-store, max-age=0'
-              : 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      }]),
       {
         // Cache sitemap for 1 hour
         source: '/sitemap.xml',

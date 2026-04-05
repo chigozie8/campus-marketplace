@@ -21,14 +21,20 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-// ── Activate: delete all old caches ──────────────────────────────────────────
+// ── Activate: delete all old caches, then force-reload every open tab ────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== OFFLINE_CACHE).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== OFFLINE_CACHE).map((k) => caches.delete(k)))
+      )
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then((clients) => {
+        // Force every open tab to reload so stale JS chunks are replaced immediately
+        clients.forEach((client) => client.navigate(client.url))
+      })
   )
-  self.clients.claim()
 })
 
 // ── Fetch: always network-first, cache only as offline fallback ───────────────
