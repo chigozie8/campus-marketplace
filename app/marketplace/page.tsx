@@ -93,7 +93,7 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
       {(products as Product[]).map(product => (
         <ProductCard key={product.id} product={product} />
       ))}
@@ -103,14 +103,15 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
 
 function ProductGridSkeleton() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
       {Array.from({ length: 8 }).map((_, i) => (
         <div key={i} className="rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card overflow-hidden animate-pulse shadow-sm">
           <div className="aspect-[4/3] bg-gray-100 dark:bg-muted" />
-          <div className="p-3 space-y-2">
-            <div className="h-3.5 bg-gray-100 dark:bg-muted rounded w-3/4" />
-            <div className="h-5 bg-gray-100 dark:bg-muted rounded w-1/2" />
-            <div className="h-9 bg-gray-100 dark:bg-muted rounded-xl" />
+          <div className="p-2.5 sm:p-3.5 space-y-2">
+            <div className="h-3 bg-gray-100 dark:bg-muted rounded w-full" />
+            <div className="h-3 bg-gray-100 dark:bg-muted rounded w-2/3" />
+            <div className="h-4 bg-gray-100 dark:bg-muted rounded w-1/2" />
+            <div className="h-8 sm:h-9 bg-gray-100 dark:bg-muted rounded-xl" />
           </div>
         </div>
       ))}
@@ -203,28 +204,28 @@ export default async function MarketplacePage({
       <div className="bg-[#0a0a0a] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col gap-4">
             <div>
-              <span className="inline-block bg-primary/20 text-green-400 text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full border border-primary/30 mb-3">
+              <span className="inline-block bg-primary/20 text-green-400 text-[10px] sm:text-xs font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-primary/30 mb-2 sm:mb-3">
                 Campus Marketplace
               </span>
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                Find great deals<br /><span className="text-primary">near you</span>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
+                Find great deals <span className="text-primary">near you</span>
               </h1>
-              <p className="text-white/50 text-sm mt-2">
+              <p className="text-white/50 text-xs sm:text-sm mt-1.5">
                 Thousands of listings from verified campus sellers
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-5 sm:gap-6">
               {[
                 { value: '120K+', label: 'Listings' },
                 { value: '50K+', label: 'Sellers' },
                 { value: '4.9★', label: 'Rating' },
               ].map(({ value, label }) => (
                 <div key={label} className="text-center">
-                  <p className="text-white font-black text-xl">{value}</p>
-                  <p className="text-white/40 text-xs uppercase tracking-wide mt-0.5">{label}</p>
+                  <p className="text-white font-black text-base sm:text-xl">{value}</p>
+                  <p className="text-white/40 text-[10px] sm:text-xs uppercase tracking-wide mt-0.5">{label}</p>
                 </div>
               ))}
             </div>
@@ -248,18 +249,18 @@ export default async function MarketplacePage({
       {/* Category pills */}
       <div className="bg-white dark:bg-card border-b border-gray-100 dark:border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto py-3 scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
             {CATEGORY_PILLS.map(({ label, slug, emoji }) => (
               <Link
                 key={slug}
                 href={`/marketplace?category=${slug}${params.q ? `&q=${params.q}` : ''}`}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-shrink-0 flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
                   activeCategory === slug
                     ? 'bg-[#0a0a0a] text-white shadow-lg shadow-black/10'
                     : 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground hover:bg-gray-200 dark:hover:bg-muted/80'
                 }`}
               >
-                <span>{emoji}</span>
+                <span className="text-sm">{emoji}</span>
                 {label}
               </Link>
             ))}

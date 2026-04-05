@@ -79,20 +79,18 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1 gap-2">
-        <div className="flex items-start justify-between gap-2">
-          <Link href={`/marketplace/${product.id}`} className="hover:text-primary transition-colors flex-1">
-            <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-relaxed">{product.title}</h3>
-          </Link>
-        </div>
+      <div className="p-2.5 sm:p-3.5 flex flex-col flex-1 gap-1.5">
+        <Link href={`/marketplace/${product.id}`} className="hover:text-primary transition-colors">
+          <h3 className="font-semibold text-xs sm:text-sm text-foreground line-clamp-2 leading-snug">{product.title}</h3>
+        </Link>
 
         {/* Price */}
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg font-bold text-foreground">
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-sm sm:text-base font-bold text-foreground">
             ₦{product.price.toLocaleString()}
           </span>
           {product.original_price && product.original_price > product.price && (
-            <span className="text-xs text-muted-foreground line-through">
+            <span className="text-[10px] text-muted-foreground line-through">
               ₦{product.original_price.toLocaleString()}
             </span>
           )}
@@ -100,22 +98,22 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
 
         {/* Location */}
         {product.campus && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="w-3 h-3" />
-            <span>{product.campus}</span>
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
+            <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+            <span className="truncate">{product.campus}</span>
           </div>
         )}
 
-        {/* Seller */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[10px] font-bold flex-shrink-0">
+        {/* Seller row — compact on mobile */}
+        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
+          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[9px] font-bold flex-shrink-0">
             {sellerName.charAt(0)}
           </div>
-          <span className="truncate">{sellerName}</span>
-          {isVerified && <BadgeCheck className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+          <span className="truncate max-w-[80px] sm:max-w-none">{sellerName}</span>
+          {isVerified && <BadgeCheck className="w-3 h-3 text-primary flex-shrink-0" />}
           {sellerRating > 0 && (
             <div className="flex items-center gap-0.5 ml-auto">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
               <span>{sellerRating.toFixed(1)}</span>
             </div>
           )}
@@ -124,12 +122,12 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
         {/* WhatsApp CTA */}
         <Button
           size="sm"
-          className="w-full mt-auto whatsapp-green border-0 h-9 text-xs font-semibold"
+          className="w-full mt-auto whatsapp-green border-0 h-8 sm:h-9 text-[10px] sm:text-xs font-semibold"
           asChild
         >
           <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
-            Chat on WhatsApp
+            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" />
+            <span className="hidden xs:inline">Chat on </span>WhatsApp
           </a>
         </Button>
       </div>
