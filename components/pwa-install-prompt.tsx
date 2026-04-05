@@ -31,12 +31,12 @@ export function PwaInstallPrompt() {
 
     if (ios) {
       setIsIos(true)
-      // Show iOS tip after 4 s
-      const t = setTimeout(() => setVisible(true), 4000)
+      // Show iOS tip after 3s
+      const t = setTimeout(() => setVisible(true), 3000)
       return () => clearTimeout(t)
     }
 
-    // Android / Chrome — listen for native prompt
+    // Android / Chrome — listen for native beforeinstallprompt
     const handler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
@@ -44,7 +44,17 @@ export function PwaInstallPrompt() {
     }
 
     window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+
+    // In development, show the prompt after 5s so it's always testable
+    let devTimer: ReturnType<typeof setTimeout> | undefined
+    if (process.env.NODE_ENV === 'development') {
+      devTimer = setTimeout(() => setVisible(true), 5000)
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      if (devTimer) clearTimeout(devTimer)
+    }
   }, [])
 
   function dismiss() {
