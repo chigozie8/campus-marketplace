@@ -13,9 +13,9 @@ const AVATARS = [
 ]
 
 const FEATURES = [
-  { icon: Shield, text: 'Verified Sellers' },
-  { icon: Zap, text: 'Instant Connect' },
-  { icon: Users, text: '50K+ Students' },
+  { icon: Shield, text: 'Verified Vendors' },
+  { icon: Zap, text: 'WhatsApp Orders' },
+  { icon: Users, text: '50K+ Sellers' },
 ]
 
 export function HeroSection() {
@@ -26,21 +26,20 @@ export function HeroSection() {
         {/* Trust badge pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
           <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
-          Nigeria&apos;s #1 Campus Marketplace
+          The Shopify for WhatsApp &amp; Social Sellers in Africa
         </div>
 
         {/* Headline */}
         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.05] text-balance">
-          <span className="text-foreground">everything is</span>
+          <span className="text-foreground">Sell smarter on</span>
           <br />
-          <span className="text-primary italic">VendoorX.</span>
+          <span className="text-primary italic">WhatsApp.</span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
-          Buy and sell anything on campus — electronics, books, fashion, food &amp; services.
-          Close deals directly on WhatsApp with{' '}
-          <span className="text-primary font-semibold">zero platform fees</span>.
+          Stop tracking orders in chats. VendoorX turns your WhatsApp, Instagram, and Facebook conversations into a{' '}
+          <span className="text-primary font-semibold">structured, trackable store</span> — with payments, dashboards, and order management built in.
         </p>
 
         {/* Feature badges */}
@@ -110,7 +109,7 @@ export function HeroSection() {
               ))}
             </div>
             <span className="text-sm text-muted-foreground font-medium">
-              <span className="text-foreground font-bold">50,000+</span> active students
+              <span className="text-foreground font-bold">50,000+</span> active vendors
             </span>
           </div>
         </div>
