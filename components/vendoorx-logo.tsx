@@ -1,18 +1,31 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 
-/** Renders the full VendoorX logo PNG (bag + wordmark) at a given height.
- *  The logo image is approximately 3:1 landscape, so width = height * 3.
+/**
+ * Renders the VendoorX logo PNG.
+ * Accepts both `size` (legacy square prop) and `height` for flexibility.
+ * The logo is ~3:1 landscape so width is derived from height.
  */
-export function VendoorXIcon({ height = 36 }: { height?: number }) {
+export function VendoorXIcon({
+  height,
+  size,
+}: {
+  height?: number
+  size?: number
+}) {
+  const h = height ?? size ?? 36
+  const w = Math.round(h * 3)
   return (
     <Image
       src="/logo.png"
       alt="VendoorX"
-      width={height * 3}
-      height={height}
+      width={w}
+      height={h}
       className="object-contain"
       priority
+      unoptimized={false}
     />
   )
 }
@@ -30,11 +43,20 @@ export function VendoorXWordmark({ className = '' }: { className?: string }) {
   )
 }
 
-export function VendoorXLogo({ height = 36, href = '/' }: { height?: number; href?: string }) {
+export function VendoorXLogo({
+  height,
+  size,
+  href = '/',
+}: {
+  height?: number
+  size?: number
+  href?: string
+}) {
+  const h = height ?? size ?? 36
   return (
     <Link href={href} className="flex items-center flex-shrink-0 group">
       <div className="transition-transform duration-200 group-hover:scale-105">
-        <VendoorXIcon height={height} />
+        <VendoorXIcon height={h} />
       </div>
     </Link>
   )
