@@ -60,7 +60,7 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: '32x32' },
     ],
     apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180' },
+      { url: '/icon-192', sizes: '180x180' },
     ],
   },
   manifest: '/manifest.webmanifest',

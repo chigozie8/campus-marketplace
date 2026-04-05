@@ -1,6 +1,12 @@
 const sharp = require('sharp')
 const path = require('path')
-const publicDir = path.join(__dirname, '..', 'public')
+const fs = require('fs')
+const publicDir = '/vercel/share/v0-project/public'
+
+// Ensure public dir exists
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true })
+}
 
 // SVG — black rounded square, white V + green X
 const svgSource = `
