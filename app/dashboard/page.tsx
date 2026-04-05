@@ -1,15 +1,14 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-// redirect used for auth guard above
 import {
   ShoppingBag, Plus, Eye, MessageCircle, Star,
   Package, Settings, LogOut, LayoutDashboard,
-  BadgeCheck, Bot, TrendingUp, ArrowUpRight,
+  BadgeCheck, Bot, TrendingUp,
   ChevronRight, Zap, BarChart3, Users, ClipboardList,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
+import { ListingCard } from '@/components/dashboard/listing-card'
 import type { Product } from '@/lib/types'
 
 export default async function DashboardPage() {
@@ -266,45 +265,7 @@ export default async function DashboardPage() {
               ) : (
                 <div className="divide-y divide-gray-50 dark:divide-border">
                   {(products as Product[]).map(product => (
-                    <div
-                      key={product.id}
-                      className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/70 dark:hover:bg-muted/30 transition-colors group"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
-                        {product.images?.[0] ? (
-                          <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="w-5 h-5 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{product.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-muted-foreground mt-0.5">
-                          ₦{product.price.toLocaleString()} &middot; {product.categories?.name || 'Uncategorised'}
-                        </p>
-                      </div>
-                      <div className="hidden sm:flex items-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
-                        <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{product.views}</span>
-                        <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" />{product.whatsapp_clicks}</span>
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                          product.is_available
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30'
-                            : 'bg-gray-100 text-gray-500 dark:bg-muted dark:text-muted-foreground'
-                        }`}>
-                          {product.is_available ? 'Active' : 'Sold'}
-                        </span>
-                        <Link
-                          href={`/marketplace/${product.id}`}
-                          className="opacity-0 group-hover:opacity-100 text-[11px] text-primary hover:underline flex items-center gap-0.5 transition-opacity"
-                        >
-                          View <ArrowUpRight className="w-3 h-3" />
-                        </Link>
-                      </div>
-                    </div>
+                    <ListingCard key={product.id} product={product} />
                   ))}
                 </div>
               )}
