@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { VendoorXLogo } from '@/components/vendoorx-logo'
+
 import type { User } from '@supabase/supabase-js'
 
 interface LandingNavProps {
@@ -42,10 +42,14 @@ export function LandingNav({ user }: LandingNavProps) {
               : 'bg-white dark:bg-gray-950 shadow-lg shadow-black/[0.07] dark:shadow-black/20 border border-gray-100 dark:border-gray-800/60'
           }`}
         >
-          <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+          <div className="flex items-center justify-between px-4 sm:px-6 h-[68px]">
 
-            {/* Logo */}
-            <VendoorXLogo height={36} />
+            {/* Wordmark */}
+            <Link href="/" className="flex items-center group select-none">
+              <span className="text-[1.45rem] font-black tracking-tight text-gray-950 dark:text-white leading-none group-hover:opacity-80 transition-opacity">
+                Vendoor<span className="text-[#16a34a]">X</span>
+              </span>
+            </Link>
 
             {/* Desktop nav links */}
             <div className="hidden lg:flex items-center gap-1">
