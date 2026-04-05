@@ -17,7 +17,7 @@ const STEPS = [
     step: '03',
     icon: Share2,
     title: 'Share across platforms',
-    description: 'Share your listings to WhatsApp Status, Instagram Stories, and Facebook with one click. Reach your audience where they are.',
+    description: 'Share your listings to WhatsApp Status, Instagram Stories, and Facebook with one click.',
   },
   {
     step: '04',
@@ -29,12 +29,14 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-muted/30">
+    <section id="how-it-works" className="py-24 px-4 sm:px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-3">How it works</p>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mb-4">
+          <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-3 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+            How it works
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mt-4 mb-4">
             Selling made simple
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-pretty leading-relaxed">
@@ -42,27 +44,30 @@ export function HowItWorksSection() {
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Steps grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((step, index) => {
             const Icon = step.icon
             return (
-              <div key={step.step} className="relative flex flex-col items-center text-center">
-                {/* Connector line */}
+              <div key={step.step} className="relative flex flex-col">
+                {/* Connector */}
                 {index < STEPS.length - 1 && (
                   <div className="hidden lg:block absolute top-8 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-px bg-border" />
                 )}
 
-                {/* Icon circle */}
-                <div className="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
-                  <Icon className="w-7 h-7 text-primary" />
-                  <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                    {index + 1}
-                  </span>
-                </div>
+                {/* Card */}
+                <div className="flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-card hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200">
+                  {/* Icon with step number */}
+                  <div className="relative w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
+                    <Icon className="w-7 h-7 text-primary" />
+                    <span className="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center border-2 border-background">
+                      {index + 1}
+                    </span>
+                  </div>
 
-                <h3 className="font-semibold text-foreground mb-2 text-balance">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{step.description}</p>
+                  <h3 className="font-semibold text-foreground mb-2 text-balance">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{step.description}</p>
+                </div>
               </div>
             )
           })}
