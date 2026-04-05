@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { HeroSection } from '@/components/landing/hero-section'
 import { WhatsappMockupSection } from '@/components/landing/whatsapp-mockup-section'
 import { HowItWorksSection } from '@/components/landing/how-it-works-section'
+import { Features } from '@/components/landing/features'
 import { CategoriesSection } from '@/components/landing/categories-section'
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { CtaSection } from '@/components/landing/cta-section'
@@ -20,6 +21,7 @@ export default async function Home() {
       <HeroSection />
       <WhatsappMockupSection />
       <HowItWorksSection />
+      <Features />
       <CategoriesSection />
       <TestimonialsSection />
       <CtaSection />
