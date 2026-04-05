@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
-  CheckCircle2, ShieldCheck, Sparkles, Lock, Mail
+  CheckCircle2, ShieldCheck, Sparkles, Lock,
+  Mail, ShoppingBag, Store, GraduationCap, Phone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,12 +17,12 @@ import { cn } from '@/lib/utils'
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
-    { label: '8+ characters', pass: password.length >= 8 },
-    { label: 'Uppercase letter', pass: /[A-Z]/.test(password) },
+    { label: '8+ chars', pass: password.length >= 8 },
+    { label: 'Uppercase', pass: /[A-Z]/.test(password) },
     { label: 'Number', pass: /[0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-[#16a34a]']
+  const barColor = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-[#16a34a]'][score]
   if (!password) return null
   return (
     <div className="mt-2 space-y-1.5">
@@ -29,13 +30,22 @@ function PasswordStrength({ password }: { password: string }) {
         {[0, 1, 2].map(i => (
           <div
             key={i}
-            className={cn('h-1 flex-1 rounded-full transition-all duration-300', i < score ? colors[score] : 'bg-gray-200')}
+            className={cn(
+              'h-1.5 flex-1 rounded-full transition-all duration-300',
+              i < score ? barColor : 'bg-gray-200'
+            )}
           />
         ))}
       </div>
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {checks.map(({ label, pass }) => (
-          <span key={label} className={cn('text-[10px] flex items-center gap-1', pass ? 'text-[#16a34a]' : 'text-gray-400')}>
+          <span
+            key={label}
+            className={cn(
+              'text-[10px] flex items-center gap-1 transition-colors',
+              pass ? 'text-[#16a34a]' : 'text-gray-400'
+            )}
+          >
             <CheckCircle2 className="w-2.5 h-2.5" />
             {label}
           </span>
@@ -45,25 +55,29 @@ function PasswordStrength({ password }: { password: string }) {
   )
 }
 
+type Role = 'buyer' | 'seller' | ''
+
 export default function SignUpPage() {
   const router = useRouter()
+  const [role, setRole] = useState<Role>('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [university, setUniversity] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters')
-      return
-    }
+    if (!role) { toast.error('Please select your account type'); return }
+    if (password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (!agreedToTerms) { toast.error('Please agree to the Terms & Privacy Policy'); return }
     setLoading(true)
     const toastId = toast.loading('Creating your account...')
     const supabase = createClient()
@@ -72,7 +86,7 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
-        data: { full_name: fullName, whatsapp_number: whatsapp },
+        data: { full_name: fullName, whatsapp_number: whatsapp, university, role },
       },
     })
     toast.dismiss(toastId)
@@ -86,41 +100,43 @@ export default function SignUpPage() {
     setLoading(false)
   }
 
+  // ── Success state ──
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
-        <div
-          className={cn(
-            'text-center max-w-md transition-all duration-500',
-            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          )}
-        >
-          <div className="relative w-20 h-20 mx-auto mb-6">
+        <div className={cn(
+          'text-center max-w-md transition-all duration-700',
+          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+        )}>
+          <div className="relative w-24 h-24 mx-auto mb-8">
             <div className="absolute inset-0 bg-[#16a34a]/20 rounded-full animate-ping" />
-            <div className="relative w-20 h-20 bg-[#0a0a0a] rounded-full flex items-center justify-center shadow-xl">
-              <Mail className="w-9 h-9 text-white" />
+            <div className="absolute inset-2 bg-[#16a34a]/10 rounded-full animate-ping [animation-delay:150ms]" />
+            <div className="relative w-24 h-24 bg-[#0a0a0a] rounded-full flex items-center justify-center shadow-2xl">
+              <Mail className="w-10 h-10 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-2">Check your inbox</h2>
-          <p className="text-gray-500 leading-relaxed mb-8 text-sm">
+          <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-3">Check your inbox</h2>
+          <p className="text-gray-500 leading-relaxed mb-8 text-sm max-w-sm mx-auto">
             We sent a confirmation link to{' '}
             <span className="font-semibold text-gray-900">{email}</span>.
             Click it to activate your VendoorX account.
           </p>
+          <div className="bg-gray-50 rounded-2xl p-4 mb-8 text-left space-y-2">
+            {["Check your spam/junk folder if you don't see it", "The link expires in 24 hours", "Contact support if you need help"].map((tip) => (
+              <div key={tip} className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle2 className="w-4 h-4 text-[#16a34a] mt-0.5 flex-shrink-0" />
+                {tip}
+              </div>
+            ))}
+          </div>
           <div className="space-y-3">
-            <Button
-              asChild
-              className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold rounded-xl"
-            >
+            <Button asChild className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold rounded-xl">
               <Link href="/auth/login">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Sign In
               </Link>
             </Button>
-            <button
-              onClick={() => setSuccess(false)}
-              className="text-sm text-[#16a34a] hover:underline font-medium"
-            >
+            <button onClick={() => setSuccess(false)} className="text-sm text-[#16a34a] hover:underline font-medium">
               Try a different email
             </button>
           </div>
@@ -132,37 +148,36 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* ── Left panel ── */}
-      <div className="hidden lg:flex lg:w-[48%] bg-[#0a0a0a] relative overflow-hidden flex-col">
+      <div className="hidden lg:flex lg:w-[46%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-[0.18]"
           style={{
             backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#16a34a]/20 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-48 h-48 bg-[#16a34a]/10 rounded-full blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#16a34a]/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-52 h-52 bg-[#16a34a]/10 rounded-full blur-2xl" />
+        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-[#16a34a]/8 rounded-full blur-2xl" />
 
         <div className="relative z-10 flex flex-col h-full p-12">
-          <Link href="/" className="inline-flex items-center gap-2 group w-fit">
+          <Link href="/" className="inline-flex items-center w-fit">
             <span className="text-2xl font-black tracking-tight text-white leading-none">
               Vendoor<span className="text-[#16a34a]">X</span>
             </span>
           </Link>
 
           <div className="flex-1 flex flex-col justify-center">
-            <div className="mb-3">
-              <span className="inline-flex items-center gap-1.5 bg-[#16a34a]/20 text-[#4ade80] text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full border border-[#16a34a]/30">
-                <Sparkles className="w-3 h-3" />
-                Free forever
-              </span>
-            </div>
+            <span className="inline-flex items-center gap-1.5 bg-[#16a34a]/20 text-[#4ade80] text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full border border-[#16a34a]/30 w-fit mb-4">
+              <Sparkles className="w-3 h-3" />
+              Free forever
+            </span>
             <h1 className="text-4xl xl:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight mb-5">
               Start selling in<br />under{' '}
               <span className="text-[#16a34a]">60 seconds.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              List items for free, connect buyers directly on WhatsApp, and get paid — no commissions.
+              List items for free, connect buyers directly on WhatsApp, and get paid — zero commissions.
             </p>
 
             <div className="space-y-3 mb-12">
@@ -171,6 +186,7 @@ export default function SignUpPage() {
                 'Direct WhatsApp buyer connections',
                 'Seller analytics & verified badge',
                 'Campus-only trusted community',
+                'Instant buyer notifications',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center flex-shrink-0">
@@ -182,7 +198,11 @@ export default function SignUpPage() {
             </div>
 
             <div className="flex gap-8 pt-8 border-t border-white/10">
-              {[{ value: '₦0', label: 'Commission' }, { value: '60s', label: 'To list' }, { value: '50K+', label: 'Buyers' }].map(({ value, label }) => (
+              {[
+                { value: '₦0', label: 'Commission' },
+                { value: '60s', label: 'To list' },
+                { value: '50K+', label: 'Buyers' },
+              ].map(({ value, label }) => (
                 <div key={label}>
                   <p className="text-2xl font-black text-white">{value}</p>
                   <p className="text-white/40 text-xs mt-0.5 uppercase tracking-wider">{label}</p>
@@ -196,7 +216,7 @@ export default function SignUpPage() {
               &quot;I listed my textbooks and got 4 messages in an hour. VendoorX is the real deal!&quot;
             </p>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#16a34a]/30 border border-[#16a34a]/40 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-[#16a34a]/30 border border-[#16a34a]/40 flex items-center justify-center flex-shrink-0">
                 <span className="text-[#4ade80] text-xs font-bold">AO</span>
               </div>
               <div>
@@ -212,7 +232,7 @@ export default function SignUpPage() {
       </div>
 
       {/* ── Right panel: form ── */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-5 lg:px-10">
           <Link
             href="/"
@@ -229,13 +249,12 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <div className="flex-1 flex items-center justify-center px-6 py-6 lg:px-16">
-          <div
-            className={cn(
-              'w-full max-w-[420px] transition-all duration-500',
-              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            )}
-          >
+        <div className="flex-1 flex items-start justify-center px-6 py-6 lg:px-16">
+          <div className={cn(
+            'w-full max-w-[440px] pb-10 transition-all duration-500',
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          )}>
+            {/* Mobile wordmark */}
             <div className="lg:hidden mb-8">
               <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
@@ -248,6 +267,44 @@ export default function SignUpPage() {
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-4">
+              {/* Role selector */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-semibold text-gray-700">I want to</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'buyer' as Role, icon: ShoppingBag, label: 'Buy items', sub: 'Browse & buy' },
+                    { value: 'seller' as Role, icon: Store, label: 'Sell items', sub: 'List & earn' },
+                  ].map(({ value, icon: Icon, label, sub }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setRole(value)}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 text-center',
+                        role === value
+                          ? 'border-[#16a34a] bg-[#16a34a]/5 text-[#16a34a]'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-gray-50'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-9 h-9 rounded-lg flex items-center justify-center transition-colors',
+                        role === value ? 'bg-[#16a34a]/15' : 'bg-gray-200'
+                      )}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold leading-none">{label}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
+                      </div>
+                      {role === value && (
+                        <CheckCircle2 className="w-4 h-4 text-[#16a34a] absolute top-3 right-3" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Full name */}
               <div className="space-y-1.5">
                 <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700">Full name</Label>
                 <Input
@@ -261,6 +318,7 @@ export default function SignUpPage() {
                 />
               </div>
 
+              {/* Email */}
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Email address</Label>
                 <Input
@@ -274,21 +332,44 @@ export default function SignUpPage() {
                 />
               </div>
 
+              {/* University */}
+              <div className="space-y-1.5">
+                <Label htmlFor="university" className="text-sm font-semibold text-gray-700">
+                  University <span className="text-gray-400 font-normal">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="university"
+                    type="text"
+                    placeholder="e.g. University of Lagos"
+                    value={university}
+                    onChange={e => setUniversity(e.target.value)}
+                    className="h-12 pl-10 pr-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  />
+                </div>
+              </div>
+
+              {/* WhatsApp */}
               <div className="space-y-1.5">
                 <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700">
                   WhatsApp number <span className="text-gray-400 font-normal">(optional)</span>
                 </Label>
-                <Input
-                  id="whatsapp"
-                  type="tel"
-                  placeholder="+234 800 000 0000"
-                  value={whatsapp}
-                  onChange={e => setWhatsapp(e.target.value)}
-                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
-                />
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="whatsapp"
+                    type="tel"
+                    placeholder="+234 800 000 0000"
+                    value={whatsapp}
+                    onChange={e => setWhatsapp(e.target.value)}
+                    className="h-12 pl-10 pr-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  />
+                </div>
                 <p className="text-[11px] text-gray-400">Buyers will contact you directly via WhatsApp</p>
               </div>
 
+              {/* Password */}
               <div className="space-y-1.5">
                 <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Password</Label>
                 <div className="relative">
@@ -313,6 +394,29 @@ export default function SignUpPage() {
                 <PasswordStrength password={password} />
               </div>
 
+              {/* Terms checkbox */}
+              <div className="flex items-start gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAgreedToTerms(!agreedToTerms)}
+                  className={cn(
+                    'w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0',
+                    agreedToTerms
+                      ? 'bg-[#16a34a] border-[#16a34a]'
+                      : 'border-gray-300 bg-white hover:border-[#16a34a]/50'
+                  )}
+                >
+                  {agreedToTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                </button>
+                <span className="text-sm text-gray-600 leading-snug select-none">
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-[#16a34a] hover:underline font-medium">Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link href="/privacy" className="text-[#16a34a] hover:underline font-medium">Privacy Policy</Link>
+                </span>
+              </div>
+
+              {/* Submit */}
               <Button
                 type="submit"
                 disabled={loading}
@@ -338,12 +442,12 @@ export default function SignUpPage() {
               className="w-full h-12 border-2 border-gray-200 hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
             >
               <Link href="/auth/login">
-                Sign in to your account
+                Sign in to existing account
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
 
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="mt-7 flex items-center justify-center gap-4 text-xs text-gray-400">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
@@ -356,13 +460,6 @@ export default function SignUpPage() {
               <div className="w-px h-3 bg-gray-200" />
               <span>No credit card</span>
             </div>
-
-            <p className="text-center text-[11px] text-gray-400 mt-4 leading-relaxed">
-              By signing up, you agree to our{' '}
-              <Link href="/terms" className="text-[#16a34a] hover:underline">Terms</Link>
-              {' '}&{' '}
-              <Link href="/privacy" className="text-[#16a34a] hover:underline">Privacy Policy</Link>
-            </p>
           </div>
         </div>
       </div>
