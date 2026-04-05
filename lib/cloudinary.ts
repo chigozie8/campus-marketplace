@@ -1,26 +1,16 @@
-import { createClient } from '@/lib/supabase/client'
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
 
-const BUCKET = 'product-images'
+  const res = await fetch('/api/upload', { method: 'POST', body: form })
+  const json = await res.json()
 
-export async function uploadToCloudinary(file: File): Promise<string> {
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error('File is too large. Maximum size is 10 MB.')
+  if (!res.ok || !json.url) {
+    throw new Error(json.error ?? 'Upload failed')
   }
 
-  const supabase = createClient()
-  const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase()
-  // Use a public/ prefix since the bucket policy allows public uploads
-  const path = `public/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false })
-
-  if (error) {
-    console.error('[upload]', error)
-    throw new Error(error.message)
-  }
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
+  return json.url as string
 }
+
+// kept for backwards compat with existing imports
+export const uploadToCloudinary = uploadImage
