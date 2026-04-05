@@ -2,7 +2,7 @@ import 'dotenv/config'
 import app from './app.js'
 import logger from './utils/logger.js'
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 3001
 
 const server = app.listen(PORT, () => {
   logger.info(`VendorX API running on port ${PORT} [${process.env.NODE_ENV ?? 'development'}]`)

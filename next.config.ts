@@ -111,17 +111,9 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // Canonical redirects — prevents duplicate content penalties
+  // Canonical redirects — add production domain redirects here when deployed
   async redirects() {
-    return [
-      // Redirect www to non-www
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.campus-marketplace-pi.vercel.app' }],
-        destination: 'https://campus-marketplace-pi.vercel.app/:path*',
-        permanent: true,
-      },
-    ]
+    return []
   },
 }
 
