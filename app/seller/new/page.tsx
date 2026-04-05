@@ -71,9 +71,10 @@ export default function NewListingPage() {
       setImages(p => [...p, ...urls])
       toast.dismiss(toastId)
       toast.success('Photos uploaded!')
-    } catch {
+    } catch (err) {
+      console.error('[upload]', err)
       toast.dismiss(toastId)
-      toast.error('Photo upload failed. Try again.')
+      toast.error(err instanceof Error ? err.message : 'Photo upload failed. Try again.')
     } finally {
       setUploadingImages(false)
     }
