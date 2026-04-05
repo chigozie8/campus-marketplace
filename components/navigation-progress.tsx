@@ -6,7 +6,7 @@ import { Suspense } from 'react'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-NProgress.configure({ showSpinner: false, trickleSpeed: 200, minimum: 0.1 })
+NProgress.configure({ showSpinner: true, trickleSpeed: 200, minimum: 0.1 })
 
 function ProgressBarInner() {
   const pathname = usePathname()
@@ -40,6 +40,10 @@ export function NavigationProgress() {
         }
         #nprogress .peg {
           box-shadow: 0 0 8px #0a0a0a, 0 0 4px #0a0a0a !important;
+        }
+        #nprogress .spinner-icon {
+          border-top-color: #0a0a0a !important;
+          border-left-color: #0a0a0a !important;
         }
       `}</style>
     </Suspense>
