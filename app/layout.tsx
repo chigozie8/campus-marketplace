@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { FloatingNav } from '@/components/floating-nav'
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -215,26 +216,18 @@ const jsonLd = {
       mainEntity: [
         {
           '@type': 'Question',
-          name: 'Is VendoorX free to use?',
+          name: 'Is VendoorX completely free to join?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! VendoorX is completely free to join and free to list products. We charge zero commission on your sales.',
+            text: 'Yes — joining VendoorX is 100% free. The Starter plan lets you list up to 10 products, generate WhatsApp order links, and receive buyers at zero cost, forever.',
           },
         },
         {
           '@type': 'Question',
-          name: 'How do I sell on VendoorX?',
+          name: 'Do I need a website to use VendoorX?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Simply sign up with your student email, create your seller profile, and start listing your products. Buyers will contact you directly via WhatsApp.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Is VendoorX only for Nigerian students?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Currently, VendoorX focuses on Nigerian university campuses, connecting over 50,000 students across major universities.',
+            text: 'Not at all. VendoorX gives you a ready-made public store profile page you can share with anyone. No coding, no hosting, no setup.',
           },
         },
         {
@@ -242,7 +235,31 @@ const jsonLd = {
           name: 'How do payments work on VendoorX?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'VendoorX connects buyers and sellers directly. Payment is handled between you and the buyer, typically in person on campus or via bank transfer.',
+            text: 'On the free Starter plan, payments are handled directly between you and your buyer. On Growth and Pro plans, you get Paystack integration so buyers can pay directly.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does VendoorX charge commission on my sales?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Never. VendoorX charges zero commission on any sale you make, regardless of your plan. Keep every naira you earn.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is VendoorX only for university students in Nigeria?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'VendoorX is focused on Nigerian campuses and university students, but anyone can use the platform. We currently serve 120+ campuses across Nigeria.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I cancel my subscription anytime?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. You can upgrade, downgrade, or cancel your subscription at any time from your dashboard settings.',
           },
         },
       ],
@@ -275,6 +292,7 @@ export default function RootLayout({
         >
           {children}
           <FloatingNav />
+          <ServiceWorkerRegistration />
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
