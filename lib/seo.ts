@@ -11,19 +11,36 @@ export const OG_IMAGE = `${SITE_URL}/og-image.png`
 
 export const SITE_KEYWORDS = [
   'campus marketplace Nigeria',
-  'student marketplace',
+  'student marketplace Nigeria',
   'buy and sell on campus',
   'Nigerian university marketplace',
   'UNILAG marketplace',
   'OAU marketplace',
+  'UI Ibadan marketplace',
+  'FUTA marketplace',
+  'ABU Zaria marketplace',
+  'LASU marketplace',
   'student trader Nigeria',
   'sell on campus Nigeria',
-  'WhatsApp marketplace',
+  'WhatsApp marketplace Nigeria',
   'campus ecommerce Nigeria',
   'VendoorX',
-  'vendoor',
-  'buy cheap electronics campus',
+  'vendoorx marketplace',
+  'buy cheap electronics campus Nigeria',
   'second hand books university Nigeria',
+  'student buy sell swap Nigeria',
+  'campus deals Nigeria',
+  'zero commission student marketplace',
+  'free student marketplace app Nigeria',
+]
+
+/**
+ * Top Nigerian universities used to enrich page-level keyword targeting.
+ */
+export const NIGERIAN_UNIVERSITIES = [
+  'UNILAG', 'OAU', 'UI', 'FUTA', 'ABU', 'LASU', 'UNIBEN',
+  'UNIPORT', 'UNILORIN', 'FUTA', 'NOUN', 'LAUTECH', 'EKSU', 'FUTO',
+  'DELSU', 'UNIZIK', 'ATBU', 'BUK', 'UDUS', 'UNIABUJA',
 ]
 
 /**
@@ -61,6 +78,10 @@ export function buildMetadata({
     metadataBase: new URL(SITE_URL),
     alternates: {
       canonical: url,
+      languages: {
+        'en-NG': url,
+        'en': url,
+      },
     },
     openGraph: {
       title: fullTitle,

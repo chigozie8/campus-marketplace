@@ -6,7 +6,7 @@ import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
-import { buildMetadata } from '@/lib/seo'
+import { buildMetadata, SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = buildMetadata({
   title: 'Campus Marketplace — Browse 120,000+ Student Listings',
@@ -104,12 +104,54 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     )
   }
 
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Campus Marketplace Listings',
+    description: 'Buy and sell items from verified student sellers across Nigerian universities',
+    url: `${SITE_URL}/marketplace`,
+    numberOfItems: (products as Product[]).length,
+    itemListElement: (products as Product[]).map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${SITE_URL}/marketplace/${product.id}`,
+      name: product.title,
+      image: product.images?.[0] || `${SITE_URL}/og-image.png`,
+      description: product.description?.slice(0, 100) || product.title,
+    })),
+  }
+
+  const collectionPageJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'VendoorX Campus Marketplace',
+    description: 'Browse thousands of listings from student sellers across Nigeria',
+    url: `${SITE_URL}/marketplace`,
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Marketplace', item: `${SITE_URL}/marketplace` },
+      ],
+    },
+  }
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
-      {(products as Product[]).map(product => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }}
+      />
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        {(products as Product[]).map(product => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+    </>
   )
 }
 

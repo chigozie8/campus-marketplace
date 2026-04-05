@@ -255,7 +255,7 @@ export default function RootLayout({
           id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
       </head>
       <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased pb-24 lg:pb-0`}>
