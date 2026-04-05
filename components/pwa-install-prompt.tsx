@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { X, Download, Smartphone, Share, Zap, ShieldCheck, Wifi } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -13,11 +14,21 @@ type PromptState = 'hidden' | 'banner' | 'ios'
 const CANCELLED_KEY = 'pwa-cancelled'
 
 export function PwaInstallPrompt() {
+  const pathname = usePathname()
   const [state, setState] = useState<PromptState>('hidden')
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [installing, setInstalling] = useState(false)
 
+  // Only show on home page
+  const isHomePage = pathname === '/'
+
   useEffect(() => {
+    // Only show on home page
+    if (!isHomePage) {
+      setState('hidden')
+      return
+    }
+
     // Already installed — skip
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -58,7 +69,7 @@ export function PwaInstallPrompt() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
       clearTimeout(t)
     }
-  }, [])
+  }, [isHomePage])
 
   // Cancel — only hides for this session, shows again on next visit
   const cancel = useCallback(() => {
