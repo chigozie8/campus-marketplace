@@ -153,7 +153,7 @@ export function ChatWidget() {
     <>
       {/* Notification bubbles */}
       {!open && (
-        <div className="fixed bottom-24 right-5 z-50 flex flex-col gap-2 items-end pointer-events-none">
+        <div className="fixed bottom-36 right-5 md:bottom-24 z-50 flex flex-col gap-2 items-end pointer-events-none">
           {notifications.map((n) => (
             <div
               key={n.id}
@@ -170,7 +170,7 @@ export function ChatWidget() {
         <button
           onClick={handleOpen}
           aria-label="Open chat"
-          className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
+          className="fixed bottom-24 right-5 md:bottom-8 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200"
         >
           <MessageCircle className="w-6 h-6" />
           {unread > 0 && (
@@ -185,7 +185,7 @@ export function ChatWidget() {
       {open && (
         <div
           className={cn(
-            'fixed bottom-5 right-5 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-background rounded-3xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300',
+            'fixed bottom-24 right-5 md:bottom-8 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-background rounded-3xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300',
             minimized ? 'h-[64px]' : 'h-[520px]',
           )}
         >
