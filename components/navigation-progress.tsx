@@ -15,14 +15,13 @@ function ProgressBarInner() {
 
   const start = () => {
     setVisible(true)
-    setProgress(10)
-    let current = 10
+    setProgress(12)
+    let current = 12
     intervalRef.current = setInterval(() => {
-      // Increments slow as it approaches 90 — never reaches 100 until done
-      const increment = current < 30 ? 8 : current < 60 ? 4 : current < 80 ? 2 : 0.5
+      const increment = current < 30 ? 10 : current < 55 ? 5 : current < 75 ? 2 : 0.4
       current = Math.min(current + increment, 90)
       setProgress(current)
-    }, 200)
+    }, 180)
   }
 
   const complete = () => {
@@ -31,18 +30,16 @@ function ProgressBarInner() {
     timerRef.current = setTimeout(() => {
       setVisible(false)
       setProgress(0)
-    }, 400)
+    }, 350)
   }
 
   useEffect(() => {
     const currentUrl = pathname + searchParams.toString()
     if (prevUrl.current && prevUrl.current !== currentUrl) {
       start()
-      // complete immediately — Next.js RSC navigation is instant after hydration
-      timerRef.current = setTimeout(complete, 100)
+      timerRef.current = setTimeout(complete, 80)
     }
     prevUrl.current = currentUrl
-
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -52,19 +49,70 @@ function ProgressBarInner() {
   if (!visible && progress === 0) return null
 
   return (
-    <div
-      className="fixed top-0 left-0 right-0 z-[9999] h-[3px] pointer-events-none"
-      aria-hidden="true"
-    >
+    <>
+      {/* Thin progress line — 1.5px, black with green shimmer */}
       <div
-        className="h-full bg-primary shadow-[0_0_8px_2px_oklch(0.45_0.22_155/0.6)] transition-all ease-out"
-        style={{
-          width: `${progress}%`,
-          opacity: visible ? 1 : 0,
-          transitionDuration: progress === 100 ? '200ms' : '300ms',
-        }}
-      />
-    </div>
+        className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none"
+        style={{ height: '1.5px' }}
+        aria-hidden="true"
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${progress}%`,
+            opacity: visible ? 1 : 0,
+            transitionProperty: 'width, opacity',
+            transitionDuration: progress === 100 ? '150ms, 300ms' : '250ms, 0ms',
+            transitionTimingFunction: 'ease-out',
+            background: 'linear-gradient(90deg, #0a0a0a 0%, #16a34a 60%, #22c55e 100%)',
+            boxShadow: '0 0 6px 0px rgba(22,163,74,0.7)',
+          }}
+        />
+      </div>
+
+      {/* Circular spinner — bottom-right of screen */}
+      {visible && (
+        <div
+          className="fixed bottom-28 right-4 z-[9999] pointer-events-none lg:bottom-6"
+          aria-hidden="true"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            className="animate-spin"
+            style={{ animationDuration: '700ms' }}
+          >
+            {/* Track */}
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              stroke="#e5e7eb"
+              strokeWidth="2"
+            />
+            {/* Active arc — black + green gradient */}
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              stroke="url(#spinner-grad)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeDasharray="30 20"
+              strokeDashoffset="0"
+            />
+            <defs>
+              <linearGradient id="spinner-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#0a0a0a" />
+                <stop offset="100%" stopColor="#16a34a" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      )}
+    </>
   )
 }
 
