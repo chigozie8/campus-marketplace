@@ -6,11 +6,23 @@ import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Marketplace — VendoorX',
-  description: 'Discover amazing deals from fellow students. Electronics, fashion, books, food and more from verified campus sellers.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'Campus Marketplace — Browse 120,000+ Student Listings',
+  description:
+    'Shop electronics, textbooks, fashion, food, services and more from verified student sellers across 120+ Nigerian universities. WhatsApp-direct, zero platform fees.',
+  path: '/marketplace',
+  keywords: [
+    'buy electronics campus Nigeria',
+    'student listings marketplace',
+    'buy textbooks Nigeria',
+    'campus fashion deals',
+    'buy food campus Nigeria',
+    'student seller Nigeria marketplace',
+    'second hand goods university Nigeria',
+  ],
+})
 
 interface SearchParams {
   category?: string

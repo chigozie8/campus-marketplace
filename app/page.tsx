@@ -1,5 +1,23 @@
+import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
 import { HeroSection } from '@/components/landing/hero-section'
+
+export const metadata: Metadata = buildMetadata({
+  title: "VendoorX — Nigeria's #1 Campus Marketplace | Buy & Sell on Campus",
+  description:
+    "VendoorX connects 50,000+ students across 120+ Nigerian universities. Buy and sell electronics, textbooks, fashion, food, and services. WhatsApp-powered, zero commission, free forever.",
+  path: '/',
+  keywords: [
+    'campus marketplace Nigeria',
+    'buy and sell university Nigeria',
+    'student seller Nigeria',
+    'UNILAG OAU UI student market',
+    'WhatsApp student commerce',
+    'sell textbooks campus',
+    'cheap electronics campus Nigeria',
+  ],
+})
 import { StatsBar } from '@/components/landing/stats-bar'
 import { ProblemSolutionSection } from '@/components/landing/problem-solution-section'
 import { WhatsappMockupSection } from '@/components/landing/whatsapp-mockup-section'

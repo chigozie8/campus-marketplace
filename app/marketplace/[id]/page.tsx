@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
+import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
 
 type Props = {
@@ -30,49 +31,69 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
 
   if (!supabase) return { title: 'Product Not Found' }
-  
+
   const { data: product } = await supabase
     .from('products')
     .select('*, profiles(*), categories(*)')
     .eq('id', id)
     .single()
 
-  if (!product) {
-    return {
-      title: 'Product Not Found',
-    }
-  }
+  if (!product) return { title: 'Product Not Found | VendoorX', robots: { index: false, follow: false } }
 
   const p = product as Product
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.com'
-  const imageUrl = p.images?.[0] || `${siteUrl}/og-image.png`
+  const imageUrl = p.images?.[0] || `${SITE_URL}/og-image.png`
+  const sellerName = p.profiles?.full_name || 'Student Seller'
+  const conditionMap: Record<string, string> = {
+    new: 'Brand new',
+    like_new: 'Like new',
+    good: 'Good condition',
+    fair: 'Fair condition',
+  }
+  const conditionLabel = conditionMap[p.condition] || 'Good condition'
+  const categoryName = p.categories?.name || 'Campus Item'
+  const campus = p.campus || p.location || 'Nigerian campus'
+
+  const title = `${p.title} — ₦${p.price.toLocaleString()} | ${categoryName} on VendoorX`
+  const description = p.description
+    ? `${p.description.slice(0, 140)}… Buy from ${sellerName} on VendoorX — WhatsApp direct, zero fees.`
+    : `Buy ${p.title} (${conditionLabel}) for ₦${p.price.toLocaleString()} from a verified student seller at ${campus} on VendoorX. Contact directly on WhatsApp.`
 
   return {
-    title: `${p.title} - ₦${p.price.toLocaleString()}`,
-    description: p.description || `Buy ${p.title} for ₦${p.price.toLocaleString()} from a verified student seller on VendoorX. ${p.condition === 'new' ? 'Brand new condition.' : ''} Contact directly on WhatsApp.`,
-    keywords: [p.title, p.categories?.name || '', 'campus marketplace', 'student seller', 'buy on campus'],
+    title,
+    description,
+    keywords: [
+      p.title,
+      categoryName,
+      `buy ${categoryName} campus Nigeria`,
+      `${categoryName} for sale student`,
+      campus,
+      'campus marketplace',
+      'student seller Nigeria',
+      'buy on campus WhatsApp',
+      SITE_NAME,
+    ],
+    authors: [{ name: sellerName }],
     openGraph: {
-      title: `${p.title} - ₦${p.price.toLocaleString()} | VendoorX`,
-      description: p.description || `Buy ${p.title} from a verified student seller`,
+      title,
+      description,
       type: 'website',
-      url: `${siteUrl}/marketplace/${id}`,
-      images: [
-        {
-          url: imageUrl,
-          width: 800,
-          height: 600,
-          alt: p.title,
-        },
-      ],
+      url: `${SITE_URL}/marketplace/${id}`,
+      siteName: SITE_NAME,
+      locale: 'en_NG',
+      images: [{ url: imageUrl, width: 800, height: 600, alt: p.title }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${p.title} - ₦${p.price.toLocaleString()}`,
-      description: p.description || `Buy from a student seller on VendoorX`,
+      title,
+      description,
       images: [imageUrl],
+      site: '@vendoorx',
     },
-    alternates: {
-      canonical: `${siteUrl}/marketplace/${id}`,
+    alternates: { canonical: `${SITE_URL}/marketplace/${id}` },
+    robots: {
+      index: p.is_available,
+      follow: true,
+      googleBot: { index: p.is_available, follow: true, 'max-image-preview': 'large' },
     },
   }
 }
