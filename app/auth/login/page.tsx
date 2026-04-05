@@ -1,14 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingBag, Eye, EyeOff, Loader2, ArrowRight, Shield, Zap, Users } from 'lucide-react'
+import {
+  Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
+  ShieldCheck, Users, Zap, CheckCircle2, Lock
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
+
+const FEATURES = [
+  { icon: Zap, label: 'Instant WhatsApp connect with buyers' },
+  { icon: ShieldCheck, label: 'Verified seller badges for trust' },
+  { icon: Users, label: '50,000+ active campus traders' },
+]
+
+const STATS = [
+  { value: '50K+', label: 'Students' },
+  { value: '120K+', label: 'Listings' },
+  { value: '4.9★', label: 'Rating' },
+]
 
 export default function LoginPage() {
   const router = useRouter()
@@ -16,205 +32,288 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
+    if (!email || !password) {
+      toast.error('Please fill in all fields')
+      return
+    }
     setLoading(true)
+    const toastId = toast.loading('Signing you in...')
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      toast.error(error.message)
+      toast.dismiss(toastId)
+      toast.error(error.message, { description: 'Check your credentials and try again.' })
       setLoading(false)
       return
     }
-    toast.success('Welcome back!')
+    toast.dismiss(toastId)
+    toast.success('Welcome back!', { description: 'Redirecting to your dashboard...' })
     router.push('/dashboard')
     router.refresh()
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left panel - Premium branding */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/80" />
-        
-        {/* Animated background elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-white/10 blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl" />
-        </div>
-        
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+    <div className="min-h-screen flex bg-white">
+      {/* ── Left panel: solid black branding ── */}
+      <div className="hidden lg:flex lg:w-[48%] bg-[#0a0a0a] relative overflow-hidden flex-col">
+        {/* Dot-grid pattern */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Green glow blob */}
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#16a34a]/20 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-[#16a34a]/10 rounded-full blur-2xl" />
 
-        <div className="relative z-10 flex flex-col justify-between w-full p-12">
+        <div className="relative z-10 flex flex-col h-full p-12">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
-              <ShoppingBag className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">VendoorX</span>
+          <div>
+            <Link href="/" className="inline-flex items-center gap-2 group">
+              <span className="text-2xl font-black tracking-tight text-white leading-none">
+                Vendoor<span className="text-[#16a34a]">X</span>
+              </span>
+            </Link>
           </div>
 
-          {/* Center content */}
-          <div className="max-w-lg">
-            <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-6">
-              Welcome back to the future of campus commerce
+          {/* Center */}
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="mb-3">
+              <span className="inline-block bg-[#16a34a]/20 text-[#4ade80] text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full border border-[#16a34a]/30">
+                Campus Marketplace
+              </span>
+            </div>
+            <h1 className="text-4xl xl:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight mb-5">
+              The smartest way<br />to buy & sell<br />
+              <span className="text-[#16a34a]">on campus.</span>
             </h1>
-            <p className="text-xl text-white/80 leading-relaxed mb-10">
-              Join over 50,000 students buying and selling smarter with WhatsApp-powered transactions.
+            <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
+              Join thousands of Nigerian students trading smarter with WhatsApp-powered listings.
             </p>
 
-            {/* Feature highlights */}
-            <div className="grid gap-4">
-              {[
-                { icon: Zap, title: 'Instant Connect', desc: 'Chat directly on WhatsApp' },
-                { icon: Shield, title: 'Verified Sellers', desc: 'Trust badges for safety' },
-                { icon: Users, title: '50K+ Community', desc: 'Active student network' },
-              ].map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-6 h-6 text-white" />
+            {/* Features */}
+            <div className="space-y-3 mb-12">
+              {FEATURES.map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#16a34a]/15 border border-[#16a34a]/25 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-4 h-4 text-[#4ade80]" />
                   </div>
-                  <div>
-                    <h3 className="text-white font-semibold">{title}</h3>
-                    <p className="text-white/70 text-sm">{desc}</p>
-                  </div>
+                  <span className="text-white/70 text-sm">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats row */}
+            <div className="flex gap-8 pt-8 border-t border-white/10">
+              {STATS.map(({ value, label }) => (
+                <div key={label}>
+                  <p className="text-2xl font-black text-white">{value}</p>
+                  <p className="text-white/40 text-xs mt-0.5 uppercase tracking-wider">{label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Bottom stats */}
-          <div className="flex gap-8">
-            {[
-              { value: '50K+', label: 'Students' },
-              { value: '120K+', label: 'Products' },
-              { value: '4.9', label: 'Rating' },
-            ].map(({ value, label }) => (
-              <div key={label}>
-                <p className="text-3xl font-bold text-white">{value}</p>
-                <p className="text-white/60 text-sm">{label}</p>
+          {/* Bottom testimonial */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <p className="text-white/80 text-sm leading-relaxed italic mb-3">
+              &quot;Sold my MacBook in 3 hours. No middleman, no stress — just WhatsApp and done.&quot;
+            </p>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#16a34a]/30 border border-[#16a34a]/40 flex items-center justify-center">
+                <span className="text-[#4ade80] text-xs font-bold">TK</span>
               </div>
-            ))}
+              <div>
+                <p className="text-white text-xs font-semibold">Tunde K.</p>
+                <p className="text-white/40 text-[11px]">UNILAG, Lagos</p>
+              </div>
+              <div className="ml-auto flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-[#16a34a] text-xs">★</span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Right panel - Login form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:px-12">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-3 mb-10 lg:hidden">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <ShoppingBag className="w-5 h-5 text-primary-foreground" />
+      {/* ── Right panel: white form ── */}
+      <div className="flex-1 flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 py-5 lg:px-10">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to home
+          </Link>
+          <p className="text-sm text-gray-500">
+            No account?{' '}
+            <Link href="/auth/sign-up" className="font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors">
+              Sign up free
+            </Link>
+          </p>
+        </div>
+
+        {/* Form area */}
+        <div className="flex-1 flex items-center justify-center px-6 py-8 lg:px-16">
+          <div
+            className={cn(
+              'w-full max-w-[420px] transition-all duration-500',
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            )}
+          >
+            {/* Mobile logo */}
+            <div className="lg:hidden mb-8">
+              <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
+                Vendoor<span className="text-[#16a34a]">X</span>
+              </span>
             </div>
-            <span className="text-xl font-bold text-foreground">VendoorX</span>
-          </div>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-2">Sign in</h2>
-            <p className="text-muted-foreground">
-              Enter your credentials to access your account
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@university.edu.ng"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="h-12 px-4 bg-muted/50 border-border/50 focus:bg-background transition-colors"
-              />
+            {/* Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-1.5">
+                Welcome back
+              </h2>
+              <p className="text-gray-500 text-sm">
+                Sign in to your VendoorX account
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <Link 
-                  href="/auth/forgot-password" 
-                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                  Email address
+                </Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="you@university.edu.ng"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   required
-                  className="h-12 px-4 pr-12 bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
                 />
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                    Password
+                  </Label>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-xs text-[#16a34a] hover:text-[#15803d] font-medium transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    className="h-12 px-4 pr-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember me */}
+              <div className="flex items-center gap-2.5 pt-1">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className={cn(
+                    'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0',
+                    rememberMe
+                      ? 'bg-[#16a34a] border-[#16a34a]'
+                      : 'border-gray-300 bg-white hover:border-[#16a34a]/50'
+                  )}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {rememberMe && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                 </button>
+                <span className="text-sm text-gray-600 select-none">Keep me signed in</span>
               </div>
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl mt-2"
+              >
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />Signing in...</>
+                ) : (
+                  <>Sign In <ArrowRight className="w-4 h-4 ml-2" /></>
+                )}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs text-gray-400 font-medium">OR</span>
+              <div className="flex-1 h-px bg-gray-200" />
             </div>
 
+            {/* Sign up CTA */}
             <Button
-              type="submit"
-              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-              disabled={loading}
+              asChild
+              variant="outline"
+              className="w-full h-12 border-2 border-gray-200 hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  Sign In
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
+              <Link href="/auth/sign-up">
+                Create a free account
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
-          </form>
 
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
+            {/* Trust badges */}
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-gray-400">
+              <div className="flex items-center gap-1">
+                <Lock className="w-3 h-3" />
+                <span>256-bit SSL</span>
+              </div>
+              <div className="w-px h-3 bg-gray-200" />
+              <div className="flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                <span>Secure login</span>
+              </div>
+              <div className="w-px h-3 bg-gray-200" />
+              <span>Free forever</span>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background text-muted-foreground">New to VendoorX?</span>
-            </div>
+
+            {/* Terms */}
+            <p className="text-center text-[11px] text-gray-400 mt-5 leading-relaxed">
+              By signing in, you agree to our{' '}
+              <Link href="/terms" className="text-[#16a34a] hover:underline">Terms</Link>
+              {' '}&{' '}
+              <Link href="/privacy" className="text-[#16a34a] hover:underline">Privacy Policy</Link>
+            </p>
           </div>
-
-          {/* Sign up link */}
-          <Button
-            asChild
-            variant="outline"
-            className="w-full h-12 font-semibold text-base border-2 hover:bg-muted/50 transition-all"
-          >
-            <Link href="/auth/sign-up">
-              Create a free account
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
-          </Button>
-
-          {/* Terms */}
-          <p className="text-center text-xs text-muted-foreground mt-8 leading-relaxed">
-            By continuing, you agree to our{' '}
-            <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
-          </p>
         </div>
       </div>
     </div>
