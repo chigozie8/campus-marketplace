@@ -31,7 +31,14 @@ const apiHeaders = [
 ]
 
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 const nextConfig: NextConfig = {
+  // Allow Replit's proxied domain to access Next.js dev resources (HMR, webpack)
+  ...(isDev && process.env.REPLIT_DEV_DOMAIN
+    ? { allowedDevOrigins: [process.env.REPLIT_DEV_DOMAIN] }
+    : {}),
+
   // Suppress TS and ESLint errors during builds (carried over from original config)
   typescript: {
     ignoreBuildErrors: true,
