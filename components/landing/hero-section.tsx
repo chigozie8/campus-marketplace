@@ -116,9 +116,24 @@ export function HeroSection() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-primary rounded-full animate-bounce" />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 group cursor-pointer select-none">
+        <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground/60 group-hover:text-primary transition-colors duration-300">
+          Scroll
+        </span>
+        <div className="relative w-10 h-10 flex items-center justify-center">
+          {/* Pulsing ring */}
+          <span className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping opacity-60" />
+          <span className="absolute inset-1 rounded-full border border-primary/20" />
+          {/* Arrow */}
+          <svg
+            className="w-5 h-5 text-primary animate-bounce relative z-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
       </div>
     </section>
