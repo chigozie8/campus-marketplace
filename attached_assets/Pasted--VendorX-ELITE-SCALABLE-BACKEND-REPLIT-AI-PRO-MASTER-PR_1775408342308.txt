@@ -1,0 +1,336 @@
+🚀 VendorX — ELITE SCALABLE BACKEND (REPLIT AI PRO MASTER PROMPT)
+
+Build a high-performance, scalable, production-grade backend system for VendorX — a WhatsApp + Instagram + Facebook powered Marketplace Platform where users buy and sell products through chat automation.
+
+This is NOT an MVP. This is a scale-ready startup backend designed to handle thousands of users, real payments, and real-time interactions.
+
+---
+
+⚠️ STRICT EXECUTION RULES
+
+- No pseudo-code
+
+- No TODOs
+
+- No placeholders in core logic
+
+- No missing imports
+
+- No broken endpoints
+
+- No dummy responses
+
+- All features must be fully implemented
+
+- Code must run with: "npm install && npm run dev"
+
+- Must follow clean architecture principles
+
+- Controllers must be thin
+
+- Business logic must be in services
+
+---
+
+🧠 SYSTEM ARCHITECTURE (MANDATORY)
+
+Use a modular + scalable architecture with:
+
+- Controller Layer (HTTP handling)
+- Service Layer (business logic)
+- Repository Layer (database abstraction)
+- Queue System (async jobs)
+- Bot Engine (chat automation)
+- Caching Layer (Redis)
+
+---
+
+🏗️ TECH STACK (STRICT — DO NOT CHANGE)
+
+- Node.js (latest LTS)
+- Express.js
+- TypeScript (MANDATORY)
+- Supabase (PostgreSQL + Auth + Storage)
+- Paystack
+- WhatsApp Business API (webhook-based)
+
+Infrastructure:
+
+- Redis (caching + sessions)
+- BullMQ (queue system)
+- Meilisearch (product search)
+
+Dev Tools:
+
+- Zod (validation)
+- Winston (logging)
+- Swagger (API docs)
+
+Security:
+
+- helmet
+- cors
+- express-rate-limit (Redis-backed)
+
+---
+
+📁 PROJECT STRUCTURE (ENFORCED)
+
+backend/
+│
+├── src/
+│   ├── config/
+│   │   ├── supabaseClient.ts
+│   │   ├── redisClient.ts
+│   │   ├── paystack.ts
+│   │   ├── meilisearch.ts
+│   │
+│   ├── controllers/
+│   ├── routes/
+│   ├── services/
+│   ├── repositories/
+│   ├── queues/
+│   ├── bots/
+│   ├── middleware/
+│   ├── validators/
+│   ├── utils/
+│   │   ├── logger.ts
+│   │   ├── helpers.ts
+│   │
+│   ├── app.ts
+│   ├── server.ts
+│
+├── docker-compose.yml
+├── Dockerfile
+├── .env.example
+├── package.json
+├── tsconfig.json
+├── README.md
+
+All files must contain real implementation.
+
+---
+
+🔐 AUTH SYSTEM (SUPABASE)
+
+- Verify JWT securely
+- Attach user to request
+- Role-based access:
+  - buyer
+  - vendor
+  - admin
+
+---
+
+🛍️ PRODUCT SYSTEM
+
+- Full CRUD
+- Pagination
+- Advanced filtering
+- Full-text search via Meilisearch
+- Cache product queries in Redis
+
+---
+
+📦 ORDER SYSTEM (STATE MACHINE)
+
+pending → paid → shipped → delivered → completed
+
+- Order creation
+- Status updates
+- Vendor + user dashboards
+- Redis caching for fast reads
+
+---
+
+💳 PAYMENT SYSTEM (PAYSTACK — FULL FLOW)
+
+- Initialize transaction
+- Store pending order
+- Verify payment
+- Secure webhook handler
+- Prevent duplicate processing
+
+Use Queue:
+
+- Payment verification retries
+- Async order updates
+
+---
+
+🤖 WHATSAPP BOT ENGINE (ADVANCED)
+
+FLOW:
+Message → Webhook → Queue → Intent Detection → Service → DB → Response → WhatsApp Reply
+
+---
+
+🧠 BOT INTELLIGENCE
+
+- Rule-based intent detection
+- Keyword extraction
+- Product recommendation
+- Session memory (Redis)
+
+---
+
+💬 RESPONSE FORMAT
+
+🛍️ {Product Name}
+💰 ₦{Price}
+📍 {Vendor}
+📝 {Description}
+
+👉 Reply "BUY {ID}"
+
+---
+
+🔌 WEBHOOKS
+
+WhatsApp
+
+POST /api/webhooks/whatsapp
+
+- Validate payload
+- Push to queue
+- Process asynchronously
+
+---
+
+Paystack
+
+POST /api/webhooks/paystack
+
+- Verify signature
+- Queue processing
+- Update order
+
+---
+
+⚡ QUEUE SYSTEM (BULLMQ)
+
+Queues:
+
+- messageQueue
+- paymentQueue
+- notificationQueue
+
+Workers must process jobs cleanly.
+
+---
+
+⚡ REDIS USAGE
+
+- Cache products
+- Store bot sessions
+- Rate limiting store
+
+---
+
+🔍 SEARCH SYSTEM (MEILISEARCH)
+
+- Sync products with search index
+- Enable fast fuzzy search
+- Filter by category and price
+
+---
+
+🛡️ SECURITY
+
+- Helmet
+- CORS
+- Rate limiting (Redis-backed)
+- Input validation (Zod)
+- Sanitize inputs
+
+---
+
+⚙️ ERROR HANDLING
+
+Centralized middleware
+
+Format:
+{
+success: false,
+message: string,
+error?: any
+}
+
+---
+
+📊 LOGGING (WINSTON)
+
+- Log all requests
+- Log errors
+- Log queue jobs
+
+---
+
+📘 API DOCUMENTATION
+
+- Swagger UI at /api/docs
+- Document all endpoints
+
+---
+
+🐳 DOCKER SUPPORT
+
+- Dockerfile
+- docker-compose (Redis + Meilisearch)
+
+---
+
+🌍 ENV VARIABLES
+
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+PAYSTACK_SECRET_KEY=
+PAYSTACK_WEBHOOK_SECRET=
+WHATSAPP_TOKEN=
+WHATSAPP_PHONE_NUMBER_ID=
+REDIS_URL=
+MEILISEARCH_HOST=
+MEILISEARCH_API_KEY=
+PORT=5000
+
+---
+
+🚀 SERVER
+
+- app.ts → setup
+- server.ts → start server
+- Graceful shutdown
+
+---
+
+📘 README
+
+Include:
+
+- Setup guide
+- Env config
+- Running locally
+- Docker usage
+- API docs
+- Deployment guide
+
+---
+
+🎯 FINAL EXPECTATION
+
+This backend must feel like:
+
+- Built by a senior backend engineer
+- Production-ready
+- Scalable to thousands of users
+- Clean, modular, and maintainable
+
+It must:
+
+- Run instantly
+- Handle real traffic
+- Support real payments
+- Power a real startup
+
+DO NOT CUT CORNERS.
