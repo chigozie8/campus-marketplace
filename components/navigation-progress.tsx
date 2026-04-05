@@ -10,14 +10,6 @@ function ProgressBarInner() {
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const mountedRef = useRef(false)
-
-  useEffect(() => {
-    mountedRef.current = true
-    return () => {
-      mountedRef.current = false
-    }
-  }, [])
 
   useEffect(() => {
     const currentUrl = pathname + searchParams.toString()
@@ -37,21 +29,17 @@ function ProgressBarInner() {
       setProgress(0)
       setVisible(true)
 
-      // Use setTimeout instead of rAF to avoid pre-mount state updates
-      timerRef.current = setTimeout(() => {
-        if (mountedRef.current) setProgress(70)
-      }, 16)
+      // Animate quickly to ~80% then complete
+      requestAnimationFrame(() => {
+        setProgress(70)
+      })
 
       timerRef.current = setTimeout(() => {
-        if (mountedRef.current) {
-          setProgress(100)
-          timerRef.current = setTimeout(() => {
-            if (mountedRef.current) {
-              setVisible(false)
-              setProgress(0)
-            }
-          }, 300)
-        }
+        setProgress(100)
+        timerRef.current = setTimeout(() => {
+          setVisible(false)
+          setProgress(0)
+        }, 300)
       }, 200)
     }
 
