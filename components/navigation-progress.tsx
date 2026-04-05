@@ -1,51 +1,127 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
-
-NProgress.configure({ showSpinner: true, trickleSpeed: 200, minimum: 0.1 })
 
 function ProgressBarInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const prevUrl = useRef<string>('')
+  const prevUrl = useRef<string | null>(null)
+  const [progress, setProgress] = useState(0)
+  const [visible, setVisible] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const currentUrl = pathname + searchParams.toString()
-    if (prevUrl.current && prevUrl.current !== currentUrl) {
-      NProgress.start()
-      const timer = setTimeout(() => NProgress.done(), 400)
-      return () => {
-        clearTimeout(timer)
-        NProgress.done()
-      }
+
+    if (prevUrl.current === null) {
+      prevUrl.current = currentUrl
+      return
     }
-    prevUrl.current = currentUrl
+
+    if (prevUrl.current !== currentUrl) {
+      prevUrl.current = currentUrl
+
+      // Clear any existing timers
+      if (timerRef.current) clearTimeout(timerRef.current)
+
+      // Start the bar
+      setProgress(0)
+      setVisible(true)
+
+      // Animate quickly to ~80% then complete
+      requestAnimationFrame(() => {
+        setProgress(70)
+      })
+
+      timerRef.current = setTimeout(() => {
+        setProgress(100)
+        timerRef.current = setTimeout(() => {
+          setVisible(false)
+          setProgress(0)
+        }, 300)
+      }, 200)
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [pathname, searchParams])
 
-  return null
+  if (!visible) return null
+
+  return (
+    <>
+      {/* Progress bar */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          height: '3px',
+          backgroundColor: '#e5e7eb',
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${progress}%`,
+            backgroundColor: '#0a0a0a',
+            transition: progress === 100 ? 'width 150ms ease-out' : 'width 200ms ease-out',
+          }}
+        />
+      </div>
+
+      {/* Spinner */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '12px',
+          right: '12px',
+          zIndex: 9999,
+          pointerEvents: 'none',
+        }}
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 18 18"
+          fill="none"
+          style={{ animation: 'nprogress-spin 0.6s linear infinite' }}
+        >
+          <circle
+            cx="9"
+            cy="9"
+            r="7"
+            stroke="#e5e7eb"
+            strokeWidth="2"
+          />
+          <path
+            d="M9 2 A7 7 0 0 1 16 9"
+            stroke="#0a0a0a"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+
+      <style>{`
+        @keyframes nprogress-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </>
+  )
 }
 
 export function NavigationProgress() {
   return (
     <Suspense fallback={null}>
       <ProgressBarInner />
-      <style>{`
-        #nprogress .bar {
-          background: #0a0a0a !important;
-          height: 3px !important;
-        }
-        #nprogress .peg {
-          box-shadow: 0 0 8px #0a0a0a, 0 0 4px #0a0a0a !important;
-        }
-        #nprogress .spinner-icon {
-          border-top-color: #0a0a0a !important;
-          border-left-color: #0a0a0a !important;
-        }
-      `}</style>
     </Suspense>
   )
 }
