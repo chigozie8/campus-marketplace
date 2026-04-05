@@ -34,35 +34,58 @@ const LINKS = {
   ],
 }
 
-const STATS = [
-  { value: '50K+', label: 'Active Students', icon: Users },
-  { value: '120+', label: 'Campuses', icon: MapPin },
-  { value: '₦2B+', label: 'Transactions', icon: TrendingUp },
-  { value: '4.9', label: 'Star Rating', icon: Star },
-]
-
-const CATEGORIES = [
-  'Electronics', 'Fashion', 'Textbooks', 'Food & Snacks',
-  'Gadgets', 'Services', 'Hostel Essentials', 'Stationery',
-]
-
 const SOCIALS = [
-  { href: 'https://wa.me/', icon: MessageCircle, label: 'WhatsApp', bg: '#25D366', text: 'white' },
-  { href: 'https://instagram.com/', icon: Instagram, label: 'Instagram', bg: '#E1306C', text: 'white' },
-  { href: 'https://facebook.com/', icon: Facebook, label: 'Facebook', bg: '#1877F2', text: 'white' },
-  { href: 'https://twitter.com/', icon: Twitter, label: 'Twitter / X', bg: '#000000', text: 'white' },
+  {
+    href: 'https://wa.me/',
+    label: 'WhatsApp',
+    bg: '#25D366',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.85L.057 23.928a.5.5 0 0 0 .606.65l6.277-1.642A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.878 9.878 0 0 1-5.029-1.373l-.36-.214-3.733.977.998-3.645-.235-.375A9.865 9.865 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://instagram.com/',
+    label: 'Instagram',
+    bg: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
+    icon: <Instagram className="w-4 h-4 text-white" />,
+  },
+  {
+    href: 'https://facebook.com/',
+    label: 'Facebook',
+    bg: '#1877F2',
+    icon: <Facebook className="w-4 h-4 text-white" />,
+  },
+  {
+    href: 'https://twitter.com/',
+    label: 'Twitter / X',
+    bg: '#000000',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zM17.083 19.77h1.833L7.084 4.126H5.117L17.083 19.77z" />
+      </svg>
+    ),
+  },
+  {
+    href: 'https://tiktok.com/',
+    label: 'TikTok',
+    bg: '#010101',
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
+      </svg>
+    ),
+  },
 ]
 
 function VendoorXLogo() {
   return (
     <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Rounded square base */}
       <rect width="44" height="44" rx="12" fill="#16a34a" />
-      {/* Inner subtle highlight */}
       <rect x="3" y="3" width="38" height="38" rx="10" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      {/* V mark */}
       <path d="M10 13l8 18h8l8-18" stroke="white" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* X badge bottom-right */}
       <rect x="27" y="27" width="13" height="13" rx="4" fill="white" />
       <path d="M30 30l7 7M37 30l-7 7" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
@@ -71,13 +94,11 @@ function VendoorXLogo() {
 
 export function LandingFooter() {
   return (
-    <footer className="bg-white border-t-4 border-[#16a34a] font-sans overflow-hidden">
+    <footer className="bg-white border-t border-gray-100 font-sans overflow-hidden">
 
-      {/* ════════════════════════════════════════
-          TOP BAND — brand + newsletter + socials
-         ════════════════════════════════════════ */}
+      {/* TOP BAND — brand + newsletter + socials */}
       <div className="bg-[#f0fdf4]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
           {/* Left — brand */}
           <div className="flex flex-col gap-5">
@@ -99,24 +120,34 @@ export function LandingFooter() {
               Nigeria&apos;s #1 campus marketplace. Buy, sell, and close deals directly on WhatsApp — zero fees, zero friction, just fast campus commerce.
             </p>
 
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => (
-                <span
-                  key={cat}
-                  className="text-xs font-medium px-3 py-1 rounded-full bg-white border border-[#16a34a]/20 text-[#15803d] hover:bg-[#16a34a] hover:text-white hover:border-[#16a34a] transition-all cursor-pointer"
-                >
-                  {cat}
-                </span>
-              ))}
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <MapPin className="w-3.5 h-3.5 text-[#16a34a] shrink-0" />
+              Made in Nigeria — built for campus hustle
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <MapPin className="w-3.5 h-3.5 text-[#16a34a]" />
-              Made in Nigeria — built for campus hustle
+            {/* Social icons — circles only */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">Follow us</p>
+              <div className="flex items-center gap-3">
+                {SOCIALS.map(({ href, label, bg, icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={label}
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg shadow-sm shrink-0"
+                    style={{ background: bg }}
+                  >
+                    {icon}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Right — newsletter + socials */}
+          {/* Right — newsletter */}
           <div className="flex flex-col gap-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-[#16a34a] mb-2">Stay in the loop</p>
@@ -124,10 +155,10 @@ export function LandingFooter() {
                 Get the best campus deals<br />
                 <span className="text-[#16a34a]">before anyone else.</span>
               </h3>
-              <p className="text-sm text-gray-500">Join 50,000+ students getting weekly deal alerts.</p>
+              <p className="text-sm text-gray-500">Join thousands of students getting weekly deal alerts.</p>
             </div>
 
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col sm:flex-row gap-2.5" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your university email"
@@ -135,68 +166,26 @@ export function LandingFooter() {
               />
               <button
                 type="submit"
-                className="px-5 py-3.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white text-sm font-bold flex items-center gap-2 shrink-0 transition-all shadow-lg shadow-green-200"
+                className="px-5 py-3.5 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-green-200"
               >
                 Subscribe <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-widest">Follow us</p>
-              <div className="flex gap-2.5">
-                {SOCIALS.map(({ href, icon: Icon, label, bg, text }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:scale-105 hover:shadow-md"
-                    style={{ backgroundColor: bg, color: text }}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </a>
-                ))}
-              </div>
-            </div>
+            <p className="text-xs text-gray-400">
+              No spam. Unsubscribe anytime. We respect your privacy.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          STATS ROW
-         ════════════════════════════════════════ */}
-      <div className="border-y border-gray-100 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4">
-            {STATS.map(({ value, label, icon: Icon }, i) => (
-              <div
-                key={label}
-                className={`py-8 px-6 flex items-center gap-4 ${i < STATS.length - 1 ? 'border-r border-gray-100' : ''}`}
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#f0fdf4] flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-[#16a34a]" />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-gray-950 leading-none">{value}</p>
-                  <p className="text-xs text-gray-400 font-medium mt-0.5">{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════════════════════════════════
-          LINK COLUMNS
-         ════════════════════════════════════════ */}
+      {/* LINK COLUMNS */}
       <div className="bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-10">
             {Object.entries(LINKS).map(([category, links]) => (
               <div key={category}>
-                <h4 className="text-xs font-black uppercase tracking-widest text-gray-950 mb-5 pb-3 border-b-2 border-[#16a34a] w-fit">
+                <h4 className="text-xs font-black uppercase tracking-widest text-gray-950 mb-5">
                   {category}
                 </h4>
                 <ul className="flex flex-col gap-3">
@@ -219,26 +208,24 @@ export function LandingFooter() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          TRUST BADGES STRIP
-         ════════════════════════════════════════ */}
-      <div className="bg-gray-50 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6">
+      {/* TRUST BADGES STRIP */}
+      <div className="bg-gray-50 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-5">
               {[
                 { icon: ShieldCheck, text: 'Verified Sellers' },
                 { icon: Zap, text: 'WhatsApp Powered' },
                 { icon: Star, text: '4.9 Rated Platform' },
-                { icon: Users, text: '50K+ Active Users' },
+                { icon: Users, text: 'Active Student Community' },
               ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                  <Icon className="w-4 h-4 text-[#16a34a]" />
+                <div key={text} className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                  <Icon className="w-3.5 h-3.5 text-[#16a34a]" />
                   {text}
                 </div>
               ))}
             </div>
-            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-green-200 shadow-sm">
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-green-200 shadow-sm shrink-0">
               <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
               <span className="text-xs font-semibold text-[#16a34a]">All systems operational</span>
             </div>
@@ -246,22 +233,20 @@ export function LandingFooter() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          BOTTOM BAR
-         ════════════════════════════════════════ */}
-      <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-400">
+      {/* BOTTOM BAR */}
+      <div className="bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-gray-400 text-center sm:text-left">
             &copy; {new Date().getFullYear()} VendoorX Technologies Ltd. All rights reserved.
           </p>
-          <p className="text-xs text-gray-400 italic">
+          <p className="text-xs text-gray-400 italic hidden md:block">
             Connecting Nigerian campuses, one deal at a time.
           </p>
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <Link href="#" className="hover:text-[#16a34a] transition-colors">Privacy</Link>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
+            <span className="w-1 h-1 rounded-full bg-gray-200" />
             <Link href="#" className="hover:text-[#16a34a] transition-colors">Terms</Link>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
+            <span className="w-1 h-1 rounded-full bg-gray-200" />
             <Link href="#" className="hover:text-[#16a34a] transition-colors">Cookies</Link>
           </div>
         </div>
