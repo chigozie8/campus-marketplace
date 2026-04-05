@@ -1,6 +1,6 @@
 // VendoorX Service Worker — Full offline support
 // Strategy: Cache-first for assets, stale-while-revalidate for pages, offline fallback for everything
-const CACHE_VERSION = 'v3'
+const CACHE_VERSION = 'v4'
 const STATIC_CACHE  = `vendoorx-static-${CACHE_VERSION}`
 const PAGE_CACHE    = `vendoorx-pages-${CACHE_VERSION}`
 const IMAGE_CACHE   = `vendoorx-images-${CACHE_VERSION}`
@@ -75,8 +75,25 @@ self.addEventListener('fetch', (event) => {
   // Don't intercept cross-origin API calls (Supabase, external) that aren't images
   if (url.origin !== self.location.origin && !isImage(url)) return
 
-  // ── 1. Static assets: cache-first, then network, then nothing ──
+  // ── 1. Static assets ──
   if (isStaticAsset(url)) {
+    // JS/CSS chunks: network-first so code updates reach the browser immediately.
+    // Falls back to cache if offline.
+    if (url.pathname.startsWith('/_next/static/chunks/') || url.pathname.startsWith('/_next/static/css/')) {
+      event.respondWith(
+        fetch(request)
+          .then((res) => {
+            if (res.ok) {
+              const clone = res.clone()
+              caches.open(STATIC_CACHE).then((c) => c.put(request, clone))
+            }
+            return res
+          })
+          .catch(() => caches.match(request))
+      )
+      return
+    }
+    // Images and other static files: cache-first (safe, changes rarely)
     const cacheName = isImage(url) ? IMAGE_CACHE : STATIC_CACHE
     event.respondWith(
       caches.open(cacheName).then((cache) =>
