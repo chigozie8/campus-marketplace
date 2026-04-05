@@ -49,7 +49,20 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       toast.dismiss(toastId)
-      toast.error(error.message, { description: 'Check your credentials and try again.' })
+      const isUnconfirmed =
+        error.message.toLowerCase().includes('email not confirmed') ||
+        (error as { code?: string }).code === 'email_not_confirmed'
+      if (isUnconfirmed) {
+        toast.error('Email not confirmed', {
+          description: 'Please check your inbox (and spam folder) and click the confirmation link.',
+          duration: 8000,
+        })
+        // Resend confirmation silently
+        await supabase.auth.resend({ type: 'signup', email })
+        toast.info('We\'ve resent your confirmation email.', { duration: 5000 })
+      } else {
+        toast.error(error.message, { description: 'Check your email and password and try again.' })
+      }
       setLoading(false)
       return
     }
