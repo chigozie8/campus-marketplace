@@ -4,7 +4,7 @@ import { ShoppingBag, MessageCircle, Instagram, Facebook } from 'lucide-react'
 const LINKS = {
   Product: [
     { label: 'Marketplace', href: '/marketplace' },
-    { label: 'Sell on CampusCart', href: '/auth/sign-up' },
+    { label: 'Sell on VendoorX', href: '/auth/sign-up' },
     { label: 'AI Assistant', href: '/assistant' },
     { label: 'Seller Dashboard', href: '/dashboard' },
   ],
@@ -34,10 +34,12 @@ export function LandingFooter() {
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <ShoppingBag className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-foreground tracking-tight">CampusCart</span>
+              <span className="font-bold text-lg text-foreground tracking-tight">
+                Vendoor<span className="text-primary">X</span>
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-6">
-              Nigeria&apos;s most loved campus and business marketplace. Connect with buyers via WhatsApp, Instagram, and Facebook.
+              Nigeria&apos;s #1 campus marketplace. Buy and sell anything on campus and close deals directly on WhatsApp.
             </p>
             {/* Social icons */}
             <div className="flex gap-2.5">
@@ -95,7 +97,7 @@ export function LandingFooter() {
         {/* Bottom bar */}
         <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} CampusCart. All rights reserved.
+            &copy; {new Date().getFullYear()} VendoorX. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground">
             Built with love for Nigerian campus entrepreneurs
