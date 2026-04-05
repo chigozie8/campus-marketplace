@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -28,16 +27,11 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-[72px]">
-          {/* Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0">
-            <Image
-              src="/logo.png"
-              alt="VendoorX"
-              width={144}
-              height={48}
-              className="object-contain"
-              priority
-            />
+          {/* Wordmark */}
+          <Link href="/" className="flex items-center flex-shrink-0 group select-none">
+            <span className="text-[1.45rem] font-black tracking-tight text-gray-950 dark:text-white leading-none group-hover:opacity-80 transition-opacity">
+              Vendoor<span className="text-[#16a34a]">X</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}

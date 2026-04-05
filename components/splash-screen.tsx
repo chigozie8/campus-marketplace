@@ -1,17 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
 
 export function SplashScreen() {
   const [hidden, setHidden] = useState(false)
   const [out, setOut] = useState(false)
 
   useEffect(() => {
-    // Fade out after 1.6s — enough for fonts + first RSC to land
-    const fadeTimer = setTimeout(() => setOut(true), 1600)
-    // Remove from DOM after fade completes
-    const removeTimer = setTimeout(() => setHidden(true), 2200)
+    // Reduced from 1600ms → 800ms for faster feel
+    const fadeTimer = setTimeout(() => setOut(true), 800)
+    const removeTimer = setTimeout(() => setHidden(true), 1300)
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(removeTimer)
@@ -33,60 +31,64 @@ export function SplashScreen() {
         justifyContent: 'center',
         background: '#ffffff',
         opacity: out ? 0 : 1,
-        transition: 'opacity 500ms ease-out',
+        transition: 'opacity 400ms ease-out',
         pointerEvents: out ? 'none' : 'all',
       }}
     >
-      {/* Logo */}
+      {/* Wordmark */}
       <div
         style={{
-          animation: 'splash-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+          animation: 'splash-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both',
         }}
       >
-        <Image
-          src="/logo.png"
-          alt="VendoorX"
-          width={180}
-          height={60}
-          priority
-          className="object-contain"
-        />
+        <span
+          style={{
+            fontSize: '2.25rem',
+            fontWeight: 900,
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            color: '#0a0a0a',
+            fontFamily: 'inherit',
+          }}
+        >
+          Vendoor<span style={{ color: '#16a34a' }}>X</span>
+        </span>
       </div>
 
       {/* Tagline */}
       <p
         style={{
-          marginTop: '12px',
-          fontSize: '13px',
+          marginTop: '10px',
+          fontSize: '11px',
           fontWeight: 600,
-          letterSpacing: '0.16em',
+          letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: '#6b7280',
-          animation: 'splash-fade-up 0.5s 0.3s ease-out both',
+          color: '#9ca3af',
+          animation: 'splash-fade-up 0.4s 0.2s ease-out both',
         }}
       >
         Campus Marketplace
       </p>
 
-      {/* Progress dots */}
+      {/* Loading dots */}
       <div
         style={{
           display: 'flex',
-          gap: '6px',
-          marginTop: '40px',
-          animation: 'splash-fade-up 0.5s 0.5s ease-out both',
+          gap: '5px',
+          marginTop: '36px',
+          animation: 'splash-fade-up 0.4s 0.35s ease-out both',
         }}
       >
         {[0, 1, 2].map((i) => (
           <span
             key={i}
             style={{
-              width: '6px',
-              height: '6px',
+              width: '5px',
+              height: '5px',
               borderRadius: '50%',
               display: 'inline-block',
-              background: i === 0 ? '#0a0a0a' : i === 1 ? '#16a34a' : '#d1d5db',
-              animation: `splash-dot 1.1s ${i * 0.18}s ease-in-out infinite`,
+              background: '#0a0a0a',
+              animation: `splash-dot 0.9s ${i * 0.15}s ease-in-out infinite`,
             }}
           />
         ))}
@@ -94,16 +96,16 @@ export function SplashScreen() {
 
       <style>{`
         @keyframes splash-pop {
-          from { opacity: 0; transform: scale(0.82); }
+          from { opacity: 0; transform: scale(0.85); }
           to   { opacity: 1; transform: scale(1); }
         }
         @keyframes splash-fade-up {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes splash-dot {
-          0%, 80%, 100% { transform: scale(1);    opacity: 0.45; }
-          40%           { transform: scale(1.55); opacity: 1; }
+          0%, 80%, 100% { transform: scale(1);   opacity: 0.3; }
+          40%           { transform: scale(1.6); opacity: 1; }
         }
       `}</style>
     </div>

@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ShoppingBag,
   Plus,
@@ -56,16 +55,11 @@ export default async function DashboardPage() {
       <div className="flex h-screen">
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-60 border-r border-border bg-sidebar fixed h-full z-30">
-          <div className="p-4 border-b border-sidebar-border">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="VendoorX"
-                width={132}
-                height={44}
-                className="object-contain"
-                priority
-              />
+          <div className="p-5 border-b border-sidebar-border">
+            <Link href="/" className="flex items-center select-none group">
+              <span className="text-xl font-black tracking-tight text-foreground leading-none group-hover:opacity-80 transition-opacity">
+                Vendoor<span className="text-primary">X</span>
+              </span>
             </Link>
           </div>
 
@@ -116,15 +110,10 @@ export default async function DashboardPage() {
 
         {/* Mobile top bar */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-border/50 h-14 flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="VendoorX"
-              width={108}
-              height={36}
-              className="object-contain"
-              priority
-            />
+          <Link href="/" className="flex items-center select-none group">
+            <span className="text-xl font-black tracking-tight text-foreground leading-none group-hover:opacity-80 transition-opacity">
+              Vendoor<span className="text-primary">X</span>
+            </span>
           </Link>
           <Button size="sm" className="hero-gradient border-0 text-white h-8" asChild>
             <Link href="/seller/new">
