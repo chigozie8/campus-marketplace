@@ -1,45 +1,26 @@
 import { createClient } from '@/lib/supabase/client'
 
+const BUCKET = 'product-images'
+
 export async function uploadToCloudinary(file: File): Promise<string> {
-  // 1. Get the current session token
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('File is too large. Maximum size is 10 MB.')
+  }
+
   const supabase = createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) {
-    throw new Error('You must be signed in to upload photos.')
+  const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase()
+  // Use a public/ prefix since the bucket policy allows public uploads
+  const path = `public/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false })
+
+  if (error) {
+    console.error('[upload]', error)
+    throw new Error(error.message)
   }
 
-  // 2. Ask our server to generate a signed upload URL
-  const signRes = await fetch('/api/storage/sign', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({ filename: file.name, contentType: file.type }),
-  })
-
-  const signJson = await signRes.json()
-  if (!signRes.ok) {
-    throw new Error(signJson.error ?? 'Could not prepare upload.')
-  }
-
-  const { signedUrl, token, publicUrl } = signJson as {
-    signedUrl: string
-    token: string
-    publicUrl: string
-  }
-
-  // 3. Upload the file directly from the browser to Supabase (no server hop)
-  const uploadRes = await supabase.storage
-    .from('product-images')
-    .uploadToSignedUrl(signJson.path, token, file, {
-      contentType: file.type,
-    })
-
-  if (uploadRes.error) {
-    throw new Error(uploadRes.error.message)
-  }
-
-  // 4. Return the permanent public URL
-  return publicUrl
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
+  return data.publicUrl
 }
