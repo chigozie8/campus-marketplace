@@ -42,10 +42,10 @@ export function LandingNav({ user }: LandingNavProps) {
               : 'bg-white dark:bg-gray-950 shadow-lg shadow-black/[0.07] dark:shadow-black/20 border border-gray-100 dark:border-gray-800/60'
           }`}
         >
-          <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+          <div className="flex items-center justify-between px-4 sm:px-6 h-[68px]">
 
             {/* Logo */}
-            <VendoorXLogo height={36} />
+            <VendoorXLogo height={44} />
 
             {/* Desktop nav links */}
             <div className="hidden lg:flex items-center gap-1">

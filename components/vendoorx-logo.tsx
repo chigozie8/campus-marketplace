@@ -15,7 +15,7 @@ export function VendoorXIcon({
   height?: number
   size?: number
 }) {
-  const h = height ?? size ?? 36
+  const h = height ?? size ?? 40
   const w = Math.round(h * 3)
   return (
     <Image
@@ -52,10 +52,10 @@ export function VendoorXLogo({
   size?: number
   href?: string
 }) {
-  const h = height ?? size ?? 36
+  const h = height ?? size ?? 44
   return (
     <Link href={href} className="flex items-center flex-shrink-0 group">
-      <div className="transition-transform duration-200 group-hover:scale-105">
+      <div className="transition-transform duration-200 group-hover:scale-[1.03]">
         <VendoorXIcon height={h} />
       </div>
     </Link>

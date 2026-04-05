@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ShoppingBag,
   Plus,
@@ -55,12 +56,16 @@ export default async function DashboardPage() {
       <div className="flex h-screen">
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-60 border-r border-border bg-sidebar fixed h-full z-30">
-          <div className="p-5 border-b border-sidebar-border">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-base">Campus<span className="text-primary">Cart</span></span>
+          <div className="p-4 border-b border-sidebar-border">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="VendoorX"
+                width={132}
+                height={44}
+                className="object-contain"
+                priority
+              />
             </Link>
           </div>
 
@@ -111,11 +116,15 @@ export default async function DashboardPage() {
 
         {/* Mobile top bar */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-border/50 h-14 flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 hero-gradient rounded-lg flex items-center justify-center">
-              <ShoppingBag className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold">Campus<span className="text-primary">Cart</span></span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="VendoorX"
+              width={108}
+              height={36}
+              className="object-contain"
+              priority
+            />
           </Link>
           <Button size="sm" className="hero-gradient border-0 text-white h-8" asChild>
             <Link href="/seller/new">
