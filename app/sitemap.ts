@@ -4,7 +4,28 @@ import { SITE_URL } from '@/lib/seo'
 
 export const revalidate = 3600
 
+// Category slugs — each becomes a crawlable landing page
+const CATEGORY_SLUGS = [
+  'electronics',
+  'textbooks',
+  'clothing',
+  'food',
+  'services',
+  'accommodation',
+  'furniture',
+  'sports',
+  'beauty',
+  'others',
+]
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const categoryPages: MetadataRoute.Sitemap = CATEGORY_SLUGS.map(slug => ({
+    url: `${SITE_URL}/marketplace?category=${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: 0.85,
+  }))
+
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -57,8 +78,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }))
 
-    return [...staticPages, ...productPages]
+    return [...staticPages, ...categoryPages, ...productPages]
   } catch {
-    return staticPages
+    return [...staticPages, ...categoryPages]
   }
 }
