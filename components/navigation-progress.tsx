@@ -9,7 +9,13 @@ function ProgressBarInner() {
   const prevUrl = useRef<string | null>(null)
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [completing, setCompleting] = useState(false)
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+  }
 
   useEffect(() => {
     const currentUrl = pathname + searchParams.toString()
@@ -21,38 +27,44 @@ function ProgressBarInner() {
 
     if (prevUrl.current !== currentUrl) {
       prevUrl.current = currentUrl
+      clearTimers()
 
-      // Clear any existing timers
-      if (timerRef.current) clearTimeout(timerRef.current)
-
-      // Start the bar
+      // Reset and start
+      setCompleting(false)
       setProgress(0)
       setVisible(true)
 
-      // Animate quickly to ~80% then complete
-      requestAnimationFrame(() => {
-        setProgress(70)
-      })
+      // Step 1: quickly jump to 30%
+      const t1 = setTimeout(() => setProgress(30), 50)
+      // Step 2: slowly creep to 60%
+      const t2 = setTimeout(() => setProgress(60), 400)
+      // Step 3: creep to 80% — stays here until route resolves
+      const t3 = setTimeout(() => setProgress(80), 900)
 
-      timerRef.current = setTimeout(() => {
+      // Step 4: finish bar
+      const t4 = setTimeout(() => {
+        setCompleting(true)
         setProgress(100)
-        timerRef.current = setTimeout(() => {
+        // Step 5: fade out
+        const t5 = setTimeout(() => {
           setVisible(false)
           setProgress(0)
-        }, 300)
-      }, 200)
+          setCompleting(false)
+        }, 400)
+        timersRef.current.push(t5)
+      }, 1200)
+
+      timersRef.current.push(t1, t2, t3, t4)
     }
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
+    return clearTimers
   }, [pathname, searchParams])
 
   if (!visible) return null
 
   return (
     <>
-      {/* Progress bar */}
+      {/* Progress bar — thick green stripe, highly visible */}
       <div
         style={{
           position: 'fixed',
@@ -61,7 +73,7 @@ function ProgressBarInner() {
           right: 0,
           zIndex: 9999,
           height: '3px',
-          backgroundColor: '#e5e7eb',
+          background: 'transparent',
           pointerEvents: 'none',
         }}
       >
@@ -69,49 +81,54 @@ function ProgressBarInner() {
           style={{
             height: '100%',
             width: `${progress}%`,
-            backgroundColor: '#0a0a0a',
-            transition: progress === 100 ? 'width 150ms ease-out' : 'width 200ms ease-out',
+            background: 'linear-gradient(90deg, #16a34a, #22c55e)',
+            transition: completing
+              ? 'width 200ms ease-out'
+              : progress === 30
+              ? 'width 100ms ease-out'
+              : 'width 600ms ease-out',
+            boxShadow: '0 0 8px rgba(22,163,74,0.6)',
           }}
         />
       </div>
 
-      {/* Spinner */}
+      {/* Pulsing dot indicator — bottom-left on mobile (above nav), top-right on desktop */}
       <div
         style={{
           position: 'fixed',
-          top: '12px',
-          right: '12px',
+          bottom: completing ? undefined : undefined,
+          top: '10px',
+          right: '10px',
           zIndex: 9999,
           pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          background: 'rgba(0,0,0,0.75)',
+          backdropFilter: 'blur(6px)',
+          borderRadius: '20px',
+          padding: '4px 10px 4px 8px',
         }}
       >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          style={{ animation: 'nprogress-spin 0.6s linear infinite' }}
-        >
-          <circle
-            cx="9"
-            cy="9"
-            r="7"
-            stroke="#e5e7eb"
-            strokeWidth="2"
-          />
-          <path
-            d="M9 2 A7 7 0 0 1 16 9"
-            stroke="#0a0a0a"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
+        <span
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: '#22c55e',
+            display: 'inline-block',
+            animation: 'nav-pulse 1s ease-in-out infinite',
+          }}
+        />
+        <span style={{ color: '#fff', fontSize: '11px', fontWeight: 600, letterSpacing: '0.01em' }}>
+          Loading…
+        </span>
       </div>
 
       <style>{`
-        @keyframes nprogress-spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes nav-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(0.7); }
         }
       `}</style>
     </>
