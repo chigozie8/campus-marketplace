@@ -1,15 +1,14 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, MapPin, BadgeCheck, Star, ShoppingBag, Share2, Package,
+  ArrowLeft, MapPin, BadgeCheck, Star,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
-import { ProductInteractions } from '@/components/product/product-interactions'
+import { ProductInteractions, ShareButton } from '@/components/product/product-interactions'
 import { ProductGallery } from '@/components/product/product-gallery'
 
 type Props = { params: Promise<{ id: string }> }
@@ -119,15 +118,7 @@ export default async function ProductDetailPage({ params }: Props) {
             <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none">
               Vendoor<span className="text-primary">X</span>
             </Link>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={undefined}
-                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors text-gray-500"
-                aria-label="Share"
-              >
-                <Share2 className="w-4.5 h-4.5" />
-              </button>
-            </div>
+            <ShareButton title={p.title} />
           </div>
         </header>
 
@@ -192,6 +183,7 @@ export default async function ProductDetailPage({ params }: Props) {
               {/* Dynamic: views, likes, WhatsApp, save button */}
               <ProductInteractions
                 productId={p.id}
+                productTitle={p.title}
                 initialViews={p.views ?? 0}
                 initialLikes={likesCount ?? 0}
                 initialLiked={initialLiked}

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Heart, Eye, MessageCircle } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Heart, Eye, MessageCircle, Share2, Check, Link as LinkIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   productId: string
+  productTitle: string
   initialViews: number
   initialLikes: number
   initialLiked: boolean
@@ -16,45 +17,50 @@ type Props = {
 
 export function ProductInteractions({
   productId,
+  productTitle,
   initialViews,
   initialLikes,
   initialLiked,
   whatsappUrl,
-  whatsappMessage,
 }: Props) {
   const [views, setViews] = useState(initialViews)
   const [likes, setLikes] = useState(initialLikes)
   const [liked, setLiked] = useState(initialLiked)
   const [likeLoading, setLikeLoading] = useState(false)
+  const [authReady, setAuthReady] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
-  const [viewCounted, setViewCounted] = useState(false)
+  const viewedRef = useRef(false)
 
-  // Get current user
+  // Resolve auth once on mount
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
       setUserId(data.user?.id ?? null)
+      setAuthReady(true)
     })
   }, [])
 
-  // Increment view once on mount
+  // Increment view count once
   useEffect(() => {
-    if (viewCounted) return
-    setViewCounted(true)
+    if (viewedRef.current) return
+    viewedRef.current = true
     fetch(`/api/products/${productId}/view`, { method: 'POST' })
       .then(() => setViews(v => v + 1))
-      .catch(() => {/* silent */})
-  }, [productId, viewCounted])
+      .catch(() => {})
+  }, [productId])
 
   const handleLike = useCallback(async () => {
-    if (likeLoading) return
+    if (likeLoading || !authReady) return
+
     if (!userId) {
-      toast.error('Sign in to save favourites')
+      toast.error('Sign in to save to your wishlist', {
+        action: { label: 'Sign in', onClick: () => window.location.href = '/auth/login' },
+      })
       return
     }
 
     setLikeLoading(true)
-    // Optimistic update
     const wasLiked = liked
+    // Optimistic update
     setLiked(!wasLiked)
     setLikes(l => wasLiked ? l - 1 : l + 1)
 
@@ -65,71 +71,159 @@ export function ProductInteractions({
         body: JSON.stringify({ userId }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error)
-      // Sync with server response
+      if (!res.ok) throw new Error(json.error ?? 'Request failed')
       setLiked(json.liked)
       setLikes(json.count)
-    } catch {
-      // Revert optimistic update
+      toast.success(json.liked ? '❤️ Added to wishlist' : 'Removed from wishlist')
+    } catch (err) {
+      // Revert
       setLiked(wasLiked)
       setLikes(l => wasLiked ? l + 1 : l - 1)
-      toast.error('Could not update favourite. Try again.')
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      toast.error(`Couldn't update wishlist: ${msg}`)
     } finally {
       setLikeLoading(false)
     }
-  }, [liked, likeLoading, productId, userId])
+  }, [liked, likeLoading, authReady, productId, userId])
 
   function handleWhatsApp() {
-    // Track click in background
+    if (!whatsappUrl || whatsappUrl === '#') {
+      toast.error("This seller hasn't added their WhatsApp number yet")
+      return
+    }
     fetch(`/api/products/${productId}/whatsapp`, { method: 'POST' }).catch(() => {})
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  async function handleShare() {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: productTitle, text: `Check out this listing on VendoorX: ${productTitle}`, url })
+      } catch {
+        // User cancelled or share failed — fall through to clipboard
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(url)
+          toast.success('Link copied to clipboard!')
+        }
+      }
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link copied to clipboard!')
+    } else {
+      // Last resort fallback
+      const input = document.createElement('input')
+      input.value = url
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      toast.success('Link copied!')
+    }
   }
 
   return (
     <div className="space-y-3">
       {/* Stats row */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Eye className="w-4 h-4" />
-          <span className="tabular-nums">{views.toLocaleString()}</span>
-          <span>view{views !== 1 ? 's' : ''}</span>
+          <span className="tabular-nums font-medium">{views.toLocaleString()}</span>
+          <span>{views === 1 ? 'view' : 'views'}</span>
         </span>
         <span className="flex items-center gap-1.5">
-          <Heart className={`w-4 h-4 ${liked ? 'fill-red-500 text-red-500' : ''}`} />
-          <span className="tabular-nums">{likes.toLocaleString()}</span>
-          <span>save{likes !== 1 ? 's' : ''}</span>
+          <Heart className={`w-4 h-4 transition-colors ${liked ? 'fill-red-500 text-red-500' : ''}`} />
+          <span className="tabular-nums font-medium">{likes.toLocaleString()}</span>
+          <span>{likes === 1 ? 'save' : 'saves'}</span>
         </span>
       </div>
 
       {/* WhatsApp CTA */}
       <button
         onClick={handleWhatsApp}
-        className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#20c05c] active:scale-[0.98] text-white font-semibold text-base flex items-center justify-center gap-2.5 shadow-lg shadow-green-500/25 transition-all hover:-translate-y-0.5"
+        className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#20c05c] active:scale-[0.98] text-white font-bold text-base flex items-center justify-center gap-2.5 shadow-lg shadow-green-500/20 transition-all hover:-translate-y-0.5"
       >
         <MessageCircle className="w-5 h-5" />
         Chat on WhatsApp
       </button>
 
-      {/* Like / Save button */}
-      <button
-        onClick={handleLike}
-        disabled={likeLoading}
-        className={`w-full h-11 rounded-xl border-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-          liked
-            ? 'border-red-200 bg-red-50 text-red-600 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400'
-            : 'border-gray-200 dark:border-border text-gray-700 dark:text-foreground hover:border-red-200 hover:bg-red-50/50 hover:text-red-500'
-        }`}
-      >
-        <Heart
-          className={`w-4 h-4 transition-all ${liked ? 'fill-red-500 text-red-500 scale-110' : ''} ${likeLoading ? 'animate-pulse' : ''}`}
-        />
-        {liked ? 'Saved to favourites' : 'Save to favourites'}
-      </button>
+      {/* Save + Share row */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* Save / Wishlist */}
+        <button
+          onClick={handleLike}
+          disabled={likeLoading || !authReady}
+          className={`h-11 rounded-xl border-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60 ${
+            liked
+              ? 'border-red-200 bg-red-50 text-red-600 dark:border-red-800/40 dark:bg-red-950/20 dark:text-red-400'
+              : 'border-gray-200 dark:border-border text-gray-700 dark:text-foreground hover:border-red-200 hover:bg-red-50/50 hover:text-red-500'
+          }`}
+        >
+          <Heart
+            className={`w-4 h-4 transition-all duration-200 ${
+              liked ? 'fill-red-500 text-red-500 scale-110' : ''
+            } ${likeLoading ? 'animate-pulse' : ''}`}
+          />
+          {liked ? 'Saved' : 'Wishlist'}
+        </button>
+
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="h-11 rounded-xl border-2 border-gray-200 dark:border-border text-sm font-semibold text-gray-700 dark:text-foreground flex items-center justify-center gap-2 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all active:scale-[0.98]"
+        >
+          <Share2 className="w-4 h-4" />
+          Share
+        </button>
+      </div>
     </div>
   )
 }
 
-// Standalone like button for use in listing cards / marketplace grid
+// ─── Standalone share button for product page header ───────────────────────
+export function ShareButton({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleShare() {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: `Check this out on VendoorX: ${title}`, url })
+        return
+      } catch {
+        // cancelled or unsupported — fall through
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const input = document.createElement('input')
+      input.value = url
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    setCopied(true)
+    toast.success('Link copied to clipboard!')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors text-gray-500 hover:text-primary"
+      aria-label="Share"
+    >
+      {copied
+        ? <Check className="w-4 h-4 text-green-500" />
+        : <Share2 className="w-4 h-4" />
+      }
+    </button>
+  )
+}
+
+// ─── Standalone like button for marketplace grid cards ─────────────────────
 export function LikeButton({ productId, size = 'sm' }: { productId: string; size?: 'sm' | 'md' }) {
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState(0)
@@ -140,17 +234,13 @@ export function LikeButton({ productId, size = 'sm' }: { productId: string; size
     createClient().auth.getUser().then(({ data }) => {
       const uid = data.user?.id ?? null
       setUserId(uid)
-      if (uid) {
-        fetch(`/api/products/${productId}/like?userId=${uid}`)
-          .then(r => r.json())
-          .then(j => { setLiked(j.liked); setLikes(j.count) })
-          .catch(() => {})
-      } else {
-        fetch(`/api/products/${productId}/like`)
-          .then(r => r.json())
-          .then(j => setLikes(j.count))
-          .catch(() => {})
-      }
+      const url = uid
+        ? `/api/products/${productId}/like?userId=${uid}`
+        : `/api/products/${productId}/like`
+      fetch(url).then(r => r.json()).then(j => {
+        if (uid) setLiked(j.liked)
+        setLikes(j.count)
+      }).catch(() => {})
     })
   }, [productId])
 
