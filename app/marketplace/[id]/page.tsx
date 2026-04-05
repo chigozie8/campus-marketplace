@@ -18,6 +18,62 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
+import type { Metadata } from 'next'
+import { ProductJsonLd } from '@/components/seo/product-jsonld'
+
+type Props = {
+  params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  
+  const { data: product } = await supabase
+    .from('products')
+    .select('*, profiles(*), categories(*)')
+    .eq('id', id)
+    .single()
+
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+    }
+  }
+
+  const p = product as Product
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.com'
+  const imageUrl = p.images?.[0] || `${siteUrl}/og-image.png`
+
+  return {
+    title: `${p.title} - ₦${p.price.toLocaleString()}`,
+    description: p.description || `Buy ${p.title} for ₦${p.price.toLocaleString()} from a verified student seller on VendoorX. ${p.condition === 'new' ? 'Brand new condition.' : ''} Contact directly on WhatsApp.`,
+    keywords: [p.title, p.categories?.name || '', 'campus marketplace', 'student seller', 'buy on campus'],
+    openGraph: {
+      title: `${p.title} - ₦${p.price.toLocaleString()} | VendoorX`,
+      description: p.description || `Buy ${p.title} from a verified student seller`,
+      type: 'website',
+      url: `${siteUrl}/marketplace/${id}`,
+      images: [
+        {
+          url: imageUrl,
+          width: 800,
+          height: 600,
+          alt: p.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${p.title} - ₦${p.price.toLocaleString()}`,
+      description: p.description || `Buy from a student seller on VendoorX`,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: `${siteUrl}/marketplace/${id}`,
+    },
+  }
+}
 
 const conditionLabels = {
   new: 'New',
@@ -56,8 +112,10 @@ export default async function ProductDetailPage({
   const imageUrl = p.images?.[0] || `/placeholder.svg?height=500&width=600`
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
+    <>
+      <ProductJsonLd product={p} />
+      <div className="min-h-screen bg-background">
+        {/* Header */}
       <header className="sticky top-0 z-40 glass border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -231,6 +289,7 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   )
 }
