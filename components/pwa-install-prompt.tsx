@@ -38,21 +38,22 @@ export function PwaInstallPrompt() {
 
     if (isIos) {
       setPlatform('ios')
-      // Show chip after a short delay on every page
+      // Always show chip on every load/refresh for iOS
       const t = setTimeout(() => setChipVisible(true), 1500)
       return () => clearTimeout(t)
     }
 
-    // Android/Chrome — capture native install prompt
+    // Android/Chrome — capture native install prompt if available
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setPlatform('android')
-      setChipVisible(true)
     }
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // Fallback: show chip even without native event (e.g. already prompted before)
+    // Always show the chip on every load/refresh regardless of whether
+    // beforeinstallprompt fires (it only fires once per browser session)
+    setPlatform('android')
     const t = setTimeout(() => {
       setChipVisible(true)
     }, 1500)
