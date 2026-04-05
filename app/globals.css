@@ -140,7 +140,17 @@
   }
 }
 
+@custom-variant xs (@media (min-width: 420px));
+
 @layer utilities {
+  /* Hide scrollbar cross-browser */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
   .hero-gradient {
     background: linear-gradient(135deg, oklch(0.50 0.19 152) 0%, oklch(0.58 0.17 162) 50%, oklch(0.46 0.15 145) 100%);
   }
