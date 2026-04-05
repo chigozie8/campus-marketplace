@@ -45,7 +45,7 @@ export function LandingNav({ user }: LandingNavProps) {
           <div className="flex items-center justify-between px-4 sm:px-6 h-16">
 
             {/* Logo */}
-            <VendoorXLogo size={38} />
+            <VendoorXLogo height={36} />
 
             {/* Desktop nav links */}
             <div className="hidden lg:flex items-center gap-1">

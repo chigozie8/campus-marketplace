@@ -4,31 +4,34 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =============================================
-   LIGHT MODE — Kartly-inspired: clean white,
-   bold green primary, crisp neutrals
+   LIGHT MODE — clean white, bold green + black
    ============================================= */
 :root {
   --background: oklch(0.99 0.002 130);
-  --foreground: oklch(0.12 0.02 160);
+  --foreground: oklch(0.08 0.01 150);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.12 0.02 160);
+  --card-foreground: oklch(0.08 0.01 150);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.12 0.02 160);
+  --popover-foreground: oklch(0.08 0.01 150);
 
-  /* Brand green — richer, deeper emerald green */
+  /* Brand green */
   --primary: oklch(0.45 0.22 155);
   --primary-foreground: oklch(1 0 0);
 
+  /* Bold black accent */
+  --ink: oklch(0.08 0.01 150);
+  --ink-foreground: oklch(1 0 0);
+
   --secondary: oklch(0.96 0.012 150);
-  --secondary-foreground: oklch(0.22 0.05 152);
+  --secondary-foreground: oklch(0.18 0.04 152);
 
   --muted: oklch(0.96 0.006 145);
   --muted-foreground: oklch(0.50 0.015 150);
 
   --accent: oklch(0.94 0.04 150);
-  --accent-foreground: oklch(0.22 0.08 152);
+  --accent-foreground: oklch(0.18 0.08 152);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
@@ -40,11 +43,11 @@
 
   /* Sidebar */
   --sidebar: oklch(0.97 0.008 148);
-  --sidebar-foreground: oklch(0.12 0.02 160);
+  --sidebar-foreground: oklch(0.08 0.01 150);
   --sidebar-primary: oklch(0.45 0.22 155);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.94 0.04 150);
-  --sidebar-accent-foreground: oklch(0.22 0.08 152);
+  --sidebar-accent-foreground: oklch(0.18 0.08 152);
   --sidebar-border: oklch(0.91 0.010 148);
   --sidebar-ring: oklch(0.45 0.22 155);
 }
@@ -141,6 +144,14 @@
   .hero-gradient {
     background: linear-gradient(135deg, oklch(0.50 0.19 152) 0%, oklch(0.58 0.17 162) 50%, oklch(0.46 0.15 145) 100%);
   }
+  /* Bold black button/badge utility */
+  .ink-fill {
+    background-color: oklch(0.08 0.01 150);
+    color: white;
+  }
+  .ink-fill:hover {
+    background-color: oklch(0.14 0.01 150);
+  }
   .instagram-gradient {
     background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     color: white;
@@ -160,5 +171,11 @@
   }
   .whatsapp-green:hover {
     background-color: #1ebe57;
+  }
+  /* Heading utility — heavy black weight */
+  .heading-black {
+    font-weight: 900;
+    color: oklch(0.08 0.01 150);
+    letter-spacing: -0.03em;
   }
 }
