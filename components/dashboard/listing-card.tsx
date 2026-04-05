@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -19,41 +19,55 @@ export function ListingCard({ product }: Props) {
   const [deleting, setDeleting] = useState(false)
   const [toggling, setToggling] = useState(false)
   const [isAvailable, setIsAvailable] = useState(product.is_available)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null)
+    })
+  }, [])
 
   async function handleDelete() {
     if (!confirm(`Delete "${product.title}"? This cannot be undone.`)) return
+    if (!userId) { toast.error('You must be signed in to delete a listing'); return }
     setDeleting(true)
     setOpen(false)
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', product.id)
-    if (error) {
-      toast.error('Failed to delete: ' + error.message)
-      setDeleting(false)
-    } else {
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Delete failed')
       toast.success('Listing deleted')
       router.refresh()
+    } catch (err) {
+      toast.error('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      setDeleting(false)
     }
   }
 
   async function handleToggleAvailability() {
+    if (!userId) { toast.error('You must be signed in'); return }
     setToggling(true)
     setOpen(false)
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('products')
-      .update({ is_available: !isAvailable })
-      .eq('id', product.id)
-    if (error) {
-      toast.error('Failed to update: ' + error.message)
-    } else {
+    try {
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, is_available: !isAvailable }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Update failed')
       setIsAvailable(v => !v)
       toast.success(isAvailable ? 'Marked as sold' : 'Marked as available')
       router.refresh()
+    } catch (err) {
+      toast.error('Failed to update: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setToggling(false)
     }
-    setToggling(false)
   }
 
   return (
