@@ -1,71 +1,34 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { X, Download, Smartphone, Share } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { X, Download, Smartphone, Share, Zap, ShieldCheck, Wifi } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-type PromptState = 'hidden' | 'banner' | 'ios' | 'mini'
+type PromptState = 'hidden' | 'banner' | 'ios'
 
-const DISMISSED_KEY = 'pwa-prompt-dismissed-until'
-const VERSION_KEY = 'pwa-prompt-version'
-const CURRENT_VERSION = '2'
-const DISMISS_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
-
-function isDismissed(): boolean {
-  try {
-    const val = localStorage.getItem(DISMISSED_KEY)
-    if (!val) return false
-    const expiry = Number(val)
-    // Guard against corrupted / NaN values
-    if (isNaN(expiry)) {
-      localStorage.removeItem(DISMISSED_KEY)
-      return false
-    }
-    return Date.now() < expiry
-  } catch {
-    return false
-  }
-}
-
-function markDismissed() {
-  try {
-    localStorage.setItem(DISMISSED_KEY, String(Date.now() + DISMISS_DURATION_MS))
-  } catch {}
-}
+const CANCELLED_KEY = 'pwa-cancelled'
 
 export function PwaInstallPrompt() {
   const [state, setState] = useState<PromptState>('hidden')
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [installing, setInstalling] = useState(false)
 
   useEffect(() => {
-    // Clear stale dismiss state on new version
-    try {
-      if (localStorage.getItem(VERSION_KEY) !== CURRENT_VERSION) {
-        localStorage.removeItem(DISMISSED_KEY)
-        localStorage.setItem(VERSION_KEY, CURRENT_VERSION)
-      }
-    } catch {}
-
-    // Already installed as standalone — no need to prompt
+    // Already installed — skip
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       ('standalone' in window.navigator &&
         (window.navigator as { standalone?: boolean }).standalone === true)
-
     if (isStandalone) return
 
-    // Show mini pill if previously dismissed
-    if (isDismissed()) {
-      setState('mini')
-      return
-    }
+    // User explicitly cancelled this session — skip
+    if (sessionStorage.getItem(CANCELLED_KEY)) return
 
-    // iOS Safari — no beforeinstallprompt, show manual instructions
+    // Detect iOS Safari
     const ua = window.navigator.userAgent
     const isIos =
       /iphone|ipad|ipod/i.test(ua) &&
@@ -78,138 +41,184 @@ export function PwaInstallPrompt() {
       return () => clearTimeout(t)
     }
 
-    // Chrome / Android — listen for native beforeinstallprompt
+    // Chrome / Android — capture native prompt
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setState('banner')
     }
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
 
-    // Fallback: show banner after 1.5s even if beforeinstallprompt never fires
-    // (covers browsers that don't support it or already met install criteria)
-    const fallbackTimer = setTimeout(() => {
+    // Always show after 1.5s even without native event
+    const t = setTimeout(() => {
       setState((prev) => (prev === 'hidden' ? 'banner' : prev))
     }, 1500)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
-      clearTimeout(fallbackTimer)
+      clearTimeout(t)
     }
   }, [])
 
-  const dismiss = useCallback(() => {
-    markDismissed()
-    setState('mini')
+  // Cancel — only hides for this session, shows again on next visit
+  const cancel = useCallback(() => {
+    sessionStorage.setItem(CANCELLED_KEY, '1')
+    setState('hidden')
   }, [])
 
   const install = useCallback(async () => {
     if (deferredPrompt) {
+      setInstalling(true)
       await deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
+      setInstalling(false)
       if (outcome === 'accepted') {
         setState('hidden')
       }
       setDeferredPrompt(null)
-    } else {
-      // No native prompt available — still dismiss the banner
-      setState('hidden')
     }
   }, [deferredPrompt])
 
   if (state === 'hidden') return null
 
-  // Mini persistent pill — shown after dismissal
-  if (state === 'mini') {
-    return (
-      <button
-        onClick={() => setState('banner')}
-        className="fixed bottom-28 md:bottom-8 left-4 z-[60] flex items-center gap-2 bg-[#0a0a0a] text-white text-[12px] font-bold px-3 py-2 rounded-full shadow-lg hover:bg-[#1a1a1a] active:scale-95 transition-all animate-in slide-in-from-left-4 duration-300"
-        aria-label="Install VendoorX app"
-      >
-        <Download className="w-3.5 h-3.5 text-[#16a34a]" />
-        Install App
-      </button>
-    )
-  }
+  const features = [
+    { icon: Zap, label: 'Instant access', sub: 'Opens in 0.3s' },
+    { icon: Wifi, label: 'Works offline', sub: 'Browse anytime' },
+    { icon: ShieldCheck, label: 'Secure & private', sub: 'SSL encrypted' },
+  ]
 
   return (
-    <div
-      role="dialog"
-      aria-label="Install VendoorX app"
-      className="fixed bottom-24 lg:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] z-[60] animate-in slide-in-from-bottom-6 duration-500 ease-out"
-    >
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-2xl overflow-hidden">
-        {/* Brand accent strip */}
-        <div className="h-1 w-full bg-[#16a34a]" />
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[58] bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-300"
+        onClick={cancel}
+        aria-hidden="true"
+      />
 
-        <div className="p-5">
-          <div className="flex items-start gap-4">
-            {/* Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white text-lg font-black tracking-tight leading-none">
-                V<span className="text-[#16a34a]">X</span>
-              </span>
-            </div>
+      {/* Bottom Sheet */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Install VendoorX"
+        className="fixed bottom-0 left-0 right-0 z-[59] animate-in slide-in-from-bottom-full duration-500 ease-out"
+      >
+        <div className="bg-white dark:bg-zinc-950 rounded-t-[32px] shadow-2xl overflow-hidden max-w-lg mx-auto">
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-black text-[15px] text-zinc-900 dark:text-white leading-tight">
-                    Install VendoorX
-                  </p>
-                  <p className="text-[12px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-snug">
-                    Add to your home screen — fast access, works offline.
-                  </p>
-                </div>
-                <button
-                  onClick={dismiss}
-                  className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors flex-shrink-0 p-1 -mr-1 -mt-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  aria-label="Dismiss"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+
+          {/* Close button */}
+          <div className="flex justify-end px-5 pt-1">
+            <button
+              onClick={cancel}
+              className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+              aria-label="Cancel"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="px-6 pb-8 pt-2">
+            {/* App identity */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 rounded-2xl bg-[#0a0a0a] flex items-center justify-center shadow-xl flex-shrink-0 ring-4 ring-[#16a34a]/20">
+                <span className="text-white text-xl font-black tracking-tight leading-none">
+                  V<span className="text-[#16a34a]">X</span>
+                </span>
               </div>
-
-              {state === 'ios' ? (
-                <div className="mt-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl p-3 space-y-2">
-                  <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    How to install on iOS
-                  </p>
-                  <div className="flex items-center gap-2 text-[12px] text-zinc-700 dark:text-zinc-300">
-                    <Share className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
-                    <span>Tap the <strong>Share</strong> button in Safari</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[12px] text-zinc-700 dark:text-zinc-300">
-                    <Smartphone className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
-                    <span>Select <strong>&ldquo;Add to Home Screen&rdquo;</strong></span>
-                  </div>
+              <div>
+                <h2 className="text-xl font-black text-zinc-900 dark:text-white leading-tight tracking-tight">
+                  VendoorX
+                </h2>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+                  Campus Marketplace
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  {[1,2,3,4,5].map(s => (
+                    <svg key={s} className="w-3 h-3 text-[#16a34a] fill-current" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                  <span className="text-[11px] text-zinc-400 ml-1 font-medium">4.9 • 50K+ users</span>
                 </div>
-              ) : (
-                <div className="mt-3 flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={install}
-                    className="flex-1 gap-1.5 h-9 text-[13px] font-bold bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white border-0"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Install App
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={dismiss}
-                    className="h-9 text-[13px] px-3 text-zinc-500"
-                  >
-                    Not now
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
+
+            {/* Feature pills */}
+            <div className="grid grid-cols-3 gap-2 mb-6">
+              {features.map(({ icon: Icon, label, sub }) => (
+                <div
+                  key={label}
+                  className="flex flex-col items-center gap-1.5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-3 border border-zinc-100 dark:border-zinc-800"
+                >
+                  <div className="w-8 h-8 rounded-full bg-[#16a34a]/10 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-[#16a34a]" />
+                  </div>
+                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 text-center leading-tight">{label}</span>
+                  <span className="text-[10px] text-zinc-400 text-center">{sub}</span>
+                </div>
+              ))}
+            </div>
+
+            {state === 'ios' ? (
+              /* iOS instructions */
+              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800 mb-4">
+                <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">
+                  How to install on iOS
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-[#0a0a0a] flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-[10px] font-black">1</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Share className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
+                      <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                        Tap the <strong>Share</strong> button in Safari
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-[#0a0a0a] flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-[10px] font-black">2</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
+                      <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                        Select <strong>&ldquo;Add to Home Screen&rdquo;</strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Install CTA */
+              <button
+                onClick={install}
+                disabled={installing}
+                className="w-full h-14 rounded-2xl bg-[#0a0a0a] hover:bg-[#1a1a1a] active:scale-[0.98] text-white font-black text-base flex items-center justify-center gap-2.5 transition-all duration-200 shadow-lg shadow-black/20 disabled:opacity-70"
+              >
+                {installing ? (
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                ) : (
+                  <Download className="w-5 h-5 text-[#16a34a]" />
+                )}
+                {installing ? 'Installing…' : 'Add to Home Screen — Free'}
+              </button>
+            )}
+
+            <p className="text-center text-[11px] text-zinc-400 mt-3 leading-relaxed">
+              No App Store needed &bull; Free forever &bull; Works on all devices
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
