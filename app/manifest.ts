@@ -52,9 +52,28 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: '/icon-192', sizes: '192x192' }],
       },
     ],
-    categories: ['shopping', 'marketplace', 'education'],
-    lang: 'en',
-    dir: 'ltr',
-    prefer_related_applications: false,
+  categories: ['shopping', 'marketplace', 'education'],
+  lang: 'en-NG',
+  dir: 'ltr',
+  prefer_related_applications: false,
+  // display_override gives browsers progressive enhancement options
+  display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+  // Screenshots help Google and app stores show rich previews
+  screenshots: [
+    {
+      src: '/screenshot-mobile.png',
+      sizes: '390x844',
+      type: 'image/png',
+      form_factor: 'narrow',
+      label: 'VendoorX campus marketplace on mobile',
+    },
+    {
+      src: '/screenshot-desktop.png',
+      sizes: '1280x800',
+      type: 'image/png',
+      form_factor: 'wide',
+      label: 'VendoorX campus marketplace on desktop',
+    },
+  ],
   }
 }
