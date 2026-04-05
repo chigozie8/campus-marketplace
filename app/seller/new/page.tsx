@@ -77,6 +77,8 @@ export default function NewListingPage() {
       toast.error(err instanceof Error ? err.message : 'Photo upload failed. Try again.')
     } finally {
       setUploadingImages(false)
+      // Reset input so the same file can be re-selected after a failure
+      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
