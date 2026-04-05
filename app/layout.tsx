@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { FloatingNav } from '@/components/floating-nav'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -41,6 +42,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <FloatingNav />
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
