@@ -92,12 +92,15 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
       {
-        // Long-lived cache for static assets — reduces repeat-visit load time
+        // Long-lived cache for static assets in production only (files have content hashes)
+        // In dev, use no-store so browsers always pick up code changes
         source: '/_next/static/(.*)',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: isDev
+              ? 'no-store, max-age=0'
+              : 'public, max-age=31536000, immutable',
           },
         ],
       },
