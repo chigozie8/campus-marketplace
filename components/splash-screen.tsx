@@ -132,23 +132,24 @@ export function SplashScreen() {
 
       </div>
 
-      {/* Corner accent dots */}
+      {/* Animated bouncing dots */}
       <div style={{
         position: 'absolute',
         bottom: 36,
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
-        gap: 5,
+        gap: 7,
         animation: 'sp-rise 0.4s 0.4s ease-out both',
       }}>
         {[0, 1, 2].map((i) => (
           <span key={i} style={{
-            width: 4,
-            height: 4,
+            width: 6,
+            height: 6,
             borderRadius: '50%',
             display: 'block',
             background: i === 1 ? '#16a34a' : '#d1d5db',
+            animation: `sp-bounce 0.9s ${i * 0.18}s ease-in-out infinite`,
           }} />
         ))}
       </div>
@@ -161,6 +162,10 @@ export function SplashScreen() {
         @keyframes sp-rise {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sp-bounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+          40%            { transform: translateY(-8px); opacity: 1; }
         }
       `}</style>
     </div>
