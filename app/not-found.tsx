@@ -1,6 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ShoppingBag, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+
+export const metadata: Metadata = {
+  title: '404 — Page Not Found | VendoorX',
+  description: "The page you're looking for doesn't exist. Head back to VendoorX and discover thousands of campus deals.",
+  robots: { index: false, follow: true },
+}
 
 export default function NotFound() {
   return (

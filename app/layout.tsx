@@ -10,59 +10,32 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { ChatWidget } from '@/components/chat-widget'
+import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.com'
+const siteUrl = SITE_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'VendoorX — Buy & Sell on Campus | Nigeria\'s #1 Student Marketplace',
+    default: "VendoorX — Buy & Sell on Campus | Nigeria's #1 Student Marketplace",
     template: '%s | VendoorX',
   },
-  description:
-    'VendoorX is Nigeria\'s largest campus marketplace connecting 50,000+ students. Buy and sell electronics, fashion, books, food, and services. Close deals directly on WhatsApp with zero platform fees. Join free today!',
-  keywords: [
-    'VendoorX',
-    'campus marketplace',
-    'student marketplace Nigeria',
-    'buy and sell on campus',
-    'university marketplace',
-    'WhatsApp commerce',
-    'student deals',
-    'campus trading',
-    'Nigerian student marketplace',
-    'sell on campus',
-    'buy from students',
-    'university buy sell',
-    'UNILAG marketplace',
-    'OAU marketplace',
-    'UI marketplace',
-    'FUTA marketplace',
-    'Nigerian universities',
-    'student entrepreneurs',
-    'campus business',
-    'zero commission marketplace',
-  ],
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   authors: [{ name: 'VendoorX Team', url: siteUrl }],
   creator: 'VendoorX',
   publisher: 'VendoorX',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
+  formatDetection: { email: false, address: false, telephone: false },
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: '32x32' },
     ],
-    apple: [
-      { url: '/icon-192', sizes: '180x180' },
-    ],
+    apple: [{ url: '/icon-192', sizes: '180x180' }],
   },
   manifest: '/manifest.webmanifest',
   openGraph: {
@@ -70,15 +43,15 @@ export const metadata: Metadata = {
     locale: 'en_NG',
     url: siteUrl,
     siteName: 'VendoorX',
-    title: 'VendoorX — Buy & Sell on Campus | Nigeria\'s #1 Student Marketplace',
+    title: "VendoorX — Buy & Sell on Campus | Nigeria's #1 Student Marketplace",
     description:
-      'Join 50,000+ students on Nigeria\'s largest campus marketplace. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp. Zero fees, instant connections!',
+      "Join 50,000+ students on Nigeria's largest campus marketplace. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp. Zero fees, instant connections!",
     images: [
       {
-        url: '/og-image.png',
+        url: `${siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'VendoorX - Nigeria\'s #1 Campus Marketplace',
+        alt: "VendoorX — Nigeria's #1 Campus Marketplace",
         type: 'image/png',
       },
     ],
@@ -87,8 +60,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'VendoorX — Buy & Sell on Campus',
     description:
-      'Nigeria\'s #1 campus marketplace. 50,000+ students trading electronics, fashion, books & more. Zero fees, WhatsApp direct deals!',
-    images: ['/og-image.png'],
+      "Nigeria's #1 campus marketplace. 50,000+ students trading electronics, fashion, books & more. Zero fees, WhatsApp direct deals!",
+    images: [`${siteUrl}/og-image.png`],
     creator: '@vendoorx',
     site: '@vendoorx',
   },
@@ -105,16 +78,12 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: siteUrl,
-  },
+  alternates: { canonical: siteUrl },
   category: 'shopping',
   classification: 'Marketplace',
   referrer: 'origin-when-cross-origin',
   verification: {
-    google: 'your-google-verification-code',
-    // yandex: 'your-yandex-verification-code',
-    // bing: 'your-bing-verification-code',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
   other: {
     'apple-mobile-web-app-capable': 'yes',
@@ -122,7 +91,6 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-title': 'VendoorX',
     'mobile-web-app-capable': 'yes',
     'msapplication-TileColor': '#16a34a',
-    'msapplication-config': '/browserconfig.xml',
   },
 }
 

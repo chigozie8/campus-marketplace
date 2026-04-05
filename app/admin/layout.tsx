@@ -1,10 +1,12 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { AdminHeader } from '@/components/admin/admin-header'
 
-export const metadata = {
-  title: 'Admin Panel — VendoorX',
+export const metadata: Metadata = {
+  title: { default: 'Admin Panel', template: '%s — VendoorX Admin' },
+  description: 'VendoorX internal admin panel — manage listings, users, categories, and analytics.',
   robots: { index: false, follow: false },
 }
 
