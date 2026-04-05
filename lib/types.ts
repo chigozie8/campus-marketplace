@@ -73,3 +73,41 @@ export type Message = {
   content: string
   created_at: string
 }
+
+export type Platform = 'whatsapp' | 'instagram' | 'facebook'
+
+export type Conversation = {
+  id: string
+  platform: Platform
+  customer_name: string
+  customer_phone?: string
+  customer_avatar?: string
+  last_message: string
+  last_message_at: string
+  unread_count: number
+  messages: ChatMessage[]
+}
+
+export type ChatMessage = {
+  id: string
+  conversation_id: string
+  direction: 'incoming' | 'outgoing'
+  content: string
+  created_at: string
+  platform: Platform
+}
+
+export type Order = {
+  id: string
+  buyer_id: string
+  seller_id: string
+  product_id: string
+  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'completed' | 'cancelled'
+  amount: number
+  currency: string
+  notes?: string | null
+  created_at: string
+  updated_at: string
+  products?: Pick<Product, 'id' | 'title' | 'images' | 'price'>
+  buyer_profile?: Pick<Profile, 'full_name' | 'avatar_url'>
+}
