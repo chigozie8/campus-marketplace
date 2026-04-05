@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export const metadata: Metadata = {
-  title: 'CampusCart — Buy & Sell on Campus',
+  title: 'VendoorX — Buy & Sell on Campus',
   description:
-    'The ultimate campus & business marketplace. Connect with buyers and sellers via WhatsApp, Instagram, and Facebook. Discover deals on electronics, fashion, books, food, services and more.',
+    'VendoorX is Nigeria\'s #1 campus marketplace. Buy and sell electronics, fashion, books, food, and services. Close deals directly on WhatsApp with zero platform fees.',
   generator: 'v0.app',
-  keywords: ['campus marketplace', 'buy and sell', 'student marketplace', 'Nigeria', 'WhatsApp commerce'],
+  keywords: ['VendoorX', 'campus marketplace', 'buy and sell', 'student marketplace', 'Nigeria', 'WhatsApp commerce'],
   icons: {
     icon: '/icon.svg',
   },

@@ -37,7 +37,7 @@ export function CtaSection() {
                 Ready to buy &amp; sell smarter?
               </h2>
               <p className="text-white/75 text-lg max-w-md leading-relaxed text-balance mb-8">
-                Join 50,000+ students already trading on CampusCart. It&apos;s free to join and free to list.
+                Join 50,000+ students already trading on VendoorX. It&apos;s free to join and free to list.
               </p>
 
               {/* Perk list */}
