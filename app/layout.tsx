@@ -9,6 +9,7 @@ import { ServiceWorkerRegistration } from '@/components/service-worker-registrat
 import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
+import { ChatWidget } from '@/components/chat-widget'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -302,6 +303,7 @@ export default function RootLayout({
           <FloatingNav />
           <ServiceWorkerRegistration />
           <PwaInstallPrompt />
+          <ChatWidget />
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </ThemeProvider>
