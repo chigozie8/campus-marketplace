@@ -2,23 +2,27 @@ import Link from 'next/link'
 import { Laptop, Shirt, BookOpen, UtensilsCrossed, Briefcase, Home, Dumbbell, Sparkles } from 'lucide-react'
 
 const categories = [
-  { icon: Laptop, name: 'Electronics', count: '12.4K', slug: 'electronics', color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40' },
-  { icon: Shirt, name: 'Fashion', count: '18.2K', slug: 'fashion', color: 'text-pink-600 bg-pink-50 dark:bg-pink-950/40' },
-  { icon: BookOpen, name: 'Books', count: '9.7K', slug: 'books', color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40' },
-  { icon: UtensilsCrossed, name: 'Food & Drinks', count: '5.1K', slug: 'food-drinks', color: 'text-orange-600 bg-orange-50 dark:bg-orange-950/40' },
-  { icon: Briefcase, name: 'Services', count: '3.8K', slug: 'services', color: 'text-purple-600 bg-purple-50 dark:bg-purple-950/40' },
-  { icon: Home, name: 'Housing', count: '2.3K', slug: 'housing', color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40' },
-  { icon: Dumbbell, name: 'Sports', count: '4.5K', slug: 'sports', color: 'text-green-600 bg-green-50 dark:bg-green-950/40' },
-  { icon: Sparkles, name: 'Beauty', count: '6.9K', slug: 'beauty', color: 'text-rose-600 bg-rose-50 dark:bg-rose-950/40' },
+  { icon: Laptop, name: 'Electronics', count: '12.4K', slug: 'electronics', colorClass: 'text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400' },
+  { icon: Shirt, name: 'Fashion', count: '18.2K', slug: 'fashion', colorClass: 'text-pink-600 bg-pink-50 dark:bg-pink-950/40 dark:text-pink-400' },
+  { icon: BookOpen, name: 'Books', count: '9.7K', slug: 'books', colorClass: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400' },
+  { icon: UtensilsCrossed, name: 'Food & Drinks', count: '5.1K', slug: 'food-drinks', colorClass: 'text-orange-600 bg-orange-50 dark:bg-orange-950/40 dark:text-orange-400' },
+  { icon: Briefcase, name: 'Services', count: '3.8K', slug: 'services', colorClass: 'text-violet-600 bg-violet-50 dark:bg-violet-950/40 dark:text-violet-400' },
+  { icon: Home, name: 'Housing', count: '2.3K', slug: 'housing', colorClass: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 dark:text-indigo-400' },
+  { icon: Dumbbell, name: 'Sports', count: '4.5K', slug: 'sports', colorClass: 'text-green-600 bg-green-50 dark:bg-green-950/40 dark:text-green-400' },
+  { icon: Sparkles, name: 'Beauty', count: '6.9K', slug: 'beauty', colorClass: 'text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400' },
 ]
 
 export function CategoriesSection() {
   return (
-    <section id="categories" className="py-24 bg-background">
+    <section id="categories" className="py-24 bg-muted/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
         <div className="text-center mb-14">
-          <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Browse by Category</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-4">
+          <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-3 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+            Browse by Category
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-balance mt-4 mb-4">
             Find what you need, fast
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto text-balance leading-relaxed">
@@ -26,19 +30,20 @@ export function CategoriesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-          {categories.map(({ icon: Icon, name, count, slug, color }) => (
+        {/* Category grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {categories.map(({ icon: Icon, name, count, slug, colorClass }) => (
             <Link
               key={slug}
               href={`/marketplace?category=${slug}`}
-              className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-md hover:shadow-primary/8 transition-all duration-200 group"
+              className="flex flex-col items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md hover:shadow-primary/8 hover:-translate-y-0.5 transition-all duration-200 group"
             >
-              <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+              <div className={`w-12 h-12 rounded-xl ${colorClass} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
                 <Icon className="w-6 h-6" />
               </div>
               <div className="text-center">
-                <p className="font-medium text-sm text-foreground">{name}</p>
-                <p className="text-xs text-muted-foreground">{count} items</p>
+                <p className="font-semibold text-sm text-foreground">{name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{count} items</p>
               </div>
             </Link>
           ))}
