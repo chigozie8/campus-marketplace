@@ -11,6 +11,7 @@ import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { FaqSection } from '@/components/landing/faq-section'
 import { CtaSection } from '@/components/landing/cta-section'
+import { TrustedBySection } from '@/components/landing/trusted-by-section'
 import { LandingNav } from '@/components/landing/landing-nav'
 import { LandingFooter } from '@/components/landing/landing-footer'
 
@@ -25,6 +26,7 @@ export default async function Home() {
       <LandingNav user={user} />
       <HeroSection />
       <StatsBar />
+      <TrustedBySection />
       <ProblemSolutionSection />
       <WhatsappMockupSection />
       <HowItWorksSection />
