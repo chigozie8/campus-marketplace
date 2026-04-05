@@ -1,57 +1,217 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft,
-  ShoppingBag,
   Send,
-  Bot,
-  User,
   Sparkles,
+  ShoppingBag,
+  BookOpen,
+  Utensils,
+  Shirt,
+  Laptop,
+  Home,
+  Mic,
+  MicOff,
+  RotateCcw,
+  ChevronRight,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    puter: any
+  }
+}
 
 type Message = {
   id: string
   role: 'user' | 'assistant'
   content: string
+  timestamp: Date
 }
 
-const SUGGESTIONS = [
-  'Find me a cheap laptop under ₦100k',
-  'What textbooks are available for 200 level Engineering?',
-  'Who sells the best jollof rice on UNILAG campus?',
-  'How do I list my items for sale?',
-  'Show me fashion items under ₦5,000',
+const QUICK_PROMPTS = [
+  { icon: Laptop, label: 'Cheap laptops', query: 'Find me a cheap laptop under ₦100k on campus' },
+  { icon: BookOpen, label: 'Textbooks', query: 'What textbooks are available for 200 level students?' },
+  { icon: Utensils, label: 'Food nearby', query: 'Who sells the best jollof rice on campus?' },
+  { icon: Shirt, label: 'Fashion deals', query: 'Show me fashion items under ₦5,000' },
+  { icon: ShoppingBag, label: 'How to sell', query: 'How do I list my items for sale on VendoorX?' },
+  { icon: Home, label: 'Accommodation', query: 'Are there student accommodation listings?' },
 ]
 
-const SAMPLE_RESPONSES: Record<string, string> = {
-  default: "I'm CampusCart AI, your smart shopping assistant! I can help you find products, compare prices, guide you through selling, or answer any marketplace questions. What are you looking for today?",
+const SYSTEM_PROMPT = `You are VendoorX AI — a smart, friendly, and energetic shopping assistant for VendoorX, Nigeria's #1 campus marketplace. You help university students buy and sell products like electronics, textbooks, fashion, food, services, and accommodation.
+
+Your personality: upbeat, helpful, knowledgeable about Nigerian campus life, uses light Nigerian slang naturally (e.g. "sharp sharp", "no wahala", "omo"), but always professional and clear.
+
+Key marketplace facts:
+- VendoorX connects 50,000+ students across 120+ Nigerian campuses (UNILAG, OAU, UI, FUTA, LASU, ABU, etc.)
+- Buyers contact sellers directly via WhatsApp — zero platform fees, zero commission
+- Product categories: Electronics, Textbooks, Clothing, Food & Drinks, Services, Accommodation, Furniture, Sports, Beauty, Others
+- Listing is free — go to /seller/new to create a listing
+- Browse at /marketplace
+- Students can filter by campus, category, condition (new/like-new/good/fair) and price
+
+When users ask about products, give helpful suggestions, price ranges typical on Nigerian campuses, and always include a call to action to browse the marketplace. Format responses nicely with line breaks. Keep responses concise but warm and friendly.`
+
+// Typewriter effect hook
+function useTypewriter(text: string, speed = 12, active = false) {
+  const [displayed, setDisplayed] = useState('')
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    if (!active || !text) {
+      setDisplayed(text)
+      setDone(true)
+      return
+    }
+    setDisplayed('')
+    setDone(false)
+    let i = 0
+    const interval = setInterval(() => {
+      i++
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) {
+        clearInterval(interval)
+        setDone(true)
+      }
+    }, speed)
+    return () => clearInterval(interval)
+  }, [text, speed, active])
+
+  return { displayed, done }
 }
 
-function getBotResponse(message: string): string {
-  const m = message.toLowerCase()
-  if (m.includes('laptop') || m.includes('computer')) {
-    return "Great choice! I found several laptops listed on CampusCart. There's a **Lenovo IdeaPad** for ₦85,000 (like new) at UNILAG, and a **Dell Inspiron** for ₦95,000 at UI. Both sellers are WhatsApp-verified. Shall I show you the full listings?\n\n👉 [Browse Electronics](/marketplace?category=electronics)"
+// Message bubble component
+function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot: boolean }) {
+  const isBot = message.role === 'assistant'
+  const { displayed } = useTypewriter(message.content, 10, isBot && isLatestBot)
+
+  const renderContent = (text: string) => {
+    return text.split('\n').map((line, i) => {
+      const boldParts = line.split(/\*\*(.*?)\*\*/g)
+      return (
+        <p key={i} className={line === '' ? 'h-2' : 'leading-relaxed'}>
+          {boldParts.map((part, j) =>
+            j % 2 === 1 ? (
+              <strong key={j} className="font-bold">
+                {part}
+              </strong>
+            ) : (
+              <span key={j}>{part}</span>
+            )
+          )}
+        </p>
+      )
+    })
   }
-  if (m.includes('sell') || m.includes('list') || m.includes('listing')) {
-    return "Listing on CampusCart is super easy and free! Here's how:\n\n1. **Create your account** (if you haven't already)\n2. **Go to your Dashboard** → New Listing\n3. **Add photos, title, price** and condition\n4. **Add your WhatsApp number** in your profile\n5. **Publish** — buyers can find you instantly!\n\nYour WhatsApp number is used so buyers can contact you directly. Need help with anything specific?\n\n👉 [Start Selling](/seller/new)"
-  }
-  if (m.includes('fashion') || m.includes('cloth') || m.includes('shirt') || m.includes('dress')) {
-    return "I can see lots of fashion deals on campus right now! There are over 18,000 fashion items listed, including:\n\n• **Ankara sets** from ₦2,500 – ₦8,000\n• **Sneakers & shoes** from ₦3,000\n• **Accessories** from ₦500\n\nMany sellers are students like you selling quality items at student-friendly prices.\n\n👉 [Browse Fashion](/marketplace?category=fashion)"
-  }
-  if (m.includes('food') || m.includes('jollof') || m.includes('eat') || m.includes('snack')) {
-    return "Hungry? There are food sellers on campus right now! From jollof rice to shawarma to snacks — many students and campus businesses are listed.\n\nPro tip: WhatsApp the seller to confirm availability before going. Most food sellers respond within minutes!\n\n👉 [Browse Food & Drinks](/marketplace?category=food-drinks)"
-  }
-  if (m.includes('book') || m.includes('textbook') || m.includes('material')) {
-    return "Textbooks are one of our most popular categories! Students regularly sell their used textbooks at 50–70% off the original price.\n\nTips for finding your books:\n• Search by course code or title\n• Filter by your campus\n• Most are in 'Good' or 'Like New' condition\n\n👉 [Browse Books](/marketplace?category=books)"
-  }
-  if (m.includes('whatsapp') || m.includes('contact') || m.includes('message')) {
-    return "When you find an item you like, just click the **'Chat on WhatsApp'** button on any product card or detail page. It'll open WhatsApp with a pre-filled message to the seller.\n\nMake sure your own WhatsApp number is set in your **Profile Settings** so buyers can reach you too!"
-  }
-  return `Great question! I'm searching the CampusCart marketplace for "${message}". \n\nHere's what I suggest:\n\n• Browse our [marketplace](/marketplace) and use the search bar\n• Filter by category to narrow down results\n• Use the sort options to find the best prices\n\nIs there anything more specific I can help you with? I can help you find products, understand pricing, or guide you through selling!`
+
+  return (
+    <div className={`flex gap-3 ${isBot ? 'flex-row' : 'flex-row-reverse'} items-end`}>
+      {/* Bot avatar */}
+      {isBot && (
+        <div className="flex-shrink-0 relative">
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/30 border border-[#16a34a]/40">
+            {/* Bot face SVG */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="drop-shadow-sm">
+              {/* Head */}
+              <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
+              {/* Antenna */}
+              <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
+              {/* Eyes */}
+              <circle cx="9" cy="11" r="2" fill="#052e16" />
+              <circle cx="15" cy="11" r="2" fill="#052e16" />
+              <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
+              <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
+              {/* Smile */}
+              <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+              {/* Ears */}
+              <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+              <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+            </svg>
+          </div>
+          {/* Glow ring when latest */}
+          {isLatestBot && (
+            <span className="absolute inset-0 rounded-2xl animate-ping border border-[#16a34a]/50" />
+          )}
+        </div>
+      )}
+
+      {/* Bubble */}
+      <div
+        className={`max-w-[78%] sm:max-w-[70%] text-sm space-y-0.5 ${
+          isBot
+            ? 'bg-[#0d1f0f] border border-[#16a34a]/25 text-[#d1fae5] rounded-3xl rounded-tl-md px-4 py-3 shadow-lg shadow-[#16a34a]/10'
+            : 'bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white rounded-3xl rounded-br-md px-4 py-3 shadow-lg shadow-[#16a34a]/30'
+        }`}
+      >
+        {isBot ? renderContent(displayed) : renderContent(message.content)}
+
+        <p className={`text-[10px] mt-1.5 ${isBot ? 'text-[#4ade80]/50' : 'text-white/50'}`}>
+          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </p>
+      </div>
+
+      {/* User avatar */}
+      {!isBot && (
+        <div className="w-8 h-8 rounded-2xl bg-[#1a1a1a] border border-white/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white/70">
+          You
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Typing indicator
+function TypingIndicator() {
+  return (
+    <div className="flex gap-3 items-end">
+      <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/30 border border-[#16a34a]/40 flex-shrink-0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
+          <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
+          <circle cx="9" cy="11" r="2" fill="#052e16" />
+          <circle cx="15" cy="11" r="2" fill="#052e16" />
+          <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
+          <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
+          <path d="M9.5 14.5 Q12 15.5 14.5 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+          <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+        </svg>
+      </div>
+      <div className="bg-[#0d1f0f] border border-[#16a34a]/25 rounded-3xl rounded-tl-md px-5 py-3.5 shadow-lg shadow-[#16a34a]/10">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:0ms]" />
+          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:175ms]" />
+          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:350ms]" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Animated background grid
+function GridBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Grid lines */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#16a34a" strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+      {/* Green glow orbs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#16a34a]/8 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-[#16a34a]/5 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 left-0 w-48 h-48 bg-[#052e16]/60 rounded-full blur-3xl" />
+    </div>
+  )
 }
 
 export default function AssistantPage() {
@@ -59,191 +219,331 @@ export default function AssistantPage() {
     {
       id: '1',
       role: 'assistant',
-      content: SAMPLE_RESPONSES.default,
+      content:
+        "Hey there! I'm VendoorX AI, your personal campus shopping assistant.\n\nI can help you find the best deals, discover sellers near your campus, guide you on how to sell, and answer any marketplace questions — sharp sharp!\n\nWhat are you looking for today?",
+      timestamp: new Date(),
     },
   ])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
+  const [puterReady, setPuterReady] = useState(false)
+  const [latestBotId, setLatestBotId] = useState('1')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const conversationHistory = useRef<{ role: string; content: string }[]>([])
+
+  // Load puter.js
+  useEffect(() => {
+    if (window.puter) { setPuterReady(true); return }
+    const script = document.createElement('script')
+    script.src = 'https://js.puter.com/v2/'
+    script.async = true
+    script.onload = () => setPuterReady(true)
+    document.head.appendChild(script)
+    return () => { if (script.parentNode) script.parentNode.removeChild(script) }
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typing])
 
-  async function sendMessage(text?: string) {
-    const content = text || input.trim()
-    if (!content) return
+  const sendMessage = useCallback(
+    async (text?: string) => {
+      const content = (text || input).trim()
+      if (!content || typing) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content,
-    }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setTyping(true)
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content,
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, userMsg])
+      setInput('')
+      setTyping(true)
 
-    // Simulate AI response delay
-    await new Promise(resolve => setTimeout(resolve, 900))
+      conversationHistory.current.push({ role: 'user', content })
 
-    const botMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: getBotResponse(content),
-    }
-    setMessages(prev => [...prev, botMessage])
-    setTyping(false)
+      try {
+        let responseText = ''
+
+        if (puterReady && window.puter?.ai?.chat) {
+          // Build messages array for puter
+          const aiMessages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...conversationHistory.current.slice(-10),
+          ]
+          const response = await window.puter.ai.chat(aiMessages, { model: 'gpt-4o-mini' })
+          responseText =
+            typeof response === 'string'
+              ? response
+              : response?.message?.content || response?.content || "No wahala! Let me help you out.\n\nBrowse the [marketplace](/marketplace) and use the search to find what you need. Need anything specific?"
+        } else {
+          // Fallback if puter not ready
+          await new Promise(r => setTimeout(r, 1200))
+          responseText = getFallbackResponse(content)
+        }
+
+        conversationHistory.current.push({ role: 'assistant', content: responseText })
+
+        const botMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: responseText,
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, botMsg])
+        setLatestBotId(botMsg.id)
+      } catch {
+        const errMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content:
+            "Hmm, my network went on a quick break. No wahala — try again in a moment, or browse the marketplace directly!\n\n[Browse Marketplace](/marketplace)",
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, errMsg])
+        setLatestBotId(errMsg.id)
+      } finally {
+        setTyping(false)
+        inputRef.current?.focus()
+      }
+    },
+    [input, typing, puterReady]
+  )
+
+  function getFallbackResponse(msg: string): string {
+    const m = msg.toLowerCase()
+    if (m.includes('laptop') || m.includes('computer') || m.includes('phone'))
+      return "Omo, you're looking for gadgets! Browse electronics listings from verified campus sellers — prices start from ₦15,000 for phones and ₦60,000 for laptops.\n\n[Browse Electronics](/marketplace?category=electronics)"
+    if (m.includes('sell') || m.includes('list'))
+      return "Listing is free and takes less than 2 minutes!\n\n1. **Go to** New Listing\n2. **Add photos** and description\n3. **Set your price** and WhatsApp number\n4. **Publish** — buyers will find you!\n\n[Start Selling](/seller/new)"
+    if (m.includes('food') || m.includes('eat') || m.includes('jollof'))
+      return "Campus food sellers are everywhere on VendoorX! From jollof rice to shawarma, many students sell fresh food daily.\n\n[Browse Food](/marketplace?category=food)"
+    if (m.includes('book') || m.includes('textbook'))
+      return "Textbooks are super popular here — students sell at 50-70% off retail price. Sharp savings!\n\n[Browse Books](/marketplace?category=textbooks)"
+    if (m.includes('fashion') || m.includes('cloth') || m.includes('shoe'))
+      return "Major fashion deals on campus! Ankara, sneakers, accessories — all at student prices.\n\n[Browse Fashion](/marketplace?category=clothing)"
+    return "I'm still warming up my AI engine! For now, browse the marketplace directly — over 50,000 students are selling on VendoorX.\n\n[Browse Marketplace](/marketplace)"
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
   }
 
+  function clearChat() {
+    conversationHistory.current = []
+    const resetMsg: Message = {
+      id: Date.now().toString(),
+      role: 'assistant',
+      content: "Chat cleared! Ready to help you find the best campus deals. What are you looking for?",
+      timestamp: new Date(),
+    }
+    setMessages([resetMsg])
+    setLatestBotId(resetMsg.id)
+  }
+
+  const showSuggestions = messages.length <= 1
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b border-border/50 flex-shrink-0">
+    <div className="flex flex-col h-[100dvh] bg-[#050a07] overflow-hidden relative">
+      <GridBackground />
+
+      {/* ── Header ── */}
+      <header className="relative z-10 flex-shrink-0 border-b border-[#16a34a]/15 bg-[#050a07]/80 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 h-16">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/dashboard"><ArrowLeft className="w-4 h-4" /></Link>
-            </Button>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 hero-gradient rounded-lg flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+          <div className="flex items-center h-14 gap-3">
+            {/* Back */}
+            <Link
+              href="/dashboard"
+              className="p-2 rounded-xl text-[#4ade80]/70 hover:text-[#4ade80] hover:bg-[#16a34a]/10 transition-all flex-shrink-0"
+              aria-label="Back"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+
+            {/* Bot identity */}
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+              {/* Animated bot icon */}
+              <div className="relative flex-shrink-0">
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/40 border border-[#16a34a]/50">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
+                    <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
+                    <circle cx="9" cy="11" r="2" fill="#052e16" />
+                    <circle cx="15" cy="11" r="2" fill="#052e16" />
+                    <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
+                    <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
+                    <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+                    <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+                    <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+                  </svg>
+                </div>
+                {/* Online dot */}
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#16a34a] rounded-full border-2 border-[#050a07]">
+                  <span className="absolute inset-0 rounded-full bg-[#16a34a] animate-ping opacity-75" />
+                </span>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground leading-none">CampusCart AI</p>
-                <p className="text-xs text-primary leading-none mt-0.5">Online</p>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#d1fae5] truncate">VendoorX AI</p>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a]" />
+                  <p className="text-[11px] text-[#4ade80]/70">
+                    {puterReady ? 'Online — GPT-4o powered' : 'Connecting…'}
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>AI-Powered</span>
+
+            {/* Powered badge + clear */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="hidden sm:flex items-center gap-1 bg-[#16a34a]/10 border border-[#16a34a]/20 text-[#4ade80] text-[10px] font-bold px-2.5 py-1.5 rounded-xl">
+                <Sparkles className="w-3 h-3" />
+                puter.js
+              </div>
+              <button
+                onClick={clearChat}
+                className="p-2 rounded-xl text-[#4ade80]/50 hover:text-[#4ade80] hover:bg-[#16a34a]/10 transition-all"
+                aria-label="Clear chat"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Messages */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-          {messages.map(message => (
-            <div
-              key={message.id}
-              className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-            >
-              {/* Avatar */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                message.role === 'assistant'
-                  ? 'hero-gradient'
-                  : 'bg-secondary border border-border'
-              }`}>
-                {message.role === 'assistant'
-                  ? <Bot className="w-4 h-4 text-white" />
-                  : <User className="w-4 h-4 text-foreground" />
-                }
-              </div>
+      {/* ── Messages ── */}
+      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
-              {/* Bubble */}
-              <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                  : 'bg-card border border-border/50 text-foreground rounded-tl-sm'
-              }`}>
-                {message.content.split('\n').map((line, i) => {
-                  // Simple markdown bold
-                  const parts = line.split(/\*\*(.*?)\*\*/g)
-                  return (
-                    <p key={i} className={line === '' ? 'mt-1' : ''}>
-                      {parts.map((part, j) =>
-                        j % 2 === 1
-                          ? <strong key={j}>{part}</strong>
-                          : part.includes('[') && part.includes('](')
-                            ? part.split(/\[([^\]]+)\]\(([^)]+)\)/g).map((seg, k) =>
-                                k % 3 === 1
-                                  ? <span key={k} className="font-medium underline">{seg}</span>
-                                  : k % 3 === 0
-                                    ? seg
-                                    : null
-                              )
-                            : part
-                      )}
-                    </p>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/* Typing indicator */}
-          {typing && (
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full hero-gradient flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-              <div className="bg-card border border-border/50 rounded-2xl rounded-tl-sm px-4 py-3">
-                <div className="flex gap-1 items-center h-4">
-                  <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
+          {/* Welcome hero — shown before any user message */}
+          {showSuggestions && (
+            <div className="text-center pt-4 pb-6">
+              {/* Big bot avatar */}
+              <div className="relative inline-flex items-center justify-center mb-4">
+                <div className="absolute w-24 h-24 rounded-full bg-[#16a34a]/15 animate-pulse" />
+                <div className="absolute w-32 h-32 rounded-full bg-[#16a34a]/8 animate-pulse [animation-delay:500ms]" />
+                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-2xl shadow-[#16a34a]/40 border-2 border-[#16a34a]/50">
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
+                    <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
+                    <circle cx="9" cy="11" r="2" fill="#052e16" />
+                    <circle cx="15" cy="11" r="2" fill="#052e16" />
+                    <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
+                    <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
+                    <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+                    <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+                    <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+                  </svg>
                 </div>
               </div>
+              <h1 className="text-xl font-black text-[#d1fae5] tracking-tight">VendoorX AI</h1>
+              <p className="text-[#4ade80]/60 text-sm mt-1">Your campus shopping genius</p>
             </div>
           )}
 
+          {/* Messages */}
+          {messages.map(msg => (
+            <MessageBubble
+              key={msg.id}
+              message={msg}
+              isLatestBot={msg.id === latestBotId && msg.role === 'assistant'}
+            />
+          ))}
+
+          {/* Typing */}
+          {typing && <TypingIndicator />}
+
+          {/* Scroll anchor */}
           <div ref={messagesEndRef} />
         </div>
       </main>
 
-      {/* Suggestions */}
-      {messages.length <= 1 && (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-4">
-          <p className="text-xs text-muted-foreground mb-3">Try asking:</p>
-          <div className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map(suggestion => (
-              <button
-                key={suggestion}
-                onClick={() => sendMessage(suggestion)}
-                className="text-xs px-3 py-1.5 rounded-full border border-border bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all"
-              >
-                {suggestion}
-              </button>
-            ))}
+      {/* ── Quick prompts ── */}
+      {showSuggestions && (
+        <div className="relative z-10 flex-shrink-0 border-t border-[#16a34a]/10 bg-[#050a07]/60 backdrop-blur-sm px-4 sm:px-6 py-3">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-[10px] font-bold text-[#4ade80]/40 uppercase tracking-widest mb-2.5">
+              Quick questions
+            </p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              {QUICK_PROMPTS.map(({ icon: Icon, label, query }) => (
+                <button
+                  key={label}
+                  onClick={() => sendMessage(query)}
+                  className="flex items-center gap-1.5 bg-[#0d1f0f] border border-[#16a34a]/20 hover:border-[#16a34a]/60 hover:bg-[#16a34a]/15 text-[#86efac] text-xs font-medium px-3 py-2 rounded-2xl whitespace-nowrap transition-all flex-shrink-0 group"
+                >
+                  <Icon className="w-3.5 h-3.5 text-[#16a34a] group-hover:text-[#4ade80] transition-colors" />
+                  {label}
+                  <ChevronRight className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Input area */}
-      <div className="flex-shrink-0 border-t border-border glass">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex gap-3 items-center">
-            <div className="relative flex-1">
-              <Input
-                placeholder="Ask anything about the marketplace..."
+      {/* ── Input area ── */}
+      <div className="relative z-10 flex-shrink-0 border-t border-[#16a34a]/15 bg-[#050a07]/90 backdrop-blur-xl">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 pb-4">
+          <div className="flex items-end gap-2.5">
+            {/* Textarea */}
+            <div className="flex-1 relative bg-[#0a1a0c] border border-[#16a34a]/25 rounded-3xl overflow-hidden focus-within:border-[#16a34a]/60 focus-within:shadow-lg focus-within:shadow-[#16a34a]/10 transition-all">
+              <textarea
+                ref={inputRef}
+                placeholder="Ask anything about campus deals…"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="h-11 pr-4"
+                rows={1}
+                className="w-full bg-transparent text-[#d1fae5] placeholder:text-[#4ade80]/30 text-sm px-4 py-3 resize-none focus:outline-none min-h-[46px] max-h-[120px]"
+                style={{ height: 'auto' }}
+                onInput={e => {
+                  const el = e.currentTarget
+                  el.style.height = 'auto'
+                  el.style.height = `${Math.min(el.scrollHeight, 120)}px`
+                }}
               />
             </div>
-            <Button
+
+            {/* Send button */}
+            <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || typing}
-              className="hero-gradient border-0 text-white h-11 w-11 p-0 flex-shrink-0"
-              size="icon"
+              aria-label="Send message"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-lg shadow-[#16a34a]/40 hover:shadow-[#16a34a]/60 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex-shrink-0"
             >
-              <Send className="w-4 h-4" />
-            </Button>
+              {typing ? (
+                <svg className="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+              ) : (
+                <Send className="w-4 h-4 text-white" />
+              )}
+            </button>
           </div>
-          <div className="flex items-center gap-3 mt-2.5">
-            <Sparkles className="w-3 h-3 text-primary" />
-            <p className="text-xs text-muted-foreground">
-              AI assistant powered by CampusCart. For real-time product info,{' '}
-              <Link href="/marketplace" className="text-primary hover:underline">browse the marketplace</Link>.
+
+          {/* Footer */}
+          <div className="flex items-center justify-center gap-1.5 mt-2.5">
+            <Sparkles className="w-3 h-3 text-[#16a34a]/60" />
+            <p className="text-[10px] text-[#4ade80]/40">
+              Powered by{' '}
+              <a
+                href="https://puter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#4ade80]/70 hover:text-[#4ade80] underline underline-offset-2 transition-colors"
+              >
+                puter.js
+              </a>{' '}
+              &middot; Free AI, no API key needed
             </p>
           </div>
         </div>
