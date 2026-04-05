@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowRight, MessageCircle, Instagram, Facebook, Twitter, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight } from 'lucide-react'
+import { VendoorXIcon } from '@/components/vendoorx-logo'
 
 const LINKS = {
   Marketplace: [
@@ -80,17 +81,7 @@ const SOCIALS = [
   },
 ]
 
-function VendoorXLogo() {
-  return (
-    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="44" height="44" rx="12" fill="#16a34a" />
-      <rect x="3" y="3" width="38" height="38" rx="10" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-      <path d="M10 13l8 18h8l8-18" stroke="white" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <rect x="27" y="27" width="13" height="13" rx="4" fill="white" />
-      <path d="M30 30l7 7M37 30l-7 7" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  )
-}
+
 
 export function LandingFooter() {
   return (
@@ -104,7 +95,7 @@ export function LandingFooter() {
           <div className="flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-3.5 w-fit group">
               <div className="transition-transform group-hover:scale-105 duration-200">
-                <VendoorXLogo />
+                <VendoorXIcon size={44} />
               </div>
               <div className="flex flex-col">
                 <span className="text-[28px] font-black tracking-tight text-gray-950 leading-none">
