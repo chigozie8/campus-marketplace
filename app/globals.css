@@ -149,4 +149,16 @@
     background-color: #1877F2;
     color: white;
   }
+  .glass {
+    background: oklch(from var(--background) l c h / 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .whatsapp-green {
+    background-color: #25D366;
+    color: white;
+  }
+  .whatsapp-green:hover {
+    background-color: #1ebe57;
+  }
 }
