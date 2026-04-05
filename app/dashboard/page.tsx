@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+// redirect used for auth guard above
 import {
   ShoppingBag, Plus, Eye, MessageCircle, Star,
   Package, Settings, LogOut, LayoutDashboard,
@@ -29,12 +30,7 @@ export default async function DashboardPage() {
   const totalClicks = (products || []).reduce((s: number, p: Product) => s + (p.whatsapp_clicks || 0), 0)
   const activeListings = (products || []).filter((p: Product) => p.is_available).length
 
-  async function signOut() {
-    'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/')
-  }
+  // sign-out handled by POST /api/auth/sign-out
 
   const initials = profile?.full_name
     ?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
@@ -119,7 +115,7 @@ export default async function DashboardPage() {
                 <p className="text-xs text-gray-500 dark:text-muted-foreground truncate">{user.email}</p>
               </div>
             </div>
-            <form action={signOut}>
+            <form action="/api/auth/sign-out" method="POST">
               <button
                 type="submit"
                 className="flex items-center gap-2.5 text-sm text-gray-500 hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 w-full px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150 font-medium"
@@ -142,7 +138,7 @@ export default async function DashboardPage() {
             <Button size="sm" className="bg-primary text-white h-8 px-3 rounded-lg text-xs font-semibold" asChild>
               <Link href="/seller/new"><Plus className="w-3.5 h-3.5 mr-1" />Sell</Link>
             </Button>
-            <form action={signOut}>
+            <form action="/api/auth/sign-out" method="POST">
               <button
                 type="submit"
                 className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
