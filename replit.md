@@ -17,14 +17,23 @@ This project has two services running side-by-side:
   - `store/` — Zustand state management
   - `styles/` — Global CSS
 
-### Backend — Express.js API (VendorX)
+### Backend — Express.js API v2 (VendorX) — TypeScript
 - **Port**: 3001
-- **Workflow**: `Backend API` → `cd backend && node src/server.js`
+- **Workflow**: `Backend API` → `cd backend && npx tsx src/server.ts`
+- **Language**: TypeScript (runs via tsx — no build step needed)
+- **Architecture**: Controller → Service → Repository → Supabase
 - **Key directories**:
-  - `backend/src/routes/` — Auth, products, orders, webhooks
-  - `backend/src/config/` — Supabase client, Paystack
-  - `backend/src/middleware/` — Rate limiting, error handling
-  - `backend/src/utils/` — Logger (Winston)
+  - `backend/src/controllers/` — Thin HTTP handlers
+  - `backend/src/services/` — Business logic (auth, product, order, payment, WhatsApp)
+  - `backend/src/repositories/` — DB abstraction layer (Supabase queries)
+  - `backend/src/queues/` — BullMQ async jobs (messages, payments, notifications)
+  - `backend/src/bots/` — WhatsApp bot engine (intent detection, response builder)
+  - `backend/src/config/` — Supabase, Redis, Paystack, Meilisearch, Swagger
+  - `backend/src/middleware/` — Auth JWT, error handler, rate limiter, request logger
+  - `backend/src/validators/` — Zod schemas
+  - `backend/src/types/` — Shared TypeScript types
+  - `backend/src/utils/` — Logger (Winston), helpers, Redis cache wrapper
+- **API Docs**: http://localhost:3001/api/docs (Swagger UI)
 
 ## Required Environment Variables (Secrets)
 

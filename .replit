@@ -42,7 +42,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && node src/server.js"
+args = "cd backend && npx tsx src/server.ts"
 
 [[ports]]
 localPort = 3001
