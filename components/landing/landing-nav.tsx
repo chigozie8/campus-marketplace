@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Menu, X, ArrowRight, Sparkles } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { VendoorXLogo } from '@/components/vendoorx-logo'
@@ -32,15 +32,8 @@ export function LandingNav({ user }: LandingNavProps) {
 
   return (
     <>
-      {/* Announcement bar */}
-      <div className="fixed top-0 left-0 right-0 z-[60] bg-[#16a34a] text-white text-center py-2 px-4 text-xs font-semibold tracking-wide flex items-center justify-center gap-2">
-        <Sparkles className="w-3 h-3 shrink-0" />
-        <span>VendoorX is live on 120+ Nigerian campuses — join for free today</span>
-        <Sparkles className="w-3 h-3 shrink-0" />
-      </div>
-
-      {/* Main navbar — sits below announcement bar */}
-      <nav className="fixed top-8 left-0 right-0 z-50 flex justify-center px-4 pt-3">
+      {/* Main navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-3">
         <div
           className={`w-full max-w-5xl transition-all duration-300 rounded-2xl ${
             scrolled

@@ -20,32 +20,7 @@ const FEATURES = [
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background">
-      {/* Static gradient background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Main gradient tint */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 100% 80% at 50% -20%, oklch(0.45 0.22 155 / 0.12) 0%, transparent 60%)',
-          }}
-        />
-        
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.015] dark:opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(oklch(0.45 0.22 155) 1px, transparent 1px), linear-gradient(90deg, oklch(0.45 0.22 155) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
-          }}
-        />
-
-        {/* Static glowing orbs */}
-        <div className="absolute w-[600px] h-[600px] -top-40 -left-40 bg-primary/20 rounded-full blur-3xl opacity-50" />
-        <div className="absolute w-[500px] h-[500px] -bottom-20 -right-20 bg-emerald-500/15 rounded-full blur-3xl opacity-50" />
-        <div className="absolute w-[300px] h-[300px] top-1/2 left-1/3 bg-teal-500/10 rounded-full blur-3xl opacity-40" />
-      </div>
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fafafa] dark:bg-background">
 
       <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
         {/* Trust badge pill */}
