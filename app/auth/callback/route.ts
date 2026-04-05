@@ -1,23 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import type { EmailOtpType } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
+  const origin = requestUrl.origin
+
   const code = requestUrl.searchParams.get('code')
+  const token_hash = requestUrl.searchParams.get('token_hash')
+  const type = requestUrl.searchParams.get('type') as EmailOtpType | null
   const next = requestUrl.searchParams.get('next') ?? '/dashboard'
-  
+
+  const supabase = await createClient()
+
+  // PKCE flow — signup confirmation, magic link
   if (code) {
-    const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
     if (!error) {
-      // Get the origin from the request URL (works in production)
-      const origin = requestUrl.origin
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
 
-  // Return to login with error if something went wrong
-  const origin = requestUrl.origin
-  return NextResponse.redirect(`${origin}/auth/login?error=Could not authenticate user`)
+  // OTP / token_hash flow — password recovery, email change
+  if (token_hash && type) {
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type })
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`)
+    }
+  }
+
+  // Something went wrong — send back to login with error
+  return NextResponse.redirect(`${origin}/auth/login?error=The+link+is+invalid+or+has+expired`)
 }

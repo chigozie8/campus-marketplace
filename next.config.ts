@@ -31,7 +31,14 @@ const apiHeaders = [
 ]
 
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 const nextConfig: NextConfig = {
+  // Allow Replit's proxied domain to access Next.js dev resources (HMR, webpack)
+  ...(isDev && process.env.REPLIT_DEV_DOMAIN
+    ? { allowedDevOrigins: [process.env.REPLIT_DEV_DOMAIN] }
+    : {}),
+
   // Suppress TS and ESLint errors during builds (carried over from original config)
   typescript: {
     ignoreBuildErrors: true,
@@ -84,16 +91,12 @@ const nextConfig: NextConfig = {
         source: '/admin(.*)',
         headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
       },
-      {
-        // Long-lived cache for static assets — reduces repeat-visit load time
+      // Long-lived cache for static assets in production only (files have content hashes)
+      // In dev, let Next.js/Turbopack manage its own cache-control — overriding it breaks HMR
+      ...(isDev ? [] : [{
         source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      }]),
       {
         // Cache sitemap for 1 hour
         source: '/sitemap.xml',
@@ -111,17 +114,9 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // Canonical redirects — prevents duplicate content penalties
+  // Canonical redirects — add production domain redirects here when deployed
   async redirects() {
-    return [
-      // Redirect www to non-www
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.campus-marketplace-pi.vercel.app' }],
-        destination: 'https://campus-marketplace-pi.vercel.app/:path*',
-        permanent: true,
-      },
-    ]
+    return []
   },
 }
 

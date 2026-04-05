@@ -4,13 +4,12 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, Upload, X, Loader2, CheckCircle,
+  ArrowLeft, X, Loader2, CheckCircle,
   Tag, FileText, DollarSign, MapPin, GraduationCap,
-  ImagePlus, Sparkles, Package,
+  ImagePlus, Sparkles, Package, Camera,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { uploadToCloudinary } from '@/lib/cloudinary'
 import type { Category } from '@/lib/types'
 
 const CONDITIONS = [
@@ -20,13 +19,23 @@ const CONDITIONS = [
   { value: 'fair', label: 'Fair', color: 'bg-orange-50 border-orange-200 text-orange-700' },
 ]
 
+type ImageEntry = { url: string; status: 'uploading' | 'done' | 'error'; error?: string }
+
+async function uploadFile(file: File): Promise<string> {
+  const body = new FormData()
+  body.append('file', file)
+  const res = await fetch('/api/upload', { method: 'POST', body })
+  const json = await res.json()
+  if (!res.ok || !json.url) throw new Error(json.error ?? 'Upload failed')
+  return json.url as string
+}
+
 export default function NewListingPage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
-  const [images, setImages] = useState<string[]>([])
-  const [uploadingImages, setUploadingImages] = useState(false)
+  const [entries, setEntries] = useState<ImageEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [form, setForm] = useState({
@@ -60,33 +69,73 @@ export default function NewListingPage() {
     return Object.keys(e).length === 0
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || [])
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
     if (!files.length) return
-    if (images.length + files.length > 6) { toast.error('Maximum 6 photos allowed'); return }
-    setUploadingImages(true)
-    const toastId = toast.loading(`Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`)
-    try {
-      const urls = await Promise.all(files.map(f => uploadToCloudinary(f)))
-      setImages(p => [...p, ...urls])
-      toast.dismiss(toastId)
-      toast.success('Photos uploaded!')
-    } catch {
-      toast.dismiss(toastId)
-      toast.error('Photo upload failed. Try again.')
-    } finally {
-      setUploadingImages(false)
-    }
+    e.target.value = ''   // reset so re-selecting same file works
+
+    const doneCount = entries.filter(en => en.status === 'done').length
+    const uploadingCount = entries.filter(en => en.status === 'uploading').length
+    const slots = 6 - doneCount - uploadingCount
+
+    if (slots <= 0) { toast.error('Maximum 6 photos allowed'); return }
+    const toUpload = files.slice(0, slots)
+
+    // Add placeholder entries immediately so the user sees the slots appear
+    const placeholders: ImageEntry[] = toUpload.map(() => ({ url: '', status: 'uploading' }))
+    setEntries(prev => {
+      const next = [...prev, ...placeholders]
+      const startIdx = prev.length
+
+      // Fire uploads for each file
+      toUpload.forEach((file, i) => {
+        uploadFile(file).then(url => {
+          setEntries(cur => {
+            const copy = [...cur]
+            copy[startIdx + i] = { url, status: 'done' }
+            return copy
+          })
+        }).catch(err => {
+          const msg = err instanceof Error ? err.message : 'Failed'
+          setEntries(cur => {
+            const copy = [...cur]
+            copy[startIdx + i] = { url: '', status: 'error', error: msg }
+            return copy
+          })
+          toast.error(`Photo ${i + 1} failed: ${msg}`)
+        })
+      })
+
+      return next
+    })
   }
+
+  function removeEntry(idx: number) {
+    setEntries(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  function retryEntry(idx: number) {
+    fileRef.current?.click()
+  }
+
+  const uploadedUrls = entries.filter(e => e.status === 'done').map(e => e.url)
+  const anyUploading = entries.some(e => e.status === 'uploading')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) { toast.error('Please fix the errors'); return }
+    if (anyUploading) { toast.error('Please wait for photos to finish uploading'); return }
+
     setSubmitting(true)
     const toastId = toast.loading('Publishing your listing…')
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { toast.dismiss(toastId); toast.error('Please sign in'); router.push('/auth/login'); return }
+    if (!user) {
+      toast.dismiss(toastId)
+      toast.error('Please sign in first')
+      router.push('/auth/login')
+      return
+    }
 
     const { error } = await supabase.from('products').insert({
       seller_id: user.id,
@@ -98,7 +147,7 @@ export default function NewListingPage() {
       category_id: form.category_id || null,
       campus: form.campus || null,
       location: form.location || null,
-      images,
+      images: uploadedUrls,
       is_available: true,
     })
 
@@ -108,7 +157,7 @@ export default function NewListingPage() {
       setSubmitting(false)
       return
     }
-    toast.success('Listing published! Buyers can now find your item.', { duration: 4000 })
+    toast.success('Listing published! 🎉', { duration: 4000 })
     router.push('/dashboard')
   }
 
@@ -116,7 +165,7 @@ export default function NewListingPage() {
     !!form.title,
     !!form.price,
     !!form.category_id,
-    images.length > 0,
+    uploadedUrls.length > 0,
     !!form.description,
   ].filter(Boolean).length
 
@@ -126,10 +175,7 @@ export default function NewListingPage() {
       <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.back()}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
-            >
+            <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
@@ -137,13 +183,9 @@ export default function NewListingPage() {
               <p className="text-[11px] text-gray-500 mt-0.5">{progress}/5 steps complete</p>
             </div>
           </div>
-          {/* Progress bar */}
           <div className="flex-1 max-w-[120px]">
             <div className="h-1.5 bg-gray-100 dark:bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-500"
-                style={{ width: `${(progress / 5) * 100}%` }}
-              />
+              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${(progress / 5) * 100}%` }} />
             </div>
           </div>
           <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none">
@@ -155,59 +197,83 @@ export default function NewListingPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 pb-28">
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Photo upload */}
+          {/* ── Photo Upload ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <ImagePlus className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos</h2>
-              <span className="ml-auto text-xs text-gray-400">{images.length}/6</span>
+              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/6 uploaded</span>
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              {images.map((url, i) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group">
-                  <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setImages(p => p.filter((_, j) => j !== i))}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                  {i === 0 && (
-                    <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded-full font-bold">Cover</span>
+            <div className="grid grid-cols-3 gap-3">
+              {entries.map((entry, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border">
+                  {entry.status === 'uploading' && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-muted">
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                      <span className="text-[10px] text-gray-400 font-medium">Uploading…</span>
+                    </div>
+                  )}
+                  {entry.status === 'done' && (
+                    <>
+                      <img src={entry.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                      {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded-full font-bold">Cover</span>}
+                      <button
+                        type="button"
+                        onClick={() => removeEntry(i)}
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
+                  {entry.status === 'error' && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-red-50 dark:bg-red-950/30 p-2">
+                      <X className="w-5 h-5 text-red-500" />
+                      <span className="text-[9px] text-red-500 text-center leading-tight font-medium">{entry.error ?? 'Failed'}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeEntry(i)}
+                        className="text-[9px] text-red-400 underline mt-0.5"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
 
-              {images.length < 6 && (
+              {/* Add photo button — only show if under limit and not in the middle of showing slots */}
+              {entries.length < 6 && (
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  disabled={uploadingImages}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-border hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1 group"
+                  className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-border hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                 >
-                  {uploadingImages
-                    ? <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                    : <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />}
-                  <span className="text-[10px] text-gray-400 group-hover:text-primary transition-colors font-medium">
-                    {uploadingImages ? 'Uploading' : 'Add'}
-                  </span>
+                  <Camera className="w-6 h-6 text-gray-300 group-hover:text-primary transition-colors" />
+                  <span className="text-[11px] text-gray-400 group-hover:text-primary font-semibold transition-colors">Add photo</span>
                 </button>
               )}
             </div>
-            <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleImageUpload} />
-            <p className="text-xs text-gray-400 mt-2">First photo is the cover. Max 5MB each.</p>
+
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <p className="text-xs text-gray-400 mt-3">First photo is the cover image. JPEG, PNG or WEBP. Max 10 MB each.</p>
           </div>
 
-          {/* Core details */}
+          {/* ── Item Details ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <FileText className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Item Details</h2>
             </div>
 
-            {/* Title */}
             <div>
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
                 Title <span className="text-red-400">*</span>
@@ -225,7 +291,6 @@ export default function NewListingPage() {
               </div>
             </div>
 
-            {/* Description */}
             <div>
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
@@ -238,7 +303,7 @@ export default function NewListingPage() {
             </div>
           </div>
 
-          {/* Pricing */}
+          {/* ── Pricing ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -260,9 +325,7 @@ export default function NewListingPage() {
                 {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                  Original Price (₦)
-                </label>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Original Price (₦)</label>
                 <input
                   type="number"
                   value={form.original_price}
@@ -275,7 +338,7 @@ export default function NewListingPage() {
             </div>
           </div>
 
-          {/* Category & Condition */}
+          {/* ── Category & Condition ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <Tag className="w-4 h-4 text-primary" />
@@ -290,18 +353,13 @@ export default function NewListingPage() {
                       key={cat.id}
                       type="button"
                       onClick={() => setField('category_id', cat.id)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
-                        form.category_id === cat.id
-                          ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                          : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:border-gray-400'
-                      }`}
+                      className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${form.category_id === cat.id ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white' : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:border-gray-400'}`}
                     >
                       {cat.name}
                     </button>
                   ))}
                 </div>
               </div>
-
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Condition</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -310,11 +368,7 @@ export default function NewListingPage() {
                       key={value}
                       type="button"
                       onClick={() => setField('condition', value)}
-                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
-                        form.condition === value
-                          ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                          : `${color} hover:opacity-80`
-                      }`}
+                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${form.condition === value ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white' : `${color} hover:opacity-80`}`}
                     >
                       {label}
                     </button>
@@ -324,7 +378,7 @@ export default function NewListingPage() {
             </div>
           </div>
 
-          {/* Location */}
+          {/* ── Location ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-primary" />
@@ -358,7 +412,7 @@ export default function NewListingPage() {
             </div>
           </div>
 
-          {/* WhatsApp notice */}
+          {/* ── WhatsApp notice ── */}
           <div className="flex gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/20">
             <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
             <p className="text-xs text-gray-600 dark:text-muted-foreground leading-relaxed">
@@ -368,7 +422,7 @@ export default function NewListingPage() {
             </p>
           </div>
 
-          {/* Submit buttons */}
+          {/* ── Submit ── */}
           <div className="flex gap-3 pt-2">
             <button
               type="button"
@@ -379,35 +433,34 @@ export default function NewListingPage() {
             </button>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || anyUploading}
               className="flex-1 py-3 rounded-xl bg-[#0a0a0a] text-white text-sm font-black hover:bg-gray-800 active:scale-[0.98] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/20 hover:-translate-y-0.5"
             >
               {submitting ? (
                 <><Loader2 className="w-4 h-4 animate-spin" />Publishing…</>
+              ) : anyUploading ? (
+                <><Loader2 className="w-4 h-4 animate-spin" />Uploading photos…</>
               ) : (
                 <><Sparkles className="w-4 h-4" />Publish Listing</>
               )}
             </button>
           </div>
 
-          {/* Tips */}
+          {/* ── Tips ── */}
           <div className="p-4 rounded-2xl bg-gray-50 dark:bg-muted border border-gray-100 dark:border-border">
             <div className="flex items-center gap-1.5 mb-2">
               <Package className="w-3.5 h-3.5 text-primary" />
               <p className="text-xs font-bold text-gray-700 dark:text-foreground">Tips for faster sales</p>
             </div>
             <ul className="space-y-1">
-              {[
-                'Clear, well-lit photos sell 3x faster',
-                'Mention condition details in the description',
-                'Competitive pricing gets more WhatsApp clicks',
-              ].map(tip => (
+              {['Clear, well-lit photos sell 3x faster', 'Mention condition details in the description', 'Competitive pricing gets more WhatsApp clicks'].map(tip => (
                 <li key={tip} className="text-xs text-gray-500 flex items-start gap-1.5">
                   <span className="text-primary mt-0.5">•</span>{tip}
                 </li>
               ))}
             </ul>
           </div>
+
         </form>
       </main>
     </div>

@@ -1,43 +1,27 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
-  ArrowLeft,
-  MessageCircle,
-  Instagram,
-  Facebook,
-  MapPin,
-  Eye,
-  BadgeCheck,
-  Star,
-  ShoppingBag,
-  Share2,
+  ArrowLeft, MapPin, BadgeCheck, Star,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
-import { FavoriteButton } from '@/components/favorite-button'
-import { ReviewsSection } from '@/components/reviews-section'
+import { ProductInteractions } from '@/components/product/product-interactions'
+import { ShareButton } from '@/components/product/share-button'
+import { ProductGallery } from '@/components/product/product-gallery'
 
-type Props = {
-  params: Promise<{ id: string }>
-}
+type Props = { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const supabase = await createClient()
-
   if (!supabase) return { title: 'Product Not Found' }
 
   const { data: product } = await supabase
-    .from('products')
-    .select('*, profiles(*), categories(*)')
-    .eq('id', id)
-    .single()
+    .from('products').select('*, profiles(*), categories(*)')
+    .eq('id', id).single()
 
   if (!product) return { title: 'Product Not Found | VendoorX', robots: { index: false, follow: false } }
 
@@ -45,283 +29,216 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const imageUrl = p.images?.[0] || `${SITE_URL}/og-image.png`
   const sellerName = p.profiles?.full_name || 'Student Seller'
   const conditionMap: Record<string, string> = {
-    new: 'Brand new',
-    like_new: 'Like new',
-    good: 'Good condition',
-    fair: 'Fair condition',
+    new: 'Brand new', like_new: 'Like new', good: 'Good condition', fair: 'Fair condition',
   }
   const conditionLabel = conditionMap[p.condition] || 'Good condition'
   const categoryName = p.categories?.name || 'Campus Item'
   const campus = p.campus || p.location || 'Nigerian campus'
-
   const title = `${p.title} — ₦${p.price.toLocaleString()} | ${categoryName} on VendoorX`
   const description = p.description
     ? `${p.description.slice(0, 140)}… Buy from ${sellerName} on VendoorX — WhatsApp direct, zero fees.`
-    : `Buy ${p.title} (${conditionLabel}) for ₦${p.price.toLocaleString()} from a verified student seller at ${campus} on VendoorX. Contact directly on WhatsApp.`
+    : `Buy ${p.title} (${conditionLabel}) for ₦${p.price.toLocaleString()} from ${sellerName} at ${campus}. Contact on WhatsApp.`
 
   return {
     title,
     description,
-    keywords: [
-      p.title,
-      categoryName,
-      `buy ${categoryName} campus Nigeria`,
-      `${categoryName} for sale student`,
-      campus,
-      'campus marketplace',
-      'student seller Nigeria',
-      'buy on campus WhatsApp',
-      SITE_NAME,
-    ],
+    keywords: [p.title, categoryName, campus, 'campus marketplace', 'student seller Nigeria', SITE_NAME],
     authors: [{ name: sellerName }],
     openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `${SITE_URL}/marketplace/${id}`,
-      siteName: SITE_NAME,
-      locale: 'en_NG',
+      title, description, type: 'website',
+      url: `${SITE_URL}/marketplace/${id}`, siteName: SITE_NAME, locale: 'en_NG',
       images: [{ url: imageUrl, width: 800, height: 600, alt: p.title }],
     },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [imageUrl],
-      site: '@vendoorx',
-    },
+    twitter: { card: 'summary_large_image', title, description, images: [imageUrl], site: '@vendoorx' },
     alternates: { canonical: `${SITE_URL}/marketplace/${id}` },
-    robots: {
-      index: p.is_available,
-      follow: true,
-      googleBot: { index: p.is_available, follow: true, 'max-image-preview': 'large' },
-    },
+    robots: { index: p.is_available, follow: true, googleBot: { index: p.is_available, follow: true, 'max-image-preview': 'large' } },
   }
 }
 
-const conditionLabels = {
-  new: 'New',
-  like_new: 'Like New',
-  good: 'Good',
-  fair: 'Fair',
+const conditionConfig = {
+  new:      { label: 'Brand New',  color: 'bg-green-50 text-green-700 border-green-200' },
+  like_new: { label: 'Like New',   color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  good:     { label: 'Good',       color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  fair:     { label: 'Fair',       color: 'bg-orange-50 text-orange-700 border-orange-200' },
 }
 
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function ProductDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
-
   if (!supabase) notFound()
 
-  const { data: product, error } = await supabase
-    .from('products')
-    .select('*, profiles(*), categories(*)')
-    .eq('id', id)
-    .single()
+  const [{ data: product, error }, sessionResult] = await Promise.all([
+    supabase.from('products').select('*, profiles(*), categories(*)').eq('id', id).single(),
+    supabase.auth.getUser(),
+  ])
 
   if (error || !product) notFound()
 
   const p = product as Product
+  const userId = sessionResult.data.user?.id ?? null
+
+  // Get likes count and whether the current user liked it
+  const { count: likesCount } = await supabase
+    .from('favorites').select('*', { count: 'exact', head: true }).eq('product_id', id)
+
+  let initialLiked = false
+  if (userId) {
+    const { data: fav } = await supabase
+      .from('favorites').select('id').eq('product_id', id).eq('user_id', userId).maybeSingle()
+    initialLiked = !!fav
+  }
 
   const whatsappNumber = p.profiles?.whatsapp_number?.replace(/\D/g, '') || ''
+  const whatsappMessage = `Hi! I'm interested in "${p.title}" listed on VendoorX for ₦${p.price.toLocaleString()}`
   const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=Hi! I'm interested in "${p.title}" listed on CampusCart for ₦${p.price.toLocaleString()}`
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
     : '#'
 
   const sellerName = p.profiles?.full_name || 'Unknown Seller'
   const sellerRating = p.profiles?.rating || 0
   const isVerified = p.profiles?.seller_verified || false
-
-  const imageUrl = p.images?.[0] || `/placeholder.svg?height=500&width=600`
+  const cond = conditionConfig[p.condition] || conditionConfig.good
 
   return (
     <>
       <ProductJsonLd product={p} />
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/marketplace">
-                  <ArrowLeft className="w-4 h-4" />
-                </Link>
-              </Button>
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-7 h-7 hero-gradient rounded-lg flex items-center justify-center">
-                  <ShoppingBag className="w-3.5 h-3.5 text-white" />
-                </div>
-                <span className="font-bold text-base hidden sm:block">Campus<span className="text-primary">Cart</span></span>
-              </Link>
-            </div>
-            <div className="flex items-center gap-2">
-              <FavoriteButton productId={p.id} />
-              <Button variant="ghost" size="icon">
-                <Share2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Images */}
-          <div className="space-y-3">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-secondary/30">
-              <Image
-                src={imageUrl}
-                alt={p.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-              {p.is_featured && (
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-primary text-primary-foreground">Featured</Badge>
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Link href="/marketplace"
+                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <span className="text-sm font-semibold text-gray-600 dark:text-muted-foreground hidden sm:block truncate max-w-[240px]">
+                {p.title}
+              </span>
+            </div>
+            <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none">
+              Vendoor<span className="text-primary">X</span>
+            </Link>
+            <ShareButton title={p.title} />
+          </div>
+        </header>
+
+        <main className="max-w-5xl mx-auto px-4 py-6 pb-28">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+            {/* ── Left: Gallery ── */}
+            <div className="lg:col-span-3 space-y-3">
+              <ProductGallery images={p.images ?? []} title={p.title} isFeatured={p.is_featured} />
+            </div>
+
+            {/* ── Right: Info + Actions ── */}
+            <div className="lg:col-span-2 space-y-4">
+
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2">
+                {p.categories?.name && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                    {p.categories.name}
+                  </span>
+                )}
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${cond.color}`}>
+                  {cond.label}
+                </span>
+                {!p.is_available && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                    Sold
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-gray-950 dark:text-white leading-tight">
+                  {p.title}
+                </h1>
+                <div className="flex items-baseline gap-3 mt-2">
+                  <span className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white">
+                    ₦{p.price.toLocaleString()}
+                  </span>
+                  {p.original_price && p.original_price > p.price && (
+                    <>
+                      <span className="text-base text-gray-400 line-through">
+                        ₦{p.original_price.toLocaleString()}
+                      </span>
+                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                        {Math.round(((p.original_price - p.price) / p.original_price) * 100)}% off
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Location */}
+              {(p.campus || p.location) && (
+                <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>{[p.campus, p.location].filter(Boolean).join(' · ')}</span>
                 </div>
               )}
-            </div>
 
-            {/* Thumbnail strip if multiple images */}
-            {p.images && p.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {p.images.map((img, i) => (
-                  <div key={i} className="relative w-20 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-border">
-                    <Image src={img} alt={`${p.title} ${i + 1}`} fill className="object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+              {/* Dynamic: views, likes, WhatsApp, save button */}
+              <ProductInteractions
+                productId={p.id}
+                productTitle={p.title}
+                initialViews={p.views ?? 0}
+                initialLikes={likesCount ?? 0}
+                initialLiked={initialLiked}
+                whatsappUrl={whatsappUrl}
+                whatsappMessage={whatsappMessage}
+              />
 
-          {/* Details */}
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                {p.categories?.name && (
-                  <Badge variant="secondary" className="text-xs">{p.categories.name}</Badge>
-                )}
-                <Badge className="text-xs bg-secondary text-secondary-foreground">
-                  {conditionLabels[p.condition]}
-                </Badge>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>{p.views} views</span>
+              {/* Description */}
+              {p.description && (
+                <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4">
+                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</h3>
+                  <p className="text-sm text-gray-700 dark:text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {p.description}
+                  </p>
                 </div>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-balance leading-tight mb-3">
-                {p.title}
-              </h1>
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-foreground">₦{p.price.toLocaleString()}</span>
-                {p.original_price && p.original_price > p.price && (
-                  <>
-                    <span className="text-lg text-muted-foreground line-through">₦{p.original_price.toLocaleString()}</span>
-                    <Badge className="bg-green-50 text-green-700 dark:bg-green-950/30 text-xs">
-                      {Math.round(((p.original_price - p.price) / p.original_price) * 100)}% off
-                    </Badge>
-                  </>
-                )}
-              </div>
-            </div>
+              )}
 
-            {/* Location */}
-            {(p.campus || p.location) && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4" />
-                <span>{[p.campus, p.location].filter(Boolean).join(' · ')}</span>
-              </div>
-            )}
-
-            {/* Description */}
-            {p.description && (
-              <div>
-                <h3 className="font-semibold text-sm text-foreground mb-2">Description</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.description}</p>
-              </div>
-            )}
-
-            {/* Seller info */}
-            <Link href={`/sellers/${p.seller_id}`} className="block p-4 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors group">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-sm text-foreground">Seller</h3>
-                <span className="text-xs text-primary font-semibold group-hover:underline">View profile</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
-                  {p.profiles?.avatar_url
-                    ? <img src={p.profiles.avatar_url} alt={sellerName} className="w-full h-full object-cover" />
-                    : sellerName.charAt(0)}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-sm text-foreground">{sellerName}</span>
-                    {isVerified && <BadgeCheck className="w-4 h-4 text-primary" />}
+              {/* Seller card */}
+              <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Seller</h3>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm flex-shrink-0">
+                    {sellerName.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {sellerRating > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        <span className="text-xs text-muted-foreground">{sellerRating.toFixed(1)}</span>
-                      </div>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {p.profiles?.total_sales || 0} sales
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-gray-900 dark:text-white truncate">{sellerName}</span>
+                      {isVerified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      {sellerRating > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <span className="text-xs text-gray-500">{sellerRating.toFixed(1)}</span>
+                        </div>
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {p.profiles?.total_sales || 0} sales
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </Link>
 
-            {/* Social CTAs */}
-            <div className="space-y-3">
-              <Button
-                size="lg"
-                className="w-full whatsapp-green border-0 h-12 text-base font-semibold"
-                asChild
-              >
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Chat on WhatsApp
-                </a>
-              </Button>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  className="h-10 instagram-gradient border-0"
-                  asChild
-                >
-                  <a href={`https://instagram.com`} target="_blank" rel="noopener noreferrer">
-                    <Instagram className="w-4 h-4 mr-2" />
-                    Instagram
-                  </a>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-10 facebook-blue border-0"
-                  asChild
-                >
-                  <a href={`https://facebook.com`} target="_blank" rel="noopener noreferrer">
-                    <Facebook className="w-4 h-4 mr-2" />
-                    Facebook
-                  </a>
-                </Button>
+              {/* Safety tip */}
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-800/30">
+                <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
+                  <span className="font-bold">Stay safe:</span> Always meet in a public place on campus and inspect items before paying. Never send money without seeing the item first.
+                </p>
               </div>
+
             </div>
           </div>
-        </div>
-        {/* Reviews */}
-        <div className="mt-8">
-          <ReviewsSection productId={p.id} sellerId={p.seller_id} />
-        </div>
-      </main>
+        </main>
       </div>
     </>
   )

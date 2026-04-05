@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   ShieldCheck, Users, Zap, CheckCircle2, Lock
@@ -28,6 +28,7 @@ const STATS = [
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,7 +36,15 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      toast.error(decodeURIComponent(errorParam), {
+        description: 'Please request a new link.',
+      })
+    }
+  }, [searchParams])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -49,7 +58,20 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       toast.dismiss(toastId)
-      toast.error(error.message, { description: 'Check your credentials and try again.' })
+      const isUnconfirmed =
+        error.message.toLowerCase().includes('email not confirmed') ||
+        (error as { code?: string }).code === 'email_not_confirmed'
+      if (isUnconfirmed) {
+        toast.error('Email not confirmed', {
+          description: 'Please check your inbox (and spam folder) and click the confirmation link.',
+          duration: 8000,
+        })
+        // Resend confirmation silently
+        await supabase.auth.resend({ type: 'signup', email })
+        toast.info('We\'ve resent your confirmation email.', { duration: 5000 })
+      } else {
+        toast.error(error.message, { description: 'Check your email and password and try again.' })
+      }
       setLoading(false)
       return
     }

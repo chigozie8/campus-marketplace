@@ -1,18 +1,31 @@
-# VendorX Backend
+# VendorX Backend API v2
 
-Enterprise-grade Node.js/Express backend for the VendorX chat-commerce platform — WhatsApp + Supabase + Paystack.
+Elite, production-grade TypeScript backend for VendorX — WhatsApp + Social Marketplace platform.
+
+## Architecture
+
+```
+Controller → Service → Repository → Supabase
+                    ↘ Queue (BullMQ/Redis)
+                    ↘ Bot Engine (WhatsApp)
+                    ↘ Cache (Redis)
+                    ↘ Search (Meilisearch)
+```
 
 ---
 
 ## Tech Stack
 
-- Node.js 20+ (ESM)
-- Express.js (modular)
-- Supabase (PostgreSQL + Auth)
-- Paystack (payments)
-- WhatsApp Cloud API (messaging)
-- Winston (logging)
-- Joi (validation)
+- Node.js 20+ (ESM, TypeScript via tsx)
+- Express.js (modular clean architecture)
+- Supabase (PostgreSQL + Auth + Storage)
+- Paystack (payments + webhooks)
+- WhatsApp Cloud API (bot engine + messaging)
+- BullMQ + Redis (async queues — graceful no-op without Redis)
+- Meilisearch (fuzzy search — falls back to Supabase without host)
+- Zod (runtime validation)
+- Winston (structured logging)
+- Swagger UI at `/api/docs`
 - Helmet / CORS / express-rate-limit (security)
 
 ---
@@ -86,14 +99,14 @@ alter table orders enable row level security;
 ### 4. Run the server
 
 ```bash
-# Development (with hot reload)
+# Development (with hot reload via tsx watch)
 npm run dev
 
 # Production
 npm start
 ```
 
-Server starts at `http://localhost:5000`.
+Server starts at `http://localhost:3001`. Swagger docs at `http://localhost:3001/api/docs`.
 
 ---
 

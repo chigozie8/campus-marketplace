@@ -70,6 +70,8 @@ export default function SignUpPage() {
   const [success, setSuccess] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resentAt, setResentAt] = useState<number | null>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -100,6 +102,24 @@ export default function SignUpPage() {
     setLoading(false)
   }
 
+  async function handleResend() {
+    const now = Date.now()
+    if (resentAt && now - resentAt < 60000) {
+      toast.error('Please wait a minute before resending.')
+      return
+    }
+    setResending(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    setResending(false)
+    if (error) {
+      toast.error(error.message)
+    } else {
+      setResentAt(now)
+      toast.success('Confirmation email resent!', { description: 'Check your inbox and spam folder.' })
+    }
+  }
+
   // ── Success state ──
   if (success) {
     return (
@@ -116,13 +136,20 @@ export default function SignUpPage() {
             </div>
           </div>
           <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-3">Check your inbox</h2>
-          <p className="text-gray-500 leading-relaxed mb-8 text-sm max-w-sm mx-auto">
+          <p className="text-gray-500 leading-relaxed mb-2 text-sm max-w-sm mx-auto">
             We sent a confirmation link to{' '}
             <span className="font-semibold text-gray-900">{email}</span>.
             Click it to activate your VendoorX account.
           </p>
-          <div className="bg-gray-50 rounded-2xl p-4 mb-8 text-left space-y-2">
-            {["Check your spam/junk folder if you don't see it", "The link expires in 24 hours", "Contact support if you need help"].map((tip) => (
+          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-6 text-left">
+            ⚠️ <strong>Check your spam/junk folder</strong> — confirmation emails sometimes land there. If you still don&apos;t see it, click Resend below.
+          </p>
+          <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left space-y-2">
+            {[
+              "Open the email and click the confirmation link",
+              "The link expires in 24 hours",
+              "After confirming, return here to sign in",
+            ].map((tip) => (
               <div key={tip} className="flex items-start gap-2 text-sm text-gray-600">
                 <CheckCircle2 className="w-4 h-4 text-[#16a34a] mt-0.5 flex-shrink-0" />
                 {tip}
@@ -136,6 +163,13 @@ export default function SignUpPage() {
                 Back to Sign In
               </Link>
             </Button>
+            <button
+              onClick={handleResend}
+              disabled={resending}
+              className="w-full h-11 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-[#16a34a] hover:text-[#16a34a] transition-all disabled:opacity-50"
+            >
+              {resending ? 'Resending…' : 'Resend confirmation email'}
+            </button>
             <button onClick={() => setSuccess(false)} className="text-sm text-[#16a34a] hover:underline font-medium">
               Try a different email
             </button>

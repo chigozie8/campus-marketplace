@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import { DashboardActions } from '@/components/dashboard-actions'
 import { Button } from '@/components/ui/button'
-import { VendorShell } from '@/components/vendor/vendor-shell'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
 
@@ -124,20 +123,29 @@ export default async function DashboardPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Platform Performance</p>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: 'WhatsApp', count: totalClicks, color: 'bg-[#25D366]', pct: 60 },
-              { label: 'Instagram', count: Math.floor(totalClicks * 0.25), color: 'bg-pink-500', pct: 25 },
-              { label: 'Facebook', count: Math.floor(totalClicks * 0.15), color: 'bg-[#1877F2]', pct: 15 },
-            ].map(({ label, count, color, pct }) => (
-              <div key={label}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-gray-700 dark:text-foreground">{label}</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{count}</span>
-                </div>
-                <div className="h-1.5 bg-gray-100 dark:bg-muted rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
-                </div>
-                <p className="text-[10px] text-gray-400 mt-1">{pct}% of inquiries</p>
-              </div>
+              { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
+              { href: '/dashboard/orders', icon: ClipboardList, label: 'My Orders', active: false },
+              { href: '/seller/new', icon: Plus, label: 'New Listing', active: false },
+              { href: '/marketplace', icon: ShoppingBag, label: 'Marketplace', active: false },
+              { href: '/orders', icon: ClipboardList, label: 'My Orders', active: false },
+              { href: '/favorites', icon: ShoppingBag, label: 'Saved Items', active: false },
+              { href: '/notifications', icon: Bell, label: 'Notifications', active: false },
+              { href: '/assistant', icon: Bot, label: 'AI Assistant', active: false },
+              { href: '/profile', icon: Settings, label: 'Profile & Settings', active: false },
+            ].map(({ href, icon: Icon, label, active }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 dark:text-sidebar-foreground hover:bg-gray-100 dark:hover:bg-sidebar-accent hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-primary' : ''}`} />
+                {label}
+                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+              </Link>
             ))}
           </div>
         </div>

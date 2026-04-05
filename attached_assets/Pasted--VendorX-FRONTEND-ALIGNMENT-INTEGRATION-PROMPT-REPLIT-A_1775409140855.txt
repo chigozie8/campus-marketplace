@@ -1,0 +1,250 @@
+🚀 VendorX — FRONTEND ALIGNMENT & INTEGRATION PROMPT (REPLIT AI PRO)
+
+You are a world-class senior frontend engineer and product designer.
+
+Your task is to refactor, upgrade, and align an existing frontend to perfectly integrate with a high-performance backend system for VendorX — a WhatsApp + Instagram + Facebook powered marketplace.
+
+This is NOT a redesign from scratch.
+This is a precision upgrade + system alignment task.
+
+---
+
+⚠️ STRICT RULES
+
+- DO NOT break existing functionality
+
+- DO NOT remove working features
+
+- DO NOT downgrade UI quality
+
+- IMPROVE structure, scalability, and integration
+
+- ENSURE full backend compatibility
+
+- MAKE UI more premium, modern, and responsive
+
+---
+
+🧠 GOAL
+
+Transform the frontend into a production-grade, scalable interface that:
+
+- Connects seamlessly with backend APIs
+- Reflects real-time system state (orders, products, payments)
+- Feels premium (Stripe-level UX)
+- Is responsive across all devices
+
+---
+
+🏗️ TECH STACK (KEEP + IMPROVE)
+
+- React (Vite or Next.js if already used)
+- TypeScript (convert if not already)
+- Tailwind CSS
+- shadcn/ui
+
+---
+
+🔌 BACKEND INTEGRATION (CRITICAL)
+
+The frontend MUST fully integrate with:
+
+- Supabase (auth/session)
+- Backend REST API (products, orders, payments)
+- Paystack (payment flow)
+- WhatsApp bot flow (deep linking / CTA triggers)
+
+---
+
+🔑 AUTHENTICATION SYSTEM
+
+- Use Supabase Auth
+- Persist session
+- Protect routes (middleware or hooks)
+- Role-based UI:
+  - buyer view
+  - vendor dashboard
+  - admin (optional)
+
+---
+
+🛍️ PRODUCT UI (UPGRADE)
+
+Improve product experience:
+
+- Grid layout (premium cards)
+- Clear product images
+- Price, vendor, description
+- Hover effects + animations
+- Category filtering
+- Search bar (connect to backend search API)
+
+---
+
+📦 ORDER SYSTEM UI
+
+- Order history page
+- Order status tracking UI:
+  - pending → paid → shipped → delivered
+
+Use:
+
+- Badges
+- Progress indicators
+- Real-time updates (polling or hooks)
+
+---
+
+💳 PAYMENT FLOW (PAYSTACK)
+
+- Clean checkout UI
+- Payment button integration
+- Loading states
+- Success / failure pages
+- Redirect handling after payment
+
+---
+
+🤖 WHATSAPP INTEGRATION (CORE UX)
+
+Create strong CTA buttons:
+
+- “Buy via WhatsApp”
+- “Chat Vendor”
+
+Use:
+
+- Dynamic WhatsApp links:
+  https://wa.me/{number}?text={encoded message}
+
+---
+
+💎 UI/UX IMPROVEMENTS (PREMIUM FEEL)
+
+- Smooth animations (Framer Motion if possible)
+- Micro-interactions (hover, click)
+- Skeleton loaders
+- Toast notifications
+- Empty states (beautiful, not boring)
+
+---
+
+📱 RESPONSIVENESS
+
+- Mobile-first design
+- Tablet optimization
+- Desktop premium layout
+
+---
+
+⚡ STATE MANAGEMENT
+
+Use:
+
+- React Query (TanStack Query)
+
+For:
+
+- API fetching
+- Caching
+- Sync with backend
+- Error handling
+
+---
+
+📡 API LAYER (IMPORTANT)
+
+Create a clean API layer:
+
+- /lib/api.ts or /services/api.ts
+
+Handle:
+
+- Base URL
+- Headers (auth token)
+- Error handling
+
+---
+
+🧩 COMPONENT STRUCTURE
+
+Refactor into:
+
+- components/ui/
+- components/shared/
+- components/features/
+- pages/ or app/
+
+Make components reusable and clean.
+
+---
+
+🔔 FEEDBACK SYSTEM
+
+- Toast notifications (success, error)
+- Loading states everywhere
+- Disabled states for actions
+
+---
+
+🛡️ ERROR HANDLING
+
+- Show user-friendly messages
+- Handle API failures gracefully
+- Retry logic (optional)
+
+---
+
+🎨 DESIGN LANGUAGE
+
+Maintain:
+
+- WhatsApp green theme (primary)
+- Clean white background
+- Soft shadows
+- Rounded components (2xl)
+- Modern typography
+
+---
+
+📊 DASHBOARD (VENDOR)
+
+Upgrade vendor dashboard:
+
+- Product management
+- Order overview
+- Stats (basic analytics)
+- Clean layout
+
+---
+
+⚙️ PERFORMANCE
+
+- Lazy loading
+- Code splitting
+- Optimize images
+- Avoid unnecessary re-renders
+
+---
+
+📘 OUTPUT EXPECTATION
+
+- Clean, production-ready frontend
+- Fully integrated with backend
+- No broken API calls
+- Premium UI feel
+- Scalable component structure
+
+---
+
+🎯 FINAL GOAL
+
+This frontend must feel like:
+
+- A real startup product
+- Smooth, fast, and modern
+- Fully connected to backend
+- Designed for real users
+
+DO NOT REWRITE EVERYTHING.
+UPGRADE, ALIGN, AND PERFECT IT.

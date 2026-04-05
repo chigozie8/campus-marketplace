@@ -1,26 +1,16 @@
-export async function uploadToCloudinary(file: File): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData()
+  form.append('file', file)
 
-  if (!cloudName || !uploadPreset) {
-    throw new Error('Cloudinary environment variables are not set')
+  const res = await fetch('/api/upload', { method: 'POST', body: form })
+  const json = await res.json()
+
+  if (!res.ok || !json.url) {
+    throw new Error(json.error ?? 'Upload failed')
   }
 
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', uploadPreset)
-  formData.append('folder', 'vendoorx')
-
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: 'POST', body: formData }
-  )
-
-  if (!response.ok) {
-    const err = await response.json()
-    throw new Error(err.error?.message ?? 'Upload failed')
-  }
-
-  const data = await response.json()
-  return data.secure_url as string
+  return json.url as string
 }
+
+// kept for backwards compat with existing imports
+export const uploadToCloudinary = uploadImage

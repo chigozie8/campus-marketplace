@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
     const toastId = toast.loading('Sending reset link...')
     const supabase = createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/reset-password`,
+      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?next=/auth/reset-password`,
     })
     toast.dismiss(toastId)
     if (error) {

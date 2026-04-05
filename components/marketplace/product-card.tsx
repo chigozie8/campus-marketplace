@@ -4,14 +4,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, MessageCircle, MapPin, Star, BadgeCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 interface ProductCardProps {
   product: Product
   isFavorited?: boolean
   onToggleFavorite?: (productId: string) => void
+  index?: number
 }
 
 const conditionLabels = {
@@ -28,19 +29,28 @@ const conditionColors = {
   fair: 'bg-orange-50 text-orange-600 dark:bg-orange-950/40',
 }
 
-export function ProductCard({ product, isFavorited = false, onToggleFavorite }: ProductCardProps) {
+export function ProductCard({ product, isFavorited = false, onToggleFavorite, index = 0 }: ProductCardProps) {
   const whatsappNumber = product.profiles?.whatsapp_number?.replace(/\D/g, '') || ''
+  const whatsappMessage = `Hi! I'm interested in "${product.title}" listed on VendoorX for ₦${product.price.toLocaleString()}. Is it still available?`
   const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=Hi! I'm interested in "${product.title}" listed on CampusCart for ₦${product.price.toLocaleString()}`
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
     : '#'
 
   const imageUrl = product.images?.[0] || `/placeholder.svg?height=240&width=320`
   const sellerName = product.profiles?.full_name || 'Unknown Seller'
   const sellerRating = product.profiles?.rating || 0
   const isVerified = product.profiles?.seller_verified || false
+  const discount = product.original_price && product.original_price > product.price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    : 0
 
   return (
-    <div className="group rounded-2xl border border-border/50 bg-card overflow-hidden card-hover flex flex-col">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
+      className="group rounded-2xl border border-border/50 bg-card overflow-hidden flex flex-col hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transition-all duration-300"
+    >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary/30">
         <Link href={`/marketplace/${product.id}`}>
@@ -48,7 +58,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
             src={imageUrl}
             alt={product.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         </Link>
@@ -56,7 +66,10 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
         {/* Badges overlay */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
           {product.is_featured && (
-            <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5">Featured</Badge>
+            <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 shadow-sm">⚡ Featured</Badge>
+          )}
+          {discount >= 10 && (
+            <Badge className="bg-red-500 text-white text-xs px-2 py-0.5 shadow-sm">{discount}% off</Badge>
           )}
           <Badge className={cn('text-xs px-2 py-0.5', conditionColors[product.condition])}>
             {conditionLabels[product.condition]}
@@ -64,7 +77,8 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
         </div>
 
         {/* Favourite button */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.85 }}
           onClick={() => onToggleFavorite?.(product.id)}
           className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-sm"
           aria-label={isFavorited ? 'Remove from favourites' : 'Add to favourites'}
@@ -75,7 +89,10 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
               isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
             )}
           />
-        </button>
+        </motion.button>
+
+        {/* WhatsApp hover overlay */}
+        <div className="absolute inset-0 bg-[#25D366]/0 group-hover:bg-[#25D366]/10 transition-colors duration-300 pointer-events-none" />
       </div>
 
       {/* Content */}
@@ -86,7 +103,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-sm sm:text-base font-bold text-foreground">
+          <span className="text-sm sm:text-base font-black text-foreground">
             ₦{product.price.toLocaleString()}
           </span>
           {product.original_price && product.original_price > product.price && (
@@ -104,7 +121,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
           </div>
         )}
 
-        {/* Seller row — compact on mobile */}
+        {/* Seller row */}
         <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
           <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-primary/20 flex items-center justify-center text-primary text-[9px] font-bold flex-shrink-0">
             {sellerName.charAt(0)}
@@ -120,17 +137,18 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite }: 
         </div>
 
         {/* WhatsApp CTA */}
-        <Button
-          size="sm"
-          className="w-full mt-auto whatsapp-green border-0 h-8 sm:h-9 text-[10px] sm:text-xs font-semibold"
-          asChild
+        <motion.a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          className="mt-auto flex items-center justify-center gap-1.5 w-full h-8 sm:h-9 rounded-xl bg-[#25D366] text-white text-[10px] sm:text-xs font-bold hover:bg-[#20BA5C] transition-colors shadow-sm shadow-[#25D366]/20"
         >
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" />
-            <span className="hidden xs:inline">Chat on </span>WhatsApp
-          </a>
-        </Button>
+          <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          <span className="hidden xs:inline">Chat on </span>WhatsApp
+        </motion.a>
       </div>
-    </div>
+    </motion.div>
   )
 }
