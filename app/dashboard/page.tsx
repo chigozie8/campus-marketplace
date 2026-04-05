@@ -14,6 +14,7 @@ import type { Product } from '@/lib/types'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  if (!supabase) redirect('/auth/login')
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 

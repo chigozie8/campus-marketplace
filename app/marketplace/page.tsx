@@ -33,6 +33,20 @@ const CATEGORY_PILLS = [
 async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient()
 
+  if (!supabase) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center px-4">
+        <div className="w-20 h-20 rounded-3xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-5">
+          <ShoppingBag className="w-10 h-10 text-gray-300 dark:text-muted-foreground" />
+        </div>
+        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Service unavailable</h3>
+        <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
+          Database connection is not configured. Please check your environment variables.
+        </p>
+      </div>
+    )
+  }
+
   let query = supabase
     .from('products')
     .select('*, profiles(*), categories(*)')
@@ -111,7 +125,7 @@ export default async function MarketplacePage({
 }) {
   const params = await searchParams
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null
   const activeCategory = params.category || 'all'
 
   return (

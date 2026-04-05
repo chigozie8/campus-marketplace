@@ -17,9 +17,7 @@ import { LandingFooter } from '@/components/landing/landing-footer'
 
 export default async function Home() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null
 
   return (
     <main className="min-h-screen bg-background">

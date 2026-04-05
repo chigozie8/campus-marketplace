@@ -28,6 +28,8 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const supabase = await createClient()
+
+  if (!supabase) return { title: 'Product Not Found' }
   
   const { data: product } = await supabase
     .from('products')
@@ -89,6 +91,8 @@ export default async function ProductDetailPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
+
+  if (!supabase) notFound()
 
   const { data: product, error } = await supabase
     .from('products')
