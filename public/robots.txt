@@ -1,0 +1,20 @@
+# VendoorX Robots.txt
+# https://vendoorx.com
+
+User-agent: *
+Allow: /
+
+# Disallow auth and private pages
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /seller/
+Disallow: /assistant/
+Disallow: /api/
+
+# Allow marketplace for indexing
+Allow: /marketplace/
+Allow: /marketplace/*
+
+# Sitemap location
+Sitemap: https://vendoorx.com/sitemap.xml

@@ -6,6 +6,18 @@ import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
 import type { Product } from '@/lib/types'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Marketplace - Browse Campus Deals',
+  description: 'Discover amazing deals from fellow students. Shop electronics, fashion, books, food, services and more. All from verified campus sellers with WhatsApp direct contact.',
+  keywords: ['campus marketplace', 'student deals', 'buy from students', 'university shopping', 'campus trading'],
+  openGraph: {
+    title: 'VendoorX Marketplace - Campus Deals',
+    description: 'Browse thousands of products from verified student sellers. Electronics, fashion, books and more.',
+    type: 'website',
+  },
+}
 
 interface SearchParams {
   category?: string
