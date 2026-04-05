@@ -24,32 +24,44 @@ export function HeroSection() {
 
       <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
         {/* Trust badge pill */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
+        <div
+          className="animate-fade-up flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium"
+          style={{ animationDelay: '0ms' }}
+        >
           <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
           The Shopify for WhatsApp &amp; Social Sellers in Africa
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.05] text-balance">
+        <h1
+          className="animate-fade-up text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.05] text-balance"
+          style={{ animationDelay: '100ms' }}
+        >
           <span className="text-foreground">Sell smarter on</span>
           <br />
           <span className="text-primary italic">WhatsApp.</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
+        <p
+          className="animate-fade-up text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl"
+          style={{ animationDelay: '200ms' }}
+        >
           Stop tracking orders in chats. VendoorX turns your WhatsApp, Instagram, and Facebook conversations into a{' '}
           <span className="text-primary font-semibold">structured, trackable store</span> — with payments, dashboards, and order management built in.
         </p>
 
         {/* Feature badges */}
-        <div className="flex flex-wrap justify-center gap-3 mt-2">
+        <div
+          className="animate-fade-up flex flex-wrap justify-center gap-3 mt-2"
+          style={{ animationDelay: '300ms' }}
+        >
           {FEATURES.map((feature) => {
             const Icon = feature.icon
             return (
               <div
                 key={feature.text}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary transition-transform duration-200 hover:scale-105"
               >
                 <Icon className="w-3.5 h-3.5" />
                 {feature.text}
@@ -59,7 +71,10 @@ export function HeroSection() {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
+        <div
+          className="animate-fade-up flex flex-col sm:flex-row items-center gap-4 mt-4"
+          style={{ animationDelay: '400ms' }}
+        >
           <Link href="/auth/sign-up">
             <Button
               size="lg"
@@ -75,7 +90,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all"
+              className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all duration-200 hover:scale-[1.02]"
             >
               <Play className="w-4 h-4 mr-2 text-primary" />
               See How It Works
@@ -84,7 +99,10 @@ export function HeroSection() {
         </div>
 
         {/* Social proof row */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t border-border/50">
+        <div
+          className="animate-fade-up flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t border-border/50"
+          style={{ animationDelay: '500ms' }}
+        >
           {/* Overlapping avatars */}
           <div className="flex -space-x-3">
             {AVATARS.map(({ initials, color }) => (

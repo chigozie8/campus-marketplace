@@ -1,7 +1,9 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
 import { Laptop, Shirt, BookOpen, UtensilsCrossed, Briefcase, Home, Dumbbell, Sparkles, ArrowRight } from 'lucide-react'
+import { useInView } from '@/hooks/use-in-view'
 
 const categories = [
   { icon: Laptop, name: 'Electronics', count: '12.4K', slug: 'electronics', gradient: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50 dark:bg-blue-950/40' },
@@ -15,8 +17,9 @@ const categories = [
 ]
 
 export function CategoriesSection() {
+  const { ref, isInView } = useInView()
   return (
-    <section id="categories" className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
+    <section id="categories" ref={ref as React.RefObject<HTMLElement>} className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
@@ -25,7 +28,10 @@ export function CategoriesSection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center mb-14">
+        <div
+          className={`text-center mb-14 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '0ms' }}
+        >
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Browse by Category
           </span>
@@ -39,11 +45,12 @@ export function CategoriesSection() {
 
         {/* Category grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-          {categories.map(({ icon: Icon, name, count, slug, gradient, bgColor }) => (
+          {categories.map(({ icon: Icon, name, count, slug, gradient, bgColor }, index) => (
             <Link
               key={slug}
               href={`/marketplace?category=${slug}`}
-              className="group relative flex flex-col items-center gap-4 p-6 sm:p-8 rounded-3xl border border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2"
+              className={`group relative flex flex-col items-center gap-4 p-6 sm:p-8 rounded-3xl border border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+              style={{ animationDelay: `${100 + index * 60}ms` }}
             >
               {/* Hover gradient overlay */}
               <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />

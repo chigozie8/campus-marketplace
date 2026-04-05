@@ -1,6 +1,8 @@
 'use client'
 
+import React from 'react'
 import { Star, Quote, Verified } from 'lucide-react'
+import { useInView } from '@/hooks/use-in-view'
 
 const TESTIMONIALS = [
   {
@@ -69,17 +71,49 @@ function StarRating({ rating }: { rating: number }) {
   )
 }
 
-export function TestimonialsSection() {
+function TestimonialCard({ t }: { t: typeof TESTIMONIALS[number] }) {
   return (
-    <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background overflow-hidden relative">
-      {/* Background decoration */}
+    <div className="group relative flex flex-col gap-5 rounded-3xl border border-border bg-card/80 backdrop-blur-sm p-7 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 w-[340px] flex-shrink-0">
+      <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${t.avatarColor} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300`} />
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+        <Quote className="w-5 h-5 text-primary" />
+      </div>
+      <p className="text-base text-muted-foreground leading-relaxed flex-1 text-pretty relative z-10">
+        &ldquo;{t.quote}&rdquo;
+      </p>
+      <div className="flex items-center justify-between pt-5 border-t border-border relative z-10">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${t.avatarColor} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
+            {t.avatar}
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-bold text-foreground">{t.name}</p>
+              {t.verified && <Verified className="w-4 h-4 text-primary fill-primary/20" />}
+            </div>
+            <p className="text-xs text-muted-foreground">{t.role}</p>
+          </div>
+        </div>
+        <StarRating rating={t.rating} />
+      </div>
+    </div>
+  )
+}
+
+export function TestimonialsSection() {
+  const { ref, isInView } = useInView()
+  return (
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-24 sm:py-32 bg-background overflow-hidden relative">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div
+          className={`text-center mb-16 px-4 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '0ms' }}
+        >
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Testimonials
           </span>
@@ -91,48 +125,16 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Testimonial grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t) => (
-            <div
-              key={t.name}
-              className="group relative flex flex-col gap-5 rounded-3xl border border-border bg-card/80 backdrop-blur-sm p-7 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2"
-            >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${t.avatarColor} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
-              
-              {/* Quote icon */}
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Quote className="w-5 h-5 text-primary" />
-              </div>
-
-              {/* Quote text */}
-              <p className="text-base text-muted-foreground leading-relaxed flex-1 text-pretty relative z-10">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-
-              {/* Author info */}
-              <div className="flex items-center justify-between pt-5 border-t border-border relative z-10">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${t.avatarColor} flex items-center justify-center text-white text-sm font-bold shadow-lg`}
-                  >
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-foreground">{t.name}</p>
-                      {t.verified && (
-                        <Verified className="w-4 h-4 text-primary fill-primary/20" />
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-                <StarRating rating={t.rating} />
-              </div>
-            </div>
-          ))}
+        {/* CSS marquee — duplicated list scrolls infinitely, pauses on hover */}
+        <div
+          className={`overflow-hidden ${isInView ? 'animate-fade-in' : 'opacity-0'}`}
+          style={{ animationDelay: '300ms' }}
+        >
+          <div className="flex gap-6 animate-marquee w-max px-6">
+            {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+              <TestimonialCard key={`${t.name}-${i}`} t={t} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

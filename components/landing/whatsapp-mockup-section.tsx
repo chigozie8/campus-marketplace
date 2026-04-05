@@ -1,6 +1,8 @@
 'use client'
 
+import React from 'react'
 import { ShoppingCart, ClipboardList, Wallet, Gift, Star, Settings, CheckCircle2, Zap } from 'lucide-react'
+import { useInView } from '@/hooks/use-in-view'
 
 const MENU_BUTTONS = [
   { icon: ShoppingCart, label: 'Browse Listings' },
@@ -27,8 +29,9 @@ const FLOATING_BADGES = [
 ]
 
 export function WhatsappMockupSection() {
+  const { ref, isInView } = useInView()
   return (
-    <section className="relative bg-background overflow-hidden py-24 sm:py-32">
+    <section ref={ref as React.RefObject<HTMLElement>} className="relative bg-background overflow-hidden py-24 sm:py-32">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div
@@ -44,20 +47,32 @@ export function WhatsappMockupSection() {
 
       <div className="relative max-w-5xl mx-auto px-6 flex flex-col items-center gap-8">
         {/* Section label */}
-        <p className="text-xs font-semibold tracking-[0.18em] uppercase text-primary">
+        <p
+          className={`text-xs font-semibold tracking-[0.18em] uppercase text-primary ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '0ms' }}
+        >
           See how it works
         </p>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-center text-balance text-foreground">
+        <h2
+          className={`text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-center text-balance text-foreground ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '100ms' }}
+        >
           Your personal WhatsApp<br className="hidden sm:block" /> store — managed by <span className="text-primary">VendoorX</span>
         </h2>
 
-        <p className="text-base sm:text-lg text-muted-foreground text-center max-w-lg leading-relaxed text-pretty">
+        <p
+          className={`text-base sm:text-lg text-muted-foreground text-center max-w-lg leading-relaxed text-pretty ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '200ms' }}
+        >
           VendoorX gives you a smart WhatsApp storefront. Browse, buy, and sell right inside the chat — no app download needed.
         </p>
 
         {/* Phone mockup */}
-        <div className="mt-8 relative">
+        <div
+          className={`mt-8 relative ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '300ms' }}
+        >
           {/* Phone glow effect */}
           <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full scale-75" />
 

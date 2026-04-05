@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, MessageCircle, CheckCircle2, Sparkles, Users, Building2, TrendingUp, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useInView } from '@/hooks/use-in-view'
 
 const PERKS = [
   'Free to join, free to list',
@@ -112,6 +113,7 @@ function AnimatedStat({
 }
 
 export function CtaSection() {
+  const { ref, isInView } = useInView()
   return (
     <section className="py-20 sm:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
       {/* Background decorations */}
@@ -120,9 +122,9 @@ export function CtaSection() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div ref={ref as React.RefObject<HTMLDivElement>} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main CTA Card */}
-        <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-emerald-700 p-8 sm:p-12 lg:p-16 shadow-2xl shadow-primary/30">
+        <div className={`relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-emerald-700 p-8 sm:p-12 lg:p-16 shadow-2xl shadow-primary/30 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}>
           {/* Background patterns */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             {/* Grid pattern */}

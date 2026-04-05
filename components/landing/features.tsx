@@ -1,3 +1,6 @@
+'use client'
+
+import React from 'react'
 import {
   MessageCircle,
   LayoutDashboard,
@@ -8,6 +11,7 @@ import {
   Users,
   ShieldCheck,
 } from 'lucide-react'
+import { useInView } from '@/hooks/use-in-view'
 
 const features = [
   {
@@ -77,10 +81,14 @@ const features = [
 ]
 
 export function Features() {
+  const { ref, isInView } = useInView()
   return (
-    <section id="features" className="py-24 bg-background">
+    <section id="features" ref={ref as React.RefObject<HTMLElement>} className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div
+          className={`text-center mb-16 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '0ms' }}
+        >
           <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Why VendoorX</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-4">
             Everything you need to run a real business
@@ -91,10 +99,11 @@ export function Features() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {features.map(({ icon: Icon, title, description, color, bg }) => (
+          {features.map(({ icon: Icon, title, description, color, bg }, index) => (
             <div
               key={title}
-              className="p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group"
+              className={`p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 group ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+              style={{ animationDelay: `${100 + index * 75}ms` }}
             >
               <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className={`w-5 h-5 ${color}`} />

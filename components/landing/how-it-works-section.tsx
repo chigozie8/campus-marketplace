@@ -1,6 +1,8 @@
 'use client'
 
+import React from 'react'
 import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { useInView } from '@/hooks/use-in-view'
 
 const STEPS = [
   {
@@ -34,8 +36,13 @@ const STEPS = [
 ]
 
 export function HowItWorksSection() {
+  const { ref, isInView } = useInView()
   return (
-    <section id="how-it-works" className="py-24 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden">
+    <section
+      id="how-it-works"
+      ref={ref as React.RefObject<HTMLElement>}
+      className="py-24 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden"
+    >
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
@@ -43,7 +50,10 @@ export function HowItWorksSection() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16 sm:mb-20">
+        <div
+          className={`text-center mb-16 sm:mb-20 ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+          style={{ animationDelay: '0ms' }}
+        >
           <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <CheckCircle2 className="w-4 h-4" />
             How it works
@@ -62,7 +72,11 @@ export function HowItWorksSection() {
           {STEPS.map((step, index) => {
             const Icon = step.icon
             return (
-              <div key={step.step} className="relative flex flex-col group">
+              <div
+                key={step.step}
+                className={`relative flex flex-col group ${isInView ? 'animate-fade-up' : 'opacity-0'}`}
+                style={{ animationDelay: `${150 + index * 150}ms` }}
+              >
                 {/* Connector line for desktop */}
                 {index < STEPS.length - 1 && (
                   <div className="hidden lg:block absolute top-10 left-[calc(50%+3rem)] w-[calc(100%-6rem)] h-[2px]">
