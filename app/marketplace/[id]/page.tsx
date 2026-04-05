@@ -11,7 +11,6 @@ import {
   BadgeCheck,
   Star,
   ShoppingBag,
-  Heart,
   Share2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,6 +20,8 @@ import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
+import { FavoriteButton } from '@/components/favorite-button'
+import { ReviewsSection } from '@/components/reviews-section'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -158,9 +159,7 @@ export default async function ProductDetailPage({
               </Link>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon">
-                <Heart className="w-4 h-4" />
-              </Button>
+              <FavoriteButton productId={p.id} />
               <Button variant="ghost" size="icon">
                 <Share2 className="w-4 h-4" />
               </Button>
@@ -249,11 +248,16 @@ export default async function ProductDetailPage({
             )}
 
             {/* Seller info */}
-            <div className="p-4 rounded-xl border border-border bg-secondary/30">
-              <h3 className="font-semibold text-sm text-foreground mb-3">Seller</h3>
+            <Link href={`/sellers/${p.seller_id}`} className="block p-4 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-sm text-foreground">Seller</h3>
+                <span className="text-xs text-primary font-semibold group-hover:underline">View profile</span>
+              </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                  {sellerName.charAt(0)}
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
+                  {p.profiles?.avatar_url
+                    ? <img src={p.profiles.avatar_url} alt={sellerName} className="w-full h-full object-cover" />
+                    : sellerName.charAt(0)}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">
@@ -273,7 +277,7 @@ export default async function ProductDetailPage({
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Social CTAs */}
             <div className="space-y-3">
@@ -312,6 +316,10 @@ export default async function ProductDetailPage({
               </div>
             </div>
           </div>
+        </div>
+        {/* Reviews */}
+        <div className="mt-8">
+          <ReviewsSection productId={p.id} sellerId={p.seller_id} />
         </div>
       </main>
       </div>

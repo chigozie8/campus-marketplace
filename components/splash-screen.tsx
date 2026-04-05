@@ -3,11 +3,15 @@
 import { useEffect, useState } from 'react'
 
 export function SplashScreen() {
+  const [mounted, setMounted] = useState(false)
   const [progress, setProgress] = useState(0)
   const [out, setOut] = useState(false)
   const [hidden, setHidden] = useState(false)
 
+  useEffect(() => { setMounted(true) }, [])
+
   useEffect(() => {
+    if (!mounted) return
     // Progress bar: 0 → 100 over ~900ms
     const steps = [
       { value: 30,  delay: 80  },
@@ -27,9 +31,9 @@ export function SplashScreen() {
       clearTimeout(fadeTimer)
       clearTimeout(hideTimer)
     }
-  }, [])
+  }, [mounted])
 
-  if (hidden) return null
+  if (!mounted || hidden) return null
 
   return (
     <div
