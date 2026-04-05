@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   ShieldCheck, Users, Zap, CheckCircle2, Lock
@@ -28,6 +28,7 @@ const STATS = [
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,7 +36,15 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      toast.error(decodeURIComponent(errorParam), {
+        description: 'Please request a new link.',
+      })
+    }
+  }, [searchParams])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
