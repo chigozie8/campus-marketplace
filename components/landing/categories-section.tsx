@@ -1,8 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
 import Link from 'next/link'
-import { motion, useInView } from 'framer-motion'
 import { Laptop, Shirt, BookOpen, UtensilsCrossed, Briefcase, Home, Dumbbell, Sparkles, ArrowRight } from 'lucide-react'
 
 const categories = [
@@ -16,33 +14,7 @@ const categories = [
   { icon: Sparkles, name: 'Beauty', count: '6.9K', slug: 'beauty', gradient: 'from-rose-500 to-pink-600', bgColor: 'bg-rose-50 dark:bg-rose-950/40' },
 ]
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-}
-
 export function CategoriesSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-
   return (
     <section id="categories" className="py-24 sm:py-32 bg-muted/30 relative overflow-hidden">
       {/* Background decoration */}
@@ -51,70 +23,52 @@ export function CategoriesSection() {
         <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" ref={ref}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <motion.span
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.5 }}
-            className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20"
-          >
+        <div className="text-center mb-14">
+          <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Browse by Category
-          </motion.span>
+          </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-balance mt-4 mb-5">
             Find what you need, <span className="text-primary">fast</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto text-balance leading-relaxed">
             From textbooks to tech, fashion to food — everything a student needs is right here.
           </p>
-        </motion.div>
+        </div>
 
         {/* Category grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
           {categories.map(({ icon: Icon, name, count, slug, gradient, bgColor }) => (
-            <motion.div key={slug} variants={itemVariants}>
-              <Link
-                href={`/marketplace?category=${slug}`}
-                className="group relative flex flex-col items-center gap-4 p-6 sm:p-8 rounded-3xl border border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500"
+            <Link
+              key={slug}
+              href={`/marketplace?category=${slug}`}
+              className="group relative flex flex-col items-center gap-4 p-6 sm:p-8 rounded-3xl border border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2"
+            >
+              {/* Hover gradient overlay */}
+              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+              
+              {/* Icon container */}
+              <div
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${bgColor} flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
               >
-                {/* Hover gradient overlay */}
-                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                
-                {/* Icon container */}
-                <motion.div
-                  whileHover={{ scale: 1.15, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${bgColor} flex items-center justify-center overflow-hidden`}
-                >
-                  {/* Gradient overlay on hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                  <Icon className="w-8 h-8 sm:w-10 sm:h-10 relative z-10 text-current group-hover:text-white transition-colors duration-500" />
-                </motion.div>
+                {/* Gradient overlay on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <Icon className="w-8 h-8 sm:w-10 sm:h-10 relative z-10 text-current group-hover:text-white transition-colors duration-500" />
+              </div>
 
-                <div className="text-center relative z-10">
-                  <p className="font-bold text-base sm:text-lg text-foreground group-hover:text-primary transition-colors">
-                    {name}
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                    {count} items
-                    <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
+              <div className="text-center relative z-10">
+                <p className="font-bold text-base sm:text-lg text-foreground group-hover:text-primary transition-colors">
+                  {name}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                  {count} items
+                  <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                </p>
+              </div>
+            </Link>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
