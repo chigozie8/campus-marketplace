@@ -12,33 +12,33 @@ interface HeroSectionProps {
 
 const AVATARS = [
   {
-    src: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&q=80',
-    alt: 'Campus student seller',
+    src: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&crop=faces&q=80',
+    alt: 'Nigerian campus seller',
     fallback: 'AO',
     color: 'bg-primary',
   },
   {
-    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80',
-    alt: 'Student vendor',
-    fallback: 'KU',
+    src: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=80&h=80&fit=crop&crop=faces&q=80',
+    alt: 'Nigerian student vendor',
+    fallback: 'CE',
     color: 'bg-emerald-600',
   },
   {
-    src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80',
-    alt: 'VendoorX seller',
-    fallback: 'TN',
+    src: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces&q=80',
+    alt: 'Campus entrepreneur',
+    fallback: 'BN',
     color: 'bg-teal-600',
   },
   {
-    src: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&q=80',
-    alt: 'Campus entrepreneur',
-    fallback: 'EM',
+    src: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces&q=80',
+    alt: 'Active vendor',
+    fallback: 'OA',
     color: 'bg-green-700',
   },
   {
-    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80',
-    alt: 'Active vendor',
-    fallback: 'JD',
+    src: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=80&h=80&fit=crop&crop=faces&q=80',
+    alt: 'Nigerian campus student',
+    fallback: 'FA',
     color: 'bg-cyan-600',
   },
 ]

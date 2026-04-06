@@ -4,17 +4,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Inbox, Package, ShoppingBag,
-  BarChart3, Settings, LogOut, Bell,
+  Settings, LogOut, Bell, Store,
 } from 'lucide-react'
 
 const NAV = [
-  { href: '/dashboard',       icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/inbox',           icon: Inbox,           label: 'Inbox',    badge: true },
-  { href: '/products',         icon: Package,         label: 'Products' },
-  { href: '/orders',          icon: ShoppingBag,     label: 'Orders' },
-  { href: '/notifications',   icon: Bell,            label: 'Notifications' },
-  { href: '/admin/analytics', icon: BarChart3,       label: 'Analytics' },
-  { href: '/profile',         icon: Settings,        label: 'Settings' },
+  { href: '/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/inbox',         icon: Inbox,           label: 'Inbox',    badge: true },
+  { href: '/products',      icon: Package,         label: 'My Listings' },
+  { href: '/orders',        icon: ShoppingBag,     label: 'Orders' },
+  { href: '/notifications', icon: Bell,            label: 'Notifications' },
+  { href: '/seller',        icon: Store,           label: 'My Store' },
+  { href: '/profile',       icon: Settings,        label: 'Settings' },
 ]
 
 interface Props {
@@ -36,7 +36,7 @@ export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Pr
             Vendoor<span className="text-primary">X</span>
           </span>
         </Link>
-        <p className="text-[10px] font-semibold text-muted-foreground mt-0.5 tracking-widest uppercase">Social Commerce</p>
+        <p className="text-[10px] font-semibold text-muted-foreground mt-0.5 tracking-widest uppercase">Campus Commerce</p>
       </div>
 
       {/* Nav */}

@@ -1,42 +1,43 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, MessageCircle, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowRight, MessageCircle, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight, Phone, Mail, Loader2, CheckCircle2 } from 'lucide-react'
 
 const LINKS = {
   Marketplace: [
-    { label: 'Browse Listings', href: '/marketplace', icon: Store },
-    { label: 'Post a Listing', href: '/seller/new', icon: TrendingUp },
-    { label: 'Top Categories', href: '/marketplace', icon: BookOpen },
-    { label: 'Seller Dashboard', href: '/dashboard', icon: Users },
-    { label: 'AI Assistant', href: '/assistant', icon: Zap },
+    { label: 'Browse Listings',   href: '/marketplace', icon: Store },
+    { label: 'Post a Listing',    href: '/seller/new',  icon: TrendingUp },
+    { label: 'Top Categories',    href: '/marketplace', icon: BookOpen },
+    { label: 'Seller Dashboard',  href: '/dashboard',   icon: Users },
+    { label: 'AI Assistant',      href: '/assistant',   icon: Zap },
   ],
   Company: [
-    { label: 'About VendoorX', href: '/about', icon: ShieldCheck },
-    { label: 'Blog & Updates', href: '/blog', icon: BookOpen },
-    { label: 'Careers', href: '/careers', icon: Users },
-    { label: 'Press Kit', href: '/press', icon: TrendingUp },
-    { label: 'Partnerships', href: '/partnerships', icon: Star },
+    { label: 'About VendoorX',   href: '/about',        icon: ShieldCheck },
+    { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
+    { label: 'Careers',          href: '/careers',      icon: Users },
+    { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
+    { label: 'Partnerships',     href: '/partnerships', icon: Star },
   ],
   Support: [
-    { label: 'Help Center', href: '/help', icon: Headphones },
-    { label: 'Contact Us', href: '/contact', icon: MessageCircle },
-    { label: 'Report a Bug', href: '/contact?subject=bug', icon: ShieldCheck },
-    { label: 'Community Forum', href: '/community', icon: Users },
-    { label: 'Status Page', href: '/status', icon: Zap },
+    { label: 'Help Center',      href: '/help',                  icon: Headphones },
+    { label: 'Contact Us',       href: '/contact',               icon: MessageCircle },
+    { label: 'Report a Bug',     href: '/contact?subject=bug',   icon: ShieldCheck },
+    { label: 'Community Forum',  href: '/community',             icon: Users },
+    { label: 'Status Page',      href: '/status',                icon: Zap },
   ],
   Legal: [
-    { label: 'Privacy Policy', href: '/privacy', icon: ShieldCheck },
-    { label: 'Terms of Service', href: '/terms', icon: BookOpen },
-    { label: 'Cookie Policy', href: '/cookies', icon: BookOpen },
-    { label: 'Refund Policy', href: '/refund', icon: ShieldCheck },
-    { label: 'Dispute Resolution', href: '/refund#disputes', icon: Users },
+    { label: 'Privacy Policy',      href: '/privacy',          icon: ShieldCheck },
+    { label: 'Terms of Service',    href: '/terms',            icon: BookOpen },
+    { label: 'Cookie Policy',       href: '/cookies',          icon: BookOpen },
+    { label: 'Refund Policy',       href: '/refund',           icon: ShieldCheck },
+    { label: 'Dispute Resolution',  href: '/refund#disputes',  icon: Users },
   ],
 }
 
 const SOCIALS = [
   {
-    href: 'https://wa.me/',
+    href: 'https://wa.me/15792583013',
     label: 'WhatsApp',
     bg: '#25D366',
     icon: (
@@ -63,7 +64,7 @@ const SOCIALS = [
     label: 'Twitter / X',
     bg: '#000000',
     icon: (
-      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zM17.083 19.77h1.833L7.084 4.126H5.117L17.083 19.77z" />
       </svg>
     ),
@@ -73,25 +74,105 @@ const SOCIALS = [
     label: 'TikTok',
     bg: '#010101',
     icon: (
-      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
       </svg>
     ),
   },
 ]
 
+const SPONSORS = [
+  { name: 'UNILAG', full: 'University of Lagos' },
+  { name: 'UI Ibadan', full: 'University of Ibadan' },
+  { name: 'OAU', full: 'Obafemi Awolowo University' },
+  { name: 'ABU Zaria', full: 'Ahmadu Bello University' },
+  { name: 'Babcock', full: 'Babcock University' },
+  { name: 'Covenant', full: 'Covenant University' },
+  { name: 'FUTA', full: 'Federal Univ. of Tech. Akure' },
+  { name: 'BUK', full: 'Bayero University Kano' },
+]
+
+function NewsletterForm() {
+  const [email, setEmail]         = useState('')
+  const [status, setStatus]       = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errMsg, setErrMsg]       = useState('')
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email.trim()) return
+    setStatus('loading')
+    setErrMsg('')
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setErrMsg(json.error || 'Something went wrong. Please try again.')
+        setStatus('error')
+        return
+      }
+      setStatus('success')
+      setEmail('')
+    } catch {
+      setErrMsg('Network error. Please try again.')
+      setStatus('error')
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-primary/10 border border-primary/20">
+        <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+        <div>
+          <p className="text-sm font-bold text-foreground">You&apos;re subscribed! 🎉</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Check your inbox for a welcome email.</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <form className="flex flex-col sm:flex-row gap-2.5" onSubmit={handleSubmit}>
+      <div className="flex-1 min-w-0">
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="Enter your university email"
+          required
+          className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
+        />
+        {status === 'error' && (
+          <p className="text-xs text-red-500 mt-1.5">{errMsg}</p>
+        )}
+      </div>
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
+      >
+        {status === 'loading'
+          ? <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
+          : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
+      </button>
+    </form>
+  )
+}
+
 export function LandingFooter() {
   return (
     <footer className="bg-background border-t border-border font-sans overflow-hidden">
 
-      {/* TOP BAND — brand + newsletter + socials */}
+      {/* ── TOP BAND — brand + newsletter + socials ── */}
       <div className="bg-primary/5 dark:bg-primary/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-          {/* Left — brand */}
+          {/* Left — brand + contact */}
           <div className="flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-2.5 w-fit group select-none">
-              {/* Logo icon */}
               <div className="relative w-8 h-8 shrink-0">
                 <div className="absolute top-0 left-0 w-[22px] h-[22px] rounded-[5px] bg-gray-950 dark:bg-white" />
                 <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-[5px] bg-[#16a34a] opacity-90" />
@@ -105,9 +186,25 @@ export function LandingFooter() {
               Nigeria&apos;s #1 campus marketplace. Buy, sell, and close deals directly on WhatsApp — zero fees, zero friction, just fast campus commerce.
             </p>
 
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-              Made in Nigeria — built for campus hustle
+            <div className="flex flex-col gap-2 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                Made in Nigeria — built for campus hustle
+              </div>
+              <a
+                href="tel:+15792583013"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
+                +1 (579) 258-3013
+              </a>
+              <a
+                href="mailto:hello@vendoorx.com"
+                className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
+                hello@vendoorx.com
+              </a>
             </div>
 
             {/* Social icons */}
@@ -143,19 +240,7 @@ export function LandingFooter() {
               <p className="text-sm text-muted-foreground">Join thousands of students getting weekly deal alerts.</p>
             </div>
 
-            <form className="flex flex-col sm:flex-row gap-2.5" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Enter your university email"
-                className="flex-1 min-w-0 px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
-              />
-              <button
-                type="submit"
-                className="px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
-              >
-                Subscribe <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
+            <NewsletterForm />
 
             <p className="text-xs text-muted-foreground">
               No spam. Unsubscribe anytime. We respect your privacy.
@@ -164,7 +249,30 @@ export function LandingFooter() {
         </div>
       </div>
 
-      {/* LINK COLUMNS */}
+      {/* ── PARTNER CAMPUSES STRIP ── */}
+      <div className="border-t border-border bg-muted/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+            Active on 120+ campuses across Nigeria
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {SPONSORS.map(({ name, full }) => (
+              <div
+                key={name}
+                title={full}
+                className="px-3.5 py-1.5 rounded-full bg-background border border-border text-xs font-bold text-muted-foreground hover:border-primary/40 hover:text-primary transition-all cursor-default"
+              >
+                {name}
+              </div>
+            ))}
+            <div className="px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
+              +112 more
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── LINK COLUMNS ── */}
       <div className="bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-10">
@@ -193,16 +301,16 @@ export function LandingFooter() {
         </div>
       </div>
 
-      {/* TRUST BADGES STRIP */}
+      {/* ── TRUST BADGES STRIP ── */}
       <div className="bg-muted/50 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-5">
               {[
                 { icon: ShieldCheck, text: 'Verified Sellers' },
-                { icon: Zap, text: 'WhatsApp Powered' },
-                { icon: Star, text: '4.9 Rated Platform' },
-                { icon: Users, text: 'Active Student Community' },
+                { icon: Zap,         text: 'WhatsApp Powered' },
+                { icon: Star,        text: '4.9 Rated Platform' },
+                { icon: Users,       text: 'Active Student Community' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
                   <Icon className="w-3.5 h-3.5 text-primary" />
@@ -218,7 +326,7 @@ export function LandingFooter() {
         </div>
       </div>
 
-      {/* BOTTOM BAR */}
+      {/* ── BOTTOM BAR ── */}
       <div className="bg-background border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground text-center sm:text-left">
