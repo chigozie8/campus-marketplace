@@ -42,7 +42,8 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd backend && npx tsx src/server.ts"
+args = "cd backend && npm run dev"
+waitForPort = 3001
 
 [[ports]]
 localPort = 3001
