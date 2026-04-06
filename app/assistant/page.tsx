@@ -12,8 +12,6 @@ import {
   Shirt,
   Laptop,
   Home,
-  Mic,
-  MicOff,
   RotateCcw,
   ChevronRight,
 } from 'lucide-react'
@@ -83,6 +81,24 @@ function useTypewriter(text: string, speed = 12, active = false) {
   return { displayed, done }
 }
 
+// Bot face SVG (shared)
+function BotFace({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="drop-shadow-sm">
+      <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
+      <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
+      <circle cx="9" cy="11" r="2" fill="#052e16" />
+      <circle cx="15" cy="11" r="2" fill="#052e16" />
+      <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
+      <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
+      <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+      <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
+    </svg>
+  )
+}
+
 // Message bubble component
 function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot: boolean }) {
   const isBot = message.role === 'assistant'
@@ -112,29 +128,11 @@ function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot
       {/* Bot avatar */}
       {isBot && (
         <div className="flex-shrink-0 relative">
-          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/30 border border-[#16a34a]/40">
-            {/* Bot face SVG */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="drop-shadow-sm">
-              {/* Head */}
-              <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
-              {/* Antenna */}
-              <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
-              <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
-              {/* Eyes */}
-              <circle cx="9" cy="11" r="2" fill="#052e16" />
-              <circle cx="15" cy="11" r="2" fill="#052e16" />
-              <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
-              <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
-              {/* Smile */}
-              <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-              {/* Ears */}
-              <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-              <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-            </svg>
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-md shadow-green-200 border border-green-200">
+            <BotFace size={20} />
           </div>
-          {/* Glow ring when latest */}
           {isLatestBot && (
-            <span className="absolute inset-0 rounded-2xl animate-ping border border-[#16a34a]/50" />
+            <span className="absolute inset-0 rounded-2xl animate-ping border border-green-400/60" />
           )}
         </div>
       )}
@@ -143,20 +141,20 @@ function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot
       <div
         className={`max-w-[78%] sm:max-w-[70%] text-sm space-y-0.5 ${
           isBot
-            ? 'bg-[#0d1f0f] border border-[#16a34a]/25 text-[#d1fae5] rounded-3xl rounded-tl-md px-4 py-3 shadow-lg shadow-[#16a34a]/10'
-            : 'bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white rounded-3xl rounded-br-md px-4 py-3 shadow-lg shadow-[#16a34a]/30'
+            ? 'bg-gray-100 text-gray-800 rounded-3xl rounded-tl-md px-4 py-3 shadow-sm'
+            : 'bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white rounded-3xl rounded-br-md px-4 py-3 shadow-md shadow-green-200'
         }`}
       >
         {isBot ? renderContent(displayed) : renderContent(message.content)}
 
-        <p className={`text-[10px] mt-1.5 ${isBot ? 'text-[#4ade80]/50' : 'text-white/50'}`}>
+        <p className={`text-[10px] mt-1.5 ${isBot ? 'text-gray-400' : 'text-white/60'}`}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
 
       {/* User avatar */}
       {!isBot && (
-        <div className="w-8 h-8 rounded-2xl bg-[#1a1a1a] border border-white/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white/70">
+        <div className="w-8 h-8 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-gray-500">
           You
         </div>
       )}
@@ -168,48 +166,16 @@ function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot
 function TypingIndicator() {
   return (
     <div className="flex gap-3 items-end">
-      <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/30 border border-[#16a34a]/40 flex-shrink-0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
-          <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
-          <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
-          <circle cx="9" cy="11" r="2" fill="#052e16" />
-          <circle cx="15" cy="11" r="2" fill="#052e16" />
-          <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
-          <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
-          <path d="M9.5 14.5 Q12 15.5 14.5 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-          <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-          <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-        </svg>
+      <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-md shadow-green-200 border border-green-200 flex-shrink-0">
+        <BotFace size={20} />
       </div>
-      <div className="bg-[#0d1f0f] border border-[#16a34a]/25 rounded-3xl rounded-tl-md px-5 py-3.5 shadow-lg shadow-[#16a34a]/10">
+      <div className="bg-gray-100 rounded-3xl rounded-tl-md px-5 py-3.5 shadow-sm">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:0ms]" />
-          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:175ms]" />
-          <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-bounce [animation-delay:350ms]" />
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-bounce [animation-delay:0ms]" />
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-bounce [animation-delay:175ms]" />
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-bounce [animation-delay:350ms]" />
         </div>
       </div>
-    </div>
-  )
-}
-
-// Animated background grid
-function GridBackground() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Grid lines */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#16a34a" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-      </svg>
-      {/* Green glow orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#16a34a]/8 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-[#16a34a]/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/3 left-0 w-48 h-48 bg-[#052e16]/60 rounded-full blur-3xl" />
     </div>
   )
 }
@@ -349,17 +315,16 @@ export default function AssistantPage() {
   const showSuggestions = messages.length <= 1
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#050a07] overflow-hidden relative">
-      <GridBackground />
+    <div className="flex flex-col h-[100dvh] bg-white overflow-hidden">
 
       {/* ── Header ── */}
-      <header className="relative z-10 flex-shrink-0 border-b border-[#16a34a]/15 bg-[#050a07]/80 backdrop-blur-xl">
+      <header className="flex-shrink-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-3">
             {/* Back */}
             <Link
               href="/dashboard"
-              className="p-2 rounded-xl text-[#4ade80]/70 hover:text-[#4ade80] hover:bg-[#16a34a]/10 transition-all flex-shrink-0"
+              className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all flex-shrink-0"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -367,32 +332,20 @@ export default function AssistantPage() {
 
             {/* Bot identity */}
             <div className="flex items-center gap-2.5 flex-1 min-w-0">
-              {/* Animated bot icon */}
               <div className="relative flex-shrink-0">
-                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-lg shadow-[#16a34a]/40 border border-[#16a34a]/50">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
-                    <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
-                    <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
-                    <circle cx="9" cy="11" r="2" fill="#052e16" />
-                    <circle cx="15" cy="11" r="2" fill="#052e16" />
-                    <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
-                    <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
-                    <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-                    <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-                    <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-                  </svg>
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-md shadow-green-200 border border-green-200">
+                  <BotFace size={20} />
                 </div>
                 {/* Online dot */}
-                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#16a34a] rounded-full border-2 border-[#050a07]">
-                  <span className="absolute inset-0 rounded-full bg-[#16a34a] animate-ping opacity-75" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white">
+                  <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-[#d1fae5] truncate">VendoorX AI</p>
+                <p className="text-sm font-bold text-gray-900 truncate">VendoorX AI</p>
                 <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a]" />
-                  <p className="text-[11px] text-[#4ade80]/70">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  <p className="text-[11px] text-green-600">
                     {puterReady ? 'Online — GPT-4o powered' : 'Connecting…'}
                   </p>
                 </div>
@@ -401,13 +354,13 @@ export default function AssistantPage() {
 
             {/* Powered badge + clear */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              <div className="hidden sm:flex items-center gap-1 bg-[#16a34a]/10 border border-[#16a34a]/20 text-[#4ade80] text-[10px] font-bold px-2.5 py-1.5 rounded-xl">
+              <div className="hidden sm:flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 text-[10px] font-bold px-2.5 py-1.5 rounded-xl">
                 <Sparkles className="w-3 h-3" />
-                puter.js
+                GPT-4o
               </div>
               <button
                 onClick={clearChat}
-                className="p-2 rounded-xl text-[#4ade80]/50 hover:text-[#4ade80] hover:bg-[#16a34a]/10 transition-all"
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
                 aria-label="Clear chat"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -418,33 +371,21 @@ export default function AssistantPage() {
       </header>
 
       {/* ── Messages ── */}
-      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
+      <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
           {/* Welcome hero — shown before any user message */}
           {showSuggestions && (
             <div className="text-center pt-4 pb-6">
-              {/* Big bot avatar */}
               <div className="relative inline-flex items-center justify-center mb-4">
-                <div className="absolute w-24 h-24 rounded-full bg-[#16a34a]/15 animate-pulse" />
-                <div className="absolute w-32 h-32 rounded-full bg-[#16a34a]/8 animate-pulse [animation-delay:500ms]" />
-                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#16a34a] to-[#052e16] flex items-center justify-center shadow-2xl shadow-[#16a34a]/40 border-2 border-[#16a34a]/50">
-                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
-                    <rect x="4" y="6" width="16" height="13" rx="3" fill="#22c55e" />
-                    <line x1="12" y1="2" x2="12" y2="6" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" />
-                    <circle cx="12" cy="2" r="1.5" fill="#4ade80" />
-                    <circle cx="9" cy="11" r="2" fill="#052e16" />
-                    <circle cx="15" cy="11" r="2" fill="#052e16" />
-                    <circle cx="9.7" cy="10.3" r="0.6" fill="#86efac" />
-                    <circle cx="15.7" cy="10.3" r="0.6" fill="#86efac" />
-                    <path d="M9 14.5 Q12 16.5 15 14.5" stroke="#052e16" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-                    <rect x="2" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-                    <rect x="19.5" y="9" width="2.5" height="5" rx="1" fill="#16a34a" />
-                  </svg>
+                <div className="absolute w-24 h-24 rounded-full bg-green-100 animate-pulse" />
+                <div className="absolute w-32 h-32 rounded-full bg-green-50 animate-pulse [animation-delay:500ms]" />
+                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-2xl shadow-green-300 border-2 border-green-200">
+                  <BotFace size={44} />
                 </div>
               </div>
-              <h1 className="text-xl font-black text-[#d1fae5] tracking-tight">VendoorX AI</h1>
-              <p className="text-[#4ade80]/60 text-sm mt-1">Your campus shopping genius</p>
+              <h1 className="text-xl font-black text-gray-900 tracking-tight">VendoorX AI</h1>
+              <p className="text-gray-500 text-sm mt-1">Your campus shopping genius</p>
             </div>
           )}
 
@@ -467,9 +408,9 @@ export default function AssistantPage() {
 
       {/* ── Quick prompts ── */}
       {showSuggestions && (
-        <div className="relative z-10 flex-shrink-0 border-t border-[#16a34a]/10 bg-[#050a07]/60 backdrop-blur-sm px-4 sm:px-6 py-3">
+        <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm px-4 sm:px-6 py-3">
           <div className="max-w-3xl mx-auto">
-            <p className="text-[10px] font-bold text-[#4ade80]/40 uppercase tracking-widest mb-2.5">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">
               Quick questions
             </p>
             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
@@ -477,9 +418,9 @@ export default function AssistantPage() {
                 <button
                   key={label}
                   onClick={() => sendMessage(query)}
-                  className="flex items-center gap-1.5 bg-[#0d1f0f] border border-[#16a34a]/20 hover:border-[#16a34a]/60 hover:bg-[#16a34a]/15 text-[#86efac] text-xs font-medium px-3 py-2 rounded-2xl whitespace-nowrap transition-all flex-shrink-0 group"
+                  className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-green-400 hover:bg-green-50 text-gray-700 hover:text-green-700 text-xs font-medium px-3 py-2 rounded-2xl whitespace-nowrap transition-all flex-shrink-0 shadow-sm group"
                 >
-                  <Icon className="w-3.5 h-3.5 text-[#16a34a] group-hover:text-[#4ade80] transition-colors" />
+                  <Icon className="w-3.5 h-3.5 text-green-600 group-hover:text-green-700 transition-colors" />
                   {label}
                   <ChevronRight className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity" />
                 </button>
@@ -490,11 +431,11 @@ export default function AssistantPage() {
       )}
 
       {/* ── Input area ── */}
-      <div className="relative z-10 flex-shrink-0 border-t border-[#16a34a]/15 bg-[#050a07]/90 backdrop-blur-xl">
+      <div className="flex-shrink-0 border-t border-gray-100 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 pb-4">
           <div className="flex items-end gap-2.5">
             {/* Textarea */}
-            <div className="flex-1 relative bg-[#0a1a0c] border border-[#16a34a]/25 rounded-3xl overflow-hidden focus-within:border-[#16a34a]/60 focus-within:shadow-lg focus-within:shadow-[#16a34a]/10 transition-all">
+            <div className="flex-1 relative bg-gray-50 border border-gray-200 rounded-3xl overflow-hidden focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 transition-all">
               <textarea
                 ref={inputRef}
                 placeholder="Ask anything about campus deals…"
@@ -502,7 +443,7 @@ export default function AssistantPage() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                className="w-full bg-transparent text-[#d1fae5] placeholder:text-[#4ade80]/30 text-sm px-4 py-3 resize-none focus:outline-none min-h-[46px] max-h-[120px]"
+                className="w-full bg-transparent text-gray-900 placeholder:text-gray-400 text-sm px-4 py-3 resize-none focus:outline-none min-h-[46px] max-h-[120px]"
                 style={{ height: 'auto' }}
                 onInput={e => {
                   const el = e.currentTarget
@@ -517,7 +458,7 @@ export default function AssistantPage() {
               onClick={() => sendMessage()}
               disabled={!input.trim() || typing}
               aria-label="Send message"
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-lg shadow-[#16a34a]/40 hover:shadow-[#16a34a]/60 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex-shrink-0"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-lg shadow-green-200 hover:shadow-green-300 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none flex-shrink-0"
             >
               {typing ? (
                 <svg className="w-4 h-4 text-white animate-spin" fill="none" viewBox="0 0 24 24">
@@ -532,14 +473,14 @@ export default function AssistantPage() {
 
           {/* Footer */}
           <div className="flex items-center justify-center gap-1.5 mt-2.5">
-            <Sparkles className="w-3 h-3 text-[#16a34a]/60" />
-            <p className="text-[10px] text-[#4ade80]/40">
+            <Sparkles className="w-3 h-3 text-green-500/60" />
+            <p className="text-[10px] text-gray-400">
               Powered by{' '}
               <a
                 href="https://puter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#4ade80]/70 hover:text-[#4ade80] underline underline-offset-2 transition-colors"
+                className="text-green-600 hover:text-green-700 underline underline-offset-2 transition-colors"
               >
                 puter.js
               </a>{' '}
