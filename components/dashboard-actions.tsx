@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Pencil, Trash2, Loader2, Eye,
-  MoreVertical, CheckCircle2, XCircle
+  MoreVertical, CheckCircle2, XCircle, Copy,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -18,16 +18,15 @@ interface Props {
 export function DashboardActions({ productId, isAvailable }: Props) {
   const router = useRouter()
   const [available, setAvailable] = useState(isAvailable)
-  const [toggling, setToggling] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [toggling, setToggling]   = useState(false)
+  const [deleting, setDeleting]   = useState(false)
+  const [duping, setDuping]       = useState(false)
+  const [open, setOpen]           = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
     }
     if (open) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -49,6 +48,43 @@ export function DashboardActions({ productId, isAvailable }: Props) {
       router.refresh()
     }
     setToggling(false)
+  }
+
+  async function duplicateListing() {
+    setOpen(false)
+    setDuping(true)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setDuping(false); return }
+
+    const { data: product, error: fetchErr } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single()
+
+    if (fetchErr || !product) {
+      toast.error('Could not fetch listing to duplicate')
+      setDuping(false)
+      return
+    }
+
+    const { id: _id, created_at: _ca, updated_at: _ua, views: _v, whatsapp_clicks: _wc, is_featured: _if, ...rest } = product
+
+    const { data: newProduct, error: insertErr } = await supabase
+      .from('products')
+      .insert({ ...rest, title: `${product.title} (Copy)`, is_available: false, views: 0, whatsapp_clicks: 0 })
+      .select('id')
+      .single()
+
+    if (insertErr || !newProduct) {
+      toast.error('Failed to duplicate listing')
+      setDuping(false)
+      return
+    }
+
+    toast.success('Listing duplicated — edit it before making it active')
+    router.push(`/seller/edit/${newProduct.id}`)
   }
 
   async function performDelete() {
@@ -100,15 +136,17 @@ export function DashboardActions({ productId, isAvailable }: Props) {
     )
   }
 
+  const busy = toggling || deleting || duping
+
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(prev => !prev)}
         className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-700 transition-colors"
         title="Actions"
-        disabled={toggling || deleting}
+        disabled={busy}
       >
-        {(toggling || deleting)
+        {busy
           ? <Loader2 className="w-4 h-4 animate-spin" />
           : <MoreVertical className="w-4 h-4" />}
       </button>
@@ -132,6 +170,14 @@ export function DashboardActions({ productId, isAvailable }: Props) {
             <Pencil className="w-4 h-4 text-blue-500" />
             Edit listing
           </Link>
+
+          <button
+            onClick={duplicateListing}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+          >
+            <Copy className="w-4 h-4 text-indigo-500" />
+            Duplicate listing
+          </button>
 
           <button
             onClick={toggleAvailability}
