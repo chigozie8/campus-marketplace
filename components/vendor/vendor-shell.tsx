@@ -39,8 +39,8 @@ export function VendorShell({
           </Link>
           <div className="flex items-center gap-2">
             <NotificationBell />
-            <Link href="/inbox" className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <Inbox className="w-5 h-5 text-gray-600" />
+            <Link href="/inbox" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+              <Inbox className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               {unreadInbox > 0 && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
               )}

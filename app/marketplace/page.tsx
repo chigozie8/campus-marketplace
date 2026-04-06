@@ -235,7 +235,7 @@ export default async function MarketplacePage({
                 <>
                   <Link
                     href="/auth/login"
-                    className="hidden xs:block text-xs sm:text-sm font-semibold text-gray-600 px-2 sm:px-3 py-2 rounded-xl hover:bg-gray-100 transition-all"
+                    className="hidden xs:block text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 px-2 sm:px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-all"
                   >
                     Sign In
                   </Link>

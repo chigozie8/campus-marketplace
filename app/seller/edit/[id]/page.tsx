@@ -208,7 +208,7 @@ export default function EditListingPage() {
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {images.map((url, i) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group">
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-muted group">
                   <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                   <button
                     type="button"

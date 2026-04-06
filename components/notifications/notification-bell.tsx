@@ -41,15 +41,38 @@ function timeAgo(date: string) {
   }
 }
 
+interface DropdownPos { top: number; right: number }
+
 export function NotificationBell() {
-  const [open, setOpen]           = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading]     = useState(true)
-  const [markingAll, setMarkingAll] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen]                     = useState(false)
+  const [notifications, setNotifications]   = useState<Notification[]>([])
+  const [loading, setLoading]               = useState(true)
+  const [markingAll, setMarkingAll]         = useState(false)
+  const [dropdownPos, setDropdownPos]       = useState<DropdownPos>({ top: 0, right: 16 })
+  const [isMobile, setIsMobile]             = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const unread = notifications.filter(n => !n.read).length
 
+  /* ── Position calculation ── */
+  const calcPos = useCallback(() => {
+    if (!buttonRef.current) return
+    const rect = buttonRef.current.getBoundingClientRect()
+    const vw   = window.innerWidth
+    const mobile = vw < 640
+
+    setIsMobile(mobile)
+    if (!mobile) {
+      // Pin right edge of dropdown to right edge of button, with 16 px margin from viewport edge
+      const dropW   = Math.min(368, vw - 32)
+      const rightFromVP = vw - rect.right        // gap between button right and viewport right
+      const right   = Math.max(16, rightFromVP)  // never closer than 16 px to viewport edge
+      setDropdownPos({ top: rect.bottom + 8, right })
+    }
+  }, [])
+
+  /* ── Fetch ── */
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/notifications')
@@ -65,11 +88,7 @@ export function NotificationBell() {
   useEffect(() => {
     fetchNotifications()
 
-    const supabase = createClient()
-    // crypto.randomUUID() guarantees uniqueness even under React Strict Mode's
-    // double-invocation, where Date.now() can return the same millisecond twice.
-    // Supabase caches channels by name on the singleton client, so reusing any
-    // name (even timestamp-based) risks getting back an already-subscribed object.
+    const supabase    = createClient()
     const channelName = `notifications-bell-${crypto.randomUUID()}`
     let channelRef: ReturnType<typeof supabase.channel> | null = null
     let active = true
@@ -88,7 +107,6 @@ export function NotificationBell() {
     })
 
     const interval = setInterval(fetchNotifications, 30_000)
-
     return () => {
       active = false
       clearInterval(interval)
@@ -96,22 +114,39 @@ export function NotificationBell() {
     }
   }, [fetchNotifications])
 
+  /* ── Click outside to close ── */
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  /* ── Recalculate position on open / resize ── */
   useEffect(() => {
     if (open) {
+      calcPos()
+      window.addEventListener('resize', calcPos)
+      window.addEventListener('scroll', calcPos, { passive: true })
+    }
+    return () => {
+      window.removeEventListener('resize', calcPos)
+      window.removeEventListener('scroll', calcPos)
+    }
+  }, [open, calcPos])
+
+  /* ── Lock body scroll on mobile bottom-sheet ── */
+  useEffect(() => {
+    if (open && isMobile) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [open])
+  }, [open, isMobile])
 
   async function markOneRead(id: string) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
@@ -130,11 +165,16 @@ export function NotificationBell() {
     setMarkingAll(false)
   }
 
+  const dropW = typeof window !== 'undefined'
+    ? Math.min(368, window.innerWidth - 32)
+    : 368
+
   return (
-    <div ref={ref} className="relative">
+    <div ref={containerRef} className="relative">
       {/* Bell button */}
       <button
-        onClick={() => setOpen(o => !o)}
+        ref={buttonRef}
+        onClick={() => { calcPos(); setOpen(o => !o) }}
         className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
@@ -146,145 +186,192 @@ export function NotificationBell() {
         )}
       </button>
 
-      {/* Mobile backdrop */}
       {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 sm:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
+        <>
+          {/* Mobile backdrop */}
+          {isMobile && (
+            <div
+              className="fixed inset-0 bg-black/40 z-[9998]"
+              onClick={() => setOpen(false)}
+            />
+          )}
 
-      {open && (
-        <div
-          className={`
-            z-50 bg-white dark:bg-card border border-gray-100 dark:border-border
-            shadow-2xl shadow-black/20 dark:shadow-black/50
-            flex flex-col overflow-hidden
-            /* mobile: fixed bottom sheet */
-            fixed bottom-0 left-0 right-0 rounded-t-3xl max-h-[85dvh]
-            /* desktop: absolute dropdown */
-            sm:absolute sm:bottom-auto sm:left-auto sm:right-0 sm:top-full sm:mt-2
-            sm:w-[22rem] sm:rounded-2xl sm:max-h-[520px]
-          `}
-        >
-          {/* Drag handle (mobile only) */}
-          <div className="flex justify-center pt-3 pb-1 sm:hidden">
-            <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
-          </div>
-
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-gray-700 dark:text-white" />
-              <span className="font-black text-sm text-gray-900 dark:text-white">Notifications</span>
-              {unread > 0 && (
-                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#16a34a]/10 text-[#16a34a]">
-                  {unread} new
-                </span>
-              )}
+          {/* Dropdown panel */}
+          {isMobile ? (
+            /* ── Mobile: bottom sheet ── */
+            <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-card border-t border-gray-100 dark:border-border shadow-2xl shadow-black/30 rounded-t-3xl max-h-[85dvh] flex flex-col overflow-hidden">
+              <DropdownContent
+                notifications={notifications}
+                loading={loading}
+                unread={unread}
+                markingAll={markingAll}
+                markAllRead={markAllRead}
+                markOneRead={markOneRead}
+                onClose={() => setOpen(false)}
+                mobile
+              />
             </div>
-            <div className="flex items-center gap-2">
-              {unread > 0 && (
-                <button
-                  onClick={markAllRead}
-                  disabled={markingAll}
-                  className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] hover:underline disabled:opacity-50"
-                >
-                  {markingAll
-                    ? <Loader2 className="w-3 h-3 animate-spin" />
-                    : <CheckCheck className="w-3 h-3" />
-                  }
-                  Mark all read
-                </button>
-              )}
-              <button
-                onClick={() => setOpen(false)}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Scrollable list */}
-          <div className="overflow-y-auto flex-1">
-            {loading ? (
-              <div className="flex items-center justify-center py-14">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-3">
-                  <Bell className="w-6 h-6 text-gray-400" />
-                </div>
-                <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">All caught up!</p>
-                <p className="text-xs text-gray-400">No notifications yet.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-50 dark:divide-border">
-                {notifications.map(n => {
-                  const cfg = getConfig(n.type)
-                  const Icon = cfg.icon
-                  return (
-                    <div
-                      key={n.id}
-                      onClick={() => { if (!n.read) markOneRead(n.id) }}
-                      className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors active:bg-gray-50 dark:active:bg-muted/30 ${
-                        n.read
-                          ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
-                          : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
-                      }`}
-                    >
-                      {/* Icon */}
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
-                        <Icon className={`w-5 h-5 ${cfg.color}`} />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start gap-2">
-                          <p className={`text-[13px] font-bold leading-snug flex-1 min-w-0 ${
-                            n.read ? 'text-gray-600 dark:text-gray-300' : 'text-gray-900 dark:text-white'
-                          }`}>
-                            {n.title}
-                          </p>
-                          {!n.read && (
-                            <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />
-                          )}
-                        </div>
-                        {n.body && (
-                          <p className={`text-[12px] leading-relaxed mt-0.5 break-words ${
-                            n.read ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'
-                          }`}>
-                            {n.body}
-                          </p>
-                        )}
-                        <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">
-                          {timeAgo(n.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-border flex-shrink-0">
-              <Link
-                href="/notifications"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors"
-              >
-                View all notifications
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+          ) : (
+            /* ── Desktop: fixed positioned dropdown ── */
+            <div
+              style={{
+                position: 'fixed',
+                top:   dropdownPos.top,
+                right: dropdownPos.right,
+                width: dropW,
+                maxHeight: 520,
+                zIndex: 9999,
+              }}
+              className="bg-white dark:bg-card border border-gray-100 dark:border-border shadow-2xl shadow-black/20 dark:shadow-black/50 rounded-2xl flex flex-col overflow-hidden"
+            >
+              <DropdownContent
+                notifications={notifications}
+                loading={loading}
+                unread={unread}
+                markingAll={markingAll}
+                markAllRead={markAllRead}
+                markOneRead={markOneRead}
+                onClose={() => setOpen(false)}
+                mobile={false}
+              />
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
+  )
+}
+
+/* ── Shared dropdown content ── */
+interface ContentProps {
+  notifications: Notification[]
+  loading: boolean
+  unread: number
+  markingAll: boolean
+  markAllRead: () => void
+  markOneRead: (id: string) => void
+  onClose: () => void
+  mobile: boolean
+}
+
+function DropdownContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose, mobile }: ContentProps) {
+  return (
+    <>
+      {/* Drag handle (mobile only) */}
+      {mobile && (
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <Bell className="w-4 h-4 text-gray-700 dark:text-white" />
+          <span className="font-black text-sm text-gray-900 dark:text-white">Notifications</span>
+          {unread > 0 && (
+            <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#16a34a]/10 text-[#16a34a]">
+              {unread} new
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {unread > 0 && (
+            <button
+              onClick={markAllRead}
+              disabled={markingAll}
+              className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] hover:underline disabled:opacity-50"
+            >
+              {markingAll
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <CheckCheck className="w-3 h-3" />
+              }
+              Mark all read
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable list */}
+      <div className="overflow-y-auto flex-1">
+        {loading ? (
+          <div className="flex items-center justify-center py-14">
+            <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-3">
+              <Bell className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">All caught up!</p>
+            <p className="text-xs text-gray-400">No notifications yet.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50 dark:divide-border">
+            {notifications.map(n => {
+              const cfg  = getConfig(n.type)
+              const Icon = cfg.icon
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => { if (!n.read) markOneRead(n.id) }}
+                  className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors active:bg-gray-50 dark:active:bg-muted/30 ${
+                    n.read
+                      ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
+                      : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
+                    <Icon className={`w-5 h-5 ${cfg.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-2">
+                      <p className={`text-[13px] font-bold leading-snug flex-1 min-w-0 ${
+                        n.read ? 'text-gray-600 dark:text-gray-300' : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {n.title}
+                      </p>
+                      {!n.read && (
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />
+                      )}
+                    </div>
+                    {n.body && (
+                      <p className={`text-[12px] leading-relaxed mt-0.5 break-words ${
+                        n.read ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {n.body}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">
+                      {timeAgo(n.created_at)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      {notifications.length > 0 && (
+        <div className="px-4 py-3 border-t border-gray-100 dark:border-border flex-shrink-0">
+          <Link
+            href="/notifications"
+            onClick={onClose}
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors"
+          >
+            View all notifications
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
+    </>
   )
 }

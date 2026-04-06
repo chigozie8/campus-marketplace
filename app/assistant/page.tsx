@@ -141,20 +141,20 @@ function MessageBubble({ message, isLatestBot }: { message: Message; isLatestBot
       <div
         className={`max-w-[78%] sm:max-w-[70%] text-sm space-y-0.5 ${
           isBot
-            ? 'bg-gray-100 text-gray-800 rounded-3xl rounded-tl-md px-4 py-3 shadow-sm'
+            ? 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-gray-100 rounded-3xl rounded-tl-md px-4 py-3 shadow-sm'
             : 'bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white rounded-3xl rounded-br-md px-4 py-3 shadow-md shadow-green-200'
         }`}
       >
         {isBot ? renderContent(displayed) : renderContent(message.content)}
 
-        <p className={`text-[10px] mt-1.5 ${isBot ? 'text-gray-400' : 'text-white/60'}`}>
+        <p className={`text-[10px] mt-1.5 ${isBot ? 'text-gray-400 dark:text-gray-500' : 'text-white/60'}`}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
 
       {/* User avatar */}
       {!isBot && (
-        <div className="w-8 h-8 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-gray-500">
+        <div className="w-8 h-8 rounded-2xl bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border flex items-center justify-center flex-shrink-0 text-[10px] font-bold text-gray-500 dark:text-gray-400">
           You
         </div>
       )}
@@ -169,7 +169,7 @@ function TypingIndicator() {
       <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-md shadow-green-200 border border-green-200 flex-shrink-0">
         <BotFace size={20} />
       </div>
-      <div className="bg-gray-100 rounded-3xl rounded-tl-md px-5 py-3.5 shadow-sm">
+      <div className="bg-gray-100 dark:bg-muted rounded-3xl rounded-tl-md px-5 py-3.5 shadow-sm">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-bounce [animation-delay:0ms]" />
           <span className="w-2 h-2 rounded-full bg-green-500 animate-bounce [animation-delay:175ms]" />
@@ -324,7 +324,7 @@ export default function AssistantPage() {
             {/* Back */}
             <Link
               href="/dashboard"
-              className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all flex-shrink-0"
+              className="p-2 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-muted transition-all flex-shrink-0"
               aria-label="Back"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -337,12 +337,12 @@ export default function AssistantPage() {
                   <BotFace size={20} />
                 </div>
                 {/* Online dot */}
-                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white">
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-background">
                   <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">VendoorX AI</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">VendoorX AI</p>
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   <p className="text-[11px] text-green-600">
@@ -360,7 +360,7 @@ export default function AssistantPage() {
               </div>
               <button
                 onClick={clearChat}
-                className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-muted transition-all"
                 aria-label="Clear chat"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -378,13 +378,13 @@ export default function AssistantPage() {
           {showSuggestions && (
             <div className="text-center pt-4 pb-6">
               <div className="relative inline-flex items-center justify-center mb-4">
-                <div className="absolute w-24 h-24 rounded-full bg-green-100 animate-pulse" />
-                <div className="absolute w-32 h-32 rounded-full bg-green-50 animate-pulse [animation-delay:500ms]" />
+                <div className="absolute w-24 h-24 rounded-full bg-green-100 dark:bg-green-950/30 animate-pulse" />
+                <div className="absolute w-32 h-32 rounded-full bg-green-50 dark:bg-green-950/20 animate-pulse [animation-delay:500ms]" />
                 <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#16a34a] to-[#15803d] flex items-center justify-center shadow-2xl shadow-green-300 border-2 border-green-200">
                   <BotFace size={44} />
                 </div>
               </div>
-              <h1 className="text-xl font-black text-gray-900 tracking-tight">VendoorX AI</h1>
+              <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">VendoorX AI</h1>
               <p className="text-gray-500 text-sm mt-1">Your campus shopping genius</p>
             </div>
           )}
@@ -443,7 +443,7 @@ export default function AssistantPage() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 rows={1}
-                className="w-full bg-transparent text-gray-900 placeholder:text-gray-400 text-sm px-4 py-3 resize-none focus:outline-none min-h-[46px] max-h-[120px]"
+                className="w-full bg-transparent text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground text-sm px-4 py-3 resize-none focus:outline-none min-h-[46px] max-h-[120px]"
                 style={{ height: 'auto' }}
                 onInput={e => {
                   const el = e.currentTarget

@@ -170,9 +170,9 @@ export function MarketplaceSkeleton() {
 
 function MarketplaceCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-      <div className="aspect-[4/3] bg-gray-100 animate-pulse relative overflow-hidden">
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+    <div className="rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card overflow-hidden shadow-sm">
+      <div className="aspect-[4/3] bg-gray-100 dark:bg-muted animate-pulse relative overflow-hidden">
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent" />
       </div>
       <div className="p-2.5 sm:p-3.5 space-y-2">
         <div className="space-y-1">
@@ -460,8 +460,8 @@ export function NotificationsSkeleton() {
 
 export function AssistantSkeleton() {
   return (
-    <div className="flex flex-col h-[100dvh] bg-white overflow-hidden">
-      <header className="flex-shrink-0 border-b border-gray-100 h-14 flex items-center px-4 sm:px-6">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-background overflow-hidden">
+      <header className="flex-shrink-0 border-b border-gray-100 dark:border-border h-14 flex items-center px-4 sm:px-6">
         <div className="max-w-3xl mx-auto w-full flex items-center gap-3">
           <Skeleton className="w-8 h-8 rounded-xl" />
           <div className="flex items-center gap-2.5 flex-1">

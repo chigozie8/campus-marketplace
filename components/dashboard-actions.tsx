@@ -110,7 +110,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
               <Trash2 className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Delete listing?</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">Delete listing?</p>
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
                 This will permanently remove your listing. This action cannot be undone.
               </p>
