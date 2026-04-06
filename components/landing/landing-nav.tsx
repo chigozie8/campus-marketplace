@@ -14,11 +14,11 @@ interface LandingNavProps {
 }
 
 const NAV_LINKS = [
-  { href: '#how-it-works', label: 'How it works' },
-  { href: '#features', label: 'Features' },
+  { href: '/#how-it-works', label: 'How it works' },
+  { href: '/#features', label: 'Features' },
   { href: '/marketplace', label: 'Browse' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#testimonials', label: 'Reviews' },
+  { href: '/#pricing', label: 'Pricing' },
+  { href: '/#testimonials', label: 'Reviews' },
 ]
 
 const MOBILE_NAV_EXTRAS = [

@@ -36,13 +36,13 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Features
             </Link>
-            <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               How it Works
             </Link>
-            <Link href="#categories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/#categories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Categories
             </Link>
             <Link href="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -75,10 +75,10 @@ export function Navbar() {
       {mobileOpen && (
         <div className="md:hidden glass border-t border-border/50">
           <div className="px-4 py-4 space-y-3">
-            <Link href="#features" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+            <Link href="/#features" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
               Features
             </Link>
-            <Link href="#how-it-works" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+            <Link href="/#how-it-works" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
               How it Works
             </Link>
             <Link href="/marketplace" className="block text-sm py-2 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>

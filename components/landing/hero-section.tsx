@@ -139,7 +139,7 @@ export function HeroSection({ user }: HeroSectionProps) {
                   </span>
                 </Button>
               </Link>
-              <Link href="#how-it-works">
+              <Link href="/#how-it-works">
                 <Button
                   size="lg"
                   variant="outline"
