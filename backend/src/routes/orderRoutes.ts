@@ -5,6 +5,7 @@ import { validate } from '../validators/authValidator.js'
 import { createOrderSchema, updateOrderStatusSchema } from '../validators/orderValidator.js'
 import * as paymentService from '../services/paymentService.js'
 import * as orderService from '../services/orderService.js'
+import * as payoutService from '../services/payoutService.js'
 import { AuthRequest } from '../types/index.js'
 
 const router = Router()
@@ -36,10 +37,14 @@ router.post('/:id/pay', async (req, res, next) => {
       return
     }
 
+    // Fetch seller's Paystack subaccount (if they've set up payouts)
+    const sellerSubaccountCode = await payoutService.getSellerSubaccountCode(order.vendor_id)
+
     const result = await paymentService.initializePayment({
       orderId: order.id,
       email: (req as AuthRequest).user.email,
       amount: order.total_amount,
+      sellerSubaccountCode: sellerSubaccountCode ?? undefined,
     })
 
     res.status(200).json({ success: true, data: result })

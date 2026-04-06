@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background px-6">
         <div className={cn(
           'text-center max-w-md w-full transition-all duration-500',
           mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -50,16 +50,16 @@ export default function ForgotPasswordPage() {
               <Mail className="w-9 h-9 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-2">Email sent!</h2>
-          <p className="text-gray-500 leading-relaxed mb-2 text-sm">
+          <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-2">Email sent!</h2>
+          <p className="text-gray-500 dark:text-muted-foreground leading-relaxed mb-2 text-sm">
             We sent a password reset link to{' '}
-            <span className="font-semibold text-gray-900">{email}</span>.
+            <span className="font-semibold text-gray-900 dark:text-white">{email}</span>.
           </p>
-          <p className="text-gray-400 text-xs mb-8">The link expires in 1 hour for your security.</p>
+          <p className="text-gray-400 dark:text-muted-foreground text-xs mb-8">The link expires in 1 hour for your security.</p>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6 text-left">
-            <p className="text-xs text-gray-500 leading-relaxed">
-              <span className="font-semibold text-gray-700">Did not receive it?</span> Check your spam folder or{' '}
+          <div className="bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-2xl p-4 mb-6 text-left">
+            <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-gray-700 dark:text-foreground">Did not receive it?</span> Check your spam folder or{' '}
               <a href="mailto:support@vendoorx.com" className="text-[#16a34a] hover:underline">contact support</a>.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-background">
       {/* ── Left panel ── */}
       <div className="hidden lg:flex lg:w-[48%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         <div
@@ -153,7 +153,7 @@ export default function ForgotPasswordPage() {
         <div className="flex items-center justify-between px-6 py-5 lg:px-10">
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to sign in
@@ -172,28 +172,27 @@ export default function ForgotPasswordPage() {
             mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}>
             <div className="lg:hidden mb-8">
-              <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
+              <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
-            {/* Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center mb-6">
-              <Lock className="w-7 h-7 text-gray-700" />
+            <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border flex items-center justify-center mb-6">
+              <Lock className="w-7 h-7 text-gray-700 dark:text-foreground" />
             </div>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-1.5">
+              <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">
                 Forgot password?
               </h2>
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-gray-500 dark:text-muted-foreground text-sm leading-relaxed">
                 Enter your email address and we&apos;ll send you a secure link to reset your password.
               </p>
             </div>
 
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                   Email address
                 </Label>
                 <Input
@@ -203,7 +202,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                 />
               </div>
 
@@ -220,9 +219,9 @@ export default function ForgotPasswordPage() {
               </Button>
             </form>
 
-            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 leading-relaxed">
-                <span className="font-semibold text-gray-700">Did not get the email?</span> Check your spam folder or{' '}
+            <div className="mt-6 bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-2xl p-4">
+              <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-gray-700 dark:text-foreground">Did not get the email?</span> Check your spam folder or{' '}
                 <a href="mailto:support@vendoorx.com" className="text-[#16a34a] hover:underline">
                   contact support
                 </a>
@@ -230,12 +229,12 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Expires in 1 hour</span>

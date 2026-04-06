@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, X, Loader2, CheckCircle,
   Tag, FileText, DollarSign, MapPin, GraduationCap,
-  ImagePlus, Sparkles, Package, Camera,
+  ImagePlus, Sparkles, Package, Camera, Play, Video,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -19,7 +19,7 @@ const CONDITIONS = [
   { value: 'fair', label: 'Fair', color: 'bg-orange-50 border-orange-200 text-orange-700' },
 ]
 
-type ImageEntry = { url: string; status: 'uploading' | 'done' | 'error'; error?: string }
+type MediaEntry = { url: string; status: 'uploading' | 'done' | 'error'; error?: string; isVideo?: boolean }
 
 async function uploadFile(file: File): Promise<string> {
   const body = new FormData()
@@ -35,7 +35,7 @@ export default function NewListingPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
-  const [entries, setEntries] = useState<ImageEntry[]>([])
+  const [entries, setEntries] = useState<MediaEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [form, setForm] = useState({
@@ -72,27 +72,30 @@ export default function NewListingPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
-    e.target.value = ''   // reset so re-selecting same file works
+    e.target.value = ''
 
     const doneCount = entries.filter(en => en.status === 'done').length
     const uploadingCount = entries.filter(en => en.status === 'uploading').length
     const slots = 6 - doneCount - uploadingCount
 
-    if (slots <= 0) { toast.error('Maximum 6 photos allowed'); return }
+    if (slots <= 0) { toast.error('Maximum 6 media files allowed'); return }
     const toUpload = files.slice(0, slots)
 
-    // Add placeholder entries immediately so the user sees the slots appear
-    const placeholders: ImageEntry[] = toUpload.map(() => ({ url: '', status: 'uploading' }))
+    const placeholders: MediaEntry[] = toUpload.map(f => ({
+      url: '',
+      status: 'uploading',
+      isVideo: f.type.startsWith('video/'),
+    }))
     setEntries(prev => {
       const next = [...prev, ...placeholders]
       const startIdx = prev.length
 
-      // Fire uploads for each file
       toUpload.forEach((file, i) => {
+        const isVideo = file.type.startsWith('video/')
         uploadFile(file).then(url => {
           setEntries(cur => {
             const copy = [...cur]
-            copy[startIdx + i] = { url, status: 'done' }
+            copy[startIdx + i] = { url, status: 'done', isVideo }
             return copy
           })
         }).catch(err => {
@@ -102,7 +105,7 @@ export default function NewListingPage() {
             copy[startIdx + i] = { url: '', status: 'error', error: msg }
             return copy
           })
-          toast.error(`Photo ${i + 1} failed: ${msg}`)
+          toast.error(`Upload ${i + 1} failed: ${msg}`)
         })
       })
 
@@ -197,11 +200,11 @@ export default function NewListingPage() {
       <main className="max-w-3xl mx-auto px-4 py-6 pb-28">
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* ── Photo Upload ── */}
+          {/* ── Photos & Video ── */}
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
               <ImagePlus className="w-4 h-4 text-primary" />
-              <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos</h2>
+              <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos &amp; Video</h2>
               <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/6 uploaded</span>
             </div>
 
@@ -210,14 +213,39 @@ export default function NewListingPage() {
                 <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border">
                   {entry.status === 'uploading' && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-muted">
-                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                      <span className="text-[10px] text-gray-400 font-medium">Uploading…</span>
+                      {entry.isVideo
+                        ? <Video className="w-6 h-6 text-primary animate-pulse" />
+                        : <Loader2 className="w-6 h-6 text-primary animate-spin" />}
+                      <span className="text-[10px] text-gray-400 font-medium">
+                        {entry.isVideo ? 'Uploading video…' : 'Uploading…'}
+                      </span>
                     </div>
                   )}
                   {entry.status === 'done' && (
                     <>
-                      <img src={entry.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                      {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded-full font-bold">Cover</span>}
+                      {entry.isVideo ? (
+                        <div className="w-full h-full relative bg-gray-950 flex items-center justify-center">
+                          <video
+                            src={entry.url}
+                            className="w-full h-full object-contain"
+                            muted
+                            preload="metadata"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+                              <Play className="w-4 h-4 text-gray-900 fill-gray-900 ml-0.5" />
+                            </div>
+                          </div>
+                          <span className="absolute bottom-1 left-1 text-[9px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5">
+                            <Video className="w-2.5 h-2.5" /> Video
+                          </span>
+                        </div>
+                      ) : (
+                        <img src={entry.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                      )}
+                      {i === 0 && !entry.isVideo && (
+                        <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded-full font-bold">Cover</span>
+                      )}
                       <button
                         type="button"
                         onClick={() => removeEntry(i)}
@@ -243,7 +271,6 @@ export default function NewListingPage() {
                 </div>
               ))}
 
-              {/* Add photo button — only show if under limit and not in the middle of showing slots */}
               {entries.length < 6 && (
                 <button
                   type="button"
@@ -251,7 +278,7 @@ export default function NewListingPage() {
                   className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-border hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                 >
                   <Camera className="w-6 h-6 text-gray-300 group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] text-gray-400 group-hover:text-primary font-semibold transition-colors">Add photo</span>
+                  <span className="text-[11px] text-gray-400 group-hover:text-primary font-semibold transition-colors">Add photo/video</span>
                 </button>
               )}
             </div>
@@ -264,7 +291,9 @@ export default function NewListingPage() {
               className="hidden"
               onChange={handleFileChange}
             />
-            <p className="text-xs text-gray-400 mt-3">First media is the cover. Images (JPEG/PNG/WEBP, max 10 MB) or videos (MP4/WebM, max 50 MB).</p>
+            <p className="text-xs text-gray-400 mt-3">
+              First image is the cover. Up to 6 files — images (JPEG/PNG/WEBP, max 10 MB) or one video (MP4/WebM, max 50 MB).
+            </p>
           </div>
 
           {/* ── Item Details ── */}

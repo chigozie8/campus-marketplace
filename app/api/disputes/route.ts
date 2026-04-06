@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { productId, reason, details } = await req.json()
+    const { productId, orderId, reason, details } = await req.json()
     if (!productId || !reason) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
@@ -24,6 +24,7 @@ export async function POST(req: Request) {
 
     const { error: insertError } = await supabase.from('disputes').insert({
       product_id: productId,
+      order_id: orderId || null,
       reporter_id: user.id,
       seller_id: product.seller_id,
       reason,

@@ -12,6 +12,7 @@ import { ProfileCompletion } from '@/components/dashboard/profile-completion'
 import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
 import { ReferralCard } from '@/components/dashboard/referral-card'
 import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
+import { PayoutSetupCard } from '@/components/dashboard/payout-setup-card'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
@@ -149,6 +150,12 @@ export default async function DashboardPage() {
             <CopyStoreLink userId={user.id} />
           </div>
         </div>
+
+        {/* ── Payout Setup ── */}
+        <PayoutSetupCard
+          hasSubaccount={!!(profile as Record<string, unknown>)?.paystack_subaccount_code}
+          accountName={(profile as Record<string, unknown>)?.payout_account_name as string | undefined}
+        />
 
         {/* ── Referral Card ── */}
         <ReferralCard />

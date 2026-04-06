@@ -5,10 +5,13 @@ import { addPaymentJob } from '../queues/paymentQueue.js'
 import logger from '../utils/logger.js'
 import { PaymentInitResult } from '../types/index.js'
 
+const PLATFORM_FEE_KOBO = 10000 // ₦100 in kobo — goes to platform (main Paystack account)
+
 export async function initializePayment(params: {
   orderId: string
   email: string
   amount: number
+  sellerSubaccountCode?: string
 }): Promise<PaymentInitResult> {
   if (!PAYSTACK_SECRET_KEY) {
     throw Object.assign(new Error('Payment system is not configured.'), { status: 503 })
@@ -16,12 +19,22 @@ export async function initializePayment(params: {
 
   const reference = generateReference('VX')
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     email: params.email,
     amount: Math.round(params.amount * 100),
     reference,
     metadata: { order_id: params.orderId },
     callback_url: `${process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'}/payment/callback`,
+  }
+
+  // ── Paystack split: ₦100 to platform, rest to seller's subaccount ──
+  if (params.sellerSubaccountCode) {
+    payload.subaccount = params.sellerSubaccountCode
+    payload.bearer = 'account'                      // Platform bears Paystack processing fee
+    payload.transaction_charge = PLATFORM_FEE_KOBO // ₦100 stays in main account
+    logger.info(`Split payment: subaccount=${params.sellerSubaccountCode}, platform_fee=₦100`)
+  } else {
+    logger.warn(`No seller subaccount for order ${params.orderId}. Full amount goes to main account.`)
   }
 
   const { data } = await paystackClient.post('/transaction/initialize', payload)

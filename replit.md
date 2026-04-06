@@ -1,5 +1,32 @@
 # Campus Marketplace / VendorX
 
+## Recently Completed Features
+
+### Paystack Split Payments (₦100 Platform Fee)
+- `backend/src/services/payoutService.ts` — listBanks, resolveAccount, createSellerSubaccount, getSellerSubaccountCode
+- `backend/src/routes/payoutRoutes.ts` — GET /banks, GET /verify-account, POST /setup (registered in app.ts)
+- `backend/src/services/paymentService.ts` — Updated `initializePayment()` to accept `sellerSubaccountCode`, adds `subaccount`, `bearer: 'account'`, `transaction_charge: 10000` (₦100 kobo) to Paystack payload when seller has a subaccount
+- `backend/src/routes/orderRoutes.ts` — Updated payment init to look up seller's subaccount via `payoutService.getSellerSubaccountCode(order.vendor_id)`
+- `app/api/payouts/banks/route.ts`, `app/api/payouts/setup/route.ts`, `app/api/payouts/verify-account/route.ts` — Next.js proxy routes to backend
+- `components/dashboard/payout-setup-card.tsx` — Full payout setup UI: bank dropdown (fetched from Paystack via backend), account number input, real-time account name verification, subaccount creation
+- `app/dashboard/page.tsx` — PayoutSetupCard integrated between stats cards and ReferralCard
+
+### Product Video Support
+- `app/seller/new/page.tsx` — Upload form now tracks `isVideo` per entry, shows video thumbnails with play icon overlay and blue "Video" badge
+
+### Disputes Linked to Orders
+- `app/api/disputes/route.ts` — Now accepts `orderId` and stores it in `order_id` field (graceful if column missing)
+
+### Dark Mode Fixes
+- `app/auth/forgot-password/page.tsx` — Full dark mode support
+- `app/auth/reset-password/page.tsx` — Full dark mode support
+- `app/dashboard/error.tsx` — Dark mode background, card, and button styles
+- `app/auth/login/page.tsx` — Divider lines now have `dark:bg-border`
+
+### Next.js 16 Proxy Convention
+- `proxy.ts` is correct (Next.js 16 renamed middleware.ts → proxy.ts; function named `proxy`)
+- Conflicting `middleware.ts` was removed to prevent startup crash
+
 ## Architecture
 
 This project has two services running side-by-side:

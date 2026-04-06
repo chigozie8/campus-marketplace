@@ -24,14 +24,14 @@ function PasswordStrength({ password }: { password: string }) {
     <div className="mt-2 space-y-2">
       <div className="flex gap-1">
         {[0, 1, 2].map(i => (
-          <div key={i} className={cn('h-1 flex-1 rounded-full transition-all duration-300', i < score ? colors[score - 1] : 'bg-gray-200')} />
+          <div key={i} className={cn('h-1 flex-1 rounded-full transition-all duration-300', i < score ? colors[score - 1] : 'bg-gray-200 dark:bg-muted')} />
         ))}
       </div>
       <div className="space-y-1">
         {checks.map(({ label, pass }) => (
           <div key={label} className="flex items-center gap-1.5">
-            <CheckCircle2 className={cn('w-3 h-3 transition-colors', pass ? 'text-[#16a34a]' : 'text-gray-300')} />
-            <span className={cn('text-xs transition-colors', pass ? 'text-gray-600' : 'text-gray-400')}>{label}</span>
+            <CheckCircle2 className={cn('w-3 h-3 transition-colors', pass ? 'text-[#16a34a]' : 'text-gray-300 dark:text-muted-foreground')} />
+            <span className={cn('text-xs transition-colors', pass ? 'text-gray-600 dark:text-foreground' : 'text-gray-400 dark:text-muted-foreground')}>{label}</span>
           </div>
         ))}
       </div>
@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-background">
       {/* Left branding panel */}
       <div className="hidden lg:flex lg:w-[48%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         <div
@@ -157,7 +157,7 @@ export default function ResetPasswordPage() {
         <div className="flex items-center px-6 py-5 lg:px-10">
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to sign in
@@ -171,40 +171,37 @@ export default function ResetPasswordPage() {
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             )}
           >
-            {/* Mobile wordmark */}
             <div className="lg:hidden mb-8">
-              <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
+              <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
-            {/* Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center mb-6">
-              <Lock className="w-7 h-7 text-gray-700" />
+            <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border flex items-center justify-center mb-6">
+              <Lock className="w-7 h-7 text-gray-700 dark:text-foreground" />
             </div>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-1.5">
+              <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">
                 Set new password
               </h2>
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-gray-500 dark:text-muted-foreground text-sm leading-relaxed">
                 Choose a strong password you have not used before.
               </p>
             </div>
 
             {!ready ? (
               <div className="flex flex-col items-center gap-3 py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                <p className="text-sm text-gray-400">Verifying reset link...</p>
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400 dark:text-muted-foreground" />
+                <p className="text-sm text-gray-400 dark:text-muted-foreground">Verifying reset link...</p>
                 <Link href="/auth/forgot-password" className="text-xs text-[#16a34a] hover:underline mt-2">
                   Request a new link instead
                 </Link>
               </div>
             ) : (
               <form onSubmit={handleReset} className="space-y-4">
-                {/* New password */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                     New password
                   </Label>
                   <div className="relative">
@@ -215,12 +212,12 @@ export default function ResetPasswordPage() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       required
-                      className="h-12 px-4 pr-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                      className="h-12 px-4 pr-12 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors p-1"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -228,9 +225,8 @@ export default function ResetPasswordPage() {
                   <PasswordStrength password={password} />
                 </div>
 
-                {/* Confirm password */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirm" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="confirm" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                     Confirm new password
                   </Label>
                   <div className="relative">
@@ -242,7 +238,7 @@ export default function ResetPasswordPage() {
                       onChange={e => setConfirm(e.target.value)}
                       required
                       className={cn(
-                        'h-12 px-4 pr-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl',
+                        'h-12 px-4 pr-12 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl',
                         confirm && password !== confirm
                           ? 'border-red-400 focus:border-red-400'
                           : 'focus:border-[#16a34a]'
@@ -251,39 +247,39 @@ export default function ResetPasswordPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors p-1"
                     >
                       {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {confirm && password !== confirm && (
-                    <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                    <p className="text-xs text-red-500">Passwords do not match</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  disabled={loading || !password || password !== confirm}
-                  className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl mt-2"
+                  disabled={loading}
+                  className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin mr-2" />Updating password...</>
                   ) : (
-                    <><ShieldCheck className="w-4 h-4 mr-2" />Update Password</>
+                    <><ShieldCheck className="w-4 h-4 mr-2" />Set New Password</>
                   )}
                 </Button>
               </form>
             )}
 
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Securely encrypted</span>
+                <span>Bank-grade security</span>
               </div>
             </div>
           </div>

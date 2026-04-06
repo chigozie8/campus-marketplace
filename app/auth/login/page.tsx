@@ -289,9 +289,9 @@ export default function LoginPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
               <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">OR</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
             </div>
 
             {/* Sign up CTA */}
@@ -312,12 +312,12 @@ export default function LoginPage() {
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Secure login</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <span>Free forever</span>
             </div>
 
