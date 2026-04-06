@@ -41,38 +41,40 @@ function timeAgo(date: string) {
   }
 }
 
-interface DropdownPos { top: number; right: number }
-
 export function NotificationBell() {
-  const [open, setOpen]                     = useState(false)
-  const [notifications, setNotifications]   = useState<Notification[]>([])
-  const [loading, setLoading]               = useState(true)
-  const [markingAll, setMarkingAll]         = useState(false)
-  const [dropdownPos, setDropdownPos]       = useState<DropdownPos>({ top: 0, right: 16 })
-  const [isMobile, setIsMobile]             = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [open, setOpen]                   = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading]             = useState(true)
+  const [markingAll, setMarkingAll]       = useState(false)
+  const [isMobile, setIsMobile]           = useState(false)
+  const [dropTop, setDropTop]             = useState(0)
+  const [dropRight, setDropRight]         = useState(16)
+
+  const buttonRef    = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const unread = notifications.filter(n => !n.read).length
 
-  /* ── Position calculation ── */
-  const calcPos = useCallback(() => {
+  /* ── Track mobile breakpoint at all times ── */
+  useEffect(() => {
+    function check() { setIsMobile(window.innerWidth < 640) }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  /* ── Calculate desktop dropdown position ── */
+  const calcDesktopPos = useCallback(() => {
     if (!buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
     const vw   = window.innerWidth
-    const mobile = vw < 640
-
-    setIsMobile(mobile)
-    if (!mobile) {
-      // Pin right edge of dropdown to right edge of button, with 16 px margin from viewport edge
-      const dropW   = Math.min(368, vw - 32)
-      const rightFromVP = vw - rect.right        // gap between button right and viewport right
-      const right   = Math.max(16, rightFromVP)  // never closer than 16 px to viewport edge
-      setDropdownPos({ top: rect.bottom + 8, right })
-    }
+    const dropW = Math.min(368, vw - 32)
+    const rightFromEdge = vw - rect.right
+    setDropTop(rect.bottom + 8)
+    setDropRight(Math.max(16, rightFromEdge))
   }, [])
 
-  /* ── Fetch ── */
+  /* ── Data fetch ── */
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/notifications')
@@ -87,7 +89,6 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications()
-
     const supabase    = createClient()
     const channelName = `notifications-bell-${crypto.randomUUID()}`
     let channelRef: ReturnType<typeof supabase.channel> | null = null
@@ -125,20 +126,20 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  /* ── Recalculate position on open / resize ── */
+  /* ── Recalculate desktop position when open ── */
   useEffect(() => {
-    if (open) {
-      calcPos()
-      window.addEventListener('resize', calcPos)
-      window.addEventListener('scroll', calcPos, { passive: true })
+    if (open && !isMobile) {
+      calcDesktopPos()
+      window.addEventListener('resize', calcDesktopPos)
+      window.addEventListener('scroll', calcDesktopPos, { passive: true })
     }
     return () => {
-      window.removeEventListener('resize', calcPos)
-      window.removeEventListener('scroll', calcPos)
+      window.removeEventListener('resize', calcDesktopPos)
+      window.removeEventListener('scroll', calcDesktopPos)
     }
-  }, [open, calcPos])
+  }, [open, isMobile, calcDesktopPos])
 
-  /* ── Lock body scroll on mobile bottom-sheet ── */
+  /* ── Lock body scroll when mobile sheet is open ── */
   useEffect(() => {
     if (open && isMobile) {
       document.body.style.overflow = 'hidden'
@@ -165,16 +166,19 @@ export function NotificationBell() {
     setMarkingAll(false)
   }
 
-  const dropW = typeof window !== 'undefined'
-    ? Math.min(368, window.innerWidth - 32)
-    : 368
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 375
+  const dropW = Math.min(368, vw - 32)
 
   return (
     <div ref={containerRef} className="relative">
+
       {/* Bell button */}
       <button
         ref={buttonRef}
-        onClick={() => { calcPos(); setOpen(o => !o) }}
+        onClick={() => {
+          if (!isMobile) calcDesktopPos()
+          setOpen(o => !o)
+        }}
         className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
@@ -186,63 +190,65 @@ export function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <>
-          {/* Mobile backdrop */}
-          {isMobile && (
-            <div
-              className="fixed inset-0 bg-black/40 z-[9998]"
-              onClick={() => setOpen(false)}
-            />
-          )}
-
-          {/* Dropdown panel */}
-          {isMobile ? (
-            /* ── Mobile: bottom sheet ── */
-            <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-card border-t border-gray-100 dark:border-border shadow-2xl shadow-black/30 rounded-t-3xl max-h-[85dvh] flex flex-col overflow-hidden">
-              <DropdownContent
-                notifications={notifications}
-                loading={loading}
-                unread={unread}
-                markingAll={markingAll}
-                markAllRead={markAllRead}
-                markOneRead={markOneRead}
-                onClose={() => setOpen(false)}
-                mobile
-              />
-            </div>
-          ) : (
-            /* ── Desktop: fixed positioned dropdown ── */
-            <div
-              style={{
-                position: 'fixed',
-                top:   dropdownPos.top,
-                right: dropdownPos.right,
-                width: dropW,
-                maxHeight: 520,
-                zIndex: 9999,
-              }}
-              className="bg-white dark:bg-card border border-gray-100 dark:border-border shadow-2xl shadow-black/20 dark:shadow-black/50 rounded-2xl flex flex-col overflow-hidden"
-            >
-              <DropdownContent
-                notifications={notifications}
-                loading={loading}
-                unread={unread}
-                markingAll={markingAll}
-                markAllRead={markAllRead}
-                markOneRead={markOneRead}
-                onClose={() => setOpen(false)}
-                mobile={false}
-              />
-            </div>
-          )}
-        </>
+      {/* ── Mobile backdrop ── */}
+      {open && isMobile && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[9998]"
+          onClick={() => setOpen(false)}
+        />
       )}
+
+      {/* ── Mobile bottom sheet ── */}
+      {open && isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-[9999] flex flex-col bg-white dark:bg-card rounded-t-3xl shadow-2xl overflow-hidden"
+          style={{ maxHeight: '85dvh' }}
+        >
+          {/* Drag handle */}
+          <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
+          </div>
+          <DropdownContent
+            notifications={notifications}
+            loading={loading}
+            unread={unread}
+            markingAll={markingAll}
+            markAllRead={markAllRead}
+            markOneRead={markOneRead}
+            onClose={() => setOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* ── Desktop fixed dropdown ── */}
+      {open && !isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: dropTop,
+            right: dropRight,
+            width: dropW,
+            maxHeight: 520,
+            zIndex: 9999,
+          }}
+          className="flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
+        >
+          <DropdownContent
+            notifications={notifications}
+            loading={loading}
+            unread={unread}
+            markingAll={markingAll}
+            markAllRead={markAllRead}
+            markOneRead={markOneRead}
+            onClose={() => setOpen(false)}
+          />
+        </div>
+      )}
+
     </div>
   )
 }
 
-/* ── Shared dropdown content ── */
+/* ─── Shared panel content ─────────────────────────────────────────────── */
 interface ContentProps {
   notifications: Notification[]
   loading: boolean
@@ -251,19 +257,11 @@ interface ContentProps {
   markAllRead: () => void
   markOneRead: (id: string) => void
   onClose: () => void
-  mobile: boolean
 }
 
-function DropdownContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose, mobile }: ContentProps) {
+function DropdownContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose }: ContentProps) {
   return (
     <>
-      {/* Drag handle (mobile only) */}
-      {mobile && (
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -298,7 +296,7 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
         </div>
       </div>
 
-      {/* Scrollable list */}
+      {/* List */}
       <div className="overflow-y-auto flex-1">
         {loading ? (
           <div className="flex items-center justify-center py-14">
@@ -321,7 +319,7 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
                 <div
                   key={n.id}
                   onClick={() => { if (!n.read) markOneRead(n.id) }}
-                  className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors active:bg-gray-50 dark:active:bg-muted/30 ${
+                  className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors ${
                     n.read
                       ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
                       : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
