@@ -55,9 +55,10 @@ export async function PATCH(
   const vendorId = verification?.vendor_id
 
   if (vendorId) {
-    if (status === 'approved') {
-      await supabase.from('profiles').update({ seller_verified: true }).eq('id', vendorId)
-    }
+    await supabase
+      .from('profiles')
+      .update({ seller_verified: status === 'approved' })
+      .eq('id', vendorId)
 
     const vendorName = verification?.full_name || 'there'
 

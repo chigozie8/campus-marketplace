@@ -371,11 +371,23 @@ export default function VerificationsPage() {
                 </div>
 
                 {/* Actions */}
-                {selected.status === 'pending' && (
+                {selected.status !== 'rejected' && (
                   <div className="pt-2 border-t border-border space-y-3">
+                    {/* Revocation warning for already-approved vendors */}
+                    {selected.status === 'approved' && !showRejectBox && (
+                      <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                          This vendor is currently <strong>approved</strong>. Rejecting will revoke their verified badge and send them an email.
+                        </p>
+                      </div>
+                    )}
+
                     {showRejectBox ? (
                       <div className="space-y-2">
-                        <p className="text-xs font-bold text-foreground">Rejection reason</p>
+                        <p className="text-xs font-bold text-foreground">
+                          {selected.status === 'approved' ? 'Reason for revoking approval' : 'Rejection reason'}
+                        </p>
                         <textarea
                           value={rejectReason}
                           onChange={e => setRejectReason(e.target.value)}
@@ -393,7 +405,7 @@ export default function VerificationsPage() {
                             className="flex-1 py-2.5 text-sm font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                           >
                             {acting ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                            Confirm Reject
+                            {selected.status === 'approved' ? 'Revoke & Reject' : 'Confirm Reject'}
                           </button>
                         </div>
                       </div>
@@ -401,18 +413,20 @@ export default function VerificationsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setShowRejectBox(true)}
-                          className="flex-1 py-2.5 text-sm font-bold text-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors border border-red-200 dark:border-red-800"
+                          className={`flex-1 py-2.5 text-sm font-bold text-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors border border-red-200 dark:border-red-800 ${selected.status === 'approved' ? 'w-full' : ''}`}
                         >
-                          Reject
+                          {selected.status === 'approved' ? 'Revoke Approval' : 'Reject'}
                         </button>
-                        <button
-                          onClick={() => handleAction('approved')}
-                          disabled={acting}
-                          className="flex-1 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
-                        >
-                          {acting ? <Loader2 className="w-4 h-4 animate-spin" /> : <BadgeCheck className="w-4 h-4" />}
-                          Approve &amp; Verify
-                        </button>
+                        {selected.status === 'pending' && (
+                          <button
+                            onClick={() => handleAction('approved')}
+                            disabled={acting}
+                            className="flex-1 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                          >
+                            {acting ? <Loader2 className="w-4 h-4 animate-spin" /> : <BadgeCheck className="w-4 h-4" />}
+                            Approve &amp; Verify
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
