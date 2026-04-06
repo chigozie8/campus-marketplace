@@ -1263,25 +1263,26 @@ export default function ProfilePage() {
 
       {/* ── 2FA Setup Modal ── */}
       {showMfaSetup && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-card w-full max-w-sm rounded-3xl shadow-2xl shadow-black/20 overflow-y-auto max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-3 pb-3 pt-12 sm:p-4">
+          <div className="bg-white dark:bg-card w-full max-w-sm rounded-3xl shadow-2xl shadow-black/20 overflow-hidden flex flex-col max-h-[90dvh]">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-border">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <div className="flex items-center justify-between px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4 border-b border-gray-100 dark:border-border flex-shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
                 </div>
-                <div>
-                  <p className="font-black text-sm text-gray-900 dark:text-white">Set up Two-Factor Auth</p>
-                  <p className="text-[11px] text-gray-400">{mfaStep === 'qr' ? 'Step 1 of 2 — Scan QR code' : 'Step 2 of 2 — Verify code'}</p>
+                <div className="min-w-0">
+                  <p className="font-black text-sm text-gray-900 dark:text-white truncate">Set up Two-Factor Auth</p>
+                  <p className="text-[10px] sm:text-[11px] text-gray-400">{mfaStep === 'qr' ? 'Step 1 of 2 — Scan QR code' : 'Step 2 of 2 — Verify code'}</p>
                 </div>
               </div>
-              <button onClick={() => setShowMfaSetup(false)} className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+              <button onClick={() => setShowMfaSetup(false)} className="w-8 h-8 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors flex items-center justify-center flex-shrink-0 ml-2">
                 <X className="w-4 h-4 text-gray-500" />
               </button>
             </div>
 
-            <div className="p-5">
+            {/* Scrollable body */}
+            <div className="overflow-y-auto flex-1 p-4 sm:p-5">
               {mfaStep === 'qr' ? (
                 <>
                   <p className="text-xs text-gray-500 mb-4 leading-relaxed">
@@ -1289,7 +1290,7 @@ export default function ProfilePage() {
                   </p>
                   {/* QR Code */}
                   <div className="flex justify-center mb-4">
-                    <div className="w-44 h-44 rounded-2xl bg-white border-2 border-gray-100 dark:border-border flex items-center justify-center overflow-hidden shadow-sm">
+                    <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl bg-white border-2 border-gray-100 dark:border-border flex items-center justify-center overflow-hidden shadow-sm">
                       {mfaQrCode
                         ? <img src={mfaQrCode} alt="2FA QR Code" className="w-full h-full object-contain p-1" />
                         : <Loader2 className="w-8 h-8 animate-spin text-gray-300" />
@@ -1298,12 +1299,12 @@ export default function ProfilePage() {
                   </div>
                   {/* Manual secret */}
                   <div className="bg-gray-50 dark:bg-muted rounded-xl p-3 mb-4">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Or enter manually</p>
-                    <div className="flex items-center justify-between gap-2">
-                      <code className="text-xs text-gray-700 dark:text-white font-mono break-all flex-1">{mfaSecret}</code>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Or enter manually</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <code className="text-[11px] sm:text-xs text-gray-700 dark:text-white font-mono break-all flex-1 leading-relaxed">{mfaSecret}</code>
                       <button
                         onClick={() => { navigator.clipboard.writeText(mfaSecret); toast.success('Secret copied!') }}
-                        className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-muted/60 transition-colors flex-shrink-0"
+                        className="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-muted/60 transition-colors flex-shrink-0 mt-0.5"
                       >
                         <Copy className="w-3.5 h-3.5 text-gray-500" />
                       </button>
@@ -1321,16 +1322,15 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-500 mb-4 leading-relaxed">
                     Open your authenticator app and enter the <span className="font-bold text-gray-900 dark:text-white">6-digit code</span> for VendoorX.
                   </p>
-                  <div className="relative mb-4">
-                    <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <div className="mb-4">
                     <input
                       type="text"
                       inputMode="numeric"
                       maxLength={6}
                       value={mfaCode}
                       onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                      placeholder="000000"
-                      className="w-full pl-10 pr-4 py-3.5 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-center text-2xl font-black tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                      placeholder="0 0 0 0 0 0"
+                      className="w-full px-3 py-3.5 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-center text-xl sm:text-2xl font-black tracking-[0.25em] sm:tracking-[0.35em] focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     />
                   </div>
                   <div className="flex gap-2">
