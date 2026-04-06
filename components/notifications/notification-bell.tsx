@@ -64,11 +64,15 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications()
+
     const supabase = createClient()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let cancelled = false
+
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
-      const channel = supabase
-        .channel('notifications-bell')
+      if (!user || cancelled) return
+      channel = supabase
+        .channel(`notifications-bell-${user.id}`)
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'notifications',
           filter: `user_id=eq.${user.id}`,
@@ -76,10 +80,15 @@ export function NotificationBell() {
           setNotifications(prev => [payload.new as Notification, ...prev])
         })
         .subscribe()
-      return () => { supabase.removeChannel(channel) }
     })
+
     const interval = setInterval(fetchNotifications, 30_000)
-    return () => clearInterval(interval)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      if (channel) supabase.removeChannel(channel)
+    }
   }, [fetchNotifications])
 
   useEffect(() => {
