@@ -29,16 +29,11 @@ const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: 
   info:                  { icon: Info,          color: 'text-gray-500 dark:text-gray-400',        bg: 'bg-gray-100 dark:bg-muted',              dot: 'bg-gray-400' },
 }
 
-function getConfig(type: string) {
-  return TYPE_CONFIG[type] ?? TYPE_CONFIG.info
-}
+function getConfig(type: string) { return TYPE_CONFIG[type] ?? TYPE_CONFIG.info }
 
 function timeAgo(date: string) {
-  try {
-    return formatDistanceToNow(new Date(date), { addSuffix: true })
-  } catch {
-    return ''
-  }
+  try { return formatDistanceToNow(new Date(date), { addSuffix: true }) }
+  catch { return '' }
 }
 
 export function NotificationBell() {
@@ -46,7 +41,6 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading]             = useState(true)
   const [markingAll, setMarkingAll]       = useState(false)
-  const [isMobile, setIsMobile]           = useState(false)
   const [dropTop, setDropTop]             = useState(0)
   const [dropRight, setDropRight]         = useState(16)
 
@@ -55,23 +49,13 @@ export function NotificationBell() {
 
   const unread = notifications.filter(n => !n.read).length
 
-  /* ── Track mobile breakpoint at all times ── */
-  useEffect(() => {
-    function check() { setIsMobile(window.innerWidth < 640) }
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
   /* ── Calculate desktop dropdown position ── */
-  const calcDesktopPos = useCallback(() => {
+  const calcPos = useCallback(() => {
     if (!buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
     const vw   = window.innerWidth
-    const dropW = Math.min(368, vw - 32)
-    const rightFromEdge = vw - rect.right
     setDropTop(rect.bottom + 8)
-    setDropRight(Math.max(16, rightFromEdge))
+    setDropRight(Math.max(16, vw - rect.right))
   }, [])
 
   /* ── Data fetch ── */
@@ -82,9 +66,7 @@ export function NotificationBell() {
         const json = await res.json()
         setNotifications(json.notifications ?? [])
       }
-    } catch { /* silent */ } finally {
-      setLoading(false)
-    }
+    } catch { /* silent */ } finally { setLoading(false) }
   }, [])
 
   useEffect(() => {
@@ -117,43 +99,39 @@ export function NotificationBell() {
 
   /* ── Click outside to close ── */
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+    function onDown(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
   }, [])
 
-  /* ── Recalculate desktop position when open ── */
+  /* ── Recalc desktop pos on resize / scroll ── */
   useEffect(() => {
-    if (open && !isMobile) {
-      calcDesktopPos()
-      window.addEventListener('resize', calcDesktopPos)
-      window.addEventListener('scroll', calcDesktopPos, { passive: true })
-    }
+    if (!open) return
+    calcPos()
+    window.addEventListener('resize', calcPos)
+    window.addEventListener('scroll', calcPos, { passive: true })
     return () => {
-      window.removeEventListener('resize', calcDesktopPos)
-      window.removeEventListener('scroll', calcDesktopPos)
+      window.removeEventListener('resize', calcPos)
+      window.removeEventListener('scroll', calcPos)
     }
-  }, [open, isMobile, calcDesktopPos])
+  }, [open, calcPos])
 
-  /* ── Lock body scroll when mobile sheet is open ── */
+  /* ── Body scroll lock while open on mobile ── */
   useEffect(() => {
-    if (open && isMobile) {
+    if (open && window.innerWidth < 640) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
     }
     return () => { document.body.style.overflow = '' }
-  }, [open, isMobile])
+  }, [open])
 
   async function markOneRead(id: string) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     await fetch('/api/notifications/mark-read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     }).catch(() => {})
   }
@@ -166,19 +144,13 @@ export function NotificationBell() {
     setMarkingAll(false)
   }
 
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 375
-  const dropW = Math.min(368, vw - 32)
-
   return (
     <div ref={containerRef} className="relative">
 
-      {/* Bell button */}
+      {/* ── Bell button ── */}
       <button
         ref={buttonRef}
-        onClick={() => {
-          if (!isMobile) calcDesktopPos()
-          setOpen(o => !o)
-        }}
+        onClick={() => { calcPos(); setOpen(o => !o) }}
         className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
@@ -190,76 +162,75 @@ export function NotificationBell() {
         )}
       </button>
 
-      {/* ── Mobile backdrop ── */}
-      {open && isMobile && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[9998]"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      {open && (
+        <>
+          {/* ══════════════════════════════════════════
+              MOBILE  (< 640 px)  — bottom sheet
+              CSS: visible by default, hidden sm:hidden
+          ═══════════════════════════════════════════ */}
 
-      {/* ── Mobile bottom sheet ── */}
-      {open && isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[9999] flex flex-col bg-white dark:bg-card rounded-t-3xl shadow-2xl overflow-hidden"
-          style={{ maxHeight: '85dvh' }}
-        >
-          {/* Drag handle */}
-          <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
+          {/* Backdrop */}
+          <div
+            className="sm:hidden fixed inset-0 bg-black/50 z-[9998]"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Sheet */}
+          <div
+            className="sm:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-card rounded-t-3xl shadow-2xl"
+            style={{ maxHeight: '85svh' }}
+          >
+            <div className="flex flex-col h-full overflow-hidden" style={{ maxHeight: '85svh' }}>
+              {/* Drag handle */}
+              <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
+              </div>
+              <PanelContent
+                notifications={notifications} loading={loading}
+                unread={unread} markingAll={markingAll}
+                markAllRead={markAllRead} markOneRead={markOneRead}
+                onClose={() => setOpen(false)}
+              />
+            </div>
           </div>
-          <DropdownContent
-            notifications={notifications}
-            loading={loading}
-            unread={unread}
-            markingAll={markingAll}
-            markAllRead={markAllRead}
-            markOneRead={markOneRead}
-            onClose={() => setOpen(false)}
-          />
-        </div>
-      )}
 
-      {/* ── Desktop fixed dropdown ── */}
-      {open && !isMobile && (
-        <div
-          style={{
-            position: 'fixed',
-            top: dropTop,
-            right: dropRight,
-            width: dropW,
-            maxHeight: 520,
-            zIndex: 9999,
-          }}
-          className="flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
-        >
-          <DropdownContent
-            notifications={notifications}
-            loading={loading}
-            unread={unread}
-            markingAll={markingAll}
-            markAllRead={markAllRead}
-            markOneRead={markOneRead}
-            onClose={() => setOpen(false)}
-          />
-        </div>
+          {/* ══════════════════════════════════════════
+              DESKTOP  (≥ 640 px)  — fixed dropdown
+              CSS: hidden by default, visible sm:flex
+          ═══════════════════════════════════════════ */}
+          <div
+            className="hidden sm:flex flex-col fixed bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
+            style={{
+              top:       dropTop,
+              right:     dropRight,
+              width:     Math.min(368, (typeof window !== 'undefined' ? window.innerWidth : 400) - 32),
+              maxHeight: 520,
+              zIndex:    9999,
+            }}
+          >
+            <PanelContent
+              notifications={notifications} loading={loading}
+              unread={unread} markingAll={markingAll}
+              markAllRead={markAllRead} markOneRead={markOneRead}
+              onClose={() => setOpen(false)}
+            />
+          </div>
+        </>
       )}
-
     </div>
   )
 }
 
-/* ─── Shared panel content ─────────────────────────────────────────────── */
-interface ContentProps {
+/* ─── Shared panel body ────────────────────────────────────────────────── */
+interface PanelProps {
   notifications: Notification[]
-  loading: boolean
-  unread: number
-  markingAll: boolean
+  loading: boolean; unread: number; markingAll: boolean
   markAllRead: () => void
   markOneRead: (id: string) => void
   onClose: () => void
 }
 
-function DropdownContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose }: ContentProps) {
+function PanelContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose }: PanelProps) {
   return (
     <>
       {/* Header */}
@@ -275,28 +246,20 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
         </div>
         <div className="flex items-center gap-2">
           {unread > 0 && (
-            <button
-              onClick={markAllRead}
-              disabled={markingAll}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] hover:underline disabled:opacity-50"
-            >
-              {markingAll
-                ? <Loader2 className="w-3 h-3 animate-spin" />
-                : <CheckCheck className="w-3 h-3" />
-              }
+            <button onClick={markAllRead} disabled={markingAll}
+              className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] hover:underline disabled:opacity-50">
+              {markingAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCheck className="w-3 h-3" />}
               Mark all read
             </button>
           )}
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
-          >
+          <button onClick={onClose}
+            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* List */}
+      {/* Scrollable list */}
       <div className="overflow-y-auto flex-1">
         {loading ? (
           <div className="flex items-center justify-center py-14">
@@ -313,16 +276,14 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-border">
             {notifications.map(n => {
-              const cfg  = getConfig(n.type)
+              const cfg = getConfig(n.type)
               const Icon = cfg.icon
               return (
-                <div
-                  key={n.id}
-                  onClick={() => { if (!n.read) markOneRead(n.id) }}
+                <div key={n.id} onClick={() => { if (!n.read) markOneRead(n.id) }}
                   className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors ${
                     n.read
                       ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
-                      : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
+                      : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
@@ -335,9 +296,7 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
                       }`}>
                         {n.title}
                       </p>
-                      {!n.read && (
-                        <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />
-                      )}
+                      {!n.read && <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />}
                     </div>
                     {n.body && (
                       <p className={`text-[12px] leading-relaxed mt-0.5 break-words ${
@@ -346,9 +305,7 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
                         {n.body}
                       </p>
                     )}
-                    <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">
-                      {timeAgo(n.created_at)}
-                    </p>
+                    <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">{timeAgo(n.created_at)}</p>
                   </div>
                 </div>
               )
@@ -360,11 +317,8 @@ function DropdownContent({ notifications, loading, unread, markingAll, markAllRe
       {/* Footer */}
       {notifications.length > 0 && (
         <div className="px-4 py-3 border-t border-gray-100 dark:border-border flex-shrink-0">
-          <Link
-            href="/notifications"
-            onClick={onClose}
-            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors"
-          >
+          <Link href="/notifications" onClick={onClose}
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors">
             View all notifications
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
