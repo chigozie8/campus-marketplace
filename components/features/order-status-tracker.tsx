@@ -82,8 +82,8 @@ export function OrderStatusTracker({ status, compact = false }: OrderStatusTrack
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300',
                   done ? 'bg-primary border-primary text-white' :
-                  active ? 'bg-white border-primary text-primary shadow-lg shadow-primary/20 scale-110' :
-                  'bg-white border-muted text-muted-foreground'
+                  active ? 'bg-background border-primary text-primary shadow-lg shadow-primary/20 scale-110' :
+                  'bg-background border-muted text-muted-foreground'
                 )}
               >
                 <Icon className="w-4 h-4" />

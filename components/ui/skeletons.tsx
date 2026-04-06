@@ -97,9 +97,9 @@ export function DashboardSkeleton() {
 
 export function MarketplaceSkeleton() {
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-background">
       {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm h-14 flex items-center">
+      <header className="sticky top-0 z-40 bg-background border-b border-border shadow-sm h-14 flex items-center">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-shrink-0">
             <Skeleton className="w-7 h-7 rounded-lg" />
@@ -131,12 +131,12 @@ export function MarketplaceSkeleton() {
       </div>
 
       {/* Mobile search */}
-      <div className="sm:hidden bg-white border-b border-gray-100 px-4 py-3">
+      <div className="sm:hidden bg-background border-b border-border px-4 py-3">
         <Skeleton className="h-10 w-full rounded-xl" />
       </div>
 
       {/* Category pills */}
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="bg-background border-b border-border px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-7xl mx-auto flex gap-2 overflow-hidden">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-xl flex-shrink-0" />
@@ -334,7 +334,7 @@ export function AuthSkeleton() {
 
 export function FavoritesSkeleton() {
   return (
-    <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
+    <div className="min-h-screen bg-background dark:bg-background">
       <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border h-14 flex items-center px-4 sm:px-6">
         <div className="max-w-7xl mx-auto w-full flex items-center gap-3">
           <Skeleton className="w-8 h-8 rounded-lg" />

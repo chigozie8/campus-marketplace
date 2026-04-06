@@ -19,6 +19,7 @@ import {
   X,
   Package,
   Megaphone,
+  BookOpen,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { label: 'Reviews',        href: '/admin/reviews',          icon: Star },
   { label: 'Messages',       href: '/admin/messages',         icon: MessageSquare },
   { label: 'Analytics',      href: '/admin/analytics',        icon: BarChart3 },
+  { label: 'Blog',           href: '/admin/blog',             icon: BookOpen },
   { label: 'Broadcast',      href: '/admin/broadcast',        icon: Megaphone },
   { label: 'Settings',       href: '/admin/settings',         icon: Settings },
 ]

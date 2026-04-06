@@ -2,6 +2,22 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Full-Stack Blog System + Cookie Consent
+- **Cookie Consent Banner** (`components/cookie-consent.tsx`) — Animated GDPR/NDPR-compliant banner with customise preferences (necessary/analytics/marketing toggles), accept all, reject all. Stored in localStorage. Linked to /cookies policy page.
+- **Blog SQL Migration** (`scripts/010_blog.sql`) — Creates `blog_posts`, `blog_categories`, `blog_comments`, `blog_likes` with RLS, indexes, triggers, seeded categories, and 3 sample posts.
+- **Blog Listing Page** (`app/(public)/blog/page.tsx`) — Full Supabase-backed blog listing with featured post hero, category filter tabs, paginated post grid (9 per page), newsletter CTA.
+- **Blog Post Page** (`app/(public)/blog/[slug]/page.tsx` + `components/blog/blog-post-client.tsx`) — Full post with markdown rendering (react-markdown + remark-gfm), like/unlike (auth + IP-based), comments with replies, social sharing (copy/Twitter/WhatsApp), view tracking, related posts.
+- **Admin Blog Management** (`app/admin/blog/`) — List with stats, New Post (`/new`), Edit Post (`/[id]/edit`), delete with confirmation.
+- **Blog Post Editor** (`components/admin/blog-post-editor.tsx`) — Rich textarea with markdown toolbar (H2/H3/bold/italic/list/quote/code/link), cover image preview, category/tags/read-time, SEO tab with live Google preview, featured toggle.
+- **Blog API Routes** — `/api/blog/comments` (GET/POST/DELETE), `/api/blog/likes` (GET/POST toggle), `/api/blog/views` (POST increment), `/api/admin/blog` (POST create), `/api/admin/blog/[id]` (PATCH update, DELETE)
+- **Admin Sidebar** — Blog nav item added with BookOpen icon
+- **@tailwindcss/typography** — Installed + configured via `@plugin` in globals.css for blog prose rendering
+- **Dark Mode Polish (T012)** — Fixed `bg-white` → `bg-background` in skeletons.tsx, dashboard-actions.tsx, order-status-tracker.tsx
+
+### Pending User Action
+- Run `scripts/010_blog.sql` in Supabase SQL Editor to create blog tables and seed sample posts
+
+
 ### TypeScript — All Frontend Errors Fixed (0 errors)
 - `lib/supabase/server.ts` + `lib/supabase/middleware.ts` — Added explicit `CookieOptions` type import from `@supabase/ssr`; both `setAll` cookie callbacks are now fully typed
 - `app/api/auth/sign-out/route.ts` — Added null guard for supabase client

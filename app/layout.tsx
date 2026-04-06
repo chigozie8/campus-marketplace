@@ -9,6 +9,7 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { ChatWidget } from '@/components/chat-widget'
+import { CookieConsent } from '@/components/cookie-consent'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
 import './globals.css'
@@ -344,6 +345,7 @@ export default function RootLayout({
             <ServiceWorkerRegistration />
             <PwaInstallPrompt />
             <ChatWidget />
+            <CookieConsent />
             <Toaster richColors position="top-right" />
             {process.env.NODE_ENV === 'production' && <Analytics />}
           </Providers>
