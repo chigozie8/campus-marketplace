@@ -14,6 +14,7 @@ import { ProductGallery } from '@/components/product/product-gallery'
 import { ReviewsSection } from '@/components/reviews-section'
 import { MakeOfferDialog } from '@/components/product/make-offer-dialog'
 import { ReportDialog } from '@/components/product/report-dialog'
+import { ProductBuyButton } from '@/components/features/product-buy-button'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -181,6 +182,19 @@ export default async function ProductDetailPage({ params }: Props) {
                 <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground">
                   <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{[p.campus, p.location].filter(Boolean).join(' · ')}</span>
+                </div>
+              )}
+
+              {/* ── Primary CTA: Buy Now ── */}
+              {p.is_available && (
+                <div className="space-y-2">
+                  <ProductBuyButton
+                    product={{ id: p.id, title: p.title, price: p.price, images: p.images }}
+                    className="w-full h-12 rounded-2xl text-base font-bold shadow-lg shadow-primary/20"
+                  />
+                  <p className="text-xs text-center text-gray-400 dark:text-muted-foreground">
+                    Secure checkout · Pay with card, transfer or USSD
+                  </p>
                 </div>
               )}
 

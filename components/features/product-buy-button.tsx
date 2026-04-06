@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CheckoutModal } from './checkout-modal'
-import type { BackendProduct } from '@/lib/api'
+import type { CheckoutProduct } from './checkout-modal'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 interface ProductBuyButtonProps {
-  product: BackendProduct
+  product: CheckoutProduct
   className?: string
 }
 

@@ -7,13 +7,20 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
-import type { BackendProduct } from '@/lib/api'
 import { toast } from 'sonner'
+
+export interface CheckoutProduct {
+  id: string
+  title: string
+  price: number
+  images?: string[] | null
+  stock_quantity?: number
+}
 
 interface CheckoutModalProps {
   open: boolean
   onClose: () => void
-  product: BackendProduct
+  product: CheckoutProduct
 }
 
 type Step = 'address' | 'confirm' | 'paying'
@@ -78,15 +85,15 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
 
         {/* Product summary */}
         <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
-          {product.image_url ? (
-            <img src={product.image_url} alt={product.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+          {product.images?.[0] ? (
+            <img src={product.images[0]} alt={product.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
           ) : (
             <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
               <ShoppingCart className="w-5 h-5 text-muted-foreground" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm line-clamp-1">{product.name}</p>
+            <p className="font-semibold text-sm line-clamp-1">{product.title}</p>
             <p className="text-primary font-black text-base mt-0.5">
               ₦{(product.price * quantity).toLocaleString()}
             </p>
@@ -105,10 +112,9 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 >−</button>
                 <span className="w-8 text-center font-black text-lg">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(q => Math.min(product.stock_quantity, q + 1))}
+                  onClick={() => setQuantity(q => Math.min(product.stock_quantity ?? 99, q + 1))}
                   className="w-9 h-9 rounded-xl border border-border flex items-center justify-center font-bold hover:bg-muted transition-colors"
                 >+</button>
-                <span className="text-xs text-muted-foreground ml-1">{product.stock_quantity} available</span>
               </div>
             </div>
 
