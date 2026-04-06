@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
         bank_name, account_number,
         id_type, id_number,
         id_image_url,
-        ...(id_back_image_url ? { id_back_image_url } : {}),
         selfie_image_url,
         status: 'pending',
         rejection_reason: null,

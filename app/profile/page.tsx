@@ -454,7 +454,7 @@ export default function ProfilePage() {
     if (!/^\d{10}$/.test(verifyForm.account_number)) { toast.error('Account number must be 10 digits'); return }
     if (!verifyForm.id_number.trim())      { toast.error('ID number is required');              return }
     if (!idFrontUrl)                       { toast.error('Please upload the front of your ID'); return }
-    if (!selfieUrl)                        { toast.error('Please upload your selfie with ID'); return }
+    if (!selfieUrl)                        { toast.error('Please upload your selfie');         return }
 
     setVerifySubmitting(true)
     try {
@@ -1142,8 +1142,8 @@ export default function ProfilePage() {
 
                 {/* Selfie */}
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Selfie with ID <span className="text-red-400">*</span></label>
-                  <p className="text-[11px] text-gray-400 mb-2">Hold your ID next to your face and take a clear photo.</p>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Selfie <span className="text-red-400">*</span></label>
+                  <p className="text-[11px] text-gray-400 mb-2">Take a clear photo of your face for identity verification.</p>
                   <input ref={selfieRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieChange} />
                   {selfieUrl ? (
                     <div className="relative">
@@ -1159,7 +1159,7 @@ export default function ProfilePage() {
                       className="w-full h-24 border-2 border-dashed border-gray-200 dark:border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-muted/50 transition-all"
                     >
                       {selfieUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Camera className="w-5 h-5 text-gray-400" />}
-                      <span className="text-xs text-gray-400">{selfieUploading ? 'Uploading…' : 'Tap to take selfie with ID'}</span>
+                      <span className="text-xs text-gray-400">{selfieUploading ? 'Uploading…' : 'Tap to take a selfie'}</span>
                     </button>
                   )}
                 </div>
