@@ -547,20 +547,19 @@ export default function ProfilePage() {
                     )}
                   </div>
 
-                  {/* Toggle */}
+                  {/* Enable / Disable button */}
                   <button
                     onClick={toggleLoginAlerts}
                     disabled={loginAlertsLoading}
-                    className={`relative w-14 h-7 rounded-full transition-all duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 mt-1 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex-shrink-0 mt-1 disabled:opacity-50 ${
                       loginAlerts
-                        ? 'bg-[#16a34a] shadow-lg shadow-[#16a34a]/40'
-                        : 'bg-gray-200 dark:bg-muted'
+                        ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40'
+                        : 'bg-[#0a0a0a] text-white hover:bg-gray-800 dark:bg-primary dark:hover:bg-primary/90'
                     }`}
-                    aria-label={loginAlerts ? 'Disable login alerts' : 'Enable login alerts'}
                   >
                     {loginAlertsLoading
-                      ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-3 text-white" />
-                      : <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${loginAlerts ? 'translate-x-7' : 'translate-x-1'}`} />
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : loginAlerts ? 'Disable' : 'Enable'
                     }
                   </button>
                 </div>
