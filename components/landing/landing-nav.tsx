@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 import type { User } from '@supabase/supabase-js'
 
@@ -76,14 +77,17 @@ export function LandingNav({ user }: LandingNavProps) {
               <ThemeToggle />
 
               {user ? (
-                <Link href="/dashboard">
-                  <Button
-                    size="sm"
-                    className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-5 h-10 gap-1.5 shadow-md shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-lg hover:shadow-green-200"
-                  >
-                    Dashboard <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
+                <div className="flex items-center gap-2">
+                  <NotificationBell />
+                  <Link href="/dashboard">
+                    <Button
+                      size="sm"
+                      className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-5 h-10 gap-1.5 shadow-md shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-lg hover:shadow-green-200"
+                    >
+                      Dashboard <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                </div>
               ) : (
                 <>
                   <Link href="/auth/login">

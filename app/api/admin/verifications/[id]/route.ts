@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendVerificationApprovedEmail, sendVerificationRejectedEmail } from '@/lib/email'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -12,9 +13,10 @@ async function assertAdmin() {
 }
 
 function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createServiceClient(url, key)
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 }
 
 export async function PATCH(
@@ -45,16 +47,50 @@ export async function PATCH(
     .from('vendor_verifications')
     .update(updateData)
     .eq('id', id)
-    .select('vendor_id')
+    .select('vendor_id, full_name')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  if (status === 'approved' && verification?.vendor_id) {
-    await supabase
-      .from('profiles')
-      .update({ seller_verified: true })
-      .eq('id', verification.vendor_id)
+  const vendorId = verification?.vendor_id
+
+  if (vendorId) {
+    if (status === 'approved') {
+      await supabase.from('profiles').update({ seller_verified: true }).eq('id', vendorId)
+    }
+
+    const vendorName = verification?.full_name || 'there'
+
+    const notifPayload =
+      status === 'approved'
+        ? {
+            user_id: vendorId,
+            type: 'verification_approved',
+            title: 'Verification Approved! 🎉',
+            body: 'Congratulations! Your business is now verified. The verified badge is live on your profile.',
+            data: { verification_id: id },
+          }
+        : {
+            user_id: vendorId,
+            type: 'verification_rejected',
+            title: 'Verification Not Approved',
+            body: rejection_reason
+              ? `Reason: ${rejection_reason}. You can correct and resubmit from your profile.`
+              : 'Your verification was not approved. You can correct your details and resubmit.',
+            data: { verification_id: id, rejection_reason },
+          }
+
+    await supabase.from('notifications').insert(notifPayload)
+
+    const { data: { user: vendorUser } } = await supabase.auth.admin.getUserById(vendorId)
+    const email = vendorUser?.email
+    if (email) {
+      if (status === 'approved') {
+        sendVerificationApprovedEmail(email, vendorName).catch(() => {})
+      } else {
+        sendVerificationRejectedEmail(email, vendorName, rejection_reason).catch(() => {})
+      }
+    }
   }
 
   return NextResponse.json({ success: true, status })
