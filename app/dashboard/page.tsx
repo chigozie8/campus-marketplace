@@ -153,11 +153,11 @@ export default async function DashboardPage() {
 
         {/* ── Payout Setup ── */}
         <PayoutSetupCard
-          hasSubaccount={!!(profile as Record<string, unknown>)?.paystack_subaccount_code}
-          accountName={(profile as Record<string, unknown>)?.payout_account_name as string | undefined}
-          savedBankCode={(profile as Record<string, unknown>)?.payout_bank_code as string | undefined}
-          savedBankName={(profile as Record<string, unknown>)?.payout_bank_name as string | undefined}
-          savedAccountNumber={(profile as Record<string, unknown>)?.payout_account_number as string | undefined}
+          hasSubaccount={!!(user.user_metadata?.paystack_subaccount_code)}
+          accountName={user.user_metadata?.payout_account_name as string | undefined}
+          savedBankCode={user.user_metadata?.payout_bank_code as string | undefined}
+          savedBankName={user.user_metadata?.payout_bank_name as string | undefined}
+          savedAccountNumber={user.user_metadata?.payout_account_number as string | undefined}
         />
 
         {/* ── Referral Card ── */}
