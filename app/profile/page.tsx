@@ -52,6 +52,18 @@ export default function ProfilePage() {
   // Login alerts state
   const [loginAlerts, setLoginAlerts] = useState(false)
   const [loginAlertsLoading, setLoginAlertsLoading] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [userCreatedAt, setUserCreatedAt] = useState('')
+
+  // Notification preferences state
+  const [notifPrefs, setNotifPrefs] = useState({
+    messages: true, orders: true, price_alerts: false,
+    promotions: false, weekly_report: true,
+  })
+  const [notifLoading, setNotifLoading] = useState<string | null>(null)
+
+  // Activity state
+  const [activityItems, setActivityItems] = useState<{ label: string; time: string; type: string }[]>([])
 
   const [form, setForm] = useState<ProfileForm>({
     full_name: '', phone: '', whatsapp_number: '',
@@ -88,12 +100,59 @@ export default function ProfilePage() {
         if (verified) { setMfaEnabled(true); setMfaFactorId(verified.id) }
       } catch {}
 
-      // Load login alerts preference
+      // Load login alerts & email
       setLoginAlerts(user.user_metadata?.login_alerts === true)
+      setUserEmail(user.email || '')
+      setUserCreatedAt(user.created_at || '')
+
+      // Load notification preferences
+      const savedNotifs = user.user_metadata?.notifications
+      if (savedNotifs) setNotifPrefs(p => ({ ...p, ...savedNotifs }))
+
+      // Load real activity from products
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, title, created_at, is_available')
+        .eq('seller_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      const items: { label: string; time: string; type: string }[] = []
+      if (products) {
+        for (const p of products) {
+          items.push({ label: `Listed: ${p.title}`, time: formatRelative(p.created_at), type: 'listing' })
+          if (!p.is_available) items.push({ label: `Marked sold: ${p.title}`, time: formatRelative(p.created_at), type: 'sale' })
+        }
+      }
+      if (user.created_at) items.push({ label: 'Joined VendoorX', time: formatRelative(user.created_at), type: 'join' })
+      setActivityItems(items)
 
       setLoading(false)
     })
   }, [router])
+
+  function formatRelative(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 60) return mins <= 1 ? 'Just now' : `${mins} minutes ago`
+    const hrs = Math.floor(mins / 60)
+    if (hrs < 24) return hrs === 1 ? '1 hour ago' : `${hrs} hours ago`
+    const days = Math.floor(hrs / 24)
+    if (days < 7) return days === 1 ? 'Yesterday' : `${days} days ago`
+    const wks = Math.floor(days / 7)
+    if (wks < 5) return wks === 1 ? '1 week ago' : `${wks} weeks ago`
+    return new Date(dateStr).toLocaleDateString('en-NG', { month: 'short', year: 'numeric' })
+  }
+
+  async function toggleNotif(key: string) {
+    setNotifLoading(key)
+    const newPrefs = { ...notifPrefs, [key]: !notifPrefs[key as keyof typeof notifPrefs] }
+    setNotifPrefs(newPrefs)
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({ data: { notifications: newPrefs } })
+    if (error) { toast.error(error.message); setNotifPrefs(notifPrefs) }
+    setNotifLoading(null)
+  }
 
   function setField(key: keyof ProfileForm, value: string) {
     setForm(p => ({ ...p, [key]: value }))
@@ -421,24 +480,37 @@ export default function ProfilePage() {
             </div>
 
             {/* Login Alerts */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card shadow-sm">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${loginAlerts ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-gray-100 dark:bg-muted'}`}>
-                <Bell className={`w-5 h-5 ${loginAlerts ? 'text-blue-600' : 'text-gray-700 dark:text-foreground'}`} />
+            <div className={`rounded-2xl border overflow-hidden shadow-sm transition-all duration-300 ${loginAlerts ? 'border-blue-200 dark:border-blue-900/40' : 'border-gray-100 dark:border-border'}`}>
+              <div className={`flex items-center gap-4 p-4 transition-colors ${loginAlerts ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20' : 'bg-white dark:bg-card'}`}>
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 transition-colors ${loginAlerts ? 'bg-blue-500 shadow-blue-200 dark:shadow-blue-900/30' : 'bg-gray-100 dark:bg-muted'}`}>
+                  <Bell className={`w-5 h-5 ${loginAlerts ? 'text-white' : 'text-gray-500 dark:text-muted-foreground'}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-sm text-gray-900 dark:text-white">Login Alerts</p>
+                    {loginAlerts && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">ON</span>}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Get an email alert on every new sign-in</p>
+                </div>
+                <button
+                  onClick={toggleLoginAlerts}
+                  disabled={loginAlertsLoading}
+                  className={`relative w-12 h-7 rounded-full transition-colors duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 ${loginAlerts ? 'bg-blue-500' : 'bg-gray-200 dark:bg-muted'}`}
+                >
+                  {loginAlertsLoading
+                    ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-2 text-white" />
+                    : <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${loginAlerts ? 'translate-x-6' : 'translate-x-1'}`} />
+                  }
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-gray-900 dark:text-white">Login Alerts</p>
-                <p className="text-xs text-gray-500">{loginAlerts ? 'You\'ll be notified of new sign-ins' : 'Get notified of new sign-ins'}</p>
-              </div>
-              <button
-                onClick={toggleLoginAlerts}
-                disabled={loginAlertsLoading}
-                className={`relative w-11 h-6 rounded-full transition-colors duration-200 disabled:opacity-50 focus:outline-none ${loginAlerts ? 'bg-blue-500' : 'bg-gray-200 dark:bg-muted'}`}
-              >
-                {loginAlertsLoading
-                  ? <Loader2 className="w-3 h-3 animate-spin absolute top-1.5 left-1.5 text-white" />
-                  : <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${loginAlerts ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                }
-              </button>
+              {loginAlerts && userEmail && (
+                <div className="px-4 py-2.5 bg-blue-50/50 dark:bg-blue-950/10 border-t border-blue-100 dark:border-blue-900/20 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                  <p className="text-xs text-blue-700 dark:text-blue-400">
+                    Alerts sent to <span className="font-bold">{userEmail}</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             <button
@@ -459,54 +531,72 @@ export default function ProfilePage() {
 
         {/* Notifications Tab */}
         {tab === 'Notifications' && (
-          <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border">
-            {[
-              { label: 'New Messages', sub: 'When buyers send you a message', on: true },
-              { label: 'New Orders', sub: 'When someone places an order', on: true },
-              { label: 'Price Alerts', sub: 'Price drops on saved items', on: false },
-              { label: 'Promotions', sub: 'VendoorX offers and updates', on: false },
-              { label: 'Weekly Report', sub: 'Your weekly sales summary', on: true },
-            ].map(({ label, sub, on }) => (
-              <div key={label} className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-semibold text-sm text-gray-900 dark:text-white">{label}</p>
-                  <p className="text-xs text-gray-500">{sub}</p>
-                </div>
-                <button
-                  onClick={() => toast.success(`${label} ${on ? 'disabled' : 'enabled'}`)}
-                  className={`relative w-11 h-6 rounded-full transition-all ${on ? 'bg-primary' : 'bg-gray-200 dark:bg-muted'}`}
-                >
-                  <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${on ? 'left-5' : 'left-0.5'}`} />
-                </button>
-              </div>
-            ))}
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Choose what to be notified about</p>
+            <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border overflow-hidden">
+              {([
+                { key: 'messages',     label: 'New Messages',   sub: 'When buyers send you a message',  color: 'bg-green-500' },
+                { key: 'orders',       label: 'New Orders',     sub: 'When someone places an order',    color: 'bg-blue-500'  },
+                { key: 'price_alerts', label: 'Price Alerts',   sub: 'Price drops on items you saved',  color: 'bg-orange-500'},
+                { key: 'promotions',   label: 'Promotions',     sub: 'VendoorX offers and updates',     color: 'bg-purple-500'},
+                { key: 'weekly_report',label: 'Weekly Report',  sub: 'Your weekly sales summary',       color: 'bg-primary'   },
+              ] as const).map(({ key, label, sub, color }) => {
+                const on = notifPrefs[key]
+                const loading = notifLoading === key
+                return (
+                  <div key={key} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 dark:hover:bg-muted/30 transition-colors">
+                    <div className={`w-2 h-8 rounded-full flex-shrink-0 ${on ? color : 'bg-gray-200 dark:bg-muted'} transition-colors`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-white">{label}</p>
+                      <p className="text-xs text-gray-500">{sub}</p>
+                    </div>
+                    <button
+                      onClick={() => toggleNotif(key)}
+                      disabled={!!notifLoading}
+                      className={`relative w-11 h-6 rounded-full transition-colors duration-300 disabled:opacity-60 flex-shrink-0 ${on ? color : 'bg-gray-200 dark:bg-muted'}`}
+                    >
+                      {loading
+                        ? <Loader2 className="w-3 h-3 animate-spin absolute top-1.5 left-1.5 text-white" />
+                        : <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      }
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
 
         {/* Activity Tab */}
         {tab === 'Activity' && (
-          <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border overflow-hidden">
-            {[
-              { label: 'Listed: Lenovo ThinkPad', time: '2 hours ago', type: 'listing' },
-              { label: 'Profile photo updated', time: 'Yesterday', type: 'profile' },
-              { label: 'Received 5-star review', time: '3 days ago', type: 'review' },
-              { label: 'Sold: JBL Bluetooth Speaker', time: '1 week ago', type: 'sale' },
-              { label: 'Joined VendoorX', time: 'Jan 2025', type: 'join' },
-            ].map(({ label, time, type }) => (
-              <div key={label} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/50 dark:hover:bg-muted/30 transition-colors">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black flex-shrink-0 ${
-                  type === 'sale' ? 'bg-green-100 text-green-700' :
-                  type === 'review' ? 'bg-yellow-100 text-yellow-700' :
-                  type === 'listing' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
-                }`}>
-                  {type === 'sale' ? '₦' : type === 'review' ? '★' : type === 'listing' ? '+' : '◎'}
+          <div className="space-y-3">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Your recent activity</p>
+            <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border overflow-hidden">
+              {activityItems.length === 0 ? (
+                <div className="text-center py-12 px-6">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mx-auto mb-3">
+                    <Package className="w-6 h-6 text-gray-400" />
+                  </div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">No activity yet</p>
+                  <p className="text-xs text-gray-400">Your listings and account activity will appear here</p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{label}</p>
-                  <p className="text-xs text-gray-500">{time}</p>
+              ) : activityItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/50 dark:hover:bg-muted/30 transition-colors">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black flex-shrink-0 ${
+                    item.type === 'sale'    ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' :
+                    item.type === 'listing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' :
+                    item.type === 'review'  ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400' :
+                    'bg-gray-100 text-gray-500 dark:bg-muted dark:text-muted-foreground'
+                  }`}>
+                    {item.type === 'sale' ? '₦' : item.type === 'listing' ? '+' : item.type === 'review' ? '★' : '◎'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.label}</p>
+                    <p className="text-xs text-gray-500">{item.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -514,7 +604,7 @@ export default function ProfilePage() {
       {/* ── 2FA Setup Modal ── */}
       {showMfaSetup && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-card w-full max-w-sm rounded-3xl shadow-2xl shadow-black/20 overflow-hidden">
+          <div className="bg-white dark:bg-card w-full max-w-sm rounded-3xl shadow-2xl shadow-black/20 overflow-y-auto max-h-[92vh]">
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100 dark:border-border">
               <div className="flex items-center gap-3">
