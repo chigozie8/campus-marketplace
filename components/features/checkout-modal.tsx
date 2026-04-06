@@ -15,6 +15,7 @@ export interface CheckoutProduct {
   price: number
   images?: string[] | null
   stock_quantity?: number
+  delivery_fee?: number | null
 }
 
 interface CheckoutModalProps {
@@ -34,7 +35,10 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
 
-  const total = product.price * quantity
+  const subtotal = product.price * quantity
+  const deliveryFee = product.delivery_fee ?? 0
+  const platformFee = 100
+  const total = subtotal + deliveryFee + platformFee
 
   async function handleCreateOrder() {
     if (address.trim().length < 5) {
@@ -151,12 +155,19 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
           <div className="space-y-4">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between py-2 border-b border-border/50">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-semibold">₦{total.toLocaleString()}</span>
+                <span className="text-muted-foreground">Subtotal ({quantity}x)</span>
+                <span className="font-semibold">₦{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border/50">
-                <span className="text-muted-foreground">Delivery</span>
-                <span className="font-semibold text-emerald-600">Free</span>
+                <span className="text-muted-foreground">Delivery fee</span>
+                {deliveryFee > 0
+                  ? <span className="font-semibold">₦{deliveryFee.toLocaleString()}</span>
+                  : <span className="font-semibold text-emerald-600">Free</span>
+                }
+              </div>
+              <div className="flex justify-between py-2 border-b border-border/50">
+                <span className="text-muted-foreground">Platform fee</span>
+                <span className="font-semibold">₦{platformFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="font-black">Total</span>

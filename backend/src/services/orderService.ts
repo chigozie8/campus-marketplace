@@ -73,6 +73,10 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   if (status === 'completed') {
     addTrustScoreJob({ type: 'order_completed', vendorId: order.seller_id })
       .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
+    // Release seller earnings from pending to available wallet
+    import('../services/walletService.js')
+      .then(w => w.releaseSellerEarnings(order.seller_id, order.id))
+      .catch(err => logger.warn(`[orderService] Wallet release failed: ${err.message}`))
   } else if (status === 'cancelled') {
     addTrustScoreJob({ type: 'order_failed', vendorId: order.seller_id })
       .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))

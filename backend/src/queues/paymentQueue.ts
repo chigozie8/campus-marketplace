@@ -32,6 +32,14 @@ if (redis) {
       if (order && order.status === 'pending' && status === 'success') {
         await updateOrderStatus(order.id, 'paid')
         logger.info(`[paymentQueue] Order ${order.id} marked as paid.`)
+
+        // Credit seller's wallet (pending until delivery confirmed)
+        try {
+          const { creditSellerPending } = await import('../services/walletService.js')
+          await creditSellerPending(order.seller_id, order.id, order.total_amount)
+        } catch (err) {
+          logger.error(`[paymentQueue] Wallet credit failed for order ${order.id}: ${err}`)
+        }
       } else {
         logger.warn(`[paymentQueue] Order not updated — status="${status}", order_status="${order?.status ?? 'not found'}"`)
       }
@@ -52,6 +60,12 @@ export async function addPaymentJob(data: PaymentJob): Promise<void> {
     const order = await getOrderByReference(data.reference)
     if (order && order.status === 'pending' && data.status === 'success') {
       await updateOrderStatus(order.id, 'paid')
+      try {
+        const { creditSellerPending } = await import('../services/walletService.js')
+        await creditSellerPending(order.seller_id, order.id, order.total_amount)
+      } catch (err) {
+        logger.error(`[paymentQueue] Inline wallet credit failed: ${err}`)
+      }
     }
   }
 }

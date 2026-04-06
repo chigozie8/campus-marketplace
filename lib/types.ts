@@ -34,6 +34,7 @@ export type Product = {
   description: string | null
   price: number
   original_price: number | null
+  delivery_fee: number | null
   currency: string
   condition: 'new' | 'like_new' | 'good' | 'fair'
   images: string[]

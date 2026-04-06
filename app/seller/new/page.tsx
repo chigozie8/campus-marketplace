@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, X, Loader2, CheckCircle,
   Tag, FileText, DollarSign, MapPin, GraduationCap,
-  ImagePlus, Sparkles, Package, Camera, Play, Video,
+  ImagePlus, Sparkles, Package, Camera, Play, Video, Truck,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -43,6 +43,8 @@ export default function NewListingPage() {
     description: '',
     price: '',
     original_price: '',
+    delivery_fee: '',
+    delivery_type: 'free' as 'free' | 'paid',
     condition: 'new',
     category_id: '',
     campus: '',
@@ -146,6 +148,7 @@ export default function NewListingPage() {
       description: form.description || null,
       price: parseFloat(form.price),
       original_price: form.original_price ? parseFloat(form.original_price) : null,
+      delivery_fee: form.delivery_type === 'paid' && form.delivery_fee ? parseFloat(form.delivery_fee) : null,
       condition: form.condition,
       category_id: form.category_id || null,
       campus: form.campus || null,
@@ -365,6 +368,59 @@ export default function NewListingPage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* ── Delivery Fee ── */}
+          <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Truck className="w-4 h-4 text-primary" />
+              <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Delivery</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <button
+                type="button"
+                onClick={() => setField('delivery_type', 'free')}
+                className={`py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all flex flex-col items-center gap-1 ${
+                  form.delivery_type === 'free'
+                    ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
+                    : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:border-gray-400'
+                }`}
+              >
+                <span className="text-base">🚚</span>
+                <span>Free Delivery</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setField('delivery_type', 'paid')}
+                className={`py-3 px-4 rounded-xl border-2 text-sm font-bold transition-all flex flex-col items-center gap-1 ${
+                  form.delivery_type === 'paid'
+                    ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
+                    : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:border-gray-400'
+                }`}
+              >
+                <span className="text-base">💰</span>
+                <span>Set Delivery Fee</span>
+              </button>
+            </div>
+            {form.delivery_type === 'paid' && (
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  Delivery Fee (₦) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={form.delivery_fee}
+                  onChange={e => setField('delivery_fee', e.target.value)}
+                  placeholder="e.g. 500"
+                  min="0"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1.5">This will be added to the product price at checkout.</p>
+              </div>
+            )}
+            {form.delivery_type === 'free' && (
+              <p className="text-xs text-gray-400">Buyers won&apos;t pay anything extra for delivery — great for boosting conversions!</p>
+            )}
           </div>
 
           {/* ── Category & Condition ── */}

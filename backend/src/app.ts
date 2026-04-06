@@ -15,6 +15,7 @@ import orderRoutes from './routes/orderRoutes.js'
 import webhookRoutes from './routes/webhookRoutes.js'
 import verificationRoutes from './routes/verificationRoutes.js'
 import payoutRoutes from './routes/payoutRoutes.js'
+import walletRoutes from './routes/walletRoutes.js'
 
 const app = express()
 
@@ -50,6 +51,7 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/webhooks', webhookRoutes)
 app.use('/api/v1/verification', verificationRoutes)
 app.use('/api/payouts', payoutRoutes)
+app.use('/api/wallets', walletRoutes)
 
 app.use(notFound)
 app.use(errorHandler)

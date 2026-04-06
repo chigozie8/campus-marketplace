@@ -185,11 +185,24 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               )}
 
+              {/* Delivery fee badge */}
+              {p.is_available && (
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-muted-foreground">
+                  <span>🚚</span>
+                  {(p as any).delivery_fee
+                    ? <span>Delivery: <strong className="text-gray-900 dark:text-white">₦{Number((p as any).delivery_fee).toLocaleString()}</strong></span>
+                    : <span className="text-emerald-600 font-semibold">Free delivery</span>
+                  }
+                  <span className="text-gray-300 mx-1">·</span>
+                  <span>₦100 platform fee</span>
+                </div>
+              )}
+
               {/* ── Primary CTA: Buy Now ── */}
               {p.is_available && (
                 <div className="space-y-2">
                   <ProductBuyButton
-                    product={{ id: p.id, title: p.title, price: p.price, images: p.images }}
+                    product={{ id: p.id, title: p.title, price: p.price, images: p.images, delivery_fee: (p as any).delivery_fee ?? null }}
                     className="w-full h-12 rounded-2xl text-base font-bold shadow-lg shadow-primary/20"
                   />
                   <p className="text-xs text-center text-gray-400 dark:text-muted-foreground">
