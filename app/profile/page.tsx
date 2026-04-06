@@ -20,12 +20,20 @@ const TABS = ['Profile', 'Security', 'Notifications', 'Activity', 'Verify'] as c
 type Tab = typeof TABS[number]
 
 const ID_TYPES = [
-  { value: 'nin',                   label: 'NIN' },
-  { value: 'bvn',                   label: 'BVN' },
+  { value: 'nin',                   label: 'NIN (National ID Number)' },
+  { value: 'bvn',                   label: 'BVN (Bank Verification No.)' },
   { value: 'drivers_license',       label: "Driver's Licence" },
   { value: 'international_passport', label: 'International Passport' },
   { value: 'voters_card',           label: "Voter's Card" },
 ] as const
+
+const ID_NUMBER_CONFIG: Record<string, { label: string; placeholder: string; maxLength: number; inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode'] }> = {
+  nin:                   { label: 'NIN (11 digits)',        placeholder: 'e.g. 12345678901',     maxLength: 11, inputMode: 'numeric' },
+  bvn:                   { label: 'BVN (11 digits)',        placeholder: 'e.g. 12345678901',     maxLength: 11, inputMode: 'numeric' },
+  drivers_license:       { label: 'Licence Number',        placeholder: 'e.g. AAD12345678901',  maxLength: 20, inputMode: 'text'    },
+  international_passport:{ label: 'Passport Number',       placeholder: 'e.g. A12345678',       maxLength: 15, inputMode: 'text'    },
+  voters_card:           { label: "Voter's Card Number",   placeholder: 'e.g. 9BE93732AB',      maxLength: 20, inputMode: 'text'    },
+}
 
 const NIGERIAN_STATES = [
   'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
@@ -90,12 +98,15 @@ export default function ProfilePage() {
   const [verifyRejectionReason, setVerifyRejectionReason] = useState('')
   const [verifyLoading, setVerifyLoading] = useState(false)
   const [verifySubmitting, setVerifySubmitting] = useState(false)
-  const [idImageUploading, setIdImageUploading] = useState(false)
+  const [idFrontUploading, setIdFrontUploading] = useState(false)
+  const [idBackUploading, setIdBackUploading] = useState(false)
   const [selfieUploading, setSelfieUploading] = useState(false)
-  const [idImageUrl, setIdImageUrl] = useState('')
+  const [idFrontUrl, setIdFrontUrl] = useState('')
+  const [idBackUrl, setIdBackUrl] = useState('')
   const [selfieUrl, setSelfieUrl] = useState('')
-  const idImageRef = useRef<HTMLInputElement>(null)
-  const selfieRef = useRef<HTMLInputElement>(null)
+  const idFrontRef = useRef<HTMLInputElement>(null)
+  const idBackRef  = useRef<HTMLInputElement>(null)
+  const selfieRef  = useRef<HTMLInputElement>(null)
   const [verifyForm, setVerifyForm] = useState({
     full_name: '', business_name: '', phone_number: '',
     location_city: '', location_state: '',
@@ -190,31 +201,26 @@ export default function ProfilePage() {
       // Load verification status
       setVerifyLoading(true)
       try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL || ''}/api/v1/verification/status`,
-            { headers: { Authorization: `Bearer ${session.access_token}` } }
-          )
-          if (res.ok) {
-            const json = await res.json()
-            if (json.data) {
-              setVerifyStatus(json.data.status as VerifyStatus)
-              setVerifyRejectionReason(json.data.rejection_reason || '')
-              setVerifyForm({
-                full_name:      json.data.full_name      || '',
-                business_name:  json.data.business_name  || '',
-                phone_number:   json.data.phone_number   || '',
-                location_city:  json.data.location_city  || '',
-                location_state: json.data.location_state || '',
-                bank_name:      json.data.bank_name      || '',
-                account_number: json.data.account_number || '',
-                id_type:        json.data.id_type        || 'nin',
-                id_number:      json.data.id_number      || '',
-              })
-              setIdImageUrl(json.data.id_image_url     || '')
-              setSelfieUrl(json.data.selfie_image_url  || '')
-            }
+        const res = await fetch('/api/verification/status')
+        if (res.ok) {
+          const json = await res.json()
+          if (json.data) {
+            setVerifyStatus(json.data.status as VerifyStatus)
+            setVerifyRejectionReason(json.data.rejection_reason || '')
+            setVerifyForm({
+              full_name:      json.data.full_name      || '',
+              business_name:  json.data.business_name  || '',
+              phone_number:   json.data.phone_number   || '',
+              location_city:  json.data.location_city  || '',
+              location_state: json.data.location_state || '',
+              bank_name:      json.data.bank_name      || '',
+              account_number: json.data.account_number || '',
+              id_type:        json.data.id_type        || 'nin',
+              id_number:      json.data.id_number      || '',
+            })
+            setIdFrontUrl(json.data.id_image_url      || '')
+            setIdBackUrl(json.data.id_back_image_url  || '')
+            setSelfieUrl(json.data.selfie_image_url   || '')
           }
         }
       } catch { /* silent */ } finally {
@@ -399,17 +405,30 @@ export default function ProfilePage() {
     setLoginAlertsLoading(false)
   }
 
-  async function handleIdImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleIdFrontChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
-    setIdImageUploading(true)
+    setIdFrontUploading(true)
     try {
       const url = await uploadToCloudinary(file)
-      setIdImageUrl(url)
-      toast.success('ID image uploaded')
+      setIdFrontUrl(url)
+      toast.success('Front of ID uploaded')
     } catch { toast.error('Upload failed — try again') }
-    finally { setIdImageUploading(false) }
+    finally { setIdFrontUploading(false) }
+  }
+
+  async function handleIdBackChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setIdBackUploading(true)
+    try {
+      const url = await uploadToCloudinary(file)
+      setIdBackUrl(url)
+      toast.success('Back of ID uploaded')
+    } catch { toast.error('Upload failed — try again') }
+    finally { setIdBackUploading(false) }
   }
 
   async function handleSelfieChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -426,34 +445,29 @@ export default function ProfilePage() {
   }
 
   async function handleVerifySubmit() {
-    if (!verifyForm.full_name.trim())      { toast.error('Full name is required');        return }
-    if (!verifyForm.business_name.trim())  { toast.error('Business name is required');    return }
-    if (!verifyForm.phone_number.trim())   { toast.error('Phone number is required');     return }
-    if (!verifyForm.location_city.trim())  { toast.error('City is required');             return }
-    if (!verifyForm.location_state)        { toast.error('State is required');            return }
-    if (!verifyForm.bank_name.trim())      { toast.error('Bank name is required');        return }
+    if (!verifyForm.full_name.trim())      { toast.error('Full name is required');              return }
+    if (!verifyForm.business_name.trim())  { toast.error('Business name is required');          return }
+    if (!verifyForm.phone_number.trim())   { toast.error('Phone number is required');           return }
+    if (!verifyForm.location_city.trim())  { toast.error('City is required');                   return }
+    if (!verifyForm.location_state)        { toast.error('State is required');                  return }
+    if (!verifyForm.bank_name.trim())      { toast.error('Bank name is required');              return }
     if (!/^\d{10}$/.test(verifyForm.account_number)) { toast.error('Account number must be 10 digits'); return }
-    if (!verifyForm.id_number.trim())      { toast.error('ID number is required');        return }
-    if (!idImageUrl)                       { toast.error('Please upload your ID image');  return }
-    if (!selfieUrl)                        { toast.error('Please upload your selfie');    return }
+    if (!verifyForm.id_number.trim())      { toast.error('ID number is required');              return }
+    if (!idFrontUrl)                       { toast.error('Please upload the front of your ID'); return }
+    if (!selfieUrl)                        { toast.error('Please upload your selfie with ID'); return }
 
     setVerifySubmitting(true)
     try {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { toast.error('Please log in again'); return }
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || ''}/api/v1/verification/submit`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ ...verifyForm, id_image_url: idImageUrl, selfie_image_url: selfieUrl }),
-        }
-      )
+      const res = await fetch('/api/verification/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...verifyForm,
+          id_image_url:      idFrontUrl,
+          id_back_image_url: idBackUrl || undefined,
+          selfie_image_url:  selfieUrl,
+        }),
+      })
       const json = await res.json()
       if (!res.ok) throw new Error(json.message || 'Submission failed')
       setVerifyStatus('pending')
@@ -1058,14 +1072,18 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">ID Number</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                    {ID_NUMBER_CONFIG[verifyForm.id_type]?.label ?? 'ID Number'}
+                  </label>
                   <div className="relative">
                     <FileImage className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="text"
+                      inputMode={ID_NUMBER_CONFIG[verifyForm.id_type]?.inputMode ?? 'text'}
+                      maxLength={ID_NUMBER_CONFIG[verifyForm.id_type]?.maxLength ?? 50}
                       value={verifyForm.id_number}
                       onChange={e => setVerifyForm(f => ({ ...f, id_number: e.target.value }))}
-                      placeholder="Enter your ID number"
+                      placeholder={ID_NUMBER_CONFIG[verifyForm.id_type]?.placeholder ?? 'Enter your ID number'}
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                     />
                   </div>
@@ -1074,32 +1092,57 @@ export default function ProfilePage() {
                 {/* Image uploads */}
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider pt-2">Document Photos</p>
 
-                {/* ID Image */}
+                {/* ID Front */}
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">ID Photo</label>
-                  <input ref={idImageRef} type="file" accept="image/*" className="hidden" onChange={handleIdImageChange} />
-                  {idImageUrl ? (
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Front of ID <span className="text-red-400">*</span></label>
+                  <p className="text-[11px] text-gray-400 mb-2">Clear photo of the front side of your document.</p>
+                  <input ref={idFrontRef} type="file" accept="image/*" className="hidden" onChange={handleIdFrontChange} />
+                  {idFrontUrl ? (
                     <div className="relative">
-                      <img src={idImageUrl} alt="ID" className="w-full h-32 object-cover rounded-xl border border-gray-200 dark:border-border" />
-                      <button onClick={() => { setIdImageUrl(''); if (idImageRef.current) idImageRef.current.value = '' }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
+                      <img src={idFrontUrl} alt="ID front" className="w-full h-32 object-cover rounded-xl border border-gray-200 dark:border-border" />
+                      <button onClick={() => { setIdFrontUrl(''); if (idFrontRef.current) idFrontRef.current.value = '' }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
                         <X className="w-3 h-3 text-white" />
                       </button>
                     </div>
                   ) : (
                     <button
-                      onClick={() => idImageRef.current?.click()}
-                      disabled={idImageUploading}
+                      onClick={() => idFrontRef.current?.click()}
+                      disabled={idFrontUploading}
                       className="w-full h-24 border-2 border-dashed border-gray-200 dark:border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-muted/50 transition-all"
                     >
-                      {idImageUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Upload className="w-5 h-5 text-gray-400" />}
-                      <span className="text-xs text-gray-400">{idImageUploading ? 'Uploading…' : 'Tap to upload ID photo'}</span>
+                      {idFrontUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Upload className="w-5 h-5 text-gray-400" />}
+                      <span className="text-xs text-gray-400">{idFrontUploading ? 'Uploading…' : 'Tap to upload front of ID'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* ID Back */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Back of ID <span className="text-gray-400 font-normal normal-case">(optional)</span></label>
+                  <p className="text-[11px] text-gray-400 mb-2">Back side — required for NIN slip, driver's licence, voter's card.</p>
+                  <input ref={idBackRef} type="file" accept="image/*" className="hidden" onChange={handleIdBackChange} />
+                  {idBackUrl ? (
+                    <div className="relative">
+                      <img src={idBackUrl} alt="ID back" className="w-full h-32 object-cover rounded-xl border border-gray-200 dark:border-border" />
+                      <button onClick={() => { setIdBackUrl(''); if (idBackRef.current) idBackRef.current.value = '' }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => idBackRef.current?.click()}
+                      disabled={idBackUploading}
+                      className="w-full h-24 border-2 border-dashed border-gray-200 dark:border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-muted/50 transition-all"
+                    >
+                      {idBackUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Upload className="w-5 h-5 text-gray-400" />}
+                      <span className="text-xs text-gray-400">{idBackUploading ? 'Uploading…' : 'Tap to upload back of ID'}</span>
                     </button>
                   )}
                 </div>
 
                 {/* Selfie */}
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Selfie with ID</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Selfie with ID <span className="text-red-400">*</span></label>
                   <p className="text-[11px] text-gray-400 mb-2">Hold your ID next to your face and take a clear photo.</p>
                   <input ref={selfieRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieChange} />
                   {selfieUrl ? (
@@ -1124,7 +1167,7 @@ export default function ProfilePage() {
                 {/* Submit */}
                 <button
                   onClick={handleVerifySubmit}
-                  disabled={verifySubmitting || idImageUploading || selfieUploading}
+                  disabled={verifySubmitting || idFrontUploading || idBackUploading || selfieUploading}
                   className="w-full py-3.5 bg-[#0a0a0a] dark:bg-primary text-white text-sm font-bold rounded-xl hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
                 >
                   {verifySubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Submitting…</> : <><BadgeCheck className="w-4 h-4" />Submit for Verification</>}

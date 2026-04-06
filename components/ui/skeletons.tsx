@@ -97,42 +97,95 @@ export function DashboardSkeleton() {
 
 export function MarketplaceSkeleton() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 h-16 border-b border-border/50 bg-background/80 backdrop-blur-sm flex items-center px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="w-8 h-8 rounded-lg" />
-            <Skeleton className="h-5 w-28" />
+    <div className="min-h-screen bg-[#f8f9fa]">
+      {/* Sticky header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm h-14 flex items-center">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Skeleton className="w-7 h-7 rounded-lg" />
+            <Skeleton className="h-5 w-24" />
           </div>
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-8 w-24 rounded-lg" />
-            <Skeleton className="h-8 w-16 rounded-lg" />
+          <Skeleton className="hidden sm:block h-9 flex-1 max-w-md rounded-xl" />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Skeleton className="h-8 w-20 rounded-xl" />
+            <Skeleton className="h-8 w-16 rounded-xl" />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page title */}
-        <div className="mb-8 space-y-2">
-          <Skeleton className="h-7 w-32" />
-          <Skeleton className="h-4 w-56" />
+      {/* Hero banner */}
+      <div className="bg-[#0a0a0a] py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-3">
+          <Skeleton className="h-4 w-32 rounded-full bg-white/10" />
+          <Skeleton className="h-9 w-56 rounded-lg bg-white/10" />
+          <Skeleton className="h-4 w-72 rounded bg-white/10" />
+          <div className="flex gap-6 pt-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-1">
+                <Skeleton className="h-6 w-14 bg-white/10 rounded" />
+                <Skeleton className="h-3 w-10 bg-white/10 rounded" />
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
-        {/* Filters */}
-        <div className="mb-8 flex gap-3 overflow-hidden">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-24 rounded-full flex-shrink-0" />
+      {/* Mobile search */}
+      <div className="sm:hidden bg-white border-b border-gray-100 px-4 py-3">
+        <Skeleton className="h-10 w-full rounded-xl" />
+      </div>
+
+      {/* Category pills */}
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto flex gap-2 overflow-hidden">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-20 rounded-xl flex-shrink-0" />
           ))}
+        </div>
+      </div>
+
+      {/* Main content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex items-center justify-between mb-5">
+          <div className="space-y-1.5">
+            <Skeleton className="h-5 w-36" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-24 rounded-xl" />
+            <Skeleton className="h-9 w-16 rounded-xl" />
+          </div>
         </div>
 
         {/* Product grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <ProductCardSkeleton key={i} />
+            <MarketplaceCardSkeleton key={i} />
           ))}
         </div>
       </main>
+    </div>
+  )
+}
+
+function MarketplaceCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
+      <div className="aspect-[4/3] bg-gray-100 animate-pulse relative overflow-hidden">
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      </div>
+      <div className="p-2.5 sm:p-3.5 space-y-2">
+        <div className="space-y-1">
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
+        <Skeleton className="h-5 w-1/2" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-3 w-14 rounded-full" />
+          <Skeleton className="h-3 w-12 rounded-full" />
+        </div>
+        <Skeleton className="h-8 sm:h-9 w-full rounded-xl" />
+      </div>
     </div>
   )
 }

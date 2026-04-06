@@ -23,7 +23,8 @@ This project has two services running side-by-side:
   - `lib/query-client.ts` — TanStack Query client singleton
   - `hooks/use-orders.ts` — Order CRUD hooks (useMyOrders, useCreateOrder, useInitializePayment, etc.)
   - `store/` — Zustand state management
-- **Backend URL**: Set via `NEXT_PUBLIC_BACKEND_URL` env var → backend on port 3001
+- **Backend URL**: Set via `NEXT_PUBLIC_BACKEND_URL` env var → backend on port 3001 (only used for non-verification operations; verification now uses Next.js API routes)
+- **Verification API routes**: `app/api/verification/status/route.ts` (GET) and `app/api/verification/submit/route.ts` (POST) use Supabase service role directly — avoids unreachable backend port
 
 ### Backend — Express.js API v2 (VendorX) — TypeScript
 - **Port**: 3001
