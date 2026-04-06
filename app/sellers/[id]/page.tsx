@@ -5,6 +5,7 @@ import {
   ArrowLeft, BadgeCheck, Star, Package, MapPin,
   GraduationCap, MessageCircle, ShoppingBag,
 } from 'lucide-react'
+import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
@@ -116,18 +117,30 @@ export default async function SellerProfilePage({ params }: Props) {
           </div>
         </div>
 
-        {/* WhatsApp CTA */}
-        {whatsappNumber && (
-          <a
-            href={`https://wa.me/${whatsappNumber}?text=Hi! I found you on VendoorX and would like to chat.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-3 mb-6 rounded-2xl bg-[#25d366] text-white font-bold text-sm hover:bg-[#1ebe5d] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Chat on WhatsApp
-          </a>
-        )}
+        {/* Social CTAs */}
+        <div className="space-y-2 mb-6">
+          {whatsappNumber && (
+            <a
+              href={`https://wa.me/${whatsappNumber}?text=Hi! I found you on VendoorX and would like to chat.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-[#25d366] text-white font-bold text-sm hover:bg-[#1ebe5d] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Chat on WhatsApp
+            </a>
+          )}
+          {(profile.instagram_handle || profile.facebook_handle) && (
+            <div className={`grid gap-2 ${profile.instagram_handle && profile.facebook_handle ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {profile.instagram_handle && (
+                <InstagramCTA handle={profile.instagram_handle} variant="primary" label="DM on Instagram" />
+              )}
+              {profile.facebook_handle && (
+                <FacebookCTA handle={profile.facebook_handle} variant="primary" label="Message on Facebook" />
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Listings grid */}
         <div className="mb-4 flex items-center gap-2">

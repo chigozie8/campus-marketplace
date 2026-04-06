@@ -5,6 +5,7 @@ import logger from '../utils/logger.js'
 interface MessageJob {
   from: string
   text: string
+  platform?: 'whatsapp' | 'instagram' | 'facebook'
 }
 
 let messageQueue: Queue | null = null

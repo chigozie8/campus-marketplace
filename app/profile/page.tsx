@@ -7,7 +7,7 @@ import {
   ArrowLeft, Camera, User, Mail, Phone, MapPin,
   GraduationCap, ShieldCheck, Bell, Lock, LogOut,
   ChevronRight, Loader2, CheckCircle2, Edit3, Star,
-  Package, Heart, BadgeCheck, Save,
+  Package, Heart, BadgeCheck, Save, AtSign,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadToCloudinary } from '@/lib/cloudinary'
@@ -20,6 +20,8 @@ interface ProfileForm {
   full_name: string
   phone: string
   whatsapp_number: string
+  instagram_handle: string
+  facebook_handle: string
   university: string
   campus: string
   bio: string
@@ -37,6 +39,7 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<Partial<ProfileForm>>({})
   const [form, setForm] = useState<ProfileForm>({
     full_name: '', phone: '', whatsapp_number: '',
+    instagram_handle: '', facebook_handle: '',
     university: '', campus: '', bio: '', avatar_url: '',
   })
 
@@ -50,6 +53,8 @@ export default function ProfilePage() {
             full_name: data.full_name || '',
             phone: data.phone || '',
             whatsapp_number: data.whatsapp_number || '',
+            instagram_handle: data.instagram_handle || '',
+            facebook_handle: data.facebook_handle || '',
             university: data.university || '',
             campus: data.campus || '',
             bio: data.bio || '',
@@ -216,6 +221,8 @@ export default function ProfilePage() {
               { key: 'full_name', label: 'Full Name', icon: User, placeholder: 'e.g. Chigozie Okonkwo', type: 'text' },
               { key: 'phone', label: 'Phone Number', icon: Phone, placeholder: '+234 800 000 0000', type: 'tel' },
               { key: 'whatsapp_number', label: 'WhatsApp Number', icon: Phone, placeholder: '+234 800 000 0000', type: 'tel' },
+              { key: 'instagram_handle', label: 'Instagram Username', icon: AtSign, placeholder: 'e.g. yourname (without @)', type: 'text' },
+              { key: 'facebook_handle', label: 'Facebook Username / Page ID', icon: AtSign, placeholder: 'e.g. yourname or page.id', type: 'text' },
               { key: 'university', label: 'University', icon: GraduationCap, placeholder: 'e.g. University of Lagos', type: 'text' },
               { key: 'campus', label: 'Campus / Hostel', icon: MapPin, placeholder: 'e.g. Hall 3, Moremi', type: 'text' },
             ].map(({ key, label, icon: Icon, placeholder, type }) => (

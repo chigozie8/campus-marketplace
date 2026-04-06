@@ -1,0 +1,166 @@
+PROJECT: VendoorX
+
+IMPORTANT:
+I already have an existing codebase.
+
+DO NOT rebuild from scratch.
+DO NOT delete working features.
+
+Your task is to:
+- Analyze the current codebase
+- Refactor and upgrade it into a scalable, production-ready SaaS system
+- Improve architecture, not replace blindly
+
+------------------------------------
+
+GOALS:
+
+Transform the existing project into a:
+
+- Multi-tenant SaaS platform
+- Multi-channel commerce system (WhatsApp, Instagram, Facebook)
+- Clean, modular, scalable backend
+
+------------------------------------
+
+STEP 1: CODEBASE ANALYSIS
+
+- Scan the entire project
+- Identify:
+  - current structure
+  - weak architecture
+  - duplicated logic
+  - missing layers
+- Explain findings before making changes
+
+------------------------------------
+
+STEP 2: ARCHITECTURE REFACTOR
+
+Refactor into a modular structure WITHOUT breaking existing logic:
+
+Backend structure should evolve into:
+
+- routes/
+- controllers/
+- services/
+- integrations/
+- middleware/
+- queues/
+- workers/
+- schemas/
+- utils/
+
+Follow:
+Routes → Controllers → Services
+
+------------------------------------
+
+STEP 3: AUTHENTICATION (SUPABASE)
+
+- Replace or integrate existing auth with Supabase Auth
+- Maintain user data safely
+- Add:
+  - session verification middleware
+  - role-based access (admin, vendor)
+
+------------------------------------
+
+STEP 4: MULTI-TENANCY
+
+- Ensure each vendor has isolated data
+- Refactor queries to be tenant-aware
+- Prevent cross-vendor access
+
+------------------------------------
+
+STEP 5: MULTI-PLATFORM UPGRADE
+
+Extend existing WhatsApp logic into:
+
+- Instagram (Meta API ready structure)
+- Facebook Messenger
+
+Create:
+
+/integrations/
+  whatsapp.service.ts
+  instagram.service.ts
+  facebook.service.ts
+
+DO NOT break existing WhatsApp functionality
+
+------------------------------------
+
+STEP 6: UNIFIED INBOX (NEW FEATURE)
+
+- Introduce messages + conversations tables
+- Normalize all platform messages
+- Connect messages to customers and orders
+
+------------------------------------
+
+STEP 7: QUEUE SYSTEM
+
+Integrate:
+
+- BullMQ
+- Upstash Redis
+
+Add queues for:
+- message processing
+- notifications
+- order handling
+
+------------------------------------
+
+STEP 8: VALIDATION
+
+- Introduce Zod schemas gradually
+- Replace unsafe request handling
+- Do not break working endpoints
+
+------------------------------------
+
+STEP 9: PAYMENTS
+
+Upgrade Paystack integration:
+
+- Add webhook verification
+- Improve error handling
+- Ensure order-payment linking
+
+------------------------------------
+
+STEP 10: PERFORMANCE IMPROVEMENTS
+
+- Add pagination to list endpoints
+- Add filtering and search
+- Optimize database queries
+
+------------------------------------
+
+STEP 11: FRONTEND UPGRADE
+
+- Upgrade UI to Next.js 15 + Tailwind + shadcn
+- Improve dashboard UX
+- Keep existing functionality intact
+
+------------------------------------
+
+STEP 12: SAFE REFACTOR RULES
+
+- Do not delete working features without replacement
+- Refactor in small steps
+- Explain every major change
+- Maintain backward compatibility where possible
+
+------------------------------------
+
+FINAL OUTPUT:
+
+- Refactored backend structure
+- New modules added cleanly
+- Explanation of changes
+- Migration steps (if needed)
+- Instructions to run updated project

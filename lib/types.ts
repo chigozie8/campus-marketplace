@@ -4,6 +4,8 @@ export type Profile = {
   avatar_url: string | null
   phone: string | null
   whatsapp_number: string | null
+  instagram_handle: string | null
+  facebook_handle: string | null
   university: string | null
   campus: string | null
   bio: string | null

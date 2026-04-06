@@ -7,6 +7,7 @@ import { Request } from 'express'
 
 const router = Router()
 
+// ─── Paystack ────────────────────────────────────────────────────────────────
 router.post(
   '/paystack',
   webhookLimiter,
@@ -24,7 +25,16 @@ router.post(
   webhookController.paystackWebhook
 )
 
+// ─── WhatsApp ────────────────────────────────────────────────────────────────
 router.get('/whatsapp', webhookController.verifyWhatsApp)
 router.post('/whatsapp', webhookLimiter, webhookController.whatsAppWebhook)
+
+// ─── Instagram ───────────────────────────────────────────────────────────────
+router.get('/instagram', webhookController.verifyInstagram)
+router.post('/instagram', webhookLimiter, webhookController.instagramWebhook)
+
+// ─── Facebook Messenger ───────────────────────────────────────────────────────
+router.get('/facebook', webhookController.verifyFacebook)
+router.post('/facebook', webhookLimiter, webhookController.facebookWebhook)
 
 export default router
