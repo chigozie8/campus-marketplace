@@ -10,6 +10,8 @@ import {
 import { DashboardActions } from '@/components/dashboard-actions'
 import { ProfileCompletion } from '@/components/dashboard/profile-completion'
 import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
+import { ReferralCard } from '@/components/dashboard/referral-card'
+import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
@@ -147,6 +149,9 @@ export default async function DashboardPage() {
             <CopyStoreLink userId={user.id} />
           </div>
         </div>
+
+        {/* ── Referral Card ── */}
+        <ReferralCard />
 
         {/* ── Profile Completion ── */}
         <ProfileCompletion
@@ -354,6 +359,11 @@ export default async function DashboardPage() {
                       }`}>
                         {product.is_available ? 'Active' : 'Sold'}
                       </span>
+                      <BoostListingButton
+                        productId={product.id}
+                        productTitle={product.title}
+                        isBoosted={product.is_featured}
+                      />
                       <DashboardActions productId={product.id} isAvailable={product.is_available} />
                     </div>
                   </div>

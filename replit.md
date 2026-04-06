@@ -59,6 +59,41 @@ This project has two services running side-by-side:
 | `WHATSAPP_PHONE_NUMBER_ID` | Backend only | WhatsApp phone number ID |
 | `WHATSAPP_VERIFY_TOKEN` | Backend only | Webhook verification token |
 
+## Features Added (Post-Migration)
+
+### Critical Fixes
+- **Next.js 16 proxy.ts**: Renamed `middleware.ts` → `proxy.ts` and updated export to `proxy()` per Next.js 16 deprecation requirement
+- **Image position bug**: Fixed `<Link>` wrapper around `<Image fill>` in product card — Link now uses `absolute inset-0` so it's the positioned parent for the Image
+- **LCP optimization**: First product card image gets `priority` prop for eager loading
+
+### New Components
+| Component | Path | Description |
+|---|---|---|
+| SearchAutocomplete | `components/marketplace/search-autocomplete.tsx` | Debounced real-time search dropdown with product previews |
+| MakeOfferDialog | `components/product/make-offer-dialog.tsx` | Buyer offer submission dialog |
+| ReportDialog | `components/product/report-dialog.tsx` | Dispute/report filing dialog |
+| BoostListingButton | `components/dashboard/boost-listing-button.tsx` | Paystack-powered 7-day listing boost (₦1,500) |
+| ReferralCard | `components/dashboard/referral-card.tsx` | Referral code display + share functionality |
+
+### New API Routes
+| Route | Method | Description |
+|---|---|---|
+| `/api/offers` | POST | Submit price offer from buyer to seller |
+| `/api/disputes` | POST | File a dispute/report against a listing |
+| `/api/referral` | GET/POST | Get referral code, track referral conversions |
+| `/api/boost` | POST | Initiate Paystack payment to boost a listing |
+
+### New Libraries
+- `lib/universities.ts` — 80+ Nigerian university email domain map for student verification
+
+### Feature Details
+- **University email verification**: Auto-detects .edu.ng domains on sign-up, sets `is_student_verified: true` in auth metadata
+- **Referral program**: Codes derived from first 8 chars of user UUID; tracked via `?ref=` query param on sign-up URL
+- **Promoted listings**: Paystack payment (₦1,500 / 150,000 kobo) for 7-day featured listing; relies on `is_featured` + `boost_expires_at` DB columns
+- **Video support**: Upload route accepts MP4/WebM/MOV (max 50 MB); ProductGallery detects video URLs and renders `<video>` player; seller form accepts video files
+- **Reviews integration**: ReviewsSection component integrated into product detail page
+- **Dark mode**: Comprehensive dark mode classes audited and added to auth pages (login, sign-up), product detail page, and all new components
+
 ## Replit Migration Notes
 
 - Dev/start scripts updated to bind on `0.0.0.0:5000` for Replit preview compatibility

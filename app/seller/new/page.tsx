@@ -260,11 +260,11 @@ export default function NewListingPage() {
               ref={fileRef}
               type="file"
               multiple
-              accept="image/jpeg,image/png,image/webp,image/gif"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
               className="hidden"
               onChange={handleFileChange}
             />
-            <p className="text-xs text-gray-400 mt-3">First photo is the cover image. JPEG, PNG or WEBP. Max 10 MB each.</p>
+            <p className="text-xs text-gray-400 mt-3">First media is the cover. Images (JPEG/PNG/WEBP, max 10 MB) or videos (MP4/WebM, max 50 MB).</p>
           </div>
 
           {/* ── Item Details ── */}

@@ -53,11 +53,12 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary/30">
-        <Link href={`/marketplace/${product.id}`}>
+        <Link href={`/marketplace/${product.id}`} className="absolute inset-0">
           <Image
             src={imageUrl}
             alt={product.title}
             fill
+            priority={index === 0}
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />

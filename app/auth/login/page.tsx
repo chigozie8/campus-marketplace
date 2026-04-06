@@ -80,7 +80,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-background">
       {/* ── Left panel: solid black branding ── */}
       <div className="hidden lg:flex lg:w-[48%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         {/* Dot-grid pattern */}
@@ -172,12 +172,12 @@ export default function LoginPage() {
         <div className="flex items-center justify-between px-6 py-5 lg:px-10">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to home
           </Link>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-muted-foreground">
             No account?{' '}
             <Link href="/auth/sign-up" className="font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors">
               Sign up free
@@ -190,17 +190,17 @@ export default function LoginPage() {
           <div className="w-full max-w-[420px]">
             {/* Mobile logo */}
             <div className="lg:hidden mb-8">
-              <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
+              <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-1.5">
+              <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">
                 Welcome back
               </h2>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 dark:text-muted-foreground text-sm">
                 Sign in to your VendoorX account
               </p>
             </div>
@@ -209,7 +209,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-4">
               {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                   Email address
                 </Label>
                 <Input
@@ -219,14 +219,14 @@ export default function LoginPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                 />
               </div>
 
               {/* Password */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                     Password
                   </Label>
                   <Link
@@ -244,12 +244,12 @@ export default function LoginPage() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     required
-                    className="h-12 px-4 pr-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                    className="h-12 px-4 pr-12 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-muted-foreground transition-colors p-1"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -265,12 +265,12 @@ export default function LoginPage() {
                     'w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0',
                     rememberMe
                       ? 'bg-[#16a34a] border-[#16a34a]'
-                      : 'border-gray-300 bg-white hover:border-[#16a34a]/50'
+                      : 'border-gray-300 dark:border-border bg-white dark:bg-muted hover:border-[#16a34a]/50'
                   )}
                 >
                   {rememberMe && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                 </button>
-                <span className="text-sm text-gray-600 select-none">Keep me signed in</span>
+                <span className="text-sm text-gray-600 dark:text-foreground select-none">Keep me signed in</span>
               </div>
 
               {/* Submit */}
@@ -290,7 +290,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400 font-medium">OR</span>
+              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">OR</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
 
@@ -298,7 +298,7 @@ export default function LoginPage() {
             <Button
               asChild
               variant="outline"
-              className="w-full h-12 border-2 border-gray-200 hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
+              className="w-full h-12 border-2 border-gray-200 dark:border-border hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all dark:text-foreground"
             >
               <Link href="/auth/sign-up">
                 Create a free account
@@ -307,7 +307,7 @@ export default function LoginPage() {
             </Button>
 
             {/* Trust badges */}
-            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
@@ -322,7 +322,7 @@ export default function LoginPage() {
             </div>
 
             {/* Terms */}
-            <p className="text-center text-[11px] text-gray-400 mt-5 leading-relaxed">
+            <p className="text-center text-[11px] text-gray-400 dark:text-muted-foreground mt-5 leading-relaxed">
               By signing in, you agree to our{' '}
               <Link href="/terms" className="text-[#16a34a] hover:underline">Terms</Link>
               {' '}&{' '}

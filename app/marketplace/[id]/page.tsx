@@ -11,6 +11,9 @@ import { ProductJsonLd } from '@/components/seo/product-jsonld'
 import { ProductInteractions } from '@/components/product/product-interactions'
 import { ShareButton } from '@/components/product/share-button'
 import { ProductGallery } from '@/components/product/product-gallery'
+import { ReviewsSection } from '@/components/reviews-section'
+import { MakeOfferDialog } from '@/components/product/make-offer-dialog'
+import { ReportDialog } from '@/components/product/report-dialog'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -145,7 +148,7 @@ export default async function ProductDetailPage({ params }: Props) {
                   {cond.label}
                 </span>
                 {!p.is_available && (
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-muted text-gray-500 dark:text-muted-foreground">
                     Sold
                   </span>
                 )}
@@ -162,10 +165,10 @@ export default async function ProductDetailPage({ params }: Props) {
                   </span>
                   {p.original_price && p.original_price > p.price && (
                     <>
-                      <span className="text-base text-gray-400 line-through">
+                      <span className="text-base text-gray-400 dark:text-muted-foreground line-through">
                         ₦{p.original_price.toLocaleString()}
                       </span>
-                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2 py-0.5 rounded-full">
                         {Math.round(((p.original_price - p.price) / p.original_price) * 100)}% off
                       </span>
                     </>
@@ -197,7 +200,7 @@ export default async function ProductDetailPage({ params }: Props) {
               {/* Description */}
               {p.description && (
                 <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4">
-                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</h3>
+                  <h3 className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-2">Description</h3>
                   <p className="text-sm text-gray-700 dark:text-muted-foreground leading-relaxed whitespace-pre-line">
                     {p.description}
                   </p>
@@ -206,7 +209,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
               {/* Seller card */}
               <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Seller</h3>
+                <h3 className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-3">Seller</h3>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm flex-shrink-0">
                     {sellerName.charAt(0).toUpperCase()}
@@ -231,6 +234,17 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               </div>
 
+              {/* Make an Offer */}
+              {p.is_available && (
+                <MakeOfferDialog
+                  productId={p.id}
+                  productTitle={p.title}
+                  listingPrice={p.price}
+                  sellerId={p.seller_id}
+                  currentUserId={userId}
+                />
+              )}
+
               {/* Safety tip */}
               <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-800/30">
                 <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
@@ -238,7 +252,21 @@ export default async function ProductDetailPage({ params }: Props) {
                 </p>
               </div>
 
+              {/* Report listing */}
+              <div className="flex justify-center">
+                <ReportDialog
+                  productId={p.id}
+                  productTitle={p.title}
+                  currentUserId={userId}
+                />
+              </div>
+
             </div>
+          </div>
+
+          {/* Reviews section — full width below the grid */}
+          <div className="mt-10 max-w-2xl">
+            <ReviewsSection productId={p.id} sellerId={p.seller_id} />
           </div>
         </main>
       </div>

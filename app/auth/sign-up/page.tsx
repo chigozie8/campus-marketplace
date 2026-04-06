@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   CheckCircle2, ShieldCheck, Sparkles, Lock,
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { detectUniversity } from '@/lib/universities'
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
@@ -57,11 +58,14 @@ function PasswordStrength({ password }: { password: string }) {
 
 type Role = 'buyer' | 'seller' | ''
 
-export default function SignUpPage() {
+function SignUpPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const referralCode = searchParams.get('ref') || ''
   const [role, setRole] = useState<Role>('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [detectedUniversity, setDetectedUniversity] = useState<string | null>(null)
   const [university, setUniversity] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [password, setPassword] = useState('')
@@ -71,6 +75,13 @@ export default function SignUpPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [resending, setResending] = useState(false)
   const [resentAt, setResentAt] = useState<number | null>(null)
+
+  function handleEmailChange(val: string) {
+    setEmail(val)
+    const uni = detectUniversity(val)
+    setDetectedUniversity(uni)
+    if (uni && !university) setUniversity(uni)
+  }
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -85,7 +96,14 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
-        data: { full_name: fullName, whatsapp_number: whatsapp, university, role },
+        data: {
+          full_name: fullName,
+          whatsapp_number: whatsapp,
+          university: university || detectedUniversity || '',
+          role,
+          referred_by: referralCode || null,
+          is_student_verified: !!detectedUniversity,
+        },
       },
     })
     toast.dismiss(toastId)
@@ -120,7 +138,7 @@ export default function SignUpPage() {
   // ── Success state ──
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background px-6">
         <div className="text-center max-w-md">
           <div className="relative w-24 h-24 mx-auto mb-8">
             <div className="absolute inset-0 bg-[#16a34a]/20 rounded-full animate-ping" />
@@ -129,22 +147,22 @@ export default function SignUpPage() {
               <Mail className="w-10 h-10 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-3">Check your inbox</h2>
-          <p className="text-gray-500 leading-relaxed mb-2 text-sm max-w-sm mx-auto">
+          <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-3">Check your inbox</h2>
+          <p className="text-gray-500 dark:text-muted-foreground leading-relaxed mb-2 text-sm max-w-sm mx-auto">
             We sent a confirmation link to{' '}
-            <span className="font-semibold text-gray-900">{email}</span>.
+            <span className="font-semibold text-gray-900 dark:text-white">{email}</span>.
             Click it to activate your VendoorX account.
           </p>
           <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-6 text-left">
             ⚠️ <strong>Check your spam/junk folder</strong> — confirmation emails sometimes land there. If you still don&apos;t see it, click Resend below.
           </p>
-          <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left space-y-2">
+          <div className="bg-gray-50 dark:bg-muted rounded-2xl p-4 mb-6 text-left space-y-2">
             {[
               "Open the email and click the confirmation link",
               "The link expires in 24 hours",
               "After confirming, return here to sign in",
             ].map((tip) => (
-              <div key={tip} className="flex items-start gap-2 text-sm text-gray-600">
+              <div key={tip} className="flex items-start gap-2 text-sm text-gray-600 dark:text-muted-foreground">
                 <CheckCircle2 className="w-4 h-4 text-[#16a34a] mt-0.5 flex-shrink-0" />
                 {tip}
               </div>
@@ -160,7 +178,7 @@ export default function SignUpPage() {
             <button
               onClick={handleResend}
               disabled={resending}
-              className="w-full h-11 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-[#16a34a] hover:text-[#16a34a] transition-all disabled:opacity-50"
+              className="w-full h-11 rounded-xl border-2 border-gray-200 dark:border-border text-sm font-semibold text-gray-700 dark:text-foreground hover:border-[#16a34a] hover:text-[#16a34a] transition-all disabled:opacity-50"
             >
               {resending ? 'Resending…' : 'Resend confirmation email'}
             </button>
@@ -174,7 +192,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-background">
       {/* ── Left panel ── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         <div
@@ -264,12 +282,12 @@ export default function SignUpPage() {
         <div className="flex items-center justify-between px-6 py-5 lg:px-10">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to home
           </Link>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-muted-foreground">
             Have an account?{' '}
             <Link href="/auth/login" className="font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors">
               Sign in
@@ -281,20 +299,20 @@ export default function SignUpPage() {
           <div className="w-full max-w-[440px] pb-10">
             {/* Mobile wordmark */}
             <div className="lg:hidden mb-8">
-              <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
+              <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
             <div className="mb-7">
-              <h2 className="text-3xl font-black text-gray-950 tracking-tight mb-1.5">Create account</h2>
-              <p className="text-gray-500 text-sm">Free forever. No credit card required.</p>
+              <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">Create account</h2>
+              <p className="text-gray-500 dark:text-muted-foreground text-sm">Free forever. No credit card required.</p>
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-4">
               {/* Role selector */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-gray-700">I want to</Label>
+                <Label className="text-sm font-semibold text-gray-700 dark:text-foreground">I want to</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { value: 'buyer' as Role, icon: ShoppingBag, label: 'Buy items', sub: 'Browse & buy' },
@@ -308,7 +326,7 @@ export default function SignUpPage() {
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 text-center',
                         role === value
                           ? 'border-[#16a34a] bg-[#16a34a]/5 text-[#16a34a]'
-                          : 'border-gray-200 hover:border-gray-300 text-gray-600 bg-gray-50'
+                          : 'border-gray-200 dark:border-border hover:border-gray-300 dark:hover:border-border/80 text-gray-600 dark:text-muted-foreground bg-gray-50 dark:bg-muted'
                       )}
                     >
                       <div className={cn(
@@ -331,7 +349,7 @@ export default function SignUpPage() {
 
               {/* Full name */}
               <div className="space-y-1.5">
-                <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700">Full name</Label>
+                <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700 dark:text-foreground">Full name</Label>
                 <Input
                   id="fullName"
                   type="text"
@@ -339,27 +357,33 @@ export default function SignUpPage() {
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                 />
               </div>
 
               {/* Email */}
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">Email address</Label>
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-foreground">Email address</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@university.edu.ng"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => handleEmailChange(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                 />
+                {detectedUniversity && (
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[#16a34a] font-semibold">
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    Student email detected — {detectedUniversity}
+                  </div>
+                )}
               </div>
 
               {/* University */}
               <div className="space-y-1.5">
-                <Label htmlFor="university" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="university" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                   University <span className="text-gray-400 font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
@@ -370,14 +394,14 @@ export default function SignUpPage() {
                     placeholder="e.g. University of Lagos"
                     value={university}
                     onChange={e => setUniversity(e.target.value)}
-                    className="h-12 pl-10 pr-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                    className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                   />
                 </div>
               </div>
 
               {/* WhatsApp */}
               <div className="space-y-1.5">
-                <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                   WhatsApp number <span className="text-gray-400 font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
@@ -388,7 +412,7 @@ export default function SignUpPage() {
                     placeholder="+234 800 000 0000"
                     value={whatsapp}
                     onChange={e => setWhatsapp(e.target.value)}
-                    className="h-12 pl-10 pr-4 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                    className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                   />
                 </div>
                 <p className="text-[11px] text-gray-400">Buyers will contact you directly via WhatsApp</p>
@@ -396,7 +420,7 @@ export default function SignUpPage() {
 
               {/* Password */}
               <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">Password</Label>
+                <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-foreground">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -406,7 +430,7 @@ export default function SignUpPage() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="h-12 px-4 pr-12 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white transition-all rounded-xl"
+                    className="h-12 px-4 pr-12 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                   />
                   <button
                     type="button"
@@ -489,5 +513,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SignUpPageInner />
+    </Suspense>
   )
 }

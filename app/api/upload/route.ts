@@ -31,8 +31,15 @@ export async function POST(req: Request) {
     if (!file || !file.size) {
       return NextResponse.json({ error: 'No file received.' }, { status: 400 })
     }
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large. Max 10 MB.' }, { status: 400 })
+    const isVideo = file.type.startsWith('video/')
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: `File too large. Max ${isVideo ? '50' : '10'} MB.` }, { status: 400 })
+    }
+
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime']
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'Unsupported file type.' }, { status: 400 })
     }
 
     const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase()

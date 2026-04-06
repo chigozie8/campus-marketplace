@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Search, SlidersHorizontal, ShoppingBag, Sparkles } fro
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
+import { SearchAutocomplete } from '@/components/marketplace/search-autocomplete'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { buildMetadata, SITE_URL } from '@/lib/seo'
@@ -204,16 +205,12 @@ export default async function MarketplacePage({
             </div>
 
             {/* Center: Search bar — desktop only */}
-            <div className="hidden sm:flex flex-1 max-w-md relative mx-2">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <form method="GET" action="/marketplace" className="w-full">
-                <input
-                  name="q"
-                  defaultValue={params.q}
-                  placeholder="Search listings…"
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                />
-              </form>
+            <div className="hidden sm:flex flex-1 max-w-md mx-2">
+              <SearchAutocomplete
+                defaultValue={params.q}
+                className="w-full"
+                placeholder="Search listings…"
+              />
             </div>
 
             {/* Right: actions */}
@@ -292,15 +289,11 @@ export default async function MarketplacePage({
 
       {/* Mobile search */}
       <div className="sm:hidden px-4 py-3 bg-white dark:bg-card border-b border-gray-100 dark:border-border">
-        <form method="GET" action="/marketplace" className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            name="q"
-            defaultValue={params.q}
-            placeholder="Search listings…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-          />
-        </form>
+        <SearchAutocomplete
+          defaultValue={params.q}
+          className="w-full"
+          placeholder="Search listings…"
+        />
       </div>
 
       {/* Category pills */}
