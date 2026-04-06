@@ -120,33 +120,34 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        {/* Platform summary */}
+        {/* Quick navigation */}
         <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5 mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Platform Performance</p>
-          <div className="grid grid-cols-3 gap-4">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Quick Navigation</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
-              { href: '/dashboard/orders', icon: ClipboardList, label: 'My Orders', active: false },
-              { href: '/seller/new', icon: Plus, label: 'New Listing', active: false },
-              { href: '/marketplace', icon: ShoppingBag, label: 'Marketplace', active: false },
-              { href: '/orders', icon: ClipboardList, label: 'My Orders', active: false },
-              { href: '/favorites', icon: ShoppingBag, label: 'Saved Items', active: false },
-              { href: '/notifications', icon: Bell, label: 'Notifications', active: false },
-              { href: '/assistant', icon: Bot, label: 'AI Assistant', active: false },
-              { href: '/profile', icon: Settings, label: 'Profile & Settings', active: false },
+              { href: '/dashboard',        icon: LayoutDashboard, label: 'Dashboard',     active: true  },
+              { href: '/seller/new',       icon: Plus,            label: 'New Listing',   active: false },
+              { href: '/marketplace',      icon: ShoppingBag,     label: 'Marketplace',   active: false },
+              { href: '/dashboard/orders', icon: ClipboardList,   label: 'My Orders',     active: false },
+              { href: '/notifications',    icon: Bell,            label: 'Notifications', active: false },
+              { href: '/assistant',        icon: Bot,             label: 'AI Assistant',  active: false },
+              { href: '/favorites',        icon: ShoppingBag,     label: 'Saved Items',   active: false },
+              { href: '/profile',          icon: Settings,        label: 'Settings',      active: false },
             ].map(({ href, icon: Icon, label, active }) => (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
                   active
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 dark:text-sidebar-foreground hover:bg-gray-100 dark:hover:bg-sidebar-accent hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-primary' : ''}`} />
-                {label}
-                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${active ? 'bg-primary/15' : 'bg-gray-100 dark:bg-muted'}`}>
+                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-primary' : 'text-gray-500 dark:text-muted-foreground'}`} />
+                </div>
+                <span className="truncate">{label}</span>
+                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />}
               </Link>
             ))}
           </div>

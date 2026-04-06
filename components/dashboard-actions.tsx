@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Pencil, Trash2, ToggleLeft, ToggleRight,
-  Loader2, Eye, MoreVertical, CheckCircle2, XCircle
+  Pencil, Trash2, Loader2, Eye,
+  MoreVertical, CheckCircle2, XCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -45,14 +45,12 @@ export function DashboardActions({ productId, isAvailable }: Props) {
       toast.error(error.message)
     } else {
       setAvailable(prev => !prev)
-      toast.success(!available ? 'Marked as active' : 'Marked as sold')
+      toast.success(!available ? 'Listing marked as active' : 'Listing marked as sold')
     }
     setToggling(false)
   }
 
-  async function handleDelete() {
-    setOpen(false)
-    if (!confirm('Delete this listing? This cannot be undone.')) return
+  async function performDelete() {
     setDeleting(true)
     const supabase = createClient()
     const { error } = await supabase.from('products').delete().eq('id', productId)
@@ -61,8 +59,44 @@ export function DashboardActions({ productId, isAvailable }: Props) {
       setDeleting(false)
       return
     }
-    toast.success('Listing deleted')
+    toast.success('Listing deleted successfully')
     router.refresh()
+  }
+
+  function handleDelete() {
+    setOpen(false)
+    toast.custom(
+      (id) => (
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl shadow-black/10 p-4 w-[320px]">
+          <div className="flex gap-3 items-start mb-4">
+            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+              <Trash2 className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Delete listing?</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                This will permanently remove your listing. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => toast.dismiss(id)}
+              className="flex-1 px-3 py-2.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => { toast.dismiss(id); performDelete() }}
+              className="flex-1 px-3 py-2.5 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors"
+            >
+              Yes, delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: 'top-center' }
+    )
   }
 
   return (
@@ -79,7 +113,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-1 w-48 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-50 overflow-hidden">
+        <div className="absolute right-0 bottom-full mb-1 w-52 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-50 overflow-hidden">
           <Link
             href={`/marketplace/${productId}`}
             onClick={() => setOpen(false)}
