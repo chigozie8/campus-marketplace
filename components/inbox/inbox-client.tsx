@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { VendorSidebar } from '@/components/vendor/vendor-sidebar'
 import { ConversationList } from './conversation-list'
 import { ChatWindow } from './chat-window'
 import { CustomerPanel } from './customer-panel'
 import { ArrowLeft } from 'lucide-react'
 import type { Conversation, Platform } from '@/lib/types'
+import { useNotificationSound } from '@/hooks/use-notification-sound'
 
 // --- Demo data (replace with real API integration) ---
 const DEMO_CONVERSATIONS: Conversation[] = [
@@ -63,10 +64,34 @@ interface Props {
   products: { id: string; title: string; price: number; images: string[] | null }[]
 }
 
+const DEMO_REPLIES: Record<string, string[]> = {
+  whatsapp: [
+    'Okay, let me check and get back to you shortly 😊',
+    'That sounds great! Can you confirm the price?',
+    'Is it still available? I need it urgently!',
+    'Thanks! I\'ll let my friend know too 🙏',
+    'Can you do delivery to Moremi Hall?',
+  ],
+  instagram: [
+    'Saw your IG post — is this the latest version?',
+    'DM-ing you now! 📩',
+    'Love this! Do you have it in black?',
+    'How long does delivery take on campus?',
+  ],
+  facebook: [
+    'Interested! How do I pay?',
+    'Is the price negotiable?',
+    'What condition is it in? Any scratches?',
+    'Can I pick it up at the library gate?',
+  ],
+}
+
 export function InboxClient({ initials, fullName, email, products }: Props) {
   const [conversations, setConversations] = useState<Conversation[]>(DEMO_CONVERSATIONS)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [filter, setFilter] = useState<Platform | 'all'>('all')
+  const replyTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const { playWhatsApp } = useNotificationSound()
 
   const totalUnread = conversations.reduce((s, c) => s + c.unread_count, 0)
   const active = conversations.find(c => c.id === activeId) || null
@@ -74,6 +99,29 @@ export function InboxClient({ initials, fullName, email, products }: Props) {
   const filtered = filter === 'all'
     ? conversations
     : conversations.filter(c => c.platform === filter)
+
+  function addIncomingMessage(convId: string, platform: string, content: string) {
+    const msg = {
+      id: `m${Date.now()}-in`,
+      conversation_id: convId,
+      direction: 'incoming' as const,
+      content,
+      created_at: new Date().toISOString(),
+      platform: platform as Conversation['platform'],
+    }
+    setConversations(prev => prev.map(c =>
+      c.id === convId
+        ? {
+            ...c,
+            messages: [...c.messages, msg],
+            last_message: content,
+            last_message_at: msg.created_at,
+            unread_count: c.id === activeId ? 0 : c.unread_count + 1,
+          }
+        : c,
+    ))
+    playWhatsApp()
+  }
 
   function sendMessage(content: string) {
     if (!active || !content.trim()) return
@@ -90,6 +138,14 @@ export function InboxClient({ initials, fullName, email, products }: Props) {
         ? { ...c, messages: [...c.messages, msg], last_message: content, last_message_at: msg.created_at }
         : c
     ))
+
+    const replies = DEMO_REPLIES[active.platform] ?? DEMO_REPLIES.whatsapp
+    const reply = replies[Math.floor(Math.random() * replies.length)]
+    const delay = 1800 + Math.random() * 2000
+    const timer = setTimeout(() => {
+      addIncomingMessage(active.id, active.platform, reply)
+    }, delay)
+    replyTimers.current.push(timer)
   }
 
   function markRead(id: string) {

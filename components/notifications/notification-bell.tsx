@@ -8,6 +8,7 @@ import {
   Tag, Star, Loader2, CheckCheck, X, ArrowRight, Info,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useNotificationSound } from '@/hooks/use-notification-sound'
 import { formatDistanceToNow } from 'date-fns'
 
 interface Notification {
@@ -39,6 +40,7 @@ export function NotificationBell() {
   const [dropTop, setDropTop]             = useState(0)
   const [dropRight, setDropRight]         = useState(16)
   const [dropWidth, setDropWidth]         = useState(368)
+  const { playNotification }             = useNotificationSound()
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -78,7 +80,11 @@ export function NotificationBell() {
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'notifications',
           filter: `user_id=eq.${user.id}`,
-        }, payload => { if (active) setNotifications(p => [payload.new as Notification, ...p]) })
+        }, payload => {
+          if (!active) return
+          setNotifications(p => [payload.new as Notification, ...p])
+          playNotification()
+        })
         .subscribe()
     })
 

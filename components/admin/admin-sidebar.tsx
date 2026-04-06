@@ -20,6 +20,7 @@ import {
   Package,
   Megaphone,
   BookOpen,
+  DollarSign,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -36,6 +37,7 @@ const NAV_ITEMS = [
   { label: 'Messages',       href: '/admin/messages',         icon: MessageSquare },
   { label: 'Analytics',      href: '/admin/analytics',        icon: BarChart3 },
   { label: 'Blog',           href: '/admin/blog',             icon: BookOpen },
+  { label: 'Pricing',        href: '/admin/pricing',          icon: DollarSign },
   { label: 'Broadcast',      href: '/admin/broadcast',        icon: Megaphone },
   { label: 'Settings',       href: '/admin/settings',         icon: Settings },
 ]

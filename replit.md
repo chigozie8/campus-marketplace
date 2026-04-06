@@ -2,6 +2,28 @@
 
 ## Recently Completed Features (Latest Session)
 
+### WhatsApp Notification Sound + Pricing Admin Panel
+
+- **`hooks/use-notification-sound.ts`** — Web Audio API sound synthesizer (zero files needed):
+  - `playWhatsApp()` — two-tone ascending ding (G5→C6), exact WhatsApp notification sound
+  - `playNotification()` — three-tone ascending chime for general alerts
+  - Uses `AudioContext` lazily (created on first interaction, respects browser autoplay policies)
+- **Notification bell** (`components/notifications/notification-bell.tsx`) — plays `playNotification()` on every realtime INSERT via Supabase channel
+- **Inbox / Chat** (`components/inbox/inbox-client.tsx`) — plays `playWhatsApp()` when incoming message arrives; also simulates auto-replies 1.8–3.8s after you send a message (demo mode), with platform-appropriate Nigerian campus replies
+- **`scripts/011_pricing.sql`** — Run in Supabase to create `pricing_plans` table with RLS + seed Starter/Growth/Pro plans
+- **`app/api/pricing/route.ts`** — Public GET endpoint — returns active plans ordered by sort_order
+- **`app/api/admin/pricing/route.ts`** — Admin-only GET (all plans) + PUT (update plan) with `requireAdmin()` guard
+- **`components/admin/pricing-editor.tsx`** — Full admin CRUD UI:
+  - Plan cards showing current prices, features, highlight/badge status
+  - Edit modal per plan: name, tagline, monthly/annual price, CTA text + link, badge, highlighted toggle, visible toggle
+  - Feature editor: toggle included/excluded, edit text inline, add new feature, delete, reorder up/down
+- **`app/admin/pricing/page.tsx`** — Admin pricing page with SQL migration reminder banner
+- **Admin sidebar** — "Pricing" with DollarSign icon added between Blog and Broadcast
+- **`components/landing/pricing-section.tsx`** — Now fetches live from `/api/pricing` on mount; falls back to hardcoded data if table not yet seeded; shows plans from DB after load
+
+### Pending User Action
+- Run `scripts/011_pricing.sql` in Supabase SQL Editor to enable the pricing admin panel
+
 ### Blog Navigation + Trust & Safety Section
 - **Blog in landing nav** (`components/landing/landing-nav.tsx`) — "Blog" added to desktop + mobile nav links
 - **Blog in vendor sidebar** (`components/vendor/vendor-sidebar.tsx`) — "Blog" with BookOpen icon added between My Store and Settings; admin sidebar already had Blog
