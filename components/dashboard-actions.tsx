@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Pencil, Trash2, ToggleLeft, ToggleRight, Loader2, ArrowUpRight } from 'lucide-react'
+import {
+  Pencil, Trash2, ToggleLeft, ToggleRight,
+  Loader2, Eye, MoreVertical, CheckCircle2, XCircle
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
@@ -17,8 +20,21 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   const [available, setAvailable] = useState(isAvailable)
   const [toggling, setToggling] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
 
   async function toggleAvailability() {
+    setOpen(false)
     setToggling(true)
     const supabase = createClient()
     const { error } = await supabase
@@ -35,6 +51,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   }
 
   async function handleDelete() {
+    setOpen(false)
     if (!confirm('Delete this listing? This cannot be undone.')) return
     setDeleting(true)
     const supabase = createClient()
@@ -49,39 +66,58 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div className="relative" ref={menuRef}>
       <button
-        onClick={toggleAvailability}
-        disabled={toggling}
-        title={available ? 'Mark as sold' : 'Mark as active'}
-        className={`p-1.5 rounded-lg transition-colors disabled:opacity-50 ${available ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-muted'}`}
+        onClick={() => setOpen(prev => !prev)}
+        className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-700 transition-colors"
+        title="Actions"
+        disabled={toggling || deleting}
       >
-        {toggling
-          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          : available ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+        {(toggling || deleting)
+          ? <Loader2 className="w-4 h-4 animate-spin" />
+          : <MoreVertical className="w-4 h-4" />}
       </button>
-      <Link
-        href={`/seller/edit/${productId}`}
-        className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors"
-        title="Edit listing"
-      >
-        <Pencil className="w-3.5 h-3.5" />
-      </Link>
-      <Link
-        href={`/marketplace/${productId}`}
-        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-muted transition-colors"
-        title="View listing"
-      >
-        <ArrowUpRight className="w-3.5 h-3.5" />
-      </Link>
-      <button
-        onClick={handleDelete}
-        disabled={deleting}
-        title="Delete listing"
-        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
-      >
-        {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-      </button>
+
+      {open && (
+        <div className="absolute right-0 bottom-full mb-1 w-48 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-50 overflow-hidden">
+          <Link
+            href={`/marketplace/${productId}`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+          >
+            <Eye className="w-4 h-4 text-gray-400" />
+            View listing
+          </Link>
+
+          <Link
+            href={`/seller/edit/${productId}`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+          >
+            <Pencil className="w-4 h-4 text-blue-500" />
+            Edit listing
+          </Link>
+
+          <button
+            onClick={toggleAvailability}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-muted transition-colors"
+          >
+            {available
+              ? <><XCircle className="w-4 h-4 text-amber-500" />Mark as sold</>
+              : <><CheckCircle2 className="w-4 h-4 text-emerald-500" />Mark as active</>}
+          </button>
+
+          <div className="border-t border-gray-100 dark:border-border" />
+
+          <button
+            onClick={handleDelete}
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete listing
+          </button>
+        </div>
+      )}
     </div>
   )
 }

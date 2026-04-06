@@ -219,7 +219,7 @@ export default async function DashboardPage() {
               {(products as Product[]).map(product => (
                 <div
                   key={product.id}
-                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/70 dark:hover:bg-muted/30 transition-colors group"
+                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/70 dark:hover:bg-muted/30 transition-colors"
                 >
                   <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
                     {product.images?.[0]
