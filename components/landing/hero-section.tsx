@@ -54,7 +54,7 @@ export function HeroSection({ user }: HeroSectionProps) {
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fafafa] dark:bg-background">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-background">
 
       {/* Subtle radial glow behind content */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-green-400/8 dark:bg-green-500/5 blur-[120px] pointer-events-none" />
