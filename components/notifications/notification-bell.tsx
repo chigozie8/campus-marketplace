@@ -66,9 +66,11 @@ export function NotificationBell() {
     fetchNotifications()
 
     const supabase = createClient()
-    // Use a unique name per mount — Supabase caches channels by name, so reusing
-    // the same name after removeChannel can return an already-subscribed object.
-    const channelName = `notifications-bell-${Date.now()}`
+    // crypto.randomUUID() guarantees uniqueness even under React Strict Mode's
+    // double-invocation, where Date.now() can return the same millisecond twice.
+    // Supabase caches channels by name on the singleton client, so reusing any
+    // name (even timestamp-based) risks getting back an already-subscribed object.
+    const channelName = `notifications-bell-${crypto.randomUUID()}`
     let channelRef: ReturnType<typeof supabase.channel> | null = null
     let active = true
 
