@@ -2,8 +2,6 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || ''
-
 async function getAuthToken(): Promise<string | null> {
   const supabase = createClient()
   const { data } = await supabase.auth.getSession()
@@ -23,7 +21,9 @@ async function request<T>(
 
   if (token) headers['Authorization'] = `Bearer ${token}`
 
-  const url = `${BACKEND_URL}/api${path}`
+  // Route through Next.js proxy so the browser never needs to reach the
+  // backend port directly — works in every deployment environment.
+  const url = `/api/backend${path}`
   const res = await fetch(url, { ...options, headers })
 
   if (!res.ok) {
