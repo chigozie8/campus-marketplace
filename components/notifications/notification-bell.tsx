@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Bell, BadgeCheck, XCircle, ShoppingBag, MessageCircle, Tag, Star, Loader2, Check, CheckCheck } from 'lucide-react'
+import Link from 'next/link'
+import {
+  Bell, BadgeCheck, XCircle, ShoppingBag, MessageCircle,
+  Tag, Star, Loader2, CheckCheck, X, ArrowRight, Info,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -15,23 +19,32 @@ interface Notification {
   created_at: string
 }
 
-const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-  verification_approved: { icon: BadgeCheck,     color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
-  verification_rejected: { icon: XCircle,         color: 'text-red-500',     bg: 'bg-red-50 dark:bg-red-950/30' },
-  new_order:             { icon: ShoppingBag,     color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-950/30' },
-  new_message:           { icon: MessageCircle,   color: 'text-violet-600',  bg: 'bg-violet-50 dark:bg-violet-950/30' },
-  new_listing:           { icon: Tag,             color: 'text-sky-600',     bg: 'bg-sky-50 dark:bg-sky-950/30' },
-  review:                { icon: Star,            color: 'text-amber-500',   bg: 'bg-amber-50 dark:bg-amber-950/30' },
+const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; dot: string }> = {
+  verification_approved: { icon: BadgeCheck,   color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-950/50', dot: 'bg-emerald-500' },
+  verification_rejected: { icon: XCircle,       color: 'text-red-500 dark:text-red-400',         bg: 'bg-red-100 dark:bg-red-950/50',         dot: 'bg-red-500' },
+  new_order:             { icon: ShoppingBag,   color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
+  new_message:           { icon: MessageCircle, color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
+  new_listing:           { icon: Tag,           color: 'text-sky-600 dark:text-sky-400',          bg: 'bg-sky-100 dark:bg-sky-950/50',          dot: 'bg-sky-500' },
+  review:                { icon: Star,          color: 'text-amber-500 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  info:                  { icon: Info,          color: 'text-gray-500 dark:text-gray-400',        bg: 'bg-gray-100 dark:bg-muted',              dot: 'bg-gray-400' },
 }
 
 function getConfig(type: string) {
-  return TYPE_CONFIG[type] ?? { icon: Bell, color: 'text-gray-500', bg: 'bg-gray-100 dark:bg-muted' }
+  return TYPE_CONFIG[type] ?? TYPE_CONFIG.info
+}
+
+function timeAgo(date: string) {
+  try {
+    return formatDistanceToNow(new Date(date), { addSuffix: true })
+  } catch {
+    return ''
+  }
 }
 
 export function NotificationBell() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]           = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]     = useState(true)
   const [markingAll, setMarkingAll] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -44,29 +57,27 @@ export function NotificationBell() {
         const json = await res.json()
         setNotifications(json.notifications ?? [])
       }
-    } catch { /* silent */ }
-    finally { setLoading(false) }
+    } catch { /* silent */ } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
     fetchNotifications()
-
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       const channel = supabase
-        .channel('notifications')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-          (payload) => {
-            setNotifications(prev => [payload.new as Notification, ...prev])
-          }
-        )
+        .channel('notifications-bell')
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          setNotifications(prev => [payload.new as Notification, ...prev])
+        })
         .subscribe()
       return () => { supabase.removeChannel(channel) }
     })
-
     const interval = setInterval(fetchNotifications, 30_000)
     return () => clearInterval(interval)
   }, [fetchNotifications])
@@ -78,6 +89,15 @@ export function NotificationBell() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
 
   async function markOneRead(id: string) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
@@ -98,6 +118,7 @@ export function NotificationBell() {
 
   return (
     <div ref={ref} className="relative">
+      {/* Bell button */}
       <button
         onClick={() => setOpen(o => !o)}
         className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
@@ -105,50 +126,82 @@ export function NotificationBell() {
       >
         <Bell className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         {unread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center text-[9px] font-black bg-red-500 text-white rounded-full px-0.5 leading-none border border-white dark:border-background shadow">
+          <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center text-[9px] font-black bg-red-500 text-white rounded-full px-0.5 leading-none border-2 border-white dark:border-background shadow">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
+      {/* Mobile backdrop */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-card rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-border z-50 overflow-hidden">
+        <div
+          className="fixed inset-0 bg-black/40 z-40 sm:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {open && (
+        <div
+          className={`
+            z-50 bg-white dark:bg-card border border-gray-100 dark:border-border
+            shadow-2xl shadow-black/20 dark:shadow-black/50
+            flex flex-col overflow-hidden
+            /* mobile: fixed bottom sheet */
+            fixed bottom-0 left-0 right-0 rounded-t-3xl max-h-[85dvh]
+            /* desktop: absolute dropdown */
+            sm:absolute sm:bottom-auto sm:left-auto sm:right-0 sm:top-full sm:mt-2
+            sm:w-[22rem] sm:rounded-2xl sm:max-h-[520px]
+          `}
+        >
+          {/* Drag handle (mobile only) */}
+          <div className="flex justify-center pt-3 pb-1 sm:hidden">
+            <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
+          </div>
+
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border flex-shrink-0">
             <div className="flex items-center gap-2">
               <Bell className="w-4 h-4 text-gray-700 dark:text-white" />
               <span className="font-black text-sm text-gray-900 dark:text-white">Notifications</span>
               {unread > 0 && (
-                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-[#16a34a]/10 text-[#16a34a]">
                   {unread} new
                 </span>
               )}
             </div>
-            {unread > 0 && (
+            <div className="flex items-center gap-2">
+              {unread > 0 && (
+                <button
+                  onClick={markAllRead}
+                  disabled={markingAll}
+                  className="flex items-center gap-1 text-[11px] font-bold text-[#16a34a] hover:underline disabled:opacity-50"
+                >
+                  {markingAll
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <CheckCheck className="w-3 h-3" />
+                  }
+                  Mark all read
+                </button>
+              )}
               <button
-                onClick={markAllRead}
-                disabled={markingAll}
-                className="flex items-center gap-1 text-[11px] font-bold text-primary hover:underline disabled:opacity-50"
+                onClick={() => setOpen(false)}
+                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
               >
-                {markingAll
-                  ? <Loader2 className="w-3 h-3 animate-spin" />
-                  : <CheckCheck className="w-3 h-3" />
-                }
-                Mark all read
+                <X className="w-4 h-4" />
               </button>
-            )}
+            </div>
           </div>
 
-          {/* Body */}
-          <div className="max-h-[400px] overflow-y-auto">
+          {/* Scrollable list */}
+          <div className="overflow-y-auto flex-1">
             {loading ? (
-              <div className="flex items-center justify-center py-10">
+              <div className="flex items-center justify-center py-14">
                 <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
               </div>
             ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-3">
-                  <Bell className="w-5 h-5 text-gray-400" />
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-3">
+                  <Bell className="w-6 h-6 text-gray-400" />
                 </div>
                 <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">All caught up!</p>
                 <p className="text-xs text-gray-400">No notifications yet.</p>
@@ -161,30 +214,39 @@ export function NotificationBell() {
                   return (
                     <div
                       key={n.id}
-                      onClick={() => !n.read && markOneRead(n.id)}
-                      className={`flex gap-3 px-4 py-3.5 transition-colors cursor-pointer group ${
+                      onClick={() => { if (!n.read) markOneRead(n.id) }}
+                      className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors active:bg-gray-50 dark:active:bg-muted/30 ${
                         n.read
-                          ? 'hover:bg-gray-50 dark:hover:bg-muted/30'
-                          : 'bg-blue-50/40 dark:bg-blue-950/10 hover:bg-blue-50/60 dark:hover:bg-blue-950/20'
+                          ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
+                          : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
                       }`}
                     >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
-                        <Icon className={`w-4.5 h-4.5 ${cfg.color}`} />
+                      {/* Icon */}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
+                        <Icon className={`w-5 h-5 ${cfg.color}`} />
                       </div>
+
+                      {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <p className={`text-[13px] font-bold leading-tight ${n.read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                        <div className="flex items-start gap-2">
+                          <p className={`text-[13px] font-bold leading-snug flex-1 min-w-0 ${
+                            n.read ? 'text-gray-600 dark:text-gray-300' : 'text-gray-900 dark:text-white'
+                          }`}>
                             {n.title}
                           </p>
                           {!n.read && (
-                            <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1" />
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />
                           )}
                         </div>
                         {n.body && (
-                          <p className="text-[12px] text-gray-500 mt-0.5 leading-relaxed line-clamp-3">{n.body}</p>
+                          <p className={`text-[12px] leading-relaxed mt-0.5 break-words ${
+                            n.read ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'
+                          }`}>
+                            {n.body}
+                          </p>
                         )}
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                        <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">
+                          {timeAgo(n.created_at)}
                         </p>
                       </div>
                     </div>
@@ -194,11 +256,17 @@ export function NotificationBell() {
             )}
           </div>
 
+          {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-border">
-              <p className="text-[11px] text-center text-gray-400">
-                Showing last {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
-              </p>
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-border flex-shrink-0">
+              <Link
+                href="/notifications"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors"
+              >
+                View all notifications
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           )}
         </div>
