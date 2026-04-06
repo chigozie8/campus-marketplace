@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Banknote, CheckCircle2, Loader2, ChevronDown, Search, ExternalLink } from 'lucide-react'
+import { Banknote, CheckCircle2, Loader2, ChevronDown, Search, ExternalLink, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface Bank {
@@ -13,9 +13,18 @@ interface Bank {
 interface PayoutSetupCardProps {
   hasSubaccount: boolean
   accountName?: string
+  savedBankCode?: string
+  savedBankName?: string
+  savedAccountNumber?: string
 }
 
-export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountName }: PayoutSetupCardProps) {
+export function PayoutSetupCard({
+  hasSubaccount: initialHasSubaccount,
+  accountName,
+  savedBankCode,
+  savedBankName,
+  savedAccountNumber,
+}: PayoutSetupCardProps) {
   const [banks, setBanks] = useState<Bank[]>([])
   const [bankSearch, setBankSearch] = useState('')
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null)
@@ -26,6 +35,7 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(initialHasSubaccount)
   const [doneAccountName, setDoneAccountName] = useState(accountName || '')
+  const [editing, setEditing] = useState(false)
 
   useEffect(() => {
     fetch('/api/payouts/banks')
@@ -51,6 +61,14 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
     }
   }, [accountNumber, selectedBank])
 
+  function startEditing() {
+    setEditing(true)
+    setAccountNumber(savedAccountNumber || '')
+    if (savedBankCode && savedBankName) {
+      setSelectedBank({ name: savedBankName, code: savedBankCode, slug: '' })
+    }
+  }
+
   async function handleSave() {
     if (!selectedBank || !resolvedName) {
       toast.error('Please select a bank and verify your account number first.')
@@ -63,6 +81,7 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bankCode: selectedBank.code,
+          bankName: selectedBank.name,
           accountNumber,
           businessName: resolvedName,
         }),
@@ -70,8 +89,9 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
       const j = await res.json()
       if (!res.ok || !j.success) throw new Error(j.message || 'Setup failed')
       setDone(true)
+      setEditing(false)
       setDoneAccountName(resolvedName)
-      toast.success('Payout account linked! You\'ll receive payments directly.')
+      toast.success(editing ? 'Payout account updated!' : 'Payout account linked! You\'ll receive payments directly.')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Setup failed. Try again.')
     } finally {
@@ -83,22 +103,31 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
     b.name.toLowerCase().includes(bankSearch.toLowerCase())
   )
 
-  if (done) {
+  if (done && !editing) {
     return (
       <div className="rounded-2xl border border-green-100 bg-green-50 dark:bg-green-950/20 dark:border-green-900/30 p-5">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
             <CheckCircle2 className="w-5 h-5 text-green-600" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="font-bold text-green-800 dark:text-green-400 text-sm">Payouts Enabled</p>
-            <p className="text-xs text-green-700 dark:text-green-500 mt-0.5">
-              {doneAccountName ? `Account: ${doneAccountName}` : 'Your bank account is linked.'}
+            <p className="text-xs text-green-700 dark:text-green-500 mt-0.5 truncate">
+              {doneAccountName
+                ? `${doneAccountName}${savedBankName ? ` · ${savedBankName}` : ''}${savedAccountNumber ? ` · ****${savedAccountNumber.slice(-4)}` : ''}`
+                : 'Your bank account is linked.'}
             </p>
             <p className="text-xs text-green-600 dark:text-green-500/70 mt-1">
               You receive the full sale price minus a ₦100 platform fee per transaction.
             </p>
           </div>
+          <button
+            onClick={startEditing}
+            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors shrink-0 ml-2"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            Change
+          </button>
         </div>
       </div>
     )
@@ -110,12 +139,22 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
           <Banknote className="w-5 h-5 text-primary" />
         </div>
-        <div>
-          <p className="font-bold text-sm">Set Up Payouts</p>
+        <div className="flex-1">
+          <p className="font-bold text-sm">{editing ? 'Update Payout Account' : 'Set Up Payouts'}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Link your bank account to receive payments directly when a buyer checks out. We deduct a flat ₦100 platform fee per sale.
+            {editing
+              ? 'Enter your new bank details below. Your account will be re-verified.'
+              : 'Link your bank account to receive payments directly when a buyer checks out. We deduct a flat ₦100 platform fee per sale.'}
           </p>
         </div>
+        {editing && (
+          <button
+            onClick={() => { setEditing(false); setAccountNumber(''); setResolvedName(''); setSelectedBank(null) }}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
       {/* Bank selector */}
@@ -204,7 +243,9 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
         disabled={saving || !resolvedName || !selectedBank}
         className="w-full h-10 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Setting up…</> : 'Enable Payouts'}
+        {saving
+          ? <><Loader2 className="w-4 h-4 animate-spin" /> {editing ? 'Updating…' : 'Setting up…'}</>
+          : editing ? 'Update Account' : 'Enable Payouts'}
       </button>
 
       <a

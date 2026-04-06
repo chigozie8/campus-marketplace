@@ -3,17 +3,21 @@
 -- Run in: Supabase Dashboard → SQL Editor
 -- ============================================================
 
--- 1. Add delivery_fee to products
+-- 1. Add payout_bank_name to profiles (for payout account editing)
+alter table public.profiles
+  add column if not exists payout_bank_name text default null;
+
+-- 2. Add delivery_fee to products
 alter table public.products
   add column if not exists delivery_fee numeric(10,2) default null;
 
--- 2. Add delivery_fee + platform_fee to orders
+-- 3. Add delivery_fee + platform_fee to orders
 alter table public.orders
   add column if not exists delivery_fee  numeric(10,2) default 0,
   add column if not exists platform_fee  numeric(10,2) default 100,
   add column if not exists seller_amount numeric(12,2) default null;
 
--- 3. Seller wallets ledger
+-- 4. Seller wallets ledger
 create table if not exists public.wallets (
   id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null unique references public.profiles(id) on delete cascade,

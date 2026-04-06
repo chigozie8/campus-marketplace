@@ -33,28 +33,44 @@ export async function resolveAccount(accountNumber: string, bankCode: string): P
 
 export async function createSellerSubaccount(
   sellerId: string,
-  params: { businessName: string; bankCode: string; accountNumber: string }
+  params: { businessName: string; bankCode: string; bankName?: string; accountNumber: string }
 ): Promise<string> {
-  const payload = {
-    business_name: params.businessName,
-    settlement_bank: params.bankCode,
-    account_number: params.accountNumber,
-    percentage_charge: 0,
+  // Check if seller already has a subaccount — update it instead of creating a new one
+  const existing = await getSellerSubaccountCode(sellerId)
+
+  let subaccountCode: string
+
+  if (existing) {
+    const { data } = await paystackClient.put(`/subaccount/${existing}`, {
+      business_name: params.businessName,
+      settlement_bank: params.bankCode,
+      account_number: params.accountNumber,
+    })
+    if (!data.status) {
+      throw Object.assign(new Error(data.message ?? 'Paystack subaccount update failed.'), { status: 400 })
+    }
+    subaccountCode = data.data.subaccount_code ?? existing
+    logger.info(`Paystack subaccount updated for seller ${sellerId}: ${subaccountCode}`)
+  } else {
+    const { data } = await paystackClient.post('/subaccount', {
+      business_name: params.businessName,
+      settlement_bank: params.bankCode,
+      account_number: params.accountNumber,
+      percentage_charge: 0,
+    })
+    if (!data.status) {
+      throw Object.assign(new Error(data.message ?? 'Paystack subaccount creation failed.'), { status: 400 })
+    }
+    subaccountCode = data.data.subaccount_code
+    logger.info(`Paystack subaccount created for seller ${sellerId}: ${subaccountCode}`)
   }
-
-  const { data } = await paystackClient.post('/subaccount', payload)
-
-  if (!data.status) {
-    throw Object.assign(new Error(data.message ?? 'Paystack subaccount creation failed.'), { status: 400 })
-  }
-
-  const subaccountCode: string = data.data.subaccount_code
 
   const { error } = await supabaseAdmin
     .from('profiles')
     .update({
       paystack_subaccount_code: subaccountCode,
       payout_bank_code: params.bankCode,
+      payout_bank_name: params.bankName ?? null,
       payout_account_number: params.accountNumber,
       payout_account_name: params.businessName,
       updated_at: new Date().toISOString(),
@@ -65,7 +81,6 @@ export async function createSellerSubaccount(
     logger.warn(`[payoutService] Could not persist subaccount for ${sellerId}: ${error.message}`)
   }
 
-  logger.info(`Paystack subaccount created for seller ${sellerId}: ${subaccountCode}`)
   return subaccountCode
 }
 

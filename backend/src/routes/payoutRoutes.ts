@@ -34,7 +34,7 @@ router.post(
   requireRole('vendor', 'admin'),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { bankCode, accountNumber, businessName } = req.body
+      const { bankCode, bankName, accountNumber, businessName } = req.body
       if (!bankCode || !accountNumber || !businessName) {
         res.status(400).json({ success: false, message: 'bankCode, accountNumber, and businessName are required.' })
         return
@@ -44,6 +44,7 @@ router.post(
       const subaccountCode = await payoutService.createSellerSubaccount(sellerId, {
         businessName,
         bankCode,
+        bankName: bankName || '',
         accountNumber,
       })
 

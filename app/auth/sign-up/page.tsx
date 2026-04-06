@@ -33,7 +33,7 @@ function PasswordStrength({ password }: { password: string }) {
             key={i}
             className={cn(
               'h-1.5 flex-1 rounded-full transition-all duration-300',
-              i < score ? barColor : 'bg-gray-200'
+              i < score ? barColor : 'bg-gray-200 dark:bg-muted'
             )}
           />
         ))}
@@ -331,7 +331,7 @@ function SignUpPageInner() {
                     >
                       <div className={cn(
                         'w-9 h-9 rounded-lg flex items-center justify-center transition-colors',
-                        role === value ? 'bg-[#16a34a]/15' : 'bg-gray-200'
+                        role === value ? 'bg-[#16a34a]/15' : 'bg-gray-200 dark:bg-muted'
                       )}>
                         <Icon className="w-4 h-4" />
                       </div>
