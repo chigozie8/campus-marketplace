@@ -482,47 +482,85 @@ export default function ProfilePage() {
             </div>
 
             {/* Login Alerts */}
-            <div className={`rounded-3xl overflow-hidden shadow-lg transition-all duration-500 ${loginAlerts ? 'shadow-blue-200/60 dark:shadow-blue-900/40' : 'shadow-gray-100 dark:shadow-black/20'}`}>
-              <div className={`relative p-5 transition-all duration-500 ${loginAlerts ? 'bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600' : 'bg-white dark:bg-card border border-gray-100 dark:border-border'}`}>
-                {/* bg decoration */}
+            <div className={`relative rounded-3xl overflow-hidden transition-all duration-500 ${
+              loginAlerts
+                ? 'shadow-xl shadow-[#16a34a]/20'
+                : 'shadow-sm shadow-gray-100 dark:shadow-black/20'
+            }`}>
+              {/* Background */}
+              <div className={`relative p-5 transition-all duration-500 ${
+                loginAlerts
+                  ? 'bg-[#0a0a0a]'
+                  : 'bg-white dark:bg-card border border-gray-100 dark:border-border'
+              }`}>
+                {/* Dot grid (active state) */}
                 {loginAlerts && (
-                  <>
-                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 -translate-y-10 translate-x-10" />
-                    <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-white/5 translate-y-8 -translate-x-6" />
-                  </>
+                  <div
+                    className="absolute inset-0 opacity-[0.06]"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+                      backgroundSize: '20px 20px',
+                    }}
+                  />
                 )}
+                {/* Green glow blob */}
+                {loginAlerts && (
+                  <div className="absolute bottom-0 right-0 w-40 h-40 bg-[#16a34a]/20 rounded-full blur-2xl pointer-events-none" />
+                )}
+
                 <div className="relative flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${loginAlerts ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-950/30'}`}>
+                  {/* Icon */}
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                    loginAlerts
+                      ? 'bg-[#16a34a]/20 border border-[#16a34a]/30'
+                      : 'bg-gray-100 dark:bg-muted border border-gray-200 dark:border-border'
+                  }`}>
                     {loginAlerts
-                      ? <ShieldCheck className="w-7 h-7 text-white" />
-                      : <ShieldAlert className="w-7 h-7 text-blue-500" />
+                      ? <ShieldCheck className="w-7 h-7 text-[#4ade80]" />
+                      : <ShieldAlert className="w-7 h-7 text-gray-500 dark:text-muted-foreground" />
                     }
                   </div>
+
+                  {/* Text */}
                   <div className="flex-1 min-w-0 pt-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className={`font-black text-base ${loginAlerts ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Login Alerts</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className={`font-black text-base tracking-tight ${loginAlerts ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                        Login Alerts
+                      </p>
                       {loginAlerts && (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/25 text-white tracking-wider">PROTECTED</span>
+                        <span className="inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full bg-[#16a34a]/25 text-[#4ade80] tracking-widest border border-[#16a34a]/30 uppercase">
+                          <span className="w-1 h-1 rounded-full bg-[#4ade80] animate-pulse" />
+                          Active
+                        </span>
                       )}
                     </div>
-                    <p className={`text-xs leading-relaxed ${loginAlerts ? 'text-blue-100' : 'text-gray-500'}`}>
-                      {loginAlerts ? 'You\'ll get an instant email whenever someone logs into your account.' : 'Get notified instantly when someone logs into your account.'}
+                    <p className={`text-xs leading-relaxed ${loginAlerts ? 'text-white/50' : 'text-gray-500'}`}>
+                      {loginAlerts
+                        ? "Instant email alert on every new sign-in to your account."
+                        : 'Get notified instantly when someone logs into your account.'}
                     </p>
                     {loginAlerts && userEmail && (
-                      <div className="mt-3 inline-flex items-center gap-2 bg-white/20 rounded-xl px-3 py-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse flex-shrink-0" />
-                        <p className="text-xs text-white font-medium truncate">{userEmail}</p>
+                      <div className="mt-3 inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-xl px-3 py-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse flex-shrink-0" />
+                        <p className="text-xs text-white/70 font-medium truncate">{userEmail}</p>
                       </div>
                     )}
                   </div>
+
+                  {/* Toggle */}
                   <button
                     onClick={toggleLoginAlerts}
                     disabled={loginAlertsLoading}
-                    className={`relative w-14 h-7 rounded-full transition-all duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 mt-1 ${loginAlerts ? 'bg-white/30' : 'bg-gray-200 dark:bg-muted'}`}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 mt-1 ${
+                      loginAlerts
+                        ? 'bg-[#16a34a] shadow-lg shadow-[#16a34a]/40'
+                        : 'bg-gray-200 dark:bg-muted'
+                    }`}
+                    aria-label={loginAlerts ? 'Disable login alerts' : 'Enable login alerts'}
                   >
                     {loginAlertsLoading
                       ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-3 text-white" />
-                      : <span className={`absolute top-1 w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${loginAlerts ? 'bg-white translate-x-7' : 'bg-white translate-x-1'}`} />
+                      : <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${loginAlerts ? 'translate-x-7' : 'translate-x-1'}`} />
                     }
                   </button>
                 </div>
@@ -549,16 +587,22 @@ export default function ProfilePage() {
         {tab === 'Notifications' && (
           <div className="space-y-4">
             {/* Header card */}
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-5 shadow-lg shadow-purple-200/50 dark:shadow-purple-900/30">
-              <div className="absolute top-0 right-0 w-28 h-28 rounded-full bg-white/10 -translate-y-8 translate-x-8" />
-              <div className="absolute bottom-0 left-10 w-16 h-16 rounded-full bg-white/10 translate-y-6" />
+            <div className="relative rounded-3xl overflow-hidden bg-[#0a0a0a] p-5 shadow-xl shadow-black/20">
+              <div
+                className="absolute inset-0 opacity-[0.07]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                }}
+              />
+              <div className="absolute bottom-0 right-0 w-36 h-36 bg-[#16a34a]/20 rounded-full blur-2xl pointer-events-none" />
               <div className="relative flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Bell className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-2xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center flex-shrink-0">
+                  <Bell className="w-6 h-6 text-[#4ade80]" />
                 </div>
                 <div>
-                  <p className="font-black text-white text-base">Notifications</p>
-                  <p className="text-purple-100 text-xs mt-0.5">Control what updates you receive</p>
+                  <p className="font-black text-white text-base tracking-tight">Notifications</p>
+                  <p className="text-white/40 text-xs mt-0.5">Control what updates you receive</p>
                 </div>
               </div>
             </div>
@@ -602,63 +646,84 @@ export default function ProfilePage() {
 
         {/* Activity Tab */}
         {tab === 'Activity' && (
-          <div className="space-y-4">
-            {/* Header */}
-            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 p-5 shadow-lg shadow-orange-200/50 dark:shadow-orange-900/30">
-              <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/10 -translate-y-6 translate-x-6" />
-              <div className="absolute bottom-0 left-8 w-14 h-14 rounded-full bg-white/10 translate-y-5" />
+          <div className="space-y-3">
+            {/* Header — dark card with green accent */}
+            <div className="relative rounded-3xl overflow-hidden bg-[#0a0a0a] p-5 shadow-xl shadow-black/20">
+              {/* Dot grid */}
+              <div
+                className="absolute inset-0 opacity-[0.07]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '20px 20px',
+                }}
+              />
+              <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#16a34a]/20 rounded-full blur-2xl pointer-events-none" />
               <div className="relative flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <BarChart2 className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-2xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center flex-shrink-0">
+                  <BarChart2 className="w-6 h-6 text-[#4ade80]" />
                 </div>
                 <div>
-                  <p className="font-black text-white text-base">Recent Activity</p>
-                  <p className="text-orange-100 text-xs mt-0.5">Your listings and account history</p>
+                  <p className="font-black text-white text-base tracking-tight">Recent Activity</p>
+                  <p className="text-white/40 text-xs mt-0.5">Your listings and account history</p>
                 </div>
+                {activityItems.length > 0 && (
+                  <div className="ml-auto">
+                    <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-full bg-[#16a34a]/20 border border-[#16a34a]/30 text-[#4ade80] text-xs font-black">
+                      {activityItems.length}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             {activityItems.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-gray-200 dark:border-border bg-gray-50/50 dark:bg-muted/20 text-center py-14 px-6">
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted dark:to-muted flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-8 h-8 text-gray-300 dark:text-muted-foreground" />
+              <div className="rounded-3xl border border-dashed border-gray-200 dark:border-border bg-white dark:bg-card text-center py-14 px-6 shadow-sm">
+                <div className="w-16 h-16 rounded-3xl bg-[#0a0a0a] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-black/20">
+                  <Package className="w-7 h-7 text-white/30" />
                 </div>
-                <p className="text-base font-black text-gray-900 dark:text-white mb-1">Nothing here yet</p>
+                <p className="text-base font-black text-gray-900 dark:text-white mb-1.5 tracking-tight">Nothing here yet</p>
                 <p className="text-xs text-gray-400 leading-relaxed">Your listings, sales, and account<br />activity will show up here.</p>
               </div>
             ) : (
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-amber-300 via-orange-300 to-rose-200 dark:from-amber-900 dark:via-orange-900 dark:to-rose-900 rounded-full" />
-
-                <div className="space-y-3">
+              <div className="bg-white dark:bg-card rounded-3xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
+                <div className="divide-y divide-gray-50 dark:divide-border">
                   {activityItems.map((item, i) => {
                     const isSale    = item.type === 'sale'
                     const isListing = item.type === 'listing'
                     const isReview  = item.type === 'review'
                     const Icon = isSale ? Banknote : isListing ? Tag : isReview ? Star : UserPlus
-                    const gradient = isSale    ? 'from-emerald-400 to-green-500'
-                                   : isListing ? 'from-blue-400 to-indigo-500'
-                                   : isReview  ? 'from-yellow-400 to-amber-500'
-                                   : 'from-violet-400 to-purple-500'
-                    const cardBg   = isSale    ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/20'
-                                   : isListing ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/20'
-                                   : isReview  ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/20'
-                                   : 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/20'
+
+                    const iconBg    = isSale    ? 'bg-emerald-500'
+                                    : isListing ? 'bg-sky-500'
+                                    : isReview  ? 'bg-amber-500'
+                                    : 'bg-[#16a34a]'
+                    const labelColor = isSale    ? 'text-emerald-600 dark:text-emerald-400'
+                                     : isListing ? 'text-sky-600 dark:text-sky-400'
+                                     : isReview  ? 'text-amber-600 dark:text-amber-400'
+                                     : 'text-[#16a34a]'
+                    const typeName  = isSale ? 'Sale' : isListing ? 'Listing' : isReview ? 'Review' : 'Account'
+
                     return (
-                      <div key={i} className="flex items-center gap-4 pl-0">
-                        {/* Timeline dot / icon */}
-                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 z-10 shadow-md`}>
-                          <Icon className="w-5 h-5 text-white" />
+                      <div key={i} className={`flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/70 dark:hover:bg-muted/30 ${i === 0 ? '' : ''}`}>
+                        {/* Icon */}
+                        <div className={`w-10 h-10 rounded-2xl ${iconBg} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                          <Icon className="w-4.5 h-4.5 text-white" />
                         </div>
-                        {/* Card */}
-                        <div className={`flex-1 rounded-2xl border p-4 ${cardBg} ${i === 0 ? 'shadow-sm' : ''}`}>
+                        {/* Text */}
+                        <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{item.label}</p>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
-                            <p className="text-xs text-gray-500">{item.time}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${labelColor}`}>{typeName}</span>
+                            <span className="text-gray-300 dark:text-border text-xs">·</span>
+                            <span className="text-xs text-gray-400">{item.time}</span>
                           </div>
                         </div>
+                        {/* Latest badge */}
+                        {i === 0 && (
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#16a34a]/10 text-[#16a34a] border border-[#16a34a]/20 uppercase tracking-wider flex-shrink-0">
+                            Latest
+                          </span>
+                        )}
                       </div>
                     )
                   })}
