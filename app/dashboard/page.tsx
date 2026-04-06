@@ -12,6 +12,7 @@ import { ProfileCompletion } from '@/components/dashboard/profile-completion'
 import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
 import { ReferralCard } from '@/components/dashboard/referral-card'
 import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
+import { BoostStoreButton } from '@/components/dashboard/boost-store-button'
 import { PayoutSetupCard } from '@/components/dashboard/payout-setup-card'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { Button } from '@/components/ui/button'
@@ -148,6 +149,10 @@ export default async function DashboardPage() {
               <p className="text-[11px] text-gray-400 mt-0.5">Send buyers directly to your listings</p>
             </div>
             <CopyStoreLink userId={user.id} fullName={profile?.full_name} />
+            <div className="pt-1 border-t border-gray-100 dark:border-border">
+              <p className="text-[10px] text-gray-400 mb-1.5 uppercase font-bold tracking-wide">Feature your store</p>
+              <BoostStoreButton storeBoostExpiresAt={user.user_metadata?.store_boost_expires_at as string | undefined} />
+            </div>
           </div>
         </div>
 

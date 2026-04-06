@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { MapPin, Star, BadgeCheck, MessageCircle, Package } from 'lucide-react'
+import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
 
 interface PageProps {
@@ -81,6 +81,9 @@ export default async function StorePage({ params }: PageProps) {
     image: seller.avatar_url || undefined,
   }
 
+  const storeBoostExpiry = (seller as Record<string, unknown>).store_boost_expires_at as string | undefined
+  const isStoreFeatured = !!storeBoostExpiry && new Date(storeBoostExpiry) > new Date()
+
   return (
     <>
       <script
@@ -106,8 +109,16 @@ export default async function StorePage({ params }: PageProps) {
 
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
+          {/* Featured Store banner */}
+          {isStoreFeatured && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary/10 to-emerald-50 dark:from-primary/15 dark:to-emerald-950/20 border border-primary/20">
+              <Zap className="w-4 h-4 text-primary flex-shrink-0 fill-primary" />
+              <p className="text-xs font-bold text-primary">Featured Store — verified top seller on VendoorX</p>
+            </div>
+          )}
+
           {/* Seller profile card */}
-          <div className="bg-white dark:bg-card rounded-2xl border border-border p-5">
+          <div className={`bg-white dark:bg-card rounded-2xl border p-5 ${isStoreFeatured ? 'border-primary/30 ring-1 ring-primary/10' : 'border-border'}`}>
             <div className="flex items-start gap-4">
               {/* Avatar */}
               <div className="w-16 h-16 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -123,6 +134,11 @@ export default async function StorePage({ params }: PageProps) {
                   <h1 className="text-lg font-black text-foreground">{name}</h1>
                   {seller.seller_verified && (
                     <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" />
+                  )}
+                  {isStoreFeatured && (
+                    <span className="flex items-center gap-0.5 text-[10px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">
+                      <Zap className="w-2.5 h-2.5 fill-white" /> Featured
+                    </span>
                   )}
                 </div>
 
