@@ -56,7 +56,8 @@ export default async function AdminOrdersPage() {
         ))}
       </div>
 
-      <AdminOrdersTable orders={all} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <AdminOrdersTable orders={all as any} />
     </div>
   )
 }

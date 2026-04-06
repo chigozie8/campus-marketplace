@@ -24,7 +24,8 @@ export default function FavoritesPage() {
         .order('created_at', { ascending: false })
         .then(({ data }) => {
           const favProducts = (data || [])
-            .map((f: { products: Product | null }) => f.products)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((f: any) => Array.isArray(f.products) ? f.products[0] : f.products)
             .filter(Boolean) as Product[]
           setProducts(favProducts)
           setLoading(false)

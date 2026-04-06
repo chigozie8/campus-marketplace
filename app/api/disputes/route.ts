@@ -36,12 +36,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    await supabase.from('notifications').insert({
-      user_id: user.id,
-      title: 'Report Received',
-      message: `Your report for "${product.title}" has been received. Our team will review it within 24 hours.`,
-      type: 'system',
-    }).then(() => {}).catch(() => {})
+    try {
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        title: 'Report Received',
+        message: `Your report for "${product.title}" has been received. Our team will review it within 24 hours.`,
+        type: 'system',
+      })
+    } catch { /* non-critical */ }
 
     return NextResponse.json({ success: true })
   } catch (err) {

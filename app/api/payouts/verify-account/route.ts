@@ -5,6 +5,8 @@ const BACKEND_URL = 'http://localhost:3001'
 
 export async function GET(req: Request) {
   const supabase = await createClient()
+  if (!supabase) return NextResponse.json({ success: false, message: 'Service unavailable' }, { status: 503 })
+
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
 

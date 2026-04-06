@@ -240,14 +240,11 @@ export default async function SellerProfilePage({ params }: Props) {
 
             {/* Individual review cards */}
             <div className="space-y-3">
-              {(reviews as Array<{
-                id: string
-                rating: number
-                comment: string | null
-                created_at: string
-                profiles: { full_name: string | null; avatar_url: string | null } | null
-              }>).map(review => {
-                const reviewer = review.profiles
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {(reviews as any[]).map((review: any) => {
+                const profilesRaw = review.profiles
+                const reviewer: { full_name: string | null; avatar_url: string | null } | null =
+                  Array.isArray(profilesRaw) ? (profilesRaw[0] ?? null) : profilesRaw
                 const reviewerName = reviewer?.full_name || 'Anonymous'
                 const reviewerInitials = reviewerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
                 return (

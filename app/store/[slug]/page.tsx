@@ -12,6 +12,7 @@ interface PageProps {
 
 async function getSellerBySlug(slug: string) {
   const supabase = await createClient()
+  if (!supabase) return null
 
   const idPrefix = slug.slice(-6)
 

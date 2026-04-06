@@ -58,10 +58,12 @@ export async function GET(req: Request) {
       })
 
       // Also try profiles table (works after migration 009)
-      await supabase
-        .from('profiles')
-        .update({ store_boost_expires_at: expiresIso } as Record<string, string>)
-        .eq('id', userId)
+      if (supabase) {
+        await supabase
+          .from('profiles')
+          .update({ store_boost_expires_at: expiresIso } as Record<string, string>)
+          .eq('id', userId)
+      }
 
       return NextResponse.redirect(`${siteUrl}/dashboard?boost=success&type=store`)
     }
@@ -69,6 +71,10 @@ export async function GET(req: Request) {
     // Listing boost
     if (!productId) {
       return NextResponse.redirect(`${siteUrl}/dashboard?boost=failed&reason=no_product`)
+    }
+
+    if (!supabase) {
+      return NextResponse.redirect(`${siteUrl}/dashboard?boost=failed&reason=service_unavailable`)
     }
 
     const { error } = await supabase

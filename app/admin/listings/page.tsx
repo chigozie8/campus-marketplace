@@ -24,7 +24,8 @@ export default async function AdminListingsPage() {
           {(products ?? []).length} total {(products ?? []).length === 1 ? 'listing' : 'listings'}
         </p>
       </div>
-      <AdminListingsTable products={products ?? []} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <AdminListingsTable products={(products ?? []) as any} />
     </div>
   )
 }

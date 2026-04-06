@@ -1,6 +1,39 @@
 # Campus Marketplace / VendorX
 
-## Recently Completed Features
+## Recently Completed Features (Latest Session)
+
+### TypeScript — All Frontend Errors Fixed (0 errors)
+- `lib/supabase/server.ts` + `lib/supabase/middleware.ts` — Added explicit `CookieOptions` type import from `@supabase/ssr`; both `setAll` cookie callbacks are now fully typed
+- `app/api/auth/sign-out/route.ts` — Added null guard for supabase client
+- `app/auth/callback/route.ts` — Added null guard for supabase client
+- `app/api/payouts/setup/route.ts` + `verify-account/route.ts` — Added null guards
+- `app/api/boost/callback/route.ts` — Added null guards at both Supabase usage points
+- `app/api/disputes/route.ts` + `app/api/offers/route.ts` — Fixed `.catch()` on `PromiseLike` by using `try/catch` wrapper around non-critical notification inserts
+- `app/favorites/page.tsx` — Fixed Supabase join returning products as array; normalized with `Array.isArray` check
+- `app/marketplace/[id]/opengraph-image.tsx` — Fixed categories/profiles join type via `unknown` cast and `Array.isArray` normalization
+- `app/sellers/[id]/page.tsx` — Fixed reviews profiles array normalization
+- `app/store/[slug]/page.tsx` — Added null guard for supabase client in `getSellerBySlug`
+- `app/admin/listings/page.tsx` + `app/admin/orders/page.tsx` — Cast Supabase join results to `any` for admin table props
+
+### Boost Callback Toast (Client-side notification)
+- `components/dashboard/boost-callback-toast.tsx` — Self-contained client component that reads `?boost=success/failed&type=store/listing` URL params and shows toast, then cleans the URL
+- `app/dashboard/page.tsx` — Integrated `BoostCallbackToast` wrapped in `Suspense`
+
+### All Pre-planned Features Already Present
+- T001: `proxy.ts` — Correct Next.js 16 convention ✓
+- T002: Image `fill` parents all have `position: relative` ✓
+- T003: University email detection (`lib/universities.ts` + sign-up page) ✓
+- T004: Search autocomplete (`components/marketplace/search-autocomplete.tsx`) ✓
+- T005: Price drop / was-price + discount badge on card and detail page ✓
+- T006: Reviews section (`components/reviews-section.tsx`) — self-fetching client component, integrated in product detail ✓
+- T007: Make an Offer dialog + `/api/offers` route ✓
+- T008: Report / Dispute dialog + `/api/disputes` route ✓
+- T009: Referral system — API route + ReferralCard in dashboard ✓
+- T010: Boost Listing / Store — full Paystack flow + callback ✓
+- T011: Video upload + gallery playback ✓
+- T012: Dark mode — all major pages covered ✓
+
+## Previously Completed Features
 
 ### Paystack Split Payments (₦100 Platform Fee)
 - `backend/src/services/payoutService.ts` — listBanks, resolveAccount, createSellerSubaccount, getSellerSubaccountCode

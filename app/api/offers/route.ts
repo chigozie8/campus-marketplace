@@ -51,13 +51,15 @@ export async function POST(req: Request) {
     const discount = Math.round(((product.price - offerPrice) / product.price) * 100)
     const notifMessage = `${buyerName} offered ₦${Number(offerPrice).toLocaleString()} (${discount}% off) for "${product.title}"${message ? `: "${message}"` : ''}`
 
-    await supabase.from('notifications').insert({
-      user_id: product.seller_id,
-      title: 'New Offer Received 💰',
-      message: notifMessage,
-      type: 'offer',
-      data: { productId, offerPrice, buyerId: user.id },
-    }).throwOnError().then(() => {}).catch(() => {})
+    try {
+      await supabase.from('notifications').insert({
+        user_id: product.seller_id,
+        title: 'New Offer Received 💰',
+        message: notifMessage,
+        type: 'offer',
+        data: { productId, offerPrice, buyerId: user.id },
+      })
+    } catch { /* non-critical */ }
 
     return NextResponse.json({ success: true })
   } catch (err) {

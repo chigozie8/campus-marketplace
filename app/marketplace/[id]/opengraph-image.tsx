@@ -27,10 +27,12 @@ export default async function ProductOGImage({
   const price = product?.price
     ? `₦${Number(product.price).toLocaleString('en-NG')}`
     : 'Price on request'
-  const categoryName =
-    (product?.categories as { name: string } | null)?.name || 'Campus Item'
-  const sellerName =
-    (product?.profiles as { full_name: string } | null)?.full_name || 'Student Seller'
+  const categoriesRaw = product?.categories as unknown as { name: string }[] | { name: string } | null | undefined
+  const categoryRec = Array.isArray(categoriesRaw) ? categoriesRaw[0] : categoriesRaw
+  const categoryName = categoryRec?.name || 'Campus Item'
+  const profilesRaw = product?.profiles as unknown as { full_name: string }[] | { full_name: string } | null | undefined
+  const profileRec = Array.isArray(profilesRaw) ? profilesRaw[0] : profilesRaw
+  const sellerName = profileRec?.full_name || 'Student Seller'
   const image = (product?.images as string[] | null)?.[0] || null
 
   const conditionLabels: Record<string, string> = {

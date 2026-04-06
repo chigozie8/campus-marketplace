@@ -12,6 +12,9 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') ?? '/dashboard'
 
   const supabase = await createClient()
+  if (!supabase) {
+    return NextResponse.redirect(`${origin}/auth/login?error=Service+unavailable`)
+  }
 
   // PKCE flow — signup confirmation, magic link
   if (code) {
