@@ -5,7 +5,7 @@ export const SITE_TAGLINE = "Nigeria's #1 Campus Marketplace"
 export const SITE_DESCRIPTION =
   "VendoorX is Nigeria's #1 campus marketplace. Buy and sell electronics, textbooks, fashion, food, and services directly on WhatsApp with zero platform fees across 120+ Nigerian universities."
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://campus-marketplace-pi.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.replit.app'
 export const SITE_TWITTER = '@vendoorx'
 export const OG_IMAGE = `${SITE_URL}/og-image.png`
 

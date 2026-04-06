@@ -9,25 +9,40 @@ export function GET() {
         style={{
           width: 512,
           height: 512,
-          background: '#0a0a0a',
-          borderRadius: 96,
+          background: '#ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <span
-          style={{
-            fontFamily: 'serif',
-            fontSize: 260,
-            fontWeight: 900,
-            color: 'white',
-            letterSpacing: '-10px',
-            lineHeight: 1,
-          }}
-        >
-          V<span style={{ color: '#16a34a' }}>X</span>
-        </span>
+        {/* Two overlapping squares — VendoorX logo mark */}
+        <div style={{ position: 'relative', width: 320, height: 320, display: 'flex' }}>
+          {/* Dark top-left square */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: 218,
+              height: 218,
+              borderRadius: 48,
+              background: '#0a0a0a',
+            }}
+          />
+          {/* Green bottom-right square */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              width: 218,
+              height: 218,
+              borderRadius: 48,
+              background: '#16a34a',
+              opacity: 0.92,
+            }}
+          />
+        </div>
       </div>
     ),
     { width: 512, height: 512 }
