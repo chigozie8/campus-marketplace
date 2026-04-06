@@ -6,6 +6,7 @@ import {
   BadgeCheck, Zap, ChevronRight,
 } from 'lucide-react'
 import { DashboardActions } from '@/components/dashboard-actions'
+import { VendorShell } from '@/components/vendor/vendor-shell'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
