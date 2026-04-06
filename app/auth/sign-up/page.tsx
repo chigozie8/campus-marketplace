@@ -68,12 +68,9 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [resending, setResending] = useState(false)
   const [resentAt, setResentAt] = useState<number | null>(null)
-
-  useEffect(() => { setMounted(true) }, [])
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -124,10 +121,7 @@ export default function SignUpPage() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-6">
-        <div className={cn(
-          'text-center max-w-md transition-all duration-700',
-          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-        )}>
+        <div className="text-center max-w-md">
           <div className="relative w-24 h-24 mx-auto mb-8">
             <div className="absolute inset-0 bg-[#16a34a]/20 rounded-full animate-ping" />
             <div className="absolute inset-2 bg-[#16a34a]/10 rounded-full animate-ping [animation-delay:150ms]" />
@@ -284,10 +278,7 @@ export default function SignUpPage() {
         </div>
 
         <div className="flex-1 flex items-start justify-center px-6 py-6 lg:px-16">
-          <div className={cn(
-            'w-full max-w-[440px] pb-10 transition-all duration-500',
-            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          )}>
+          <div className="w-full max-w-[440px] pb-10">
             {/* Mobile wordmark */}
             <div className="lg:hidden mb-8">
               <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">

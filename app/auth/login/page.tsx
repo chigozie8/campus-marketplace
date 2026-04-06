@@ -34,10 +34,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const errorParam = searchParams.get('error')
     if (errorParam) {
       toast.error(decodeURIComponent(errorParam), {
@@ -189,12 +187,7 @@ export default function LoginPage() {
 
         {/* Form area */}
         <div className="flex-1 flex items-center justify-center px-6 py-8 lg:px-16">
-          <div
-            className={cn(
-              'w-full max-w-[420px] transition-all duration-500',
-              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            )}
-          >
+          <div className="w-full max-w-[420px]">
             {/* Mobile logo */}
             <div className="lg:hidden mb-8">
               <span className="text-2xl font-black tracking-tight text-gray-950 leading-none">
