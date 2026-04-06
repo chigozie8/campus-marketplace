@@ -26,7 +26,7 @@ export async function findVerificationByVendor(vendorId: string) {
 export async function listVerifications(status?: string) {
   let query = supabaseAdmin
     .from('vendor_verifications')
-    .select('*, profiles!vendor_id(full_name, email, avatar_url)')
+    .select('*, profiles!vendor_id(full_name, avatar_url)')
     .order('created_at', { ascending: false })
 
   if (status) query = query.eq('status', status)

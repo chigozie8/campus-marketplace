@@ -23,8 +23,8 @@ function OrderCard({ order }: { order: BackendOrder }) {
       >
         {/* Product image */}
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted flex-shrink-0 overflow-hidden">
-          {order.products?.image_url ? (
-            <img src={order.products.image_url} alt={order.products.name} className="w-full h-full object-cover" />
+          {order.products?.images?.[0] ?? order.products?.image_url ? (
+            <img src={order.products?.images?.[0] ?? order.products?.image_url!} alt={order.products?.title ?? order.products?.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="w-6 h-6 text-muted-foreground" />
@@ -36,7 +36,7 @@ function OrderCard({ order }: { order: BackendOrder }) {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="font-semibold text-sm sm:text-base line-clamp-1">
-                {order.products?.name ?? 'Product'}
+                {order.products?.title ?? order.products?.name ?? 'Product'}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {new Date(order.created_at).toLocaleDateString('en-NG', {

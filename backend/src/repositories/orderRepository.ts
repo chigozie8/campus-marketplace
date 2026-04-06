@@ -16,7 +16,7 @@ export async function insertOrder(orderData: Omit<OrderRow, 'id' | 'created_at' 
 export async function findOrderById(id: string): Promise<OrderRow> {
   const { data, error } = await supabaseAdmin
     .from('orders')
-    .select('*, products(*), profiles!orders_buyer_id_fkey(full_name, email)')
+    .select('*, products(*), profiles!orders_buyer_id_fkey(full_name)')
     .eq('id', id)
     .single()
 
@@ -28,7 +28,7 @@ export async function findOrdersByBuyer(buyerId: string, page = 1, limit = 20): 
   const from = (page - 1) * limit
   const { data, error, count } = await supabaseAdmin
     .from('orders')
-    .select('*, products(name, price, image_url)', { count: 'exact' })
+    .select('*, products(title, price, images)', { count: 'exact' })
     .eq('buyer_id', buyerId)
     .order('created_at', { ascending: false })
     .range(from, from + limit - 1)
@@ -41,8 +41,8 @@ export async function findOrdersByVendor(vendorId: string, page = 1, limit = 20)
   const from = (page - 1) * limit
   const { data, error, count } = await supabaseAdmin
     .from('orders')
-    .select('*, products(name, price), profiles!orders_buyer_id_fkey(full_name, email)', { count: 'exact' })
-    .eq('vendor_id', vendorId)
+    .select('*, products(title, price), profiles!orders_buyer_id_fkey(full_name)', { count: 'exact' })
+    .eq('seller_id', vendorId)
     .order('created_at', { ascending: false })
     .range(from, from + limit - 1)
 
@@ -66,7 +66,7 @@ export async function findOrderByReference(reference: string): Promise<OrderRow 
   const { data, error } = await supabaseAdmin
     .from('orders')
     .select('*')
-    .eq('payment_reference', reference)
+    .eq('payment_ref', reference)
     .single()
 
   if (error || !data) return null
@@ -76,7 +76,7 @@ export async function findOrderByReference(reference: string): Promise<OrderRow 
 export async function setOrderPaymentReference(orderId: string, reference: string): Promise<void> {
   const { error } = await supabaseAdmin
     .from('orders')
-    .update({ payment_reference: reference, updated_at: new Date().toISOString() })
+    .update({ payment_ref: reference, updated_at: new Date().toISOString() })
     .eq('id', orderId)
 
   if (error) throw new Error(error.message)

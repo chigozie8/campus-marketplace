@@ -38,7 +38,7 @@ router.post('/:id/pay', async (req, res, next) => {
     }
 
     // Fetch seller's Paystack subaccount (if they've set up payouts)
-    const sellerSubaccountCode = await payoutService.getSellerSubaccountCode(order.vendor_id)
+    const sellerSubaccountCode = await payoutService.getSellerSubaccountCode(order.seller_id)
 
     const result = await paymentService.initializePayment({
       orderId: order.id,

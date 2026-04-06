@@ -38,13 +38,13 @@ export interface ProductRow {
 export interface OrderRow {
   id: string
   buyer_id: string
-  vendor_id: string
+  seller_id: string
   product_id: string
   quantity: number
   total_amount: number
   status: OrderStatus
   delivery_address: string
-  payment_reference?: string
+  payment_ref?: string
   created_at: string
   updated_at?: string
 }

@@ -13,7 +13,10 @@ export async function createOrder(
 ): Promise<OrderRow> {
   const product = await productRepo.findProductById(data.product_id)
 
-  if (product.stock_quantity < data.quantity) {
+  // The products table uses seller_id; vendor_id is the backend type alias
+  const sellerId = (product as any).seller_id ?? product.vendor_id
+
+  if ((product.stock_quantity ?? Infinity) < data.quantity) {
     throw Object.assign(new Error('Insufficient stock.'), { status: 400 })
   }
 
@@ -22,7 +25,7 @@ export async function createOrder(
   const order = await orderRepo.insertOrder({
     buyer_id: buyerId,
     product_id: data.product_id,
-    vendor_id: product.vendor_id,
+    seller_id: sellerId,
     quantity: data.quantity,
     total_amount,
     delivery_address: data.delivery_address,
@@ -68,10 +71,10 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
 
   // Trigger trust score recalculation on terminal statuses
   if (status === 'completed') {
-    addTrustScoreJob({ type: 'order_completed', vendorId: order.vendor_id })
+    addTrustScoreJob({ type: 'order_completed', vendorId: order.seller_id })
       .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
   } else if (status === 'cancelled') {
-    addTrustScoreJob({ type: 'order_failed', vendorId: order.vendor_id })
+    addTrustScoreJob({ type: 'order_failed', vendorId: order.seller_id })
       .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
   }
 

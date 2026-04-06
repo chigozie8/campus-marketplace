@@ -23,7 +23,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('role')
+      .select('is_seller')
       .eq('id', user.id)
       .single()
 
@@ -31,9 +31,11 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       logger.warn(`Profile fetch failed for user ${user.id}: ${profileError.message}`)
     }
 
+    const role: 'buyer' | 'vendor' | 'admin' = profile?.is_seller ? 'vendor' : 'buyer'
+
     ;(req as AuthRequest).user = {
       ...user,
-      role: (profile?.role as 'buyer' | 'vendor' | 'admin') ?? 'buyer',
+      role,
     }
 
     next()

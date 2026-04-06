@@ -134,16 +134,16 @@ export interface BackendProduct {
 export interface BackendOrder {
   id: string
   buyer_id: string
-  vendor_id: string
+  seller_id: string
   product_id: string
   quantity: number
   total_amount: number
   status: OrderStatus
   delivery_address: string
-  payment_reference?: string
+  payment_ref?: string
   created_at: string
   updated_at?: string
-  products?: { name: string; price: number; image_url?: string }
+  products?: { title: string; name?: string; price: number; images?: string[]; image_url?: string }
 }
 
 export interface BackendProfile {

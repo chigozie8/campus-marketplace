@@ -48,7 +48,7 @@ export async function findProducts(params: ProductQuery): Promise<PaginatedRespo
 export async function findProductById(id: string): Promise<ProductRow> {
   const { data, error } = await supabaseAdmin
     .from('products')
-    .select('*, profiles(full_name, email)')
+    .select('*, profiles(full_name)')
     .eq('id', id)
     .single()
 
