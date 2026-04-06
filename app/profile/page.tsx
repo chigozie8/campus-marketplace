@@ -67,6 +67,9 @@ export default function ProfilePage() {
   // Activity state
   const [activityItems, setActivityItems] = useState<{ label: string; time: string; type: string }[]>([])
 
+  // Hero stats (dynamic)
+  const [stats, setStats] = useState({ listings: 0, rating: 0, saved: 0, verified: false })
+
   const [form, setForm] = useState<ProfileForm>({
     full_name: '', phone: '', whatsapp_number: '',
     instagram_handle: '', facebook_handle: '',
@@ -111,14 +114,32 @@ export default function ProfilePage() {
       const savedNotifs = user.user_metadata?.notifications
       if (savedNotifs) setNotifPrefs(p => ({ ...p, ...savedNotifs }))
 
-      // Load real activity from products
-      const { data: products } = await supabase
-        .from('products')
-        .select('id, title, created_at, is_available')
-        .eq('seller_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10)
+      // Load hero stats in parallel
+      const [{ count: listingCount }, { count: savedCount }, { data: products }] = await Promise.all([
+        supabase
+          .from('products')
+          .select('id', { count: 'exact', head: true })
+          .eq('seller_id', user.id),
+        supabase
+          .from('favorites')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id),
+        supabase
+          .from('products')
+          .select('id, title, created_at, is_available')
+          .eq('seller_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ])
 
+      setStats({
+        listings: listingCount ?? 0,
+        rating:   data?.average_rating ?? data?.rating ?? 0,
+        saved:    savedCount ?? 0,
+        verified: data?.is_business_verified || data?.seller_verified || false,
+      })
+
+      // Build activity feed
       const items: { label: string; time: string; type: string }[] = []
       if (products) {
         for (const p of products) {
@@ -174,13 +195,22 @@ export default function ProfilePage() {
     if (!file) return
     if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
     setUploading(true)
-    setLocalAvatar(URL.createObjectURL(file))
+    const preview = URL.createObjectURL(file)
+    setLocalAvatar(preview)
     try {
       const url = await uploadToCloudinary(file)
       setField('avatar_url', url)
       setLocalAvatar(url)
-      toast.success('Profile photo updated!')
+      // Auto-save to DB immediately so photo persists without clicking Save
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { error } = await supabase.from('profiles').update({ avatar_url: url, updated_at: new Date().toISOString() }).eq('id', user.id)
+        if (error) toast.error('Photo saved locally but DB update failed — press Save to persist.')
+        else toast.success('Profile photo updated!')
+      }
     } catch {
+      setLocalAvatar(form.avatar_url) // revert preview on failure
       toast.error('Photo upload failed. Try again.')
     } finally {
       setUploading(false)
@@ -193,9 +223,35 @@ export default function ProfilePage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { error } = await supabase.from('profiles').upsert({ id: user.id, ...form, updated_at: new Date().toISOString() })
-      if (error) toast.error(error.message)
-      else toast.success('Profile saved successfully!')
+
+      const payload = {
+        id:              user.id,
+        full_name:       form.full_name,
+        phone:           form.phone,
+        whatsapp_number: form.whatsapp_number,
+        university:      form.university,
+        campus:          form.campus,
+        bio:             form.bio,
+        avatar_url:      form.avatar_url,
+        updated_at:      new Date().toISOString(),
+      }
+
+      // Try with social handles (requires migration 004)
+      const fullPayload = { ...payload, instagram_handle: form.instagram_handle, facebook_handle: form.facebook_handle }
+      const { error } = await supabase.from('profiles').upsert(fullPayload)
+
+      if (error) {
+        // If social handle columns don't exist yet, save without them
+        if (error.message.includes('column') || error.code === 'PGRST204' || error.code === '42703') {
+          const { error: fallbackError } = await supabase.from('profiles').upsert(payload)
+          if (fallbackError) { toast.error(fallbackError.message); return }
+          toast.success('Profile saved! Run migration 004 to enable social handle fields.')
+        } else {
+          toast.error(error.message)
+        }
+      } else {
+        toast.success('Profile saved successfully!')
+      }
     })
   }
 
@@ -342,16 +398,16 @@ export default function ProfilePage() {
             <h2 className="text-white font-black text-xl tracking-tight">{form.full_name || 'Your Name'}</h2>
             <p className="text-white/50 text-sm mt-0.5">{form.university || 'Campus Vendor'}</p>
 
-            {/* Mini stats */}
+            {/* Mini stats — dynamic */}
             <div className="flex gap-6 mt-5 pt-5 border-t border-white/10 w-full justify-center">
               {[
-                { label: 'Listings', value: '12', icon: Package },
-                { label: 'Rating', value: '4.9★', icon: Star },
-                { label: 'Saved', value: '38', icon: Heart },
-                { label: 'Verified', value: '✓', icon: BadgeCheck },
+                { label: 'Listings', value: stats.listings.toString() },
+                { label: 'Rating',   value: stats.rating > 0 ? `${stats.rating.toFixed(1)}★` : '—' },
+                { label: 'Saved',    value: stats.saved.toString() },
+                { label: 'Verified', value: stats.verified ? '✓' : '—' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex flex-col items-center gap-0.5">
-                  <span className="text-white font-black text-lg leading-none">{value}</span>
+                  <span className={`font-black text-lg leading-none ${label === 'Verified' && stats.verified ? 'text-[#4ade80]' : 'text-white'}`}>{value}</span>
                   <span className="text-white/40 text-[11px] uppercase tracking-wide">{label}</span>
                 </div>
               ))}

@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import webhookRoutes from './routes/webhookRoutes.js'
+import verificationRoutes from './routes/verificationRoutes.js'
 
 const app = express()
 
@@ -46,6 +47,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/webhooks', webhookRoutes)
+app.use('/api/v1/verification', verificationRoutes)
 
 app.use(notFound)
 app.use(errorHandler)

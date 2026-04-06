@@ -2,6 +2,8 @@ import * as orderRepo from '../repositories/orderRepository.js'
 import * as productRepo from '../repositories/productRepository.js'
 import { getCache, setCache, delCache } from '../utils/cache.js'
 import { OrderRow, OrderStatus, PaginatedResponse } from '../types/index.js'
+import { addTrustScoreJob } from '../queues/trustScoreQueue.js'
+import logger from '../utils/logger.js'
 
 const CACHE_TTL = 60
 
@@ -63,6 +65,16 @@ export async function getVendorOrders(vendorId: string, page: number, limit: num
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<OrderRow> {
   const order = await orderRepo.updateOrderStatus(id, status)
   await delCache(`orders:id:${id}`)
+
+  // Trigger trust score recalculation on terminal statuses
+  if (status === 'completed') {
+    addTrustScoreJob({ type: 'order_completed', vendorId: order.vendor_id })
+      .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
+  } else if (status === 'cancelled') {
+    addTrustScoreJob({ type: 'order_failed', vendorId: order.vendor_id })
+      .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
+  }
+
   return order
 }
 

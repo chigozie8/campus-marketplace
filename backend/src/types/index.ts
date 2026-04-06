@@ -57,6 +57,39 @@ export interface ProfileRow {
   role: 'buyer' | 'vendor' | 'admin'
   email: string
   created_at: string
+  is_business_verified?: boolean
+  total_orders?: number
+  successful_orders?: number
+  failed_orders?: number
+  disputes_count?: number
+  average_rating?: number
+  trust_score?: number
+  instagram_handle?: string
+  facebook_handle?: string
+}
+
+export type VerificationStatus = 'pending' | 'approved' | 'rejected'
+
+export interface VerificationRow {
+  id: string
+  vendor_id: string
+  full_name: string
+  business_name: string
+  phone_number: string
+  location_city: string
+  location_state: string
+  bank_name: string
+  account_number: string
+  id_type: 'nin' | 'bvn' | 'drivers_license' | 'international_passport' | 'voters_card'
+  id_number: string
+  id_image_url: string
+  selfie_image_url: string
+  status: VerificationStatus
+  rejection_reason?: string
+  reviewed_by?: string
+  reviewed_at?: string
+  created_at: string
+  updated_at: string
 }
 
 export interface AppError extends Error {
