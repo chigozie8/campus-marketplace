@@ -5,10 +5,16 @@ export async function updateSession(request: NextRequest) {
   // Guard: if Supabase env vars are not set, skip auth middleware entirely.
   // This prevents a hard crash during cold starts or in environments where
   // the vars haven't been injected yet.
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.next({ request })
+  }
+
+  // Validate URL format — must start with https://
+  try { new URL(supabaseUrl) } catch {
+    console.error('NEXT_PUBLIC_SUPABASE_URL is not a valid URL:', supabaseUrl)
     return NextResponse.next({ request })
   }
 
@@ -19,8 +25,8 @@ export async function updateSession(request: NextRequest) {
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
