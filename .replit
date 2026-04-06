@@ -59,3 +59,8 @@ externalPort = 80
 NEXT_PUBLIC_BACKEND_URL = "https://fa75bd1a-5f2d-4cc8-828f-85270cdb330d-00-3nm0oboepxdxj.picard.replit.dev:3001"
 FRONTEND_URL = "https://fa75bd1a-5f2d-4cc8-828f-85270cdb330d-00-3nm0oboepxdxj.picard.replit.dev"
 NEXT_PUBLIC_SITE_URL = "https://fa75bd1a-5f2d-4cc8-828f-85270cdb330d-00-3nm0oboepxdxj.picard.replit.dev"
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd backend && npm run start & npm run start"]
+build = ["bash", "-c", "npm run build"]
