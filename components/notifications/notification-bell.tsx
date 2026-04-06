@@ -181,7 +181,7 @@ export function NotificationBell() {
                           )}
                         </div>
                         {n.body && (
-                          <p className="text-[12px] text-gray-500 mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
+                          <p className="text-[12px] text-gray-500 mt-0.5 leading-relaxed line-clamp-3">{n.body}</p>
                         )}
                         <p className="text-[10px] text-gray-400 mt-1">
                           {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}

@@ -293,7 +293,7 @@ export default function NotificationsPage() {
                           {timeAgo(notification.created_at)}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed line-clamp-2">
+                      <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed">
                         {notification.body}
                       </p>
                       {/* Type badge */}

@@ -29,7 +29,7 @@ export async function POST(
   if (!adminRole) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { data: verification, error: fetchErr } = await adminClient
-    .from('verifications')
+    .from('vendor_verifications')
     .select('id_image_url, selfie_image_url')
     .eq('id', id)
     .single()
