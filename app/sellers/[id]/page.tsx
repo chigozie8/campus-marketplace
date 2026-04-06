@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   ArrowLeft, BadgeCheck, Star, Package, MapPin,
-  GraduationCap, MessageCircle, ShoppingBag,
+  GraduationCap, MessageCircle, ShoppingBag, User,
 } from 'lucide-react'
 import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
@@ -36,7 +36,7 @@ export default async function SellerProfilePage({ params }: Props) {
   const [{ data: profile }, { data: products }, { data: reviews }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', id).single(),
     supabase.from('products').select('*, categories(*)').eq('seller_id', id).eq('is_available', true).order('created_at', { ascending: false }),
-    supabase.from('reviews').select('rating').eq('seller_id', id),
+    supabase.from('reviews').select('id, rating, comment, created_at, profiles!reviewer_id(full_name, avatar_url)').eq('seller_id', id).order('created_at', { ascending: false }),
   ])
 
   if (!profile) notFound()
@@ -44,6 +44,17 @@ export default async function SellerProfilePage({ params }: Props) {
   const avgRating = reviews && reviews.length
     ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
     : 0
+
+  function timeAgo(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 60) return mins <= 1 ? 'Just now' : `${mins}m ago`
+    const hrs = Math.floor(mins / 60)
+    if (hrs < 24) return `${hrs}h ago`
+    const days = Math.floor(hrs / 24)
+    if (days < 7) return `${days}d ago`
+    return new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
 
   const initials = profile.full_name
     ?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
@@ -197,30 +208,83 @@ export default async function SellerProfilePage({ params }: Props) {
           </div>
         )}
 
-        {/* Reviews summary */}
+        {/* Reviews section */}
         {reviews && reviews.length > 0 && (
-          <div className="mt-8 bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="mt-8 space-y-3">
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-1">
               <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-              <h2 className="font-bold text-base text-gray-900 dark:text-white">
-                {avgRating.toFixed(1)} avg from {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              <h2 className="font-black text-base text-gray-900 dark:text-white tracking-tight">
+                Reviews
               </h2>
+              <span className="ml-auto text-sm text-gray-500">{avgRating.toFixed(1)} avg · {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
             </div>
-            {/* Rating breakdown bars */}
-            {[5, 4, 3, 2, 1].map(star => {
-              const count = reviews.filter(r => r.rating === star).length
-              const pct = reviews.length ? Math.round((count / reviews.length) * 100) : 0
-              return (
-                <div key={star} className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs text-gray-500 w-4">{star}</span>
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
-                  <div className="flex-1 h-1.5 bg-gray-100 dark:bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+
+            {/* Rating breakdown */}
+            <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-4">
+              {[5, 4, 3, 2, 1].map(star => {
+                const count = reviews.filter(r => r.rating === star).length
+                const pct = reviews.length ? Math.round((count / reviews.length) * 100) : 0
+                return (
+                  <div key={star} className="flex items-center gap-2 mb-1.5 last:mb-0">
+                    <span className="text-xs text-gray-500 w-3">{star}</span>
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
+                    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs text-gray-400 w-6 text-right">{count}</span>
                   </div>
-                  <span className="text-xs text-gray-400 w-7 text-right">{count}</span>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
+
+            {/* Individual review cards */}
+            <div className="space-y-3">
+              {(reviews as Array<{
+                id: string
+                rating: number
+                comment: string | null
+                created_at: string
+                profiles: { full_name: string | null; avatar_url: string | null } | null
+              }>).map(review => {
+                const reviewer = review.profiles
+                const reviewerName = reviewer?.full_name || 'Anonymous'
+                const reviewerInitials = reviewerName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
+                return (
+                  <div key={review.id} className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-4">
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="w-9 h-9 rounded-xl overflow-hidden bg-gray-100 dark:bg-muted flex-shrink-0 flex items-center justify-center">
+                        {reviewer?.avatar_url ? (
+                          <Image src={reviewer.avatar_url} alt={reviewerName} width={36} height={36} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xs font-black text-gray-500">{reviewerInitials || <User className="w-4 h-4 text-gray-400" />}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {/* Name + stars + date */}
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-gray-900 dark:text-white truncate">{reviewerName}</span>
+                          <span className="text-xs text-gray-400 flex-shrink-0">{timeAgo(review.created_at)}</span>
+                        </div>
+                        {/* Stars */}
+                        <div className="flex gap-0.5 mt-0.5 mb-1.5">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`w-3 h-3 ${s <= review.rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200 dark:fill-muted dark:text-muted'}`} />
+                          ))}
+                        </div>
+                        {/* Comment */}
+                        {review.comment ? (
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{review.comment}</p>
+                        ) : (
+                          <p className="text-xs text-gray-400 italic">No comment left</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </main>

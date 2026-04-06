@@ -9,14 +9,31 @@ import {
   ChevronRight, Loader2, CheckCircle2, Edit3, Star,
   Package, Heart, BadgeCheck, Save, AtSign, X, KeyRound, Copy,
   MessageCircle, ShoppingBag, TrendingDown, Sparkles, BarChart2,
-  Banknote, UserPlus, Tag, ShieldAlert,
+  Banknote, UserPlus, Tag, ShieldAlert, Building2, FileImage,
+  CreditCard, Clock, CheckCircle, XCircle, Upload,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadToCloudinary } from '@/lib/cloudinary'
 import { createClient } from '@/lib/supabase/client'
 
-const TABS = ['Profile', 'Security', 'Notifications', 'Activity'] as const
+const TABS = ['Profile', 'Security', 'Notifications', 'Activity', 'Verify'] as const
 type Tab = typeof TABS[number]
+
+const ID_TYPES = [
+  { value: 'nin',                   label: 'NIN' },
+  { value: 'bvn',                   label: 'BVN' },
+  { value: 'drivers_license',       label: "Driver's Licence" },
+  { value: 'international_passport', label: 'International Passport' },
+  { value: 'voters_card',           label: "Voter's Card" },
+] as const
+
+const NIGERIAN_STATES = [
+  'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
+  'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo',
+  'Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa',
+  'Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba',
+  'Yobe','Zamfara',
+]
 
 interface ProfileForm {
   full_name: string
@@ -66,6 +83,26 @@ export default function ProfilePage() {
 
   // Activity state
   const [activityItems, setActivityItems] = useState<{ label: string; time: string; type: string }[]>([])
+
+  // Verification state
+  type VerifyStatus = 'none' | 'pending' | 'approved' | 'rejected'
+  const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('none')
+  const [verifyRejectionReason, setVerifyRejectionReason] = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [verifySubmitting, setVerifySubmitting] = useState(false)
+  const [idImageUploading, setIdImageUploading] = useState(false)
+  const [selfieUploading, setSelfieUploading] = useState(false)
+  const [idImageUrl, setIdImageUrl] = useState('')
+  const [selfieUrl, setSelfieUrl] = useState('')
+  const idImageRef = useRef<HTMLInputElement>(null)
+  const selfieRef = useRef<HTMLInputElement>(null)
+  const [verifyForm, setVerifyForm] = useState({
+    full_name: '', business_name: '', phone_number: '',
+    location_city: '', location_state: '',
+    bank_name: '', account_number: '',
+    id_type: 'nin' as typeof ID_TYPES[number]['value'],
+    id_number: '',
+  })
 
   // Hero stats (dynamic)
   const [stats, setStats] = useState({ listings: 0, rating: 0, saved: 0, verified: false })
@@ -149,6 +186,40 @@ export default function ProfilePage() {
       }
       if (user.created_at) items.push({ label: 'Joined VendoorX', time: formatRelative(user.created_at), type: 'join' })
       setActivityItems(items)
+
+      // Load verification status
+      setVerifyLoading(true)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL || ''}/api/v1/verification/status`,
+            { headers: { Authorization: `Bearer ${session.access_token}` } }
+          )
+          if (res.ok) {
+            const json = await res.json()
+            if (json.data) {
+              setVerifyStatus(json.data.status as VerifyStatus)
+              setVerifyRejectionReason(json.data.rejection_reason || '')
+              setVerifyForm({
+                full_name:      json.data.full_name      || '',
+                business_name:  json.data.business_name  || '',
+                phone_number:   json.data.phone_number   || '',
+                location_city:  json.data.location_city  || '',
+                location_state: json.data.location_state || '',
+                bank_name:      json.data.bank_name      || '',
+                account_number: json.data.account_number || '',
+                id_type:        json.data.id_type        || 'nin',
+                id_number:      json.data.id_number      || '',
+              })
+              setIdImageUrl(json.data.id_image_url     || '')
+              setSelfieUrl(json.data.selfie_image_url  || '')
+            }
+          }
+        }
+      } catch { /* silent */ } finally {
+        setVerifyLoading(false)
+      }
 
       setLoading(false)
     })
@@ -326,6 +397,72 @@ export default function ProfilePage() {
     setLoginAlerts(newVal)
     toast.success(newVal ? 'Login alerts enabled — you\'ll be notified of new sign-ins' : 'Login alerts disabled')
     setLoginAlertsLoading(false)
+  }
+
+  async function handleIdImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setIdImageUploading(true)
+    try {
+      const url = await uploadToCloudinary(file)
+      setIdImageUrl(url)
+      toast.success('ID image uploaded')
+    } catch { toast.error('Upload failed — try again') }
+    finally { setIdImageUploading(false) }
+  }
+
+  async function handleSelfieChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setSelfieUploading(true)
+    try {
+      const url = await uploadToCloudinary(file)
+      setSelfieUrl(url)
+      toast.success('Selfie uploaded')
+    } catch { toast.error('Upload failed — try again') }
+    finally { setSelfieUploading(false) }
+  }
+
+  async function handleVerifySubmit() {
+    if (!verifyForm.full_name.trim())      { toast.error('Full name is required');        return }
+    if (!verifyForm.business_name.trim())  { toast.error('Business name is required');    return }
+    if (!verifyForm.phone_number.trim())   { toast.error('Phone number is required');     return }
+    if (!verifyForm.location_city.trim())  { toast.error('City is required');             return }
+    if (!verifyForm.location_state)        { toast.error('State is required');            return }
+    if (!verifyForm.bank_name.trim())      { toast.error('Bank name is required');        return }
+    if (!/^\d{10}$/.test(verifyForm.account_number)) { toast.error('Account number must be 10 digits'); return }
+    if (!verifyForm.id_number.trim())      { toast.error('ID number is required');        return }
+    if (!idImageUrl)                       { toast.error('Please upload your ID image');  return }
+    if (!selfieUrl)                        { toast.error('Please upload your selfie');    return }
+
+    setVerifySubmitting(true)
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { toast.error('Please log in again'); return }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || ''}/api/v1/verification/submit`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ ...verifyForm, id_image_url: idImageUrl, selfie_image_url: selfieUrl }),
+        }
+      )
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.message || 'Submission failed')
+      setVerifyStatus('pending')
+      toast.success('Verification submitted! We\'ll review within 24–48 hours.')
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Submission failed')
+    } finally {
+      setVerifySubmitting(false)
+    }
   }
 
   async function handleSignOut() {
@@ -787,6 +924,211 @@ export default function ProfilePage() {
                     )
                   })}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Verify Tab ── */}
+        {tab === 'Verify' && (
+          <div className="space-y-4">
+
+            {/* Header card */}
+            <div className="relative rounded-3xl overflow-hidden bg-[#0a0a0a] p-5 shadow-xl shadow-black/20">
+              <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+              <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#16a34a]/20 rounded-full blur-2xl pointer-events-none" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center flex-shrink-0">
+                  <BadgeCheck className="w-6 h-6 text-[#4ade80]" />
+                </div>
+                <div>
+                  <p className="font-black text-white text-base tracking-tight">Business Verification</p>
+                  <p className="text-white/40 text-xs mt-0.5">Get the verified badge on your seller profile</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Status banner */}
+            {verifyLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            ) : verifyStatus === 'approved' ? (
+              <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl">
+                <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">You are verified!</p>
+                  <p className="text-xs text-emerald-600/70 mt-0.5">Your business is verified. The badge now shows on your public profile.</p>
+                </div>
+              </div>
+            ) : verifyStatus === 'pending' ? (
+              <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-700 rounded-2xl">
+                <Clock className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Under review</p>
+                  <p className="text-xs text-amber-600/70 mt-0.5">Your documents are being reviewed. We'll notify you within 24–48 hours.</p>
+                </div>
+              </div>
+            ) : verifyStatus === 'rejected' ? (
+              <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-2xl space-y-1">
+                <div className="flex items-center gap-2">
+                  <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <p className="text-sm font-bold text-red-600 dark:text-red-400">Verification rejected</p>
+                </div>
+                {verifyRejectionReason && <p className="text-xs text-red-500/80 pl-7">{verifyRejectionReason}</p>}
+                <p className="text-xs text-red-500/60 pl-7">You can correct your details below and resubmit.</p>
+              </div>
+            ) : null}
+
+            {/* Form — hide if approved or pending */}
+            {(verifyStatus === 'none' || verifyStatus === 'rejected') && !verifyLoading && (
+              <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm p-5 space-y-4">
+
+                {/* Personal & Business */}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Personal &amp; Business</p>
+                {[
+                  { key: 'full_name',     label: 'Full Name',       icon: User,       placeholder: 'As on your ID' },
+                  { key: 'business_name', label: 'Business Name',   icon: Building2,  placeholder: 'e.g. Chigo Gadgets' },
+                  { key: 'phone_number',  label: 'Phone Number',    icon: Phone,      placeholder: '+234 800 000 0000' },
+                  { key: 'location_city', label: 'City',            icon: MapPin,     placeholder: 'e.g. Lagos' },
+                ].map(({ key, label, icon: Icon, placeholder }) => (
+                  <div key={key}>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">{label}</label>
+                    <div className="relative">
+                      <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={verifyForm[key as keyof typeof verifyForm]}
+                        onChange={e => setVerifyForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {/* State */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">State</label>
+                  <select
+                    value={verifyForm.location_state}
+                    onChange={e => setVerifyForm(f => ({ ...f, location_state: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                  >
+                    <option value="">Select state…</option>
+                    {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                {/* Bank details */}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider pt-2">Bank Details</p>
+                {[
+                  { key: 'bank_name',      label: 'Bank Name',       placeholder: 'e.g. Access Bank' },
+                  { key: 'account_number', label: 'Account Number',  placeholder: '10-digit account number' },
+                ].map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">{label}</label>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        inputMode={key === 'account_number' ? 'numeric' : 'text'}
+                        maxLength={key === 'account_number' ? 10 : undefined}
+                        value={verifyForm[key as keyof typeof verifyForm]}
+                        onChange={e => setVerifyForm(f => ({ ...f, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                ))}
+
+                {/* ID details */}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider pt-2">Identity Document</p>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">ID Type</label>
+                  <select
+                    value={verifyForm.id_type}
+                    onChange={e => setVerifyForm(f => ({ ...f, id_type: e.target.value as typeof verifyForm.id_type }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                  >
+                    {ID_TYPES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">ID Number</label>
+                  <div className="relative">
+                    <FileImage className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={verifyForm.id_number}
+                      onChange={e => setVerifyForm(f => ({ ...f, id_number: e.target.value }))}
+                      placeholder="Enter your ID number"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Image uploads */}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider pt-2">Document Photos</p>
+
+                {/* ID Image */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">ID Photo</label>
+                  <input ref={idImageRef} type="file" accept="image/*" className="hidden" onChange={handleIdImageChange} />
+                  {idImageUrl ? (
+                    <div className="relative">
+                      <img src={idImageUrl} alt="ID" className="w-full h-32 object-cover rounded-xl border border-gray-200 dark:border-border" />
+                      <button onClick={() => { setIdImageUrl(''); if (idImageRef.current) idImageRef.current.value = '' }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => idImageRef.current?.click()}
+                      disabled={idImageUploading}
+                      className="w-full h-24 border-2 border-dashed border-gray-200 dark:border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-muted/50 transition-all"
+                    >
+                      {idImageUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Upload className="w-5 h-5 text-gray-400" />}
+                      <span className="text-xs text-gray-400">{idImageUploading ? 'Uploading…' : 'Tap to upload ID photo'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Selfie */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Selfie with ID</label>
+                  <p className="text-[11px] text-gray-400 mb-2">Hold your ID next to your face and take a clear photo.</p>
+                  <input ref={selfieRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleSelfieChange} />
+                  {selfieUrl ? (
+                    <div className="relative">
+                      <img src={selfieUrl} alt="Selfie" className="w-full h-32 object-cover rounded-xl border border-gray-200 dark:border-border" />
+                      <button onClick={() => { setSelfieUrl(''); if (selfieRef.current) selfieRef.current.value = '' }} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center">
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => selfieRef.current?.click()}
+                      disabled={selfieUploading}
+                      className="w-full h-24 border-2 border-dashed border-gray-200 dark:border-border rounded-xl flex flex-col items-center justify-center gap-1.5 hover:border-primary/40 hover:bg-gray-50 dark:hover:bg-muted/50 transition-all"
+                    >
+                      {selfieUploading ? <Loader2 className="w-5 h-5 animate-spin text-gray-400" /> : <Camera className="w-5 h-5 text-gray-400" />}
+                      <span className="text-xs text-gray-400">{selfieUploading ? 'Uploading…' : 'Tap to take selfie with ID'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Submit */}
+                <button
+                  onClick={handleVerifySubmit}
+                  disabled={verifySubmitting || idImageUploading || selfieUploading}
+                  className="w-full py-3.5 bg-[#0a0a0a] dark:bg-primary text-white text-sm font-bold rounded-xl hover:bg-gray-800 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                >
+                  {verifySubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Submitting…</> : <><BadgeCheck className="w-4 h-4" />Submit for Verification</>}
+                </button>
               </div>
             )}
           </div>
