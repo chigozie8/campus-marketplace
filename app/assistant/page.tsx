@@ -473,18 +473,9 @@ export default function AssistantPage() {
 
           {/* Footer */}
           <div className="flex items-center justify-center gap-1.5 mt-2.5">
-            <Sparkles className="w-3 h-3 text-green-500/60" />
-            <p className="text-[10px] text-gray-400">
-              Powered by{' '}
-              <a
-                href="https://puter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-600 hover:text-green-700 underline underline-offset-2 transition-colors"
-              >
-                puter.js
-              </a>{' '}
-              &middot; Free AI, no API key needed
+            <Sparkles className="w-3 h-3 text-green-500" />
+            <p className="text-[10px] font-semibold text-green-600 tracking-wide">
+              Your smartest campus shopping companion ✨
             </p>
           </div>
         </div>
