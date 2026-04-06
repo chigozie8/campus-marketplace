@@ -2,29 +2,15 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, MessageCircle, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight, Phone, Mail, Loader2, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp, ChevronRight, Phone, Mail, Loader2, CheckCircle2 } from 'lucide-react'
 
 const LINKS = {
-  Marketplace: [
-    { label: 'Browse Listings',   href: '/marketplace', icon: Store },
-    { label: 'Post a Listing',    href: '/seller/new',  icon: TrendingUp },
-    { label: 'Top Categories',    href: '/marketplace', icon: BookOpen },
-    { label: 'Seller Dashboard',  href: '/dashboard',   icon: Users },
-    { label: 'AI Assistant',      href: '/assistant',   icon: Zap },
-  ],
   Company: [
     { label: 'About VendoorX',   href: '/about',        icon: ShieldCheck },
     { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
     { label: 'Careers',          href: '/careers',      icon: Users },
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
     { label: 'Partnerships',     href: '/partnerships', icon: Star },
-  ],
-  Support: [
-    { label: 'Help Center',      href: '/help',                  icon: Headphones },
-    { label: 'Contact Us',       href: '/contact',               icon: MessageCircle },
-    { label: 'Report a Bug',     href: '/contact?subject=bug',   icon: ShieldCheck },
-    { label: 'Community Forum',  href: '/community',             icon: Users },
-    { label: 'Status Page',      href: '/status',                icon: Zap },
   ],
   Legal: [
     { label: 'Privacy Policy',      href: '/privacy',          icon: ShieldCheck },
@@ -275,7 +261,7 @@ export function LandingFooter() {
       {/* ── LINK COLUMNS ── */}
       <div className="bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-10">
+          <div className="grid grid-cols-2 gap-10">
             {Object.entries(LINKS).map(([category, links]) => (
               <div key={category}>
                 <h4 className="text-xs font-black uppercase tracking-widest text-foreground mb-5">
