@@ -150,9 +150,9 @@ export function PayoutSetupCard({ hasSubaccount: initialHasSubaccount, accountNa
               <div className="max-h-48 overflow-y-auto">
                 {filteredBanks.length === 0 ? (
                   <p className="text-xs text-muted-foreground text-center py-4">No banks found</p>
-                ) : filteredBanks.map(b => (
+                ) : filteredBanks.map((b, i) => (
                   <button
-                    key={b.code}
+                    key={`${b.code}-${i}`}
                     type="button"
                     onClick={() => { setSelectedBank(b); setShowBankList(false); setBankSearch('') }}
                     className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
