@@ -1,133 +1,226 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Briefcase, Heart, Zap, Users, Globe, Coffee, MapPin } from 'lucide-react'
+import { ArrowRight, Bell, Briefcase, MapPin, Sparkles, Users, Zap } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Careers | VendoorX',
-  description: 'Join the VendoorX team and help build Africa\'s most loved campus marketplace. See open positions.',
+  description: 'Join the VendoorX team. We\'re building Africa\'s most loved campus marketplace — roles opening soon.',
 }
 
-const PERKS = [
-  { icon: Heart, title: 'Health First', desc: 'HMO health insurance for you and one dependent. Your health is non-negotiable.' },
-  { icon: Zap, title: 'Fast Growth', desc: 'Join a rocket ship. Your work impacts 50,000+ users from day one.' },
-  { icon: Globe, title: 'Remote Friendly', desc: 'Work from anywhere in Nigeria. We trust you to manage your own time and output.' },
-  { icon: Coffee, title: 'Learning Budget', desc: '₦120,000/year for courses, books, conferences, and anything that makes you better.' },
-  { icon: Users, title: 'Equity Options', desc: 'Early hires get meaningful equity. We grow together.' },
-  { icon: MapPin, title: 'Lagos Hub', desc: 'Optional in-person office in Victoria Island for those who prefer it.' },
+const PHOTOS = [
+  {
+    id: 'p1',
+    src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'Nigerian university students collaborating',
+  },
+  {
+    id: 'p2',
+    src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'Student at Nigerian campus',
+  },
+  {
+    id: 'p3',
+    src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'Students working on laptops',
+  },
+  {
+    id: 'p4',
+    src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'University students studying together',
+  },
+  {
+    id: 'p5',
+    src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'Student with laptop on campus',
+  },
+  {
+    id: 'p6',
+    src: 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=480&h=640&fit=crop&crop=faces&q=85',
+    alt: 'Students in university library',
+  },
 ]
 
-const ROLES = [
-  {
-    title: 'Senior Full-Stack Engineer',
-    team: 'Engineering',
-    type: 'Full-time · Remote',
-    desc: 'Own critical features end-to-end. Next.js 16, Supabase, TypeScript, Paystack APIs. You ship fast and break nothing.',
-  },
-  {
-    title: 'Product Designer (UI/UX)',
-    team: 'Design',
-    type: 'Full-time · Remote',
-    desc: 'Design the marketplace, onboarding, and seller tools for 50,000+ users. You love Figma and hate unnecessary friction.',
-  },
-  {
-    title: 'Growth & Community Manager',
-    team: 'Growth',
-    type: 'Full-time · Lagos',
-    desc: 'Own our campus ambassador programme. Build communities at universities across Nigeria and drive seller acquisition.',
-  },
-  {
-    title: 'Customer Success Specialist',
-    team: 'Operations',
-    type: 'Full-time · Lagos',
-    desc: 'Be the first point of contact for sellers and buyers. Resolve disputes, answer questions, and make people happy.',
-  },
+const TEASER_ROLES = [
+  { title: 'Software Engineer', team: 'Engineering', location: 'Remote · Nigeria' },
+  { title: 'Product Designer', team: 'Design', location: 'Remote · Nigeria' },
+  { title: 'Campus Growth Lead', team: 'Growth', location: 'Lagos / Abuja' },
+  { title: 'Customer Success', team: 'Operations', location: 'Lagos' },
 ]
 
 export default function CareersPage() {
   return (
-    <div className="bg-background">
+    <div className="min-h-screen bg-zinc-950 text-white overflow-hidden">
 
-      {/* Hero */}
-      <section className="py-20 sm:py-28 px-4 bg-gradient-to-br from-indigo-50 via-background to-background dark:from-indigo-950/20 border-b border-border">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest mb-6">
-            <Briefcase className="w-3.5 h-3.5" />
-            We&apos;re Hiring
+      {/* ── HERO ── */}
+      <section className="relative min-h-screen flex flex-col">
+
+        {/* Photo mosaic — absolute behind content */}
+        <div className="absolute inset-0 grid grid-cols-3 sm:grid-cols-6 grid-rows-2 gap-1 pointer-events-none select-none">
+          {PHOTOS.map((photo, i) => (
+            <div
+              key={photo.id}
+              className={`relative overflow-hidden ${
+                i === 0 ? 'col-span-2 row-span-2' :
+                i === 5 ? 'col-span-2 row-span-1' : ''
+              }`}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 33vw, 17vw"
+                unoptimized
+              />
+              {/* dark overlay per photo */}
+              <div className="absolute inset-0 bg-zinc-950/70" />
+            </div>
+          ))}
+          {/* Full overlay gradient — ensures readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/50 to-zinc-950" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-4 py-32 text-center">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#16a34a]/20 border border-[#16a34a]/40 text-[#4ade80] text-xs font-bold uppercase tracking-widest mb-8">
+            <Sparkles className="w-3.5 h-3.5" />
+            Roles opening soon
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-5 leading-tight">
-            Build the future of<br />
-            <span className="text-primary">African campus commerce.</span>
+
+          {/* Heading */}
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-none tracking-tight mb-6 max-w-4xl">
+            Build what{' '}
+            <span className="text-[#16a34a]">
+              50,000+<br className="sm:hidden" /> students
+            </span>{' '}
+            depend on.
           </h1>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            We&apos;re a small, ambitious team solving a real problem for millions of Nigerian students. If you love shipping products that matter, you belong here.
+
+          <p className="text-zinc-400 text-lg sm:text-xl leading-relaxed max-w-2xl mb-10">
+            We&apos;re assembling the team that will power campus commerce across every university in Nigeria.
+            Roles are opening soon — be first in line.
+          </p>
+
+          {/* Notify form */}
+          <form
+            action="/api/newsletter"
+            method="POST"
+            className="flex flex-col sm:flex-row gap-3 w-full max-w-md"
+          >
+            <input
+              type="email"
+              name="email"
+              placeholder="your@university.edu.ng"
+              required
+              className="flex-1 px-5 py-4 rounded-xl bg-white/10 border border-white/20 focus:border-[#16a34a] text-white placeholder:text-zinc-500 outline-none transition-colors text-sm"
+            />
+            <button
+              type="submit"
+              className="px-6 py-4 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 font-bold text-sm text-white flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-[#16a34a]/30"
+            >
+              <Bell className="w-4 h-4" />
+              Notify Me
+            </button>
+          </form>
+          <p className="text-zinc-600 text-xs mt-3">No spam. We&apos;ll only email when roles go live.</p>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="relative z-10 flex justify-center pb-10 animate-bounce">
+          <div className="w-px h-10 bg-gradient-to-b from-zinc-600 to-transparent" />
+        </div>
+      </section>
+
+      {/* ── TEASER ROLES ── */}
+      <section className="px-4 py-20 border-t border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 mb-10">
+            <Briefcase className="w-5 h-5 text-[#16a34a]" />
+            <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400">
+              Roles we&apos;re building towards
+            </h2>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {TEASER_ROLES.map(({ title, team, location }) => (
+              <div
+                key={title}
+                className="flex items-center justify-between px-6 py-5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#16a34a]/40 hover:bg-white/8 transition-all group"
+              >
+                <div>
+                  <p className="text-white font-bold text-base group-hover:text-[#4ade80] transition-colors">{title}</p>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
+                    <span>{team}</span>
+                    <span>·</span>
+                    <MapPin className="w-3 h-3" />
+                    <span>{location}</span>
+                  </div>
+                </div>
+                <div className="px-3 py-1.5 rounded-full bg-[#16a34a]/10 border border-[#16a34a]/20 text-[#4ade80] text-xs font-bold">
+                  Soon
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY JOIN ── */}
+      <section className="px-4 py-20 border-t border-white/5">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-3 mb-10">
+            <Zap className="w-5 h-5 text-[#16a34a]" />
+            <h2 className="text-xs font-black uppercase tracking-widest text-zinc-400">
+              Why this matters
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            {[
+              { stat: '50K+', label: 'students on the platform' },
+              { stat: '120+', label: 'campuses across Nigeria' },
+              { stat: '₦0', label: 'fee to sell on WhatsApp' },
+            ].map(({ stat, label }) => (
+              <div key={stat} className="rounded-2xl bg-white/5 border border-white/10 p-8">
+                <p className="text-4xl font-black text-[#4ade80] mb-2">{stat}</p>
+                <p className="text-zinc-400 text-sm leading-snug">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-zinc-400 text-base leading-relaxed mt-10 text-center max-w-xl mx-auto">
+            VendoorX is how Nigerian students buy and sell — textbooks, food, fashion, electronics — all on WhatsApp, with real payments and real trust built in.
+            <br /><br />
+            When you join us, your code, designs, and ideas are used by real students every single day.
           </p>
         </div>
       </section>
 
-      {/* Perks */}
-      <section className="py-16 sm:py-20 px-4 border-b border-border">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-8 text-center">Why VendoorX</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {PERKS.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="rounded-2xl border border-border bg-card p-5 flex flex-col gap-3 hover:border-primary/30 hover:shadow-md transition-all">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground mb-1">{title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Open roles */}
-      <section className="py-16 sm:py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary">Open Positions</p>
-            <span className="text-xs font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-full">{ROLES.length} roles open</span>
-          </div>
-          <div className="flex flex-col gap-4">
-            {ROLES.map(({ title, team, type, desc }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-border bg-card p-6 flex flex-col sm:flex-row sm:items-start gap-4 hover:border-primary/30 hover:shadow-lg transition-all group"
-              >
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="text-base font-black text-foreground group-hover:text-primary transition-colors">{title}</h3>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                    <span className="px-2 py-0.5 rounded-full bg-muted font-medium">{team}</span>
-                    <span>·</span>
-                    <span>{type}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                </div>
-                <Link
-                  href={`/contact?subject=Job Application — ${encodeURIComponent(title)}`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white font-bold text-sm transition-all shrink-0 whitespace-nowrap"
-                >
-                  Apply <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center rounded-2xl border border-dashed border-border py-10 px-6">
-            <p className="text-foreground font-bold mb-2">Don&apos;t see your role?</p>
-            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">We&apos;re always looking for exceptional talent. Send your CV and tell us how you&apos;d make VendoorX better.</p>
-            <Link
-              href="/contact?subject=General Application"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all"
-            >
-              Send Open Application <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+      {/* ── OPEN APPLICATION CTA ── */}
+      <section className="px-4 py-20 border-t border-white/5">
+        <div className="max-w-2xl mx-auto text-center">
+          <Users className="w-8 h-8 text-[#16a34a] mx-auto mb-5" />
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 leading-tight">
+            Don&apos;t wait for a posting.
+          </h2>
+          <p className="text-zinc-400 text-base leading-relaxed mb-8">
+            If you&apos;re exceptional and believe in what we&apos;re building, send us a message now. We read every application.
+          </p>
+          <Link
+            href="/contact?subject=Open Application — Careers"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 font-bold text-white text-base transition-all shadow-xl shadow-[#16a34a]/20"
+          >
+            Send open application <ArrowRight className="w-4 h-4" />
+          </Link>
+          <p className="text-zinc-600 text-xs mt-5">
+            Email us directly at{' '}
+            <a href="mailto:team@vendoorx.com" className="text-[#4ade80] hover:underline">
+              team@vendoorx.com
+            </a>
+          </p>
         </div>
       </section>
 

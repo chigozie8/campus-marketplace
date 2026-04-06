@@ -10,7 +10,6 @@ const LINKS = {
     { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
     { label: 'Careers',          href: '/careers',      icon: Users },
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
-    { label: 'Partnerships',     href: '/partnerships', icon: Star },
   ],
   Legal: [
     { label: 'Privacy Policy',      href: '/privacy',          icon: ShieldCheck },
