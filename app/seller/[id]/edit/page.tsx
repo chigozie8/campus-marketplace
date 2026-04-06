@@ -98,8 +98,8 @@ export default function EditListingPage() {
 
     const doneCount = entries.filter(en => en.status === 'done').length
     const uploadingCount = entries.filter(en => en.status === 'uploading').length
-    const slots = 6 - doneCount - uploadingCount
-    if (slots <= 0) { toast.error('Maximum 6 photos allowed'); return }
+    const slots = 9 - doneCount - uploadingCount
+    if (slots <= 0) { toast.error('Maximum 9 photos allowed'); return }
     const toUpload = files.slice(0, slots)
 
     const placeholders: ImageEntry[] = toUpload.map(() => ({ url: '', status: 'uploading' }))
@@ -203,7 +203,7 @@ export default function EditListingPage() {
             <div className="flex items-center gap-2 mb-4">
               <ImagePlus className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos</h2>
-              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/6</span>
+              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/9</span>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {entries.map((entry, i) => (
@@ -233,7 +233,7 @@ export default function EditListingPage() {
                   )}
                 </div>
               ))}
-              {entries.length < 6 && (
+              {entries.length < 9 && (
                 <button type="button" onClick={() => fileRef.current?.click()}
                   className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-border hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group">
                   <Camera className="w-6 h-6 text-gray-300 group-hover:text-primary transition-colors" />

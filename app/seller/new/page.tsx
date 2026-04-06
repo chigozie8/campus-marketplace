@@ -78,9 +78,9 @@ export default function NewListingPage() {
 
     const doneCount = entries.filter(en => en.status === 'done').length
     const uploadingCount = entries.filter(en => en.status === 'uploading').length
-    const slots = 6 - doneCount - uploadingCount
+    const slots = 9 - doneCount - uploadingCount
 
-    if (slots <= 0) { toast.error('Maximum 6 media files allowed'); return }
+    if (slots <= 0) { toast.error('Maximum 9 media files allowed'); return }
     const toUpload = files.slice(0, slots)
 
     const placeholders: MediaEntry[] = toUpload.map(f => ({
@@ -208,7 +208,7 @@ export default function NewListingPage() {
             <div className="flex items-center gap-2 mb-4">
               <ImagePlus className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos &amp; Video</h2>
-              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/6 uploaded</span>
+              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/9 uploaded</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
@@ -274,7 +274,7 @@ export default function NewListingPage() {
                 </div>
               ))}
 
-              {entries.length < 6 && (
+              {entries.length < 9 && (
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}

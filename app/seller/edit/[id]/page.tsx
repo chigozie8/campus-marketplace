@@ -84,7 +84,7 @@ export default function EditListingPage() {
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || [])
     if (!files.length) return
-    if (images.length + files.length > 6) { toast.error('Maximum 6 photos allowed'); return }
+    if (images.length + files.length > 9) { toast.error('Maximum 9 photos allowed'); return }
     setUploadingImages(true)
     const toastId = toast.loading(`Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`)
     try {
@@ -204,7 +204,7 @@ export default function EditListingPage() {
             <div className="flex items-center gap-2 mb-3">
               <ImagePlus className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos</h2>
-              <span className="ml-auto text-xs text-gray-400">{images.length}/6</span>
+              <span className="ml-auto text-xs text-gray-400">{images.length}/9</span>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {images.map((url, i) => (
@@ -220,7 +220,7 @@ export default function EditListingPage() {
                   {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] bg-primary text-white px-1.5 py-0.5 rounded-full font-bold">Cover</span>}
                 </div>
               ))}
-              {images.length < 6 && (
+              {images.length < 9 && (
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
