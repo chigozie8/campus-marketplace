@@ -2,8 +2,13 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Users, Building2, TrendingUp, Star, Zap } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Users, Building2, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import type { User } from '@supabase/supabase-js'
+
+interface CtaSectionProps {
+  user?: User | null
+}
 
 const PERKS = [
   'Free to join, free to list',
@@ -83,7 +88,9 @@ function StatCard({
   )
 }
 
-export function CtaSection() {
+export function CtaSection({ user }: CtaSectionProps) {
+  const isAuthed = !!user
+
   return (
     <section className="relative overflow-hidden bg-[#0a0a0a] py-24 sm:py-36">
       {/* Subtle grid texture */}
@@ -97,7 +104,6 @@ export function CtaSection() {
 
       {/* Green glow top-center */}
       <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#16a34a]/20 blur-[100px] pointer-events-none" />
-      {/* Subtle green glow bottom */}
       <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[400px] h-[300px] rounded-full bg-[#16a34a]/10 blur-[80px] pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
@@ -105,20 +111,34 @@ export function CtaSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8">
           <Zap className="w-4 h-4 text-[#16a34a]" />
-          <span className="text-sm font-semibold text-[#16a34a] tracking-wide">Join the largest campus marketplace</span>
+          <span className="text-sm font-semibold text-[#16a34a] tracking-wide">
+            {isAuthed ? 'Your store is live and ready' : 'Join the largest campus marketplace'}
+          </span>
         </div>
 
         {/* Headline */}
         <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight">
-          Ready to buy &amp; sell{' '}
-          <span className="text-[#16a34a]">smarter?</span>
+          {isAuthed ? (
+            <>Ready to grow your{' '}<span className="text-[#16a34a]">store?</span></>
+          ) : (
+            <>Ready to buy &amp; sell{' '}<span className="text-[#16a34a]">smarter?</span></>
+          )}
         </h2>
 
         {/* Sub-copy */}
         <p className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-10">
-          Join <span className="text-white font-bold">50,000+</span> students already trading on VendoorX.
-          It&apos;s <span className="text-[#16a34a] font-semibold">free to join</span> and{' '}
-          <span className="text-[#16a34a] font-semibold">free to list</span>.
+          {isAuthed ? (
+            <>
+              Your dashboard has everything you need. Boost your listings, track orders, and{' '}
+              <span className="text-[#16a34a] font-semibold">grow your campus business</span>.
+            </>
+          ) : (
+            <>
+              Join <span className="text-white font-bold">50,000+</span> students already trading on VendoorX.
+              It&apos;s <span className="text-[#16a34a] font-semibold">free to join</span> and{' '}
+              <span className="text-[#16a34a] font-semibold">free to list</span>.
+            </>
+          )}
         </p>
 
         {/* Stats */}
@@ -140,24 +160,50 @@ export function CtaSection() {
 
         {/* CTA buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-          <Button
-            size="lg"
-            className="group bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-[#16a34a]/30 hover:shadow-[#16a34a]/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
-            asChild
-          >
-            <Link href="/auth/sign-up">
-              Start for Free
-              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-white/20 text-white hover:bg-white/10 hover:border-white/40 h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg font-semibold rounded-2xl bg-transparent w-full sm:w-auto transition-all duration-300"
-            asChild
-          >
-            <Link href="/marketplace">Browse Marketplace</Link>
-          </Button>
+          {isAuthed ? (
+            <>
+              <Button
+                size="lg"
+                className="group bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-[#16a34a]/30 hover:shadow-[#16a34a]/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
+                asChild
+              >
+                <Link href="/dashboard">
+                  <LayoutDashboard className="mr-2 w-5 h-5" />
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 hover:border-white/40 h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg font-semibold rounded-2xl bg-transparent w-full sm:w-auto transition-all duration-300"
+                asChild
+              >
+                <Link href="/marketplace">Browse Marketplace</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="lg"
+                className="group bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-[#16a34a]/30 hover:shadow-[#16a34a]/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
+                asChild
+              >
+                <Link href="/auth/sign-up">
+                  Start for Free
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 hover:border-white/40 h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg font-semibold rounded-2xl bg-transparent w-full sm:w-auto transition-all duration-300"
+                asChild
+              >
+                <Link href="/marketplace">Browse Marketplace</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Trust line */}

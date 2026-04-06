@@ -22,16 +22,16 @@ export default function RootError({
     error.message?.toLowerCase().includes('fetch')
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-20 h-20 rounded-3xl bg-white border border-gray-100 shadow-sm flex items-center justify-center mb-6">
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-background flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-20 h-20 rounded-3xl bg-white dark:bg-card border border-gray-100 dark:border-border shadow-sm flex items-center justify-center mb-6">
         <WifiOff className="w-9 h-9 text-[#16a34a]" strokeWidth={1.5} />
       </div>
 
-      <p className="text-sm font-black tracking-tight text-gray-950 mb-6 select-none">
+      <p className="text-sm font-black tracking-tight text-gray-950 dark:text-white mb-6 select-none">
         Vendoor<span className="text-[#16a34a]">X</span>
       </p>
 
-      <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight mb-3">
+      <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-3">
         {isOffline ? 'You\'re offline' : isDbError ? 'Service unavailable' : 'Something went wrong'}
       </h1>
 
@@ -53,7 +53,7 @@ export default function RootError({
         </button>
         <Link
           href="/"
-          className="flex-1 inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold px-5 py-3 rounded-xl hover:bg-gray-50 active:scale-95 transition-all shadow-sm"
+          className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card border border-gray-200 dark:border-border text-gray-700 dark:text-foreground text-sm font-bold px-5 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-muted active:scale-95 transition-all shadow-sm"
         >
           <Home className="w-4 h-4" />
           Go Home

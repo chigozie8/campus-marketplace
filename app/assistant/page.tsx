@@ -315,10 +315,10 @@ export default function AssistantPage() {
   const showSuggestions = messages.length <= 1
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-background overflow-hidden">
 
       {/* ── Header ── */}
-      <header className="flex-shrink-0 border-b border-gray-100 bg-white/90 backdrop-blur-xl">
+      <header className="flex-shrink-0 border-b border-gray-100 dark:border-border bg-white/90 dark:bg-background/90 backdrop-blur-xl">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-3">
             {/* Back */}
@@ -371,7 +371,7 @@ export default function AssistantPage() {
       </header>
 
       {/* ── Messages ── */}
-      <main className="flex-1 overflow-y-auto scrollbar-hide bg-white">
+      <main className="flex-1 overflow-y-auto scrollbar-hide bg-white dark:bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
           {/* Welcome hero — shown before any user message */}
@@ -408,7 +408,7 @@ export default function AssistantPage() {
 
       {/* ── Quick prompts ── */}
       {showSuggestions && (
-        <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm px-4 sm:px-6 py-3">
+        <div className="flex-shrink-0 border-t border-gray-100 dark:border-border bg-gray-50/80 dark:bg-muted/20 backdrop-blur-sm px-4 sm:px-6 py-3">
           <div className="max-w-3xl mx-auto">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">
               Quick questions
@@ -418,7 +418,7 @@ export default function AssistantPage() {
                 <button
                   key={label}
                   onClick={() => sendMessage(query)}
-                  className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-green-400 hover:bg-green-50 text-gray-700 hover:text-green-700 text-xs font-medium px-3 py-2 rounded-2xl whitespace-nowrap transition-all flex-shrink-0 shadow-sm group"
+                  className="flex items-center gap-1.5 bg-white dark:bg-card border border-gray-200 dark:border-border hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-950/30 text-gray-700 dark:text-foreground hover:text-green-700 text-xs font-medium px-3 py-2 rounded-2xl whitespace-nowrap transition-all flex-shrink-0 shadow-sm group"
                 >
                   <Icon className="w-3.5 h-3.5 text-green-600 group-hover:text-green-700 transition-colors" />
                   {label}
@@ -431,11 +431,11 @@ export default function AssistantPage() {
       )}
 
       {/* ── Input area ── */}
-      <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+      <div className="flex-shrink-0 border-t border-gray-100 dark:border-border bg-white dark:bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 pb-4">
           <div className="flex items-end gap-2.5">
             {/* Textarea */}
-            <div className="flex-1 relative bg-gray-50 border border-gray-200 rounded-3xl overflow-hidden focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 transition-all">
+            <div className="flex-1 relative bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-3xl overflow-hidden focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 dark:focus-within:ring-green-900 transition-all">
               <textarea
                 ref={inputRef}
                 placeholder="Ask anything about campus deals…"

@@ -1,15 +1,46 @@
 'use client'
 
 import Link from 'next/link'
-import { Sparkles, ArrowRight, Play, Shield, Zap, Users } from 'lucide-react'
+import Image from 'next/image'
+import { Sparkles, ArrowRight, Play, Shield, Zap, Users, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import type { User } from '@supabase/supabase-js'
+
+interface HeroSectionProps {
+  user?: User | null
+}
 
 const AVATARS = [
-  { initials: 'AO', color: 'bg-primary' },
-  { initials: 'KU', color: 'bg-emerald-600' },
-  { initials: 'TN', color: 'bg-teal-600' },
-  { initials: 'EM', color: 'bg-green-700' },
-  { initials: 'JD', color: 'bg-cyan-600' },
+  {
+    src: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&q=80',
+    alt: 'Campus student seller',
+    fallback: 'AO',
+    color: 'bg-primary',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&q=80',
+    alt: 'Student vendor',
+    fallback: 'KU',
+    color: 'bg-emerald-600',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&q=80',
+    alt: 'VendoorX seller',
+    fallback: 'TN',
+    color: 'bg-teal-600',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&q=80',
+    alt: 'Campus entrepreneur',
+    fallback: 'EM',
+    color: 'bg-green-700',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&q=80',
+    alt: 'Active vendor',
+    fallback: 'JD',
+    color: 'bg-cyan-600',
+  },
 ]
 
 const FEATURES = [
@@ -18,15 +49,25 @@ const FEATURES = [
   { icon: Users, text: '50K+ Sellers' },
 ]
 
-export function HeroSection() {
+export function HeroSection({ user }: HeroSectionProps) {
+  const isAuthed = !!user
+  const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fafafa] dark:bg-background">
 
+      {/* Subtle radial glow behind content */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-green-400/8 dark:bg-green-500/5 blur-[120px] pointer-events-none" />
+
       <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
+
         {/* Trust badge pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
           <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
-          The Shopify for WhatsApp &amp; Social Sellers in Africa
+          {isAuthed && firstName
+            ? `Welcome back, ${firstName}! Your store awaits 🎉`
+            : "The Shopify for WhatsApp & Social Sellers in Africa"
+          }
         </div>
 
         {/* Headline */}
@@ -39,7 +80,8 @@ export function HeroSection() {
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
           Stop tracking orders in chats. VendoorX turns your WhatsApp, Instagram, and Facebook conversations into a{' '}
-          <span className="text-primary font-semibold">structured, trackable store</span> — with payments, dashboards, and order management built in.
+          <span className="text-primary font-semibold">structured, trackable store</span>{' '}
+          — with payments, dashboards, and order management built in.
         </p>
 
         {/* Feature badges */}
@@ -60,50 +102,90 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
-          <Link href="/auth/sign-up">
-            <Button
-              size="lg"
-              className="group relative rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Get Started Free
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Button>
-          </Link>
-          <Link href="#how-it-works">
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all"
-            >
-              <Play className="w-4 h-4 mr-2 text-primary" />
-              See How It Works
-            </Button>
-          </Link>
+          {isAuthed ? (
+            <>
+              <Link href="/dashboard">
+                <Button
+                  size="lg"
+                  className="group relative rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Go to Dashboard
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
+              <Link href="/marketplace">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all"
+                >
+                  Browse Marketplace
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/sign-up">
+                <Button
+                  size="lg"
+                  className="group relative rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Get Started Free
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
+              <Link href="#how-it-works">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all"
+                >
+                  <Play className="w-4 h-4 mr-2 text-primary" />
+                  See How It Works
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Social proof row */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t border-border/50">
-          {/* Overlapping avatars */}
+          {/* Overlapping real avatars */}
           <div className="flex -space-x-3">
-            {AVATARS.map(({ initials, color }) => (
+            {AVATARS.map(({ src, alt, fallback, color }, i) => (
               <div
-                key={initials}
-                className={`w-10 h-10 rounded-full ${color} flex items-center justify-center text-white text-xs font-bold ring-3 ring-background shadow-lg`}
+                key={fallback}
+                className="w-10 h-10 rounded-full ring-3 ring-background shadow-lg overflow-hidden"
+                style={{ zIndex: AVATARS.length - i }}
               >
-                {initials}
+                <Image
+                  src={src}
+                  alt={alt}
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement
+                    target.style.display = 'none'
+                    const parent = target.parentElement
+                    if (parent) {
+                      parent.className = `w-10 h-10 rounded-full ring-3 ring-background shadow-lg flex items-center justify-center text-white text-xs font-bold ${color}`
+                      parent.textContent = fallback
+                    }
+                  }}
+                />
               </div>
             ))}
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className="w-4 h-4 text-yellow-500 fill-yellow-500"
-                  viewBox="0 0 20 20"
-                >
+                <svg key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               ))}
@@ -115,7 +197,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator — sits below the content flow, not overlapping */}
+      {/* Scroll indicator */}
       <div className="pb-10 flex flex-col items-center gap-2 group cursor-pointer select-none">
         <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-muted-foreground/50 group-hover:text-primary transition-colors duration-300">
           Scroll
@@ -123,13 +205,7 @@ export function HeroSection() {
         <div className="relative w-10 h-10 flex items-center justify-center">
           <span className="absolute inset-0 rounded-full border-2 border-primary/25 animate-ping opacity-50" />
           <span className="absolute inset-1 rounded-full border border-primary/15" />
-          <svg
-            className="w-5 h-5 text-primary animate-bounce relative z-10"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
+          <svg className="w-5 h-5 text-primary animate-bounce relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>

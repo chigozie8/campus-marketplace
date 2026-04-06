@@ -372,7 +372,7 @@ export default function ProfilePage() {
 
   function handleDisable2FA() {
     toast.custom((id) => (
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl shadow-black/10 p-4 w-[320px]">
+      <div className="bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/10 p-4 w-[320px]">
         <div className="flex gap-3 items-start mb-4">
           <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
             <ShieldCheck className="w-5 h-5 text-red-500" />

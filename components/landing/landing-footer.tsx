@@ -1,36 +1,36 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, MessageCircle, Instagram, Facebook, Twitter, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight } from 'lucide-react'
+import { ArrowRight, MessageCircle, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Headphones, Users, TrendingUp, Store, ChevronRight } from 'lucide-react'
 
 const LINKS = {
   Marketplace: [
     { label: 'Browse Listings', href: '/marketplace', icon: Store },
-    { label: 'Post a Listing', href: '/auth/sign-up', icon: TrendingUp },
+    { label: 'Post a Listing', href: '/seller/new', icon: TrendingUp },
     { label: 'Top Categories', href: '/marketplace', icon: BookOpen },
     { label: 'Seller Dashboard', href: '/dashboard', icon: Users },
     { label: 'AI Assistant', href: '/assistant', icon: Zap },
   ],
   Company: [
-    { label: 'About VendoorX', href: '#', icon: ShieldCheck },
-    { label: 'Blog & Updates', href: '#', icon: BookOpen },
-    { label: 'Careers', href: '#', icon: Users },
-    { label: 'Press Kit', href: '#', icon: TrendingUp },
-    { label: 'Partnerships', href: '#', icon: Star },
+    { label: 'About VendoorX', href: '/about', icon: ShieldCheck },
+    { label: 'Blog & Updates', href: '/blog', icon: BookOpen },
+    { label: 'Careers', href: '/careers', icon: Users },
+    { label: 'Press Kit', href: '/press', icon: TrendingUp },
+    { label: 'Partnerships', href: '/partnerships', icon: Star },
   ],
   Support: [
-    { label: 'Help Center', href: '#', icon: Headphones },
-    { label: 'Contact Us', href: '#', icon: MessageCircle },
-    { label: 'Report a Bug', href: '#', icon: ShieldCheck },
-    { label: 'Community Forum', href: '#', icon: Users },
-    { label: 'Status Page', href: '#', icon: Zap },
+    { label: 'Help Center', href: '/help', icon: Headphones },
+    { label: 'Contact Us', href: '/contact', icon: MessageCircle },
+    { label: 'Report a Bug', href: '/contact?subject=bug', icon: ShieldCheck },
+    { label: 'Community Forum', href: '/community', icon: Users },
+    { label: 'Status Page', href: '/status', icon: Zap },
   ],
   Legal: [
-    { label: 'Privacy Policy', href: '#', icon: ShieldCheck },
-    { label: 'Terms of Service', href: '#', icon: BookOpen },
-    { label: 'Cookie Policy', href: '#', icon: BookOpen },
-    { label: 'Refund Policy', href: '#', icon: ShieldCheck },
-    { label: 'Dispute Resolution', href: '#', icon: Users },
+    { label: 'Privacy Policy', href: '/privacy', icon: ShieldCheck },
+    { label: 'Terms of Service', href: '/terms', icon: BookOpen },
+    { label: 'Cookie Policy', href: '/cookies', icon: BookOpen },
+    { label: 'Refund Policy', href: '/refund', icon: ShieldCheck },
+    { label: 'Dispute Resolution', href: '/refund#disputes', icon: Users },
   ],
 }
 
@@ -47,19 +47,19 @@ const SOCIALS = [
     ),
   },
   {
-    href: 'https://instagram.com/',
+    href: 'https://instagram.com/vendoorx',
     label: 'Instagram',
     bg: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
     icon: <Instagram className="w-4 h-4 text-white" />,
   },
   {
-    href: 'https://facebook.com/',
+    href: 'https://facebook.com/vendoorx',
     label: 'Facebook',
     bg: '#1877F2',
     icon: <Facebook className="w-4 h-4 text-white" />,
   },
   {
-    href: 'https://twitter.com/',
+    href: 'https://twitter.com/vendoorx',
     label: 'Twitter / X',
     bg: '#000000',
     icon: (
@@ -69,7 +69,7 @@ const SOCIALS = [
     ),
   },
   {
-    href: 'https://tiktok.com/',
+    href: 'https://tiktok.com/@vendoorx',
     label: 'TikTok',
     bg: '#010101',
     icon: (
@@ -79,8 +79,6 @@ const SOCIALS = [
     ),
   },
 ]
-
-
 
 export function LandingFooter() {
   return (
@@ -92,12 +90,14 @@ export function LandingFooter() {
 
           {/* Left — brand */}
           <div className="flex flex-col gap-5">
-            <Link href="/" className="flex flex-col w-fit group select-none">
-              <span className="text-[1.6rem] font-black tracking-tight text-foreground leading-none group-hover:opacity-80 transition-opacity">
+            <Link href="/" className="flex items-center gap-2.5 w-fit group select-none">
+              {/* Logo icon */}
+              <div className="relative w-8 h-8 shrink-0">
+                <div className="absolute top-0 left-0 w-[22px] h-[22px] rounded-[5px] bg-gray-950 dark:bg-white" />
+                <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-[5px] bg-[#16a34a] opacity-90" />
+              </div>
+              <span className="text-[1.5rem] font-black tracking-tight text-foreground leading-none group-hover:opacity-80 transition-opacity">
                 Vendoor<span className="text-primary">X</span>
-              </span>
-              <span className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-semibold mt-1">
-                Campus Marketplace
               </span>
             </Link>
 
@@ -110,7 +110,7 @@ export function LandingFooter() {
               Made in Nigeria — built for campus hustle
             </div>
 
-            {/* Social icons — circles only */}
+            {/* Social icons */}
             <div className="flex flex-col gap-2">
               <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">Follow us</p>
               <div className="flex items-center gap-3">
@@ -228,11 +228,11 @@ export function LandingFooter() {
             Connecting Nigerian campuses, one deal at a time.
           </p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
             <span className="w-1 h-1 rounded-full bg-border" />
-            <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
             <span className="w-1 h-1 rounded-full bg-border" />
-            <Link href="#" className="hover:text-primary transition-colors">Cookies</Link>
+            <Link href="/cookies" className="hover:text-primary transition-colors">Cookies</Link>
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
     <div
       className={`group rounded-2xl border transition-all duration-300 overflow-hidden ${
         open
-          ? 'border-primary/40 shadow-lg shadow-primary/8 bg-white'
+          ? 'border-primary/40 shadow-lg shadow-primary/8 bg-white dark:bg-card'
           : 'border-border bg-card hover:border-primary/20 hover:shadow-md'
       }`}
     >
@@ -113,7 +113,7 @@ function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
 
 export function FaqSection() {
   return (
-    <section id="faq" className="py-24 sm:py-32 px-4 sm:px-6 bg-[#fafafa]">
+    <section id="faq" className="py-24 sm:py-32 px-4 sm:px-6 bg-[#fafafa] dark:bg-muted/20">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}

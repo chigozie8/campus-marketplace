@@ -415,7 +415,7 @@ export function WhatsappMockupSection() {
 
                 {/* Post a Listing prompt */}
                 <IncomingBubble time="9:42 AM" noBubble>
-                  <div className="bg-white rounded-[18px] rounded-tl-[4px] shadow-sm overflow-hidden">
+                  <div className="bg-white dark:bg-[#202c33] rounded-[18px] rounded-tl-[4px] shadow-sm overflow-hidden">
                     <div style={{ padding: '8px 12px 4px' }}>
                       <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: 5 }}>
                         <ShoppingCart style={{ width: 12, height: 12, color: '#25D366' }} />

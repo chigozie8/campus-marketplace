@@ -98,7 +98,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <LandingNav user={user} />
-      <HeroSection />
+      <HeroSection user={user} />
       <StatsBar />
       <TrustedBySection />
       <ProblemSolutionSection />
@@ -110,7 +110,7 @@ export default async function Home() {
       <TestimonialsSection />
       <PricingSection />
       <FaqSection />
-      <CtaSection />
+      <CtaSection user={user} />
       <LandingFooter />
     </main>
   )

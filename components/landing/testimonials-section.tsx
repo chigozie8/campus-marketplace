@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Star, BadgeCheck } from 'lucide-react'
 
 const TESTIMONIALS = [
@@ -7,7 +8,8 @@ const TESTIMONIALS = [
     name: 'Adaeze Okonkwo',
     role: 'Fashion Seller',
     school: 'UNILAG',
-    avatar: 'AO',
+    avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&h=100&fit=crop&q=80',
+    initials: 'AO',
     color: 'from-pink-500 to-rose-600',
     rating: 5,
     revenue: '₦180,000',
@@ -19,7 +21,8 @@ const TESTIMONIALS = [
     name: 'Chukwuemeka Eze',
     role: 'Electronics Reseller',
     school: 'UI Ibadan',
-    avatar: 'CE',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80',
+    initials: 'CE',
     color: 'from-blue-500 to-indigo-600',
     rating: 5,
     revenue: '3 Laptops',
@@ -31,7 +34,8 @@ const TESTIMONIALS = [
     name: 'Fatimah Al-Hassan',
     role: 'Food Vendor',
     school: 'ABU Zaria',
-    avatar: 'FA',
+    avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&q=80',
+    initials: 'FA',
     color: 'from-orange-500 to-red-600',
     rating: 5,
     revenue: 'Daily Orders',
@@ -43,7 +47,8 @@ const TESTIMONIALS = [
     name: 'Oluwafemi Adeyemi',
     role: 'Textbook Seller',
     school: 'OAU',
-    avatar: 'OA',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&q=80',
+    initials: 'OA',
     color: 'from-emerald-500 to-green-600',
     rating: 5,
     revenue: 'School Fees',
@@ -55,7 +60,8 @@ const TESTIMONIALS = [
     name: 'Blessing Nwosu',
     role: 'Beauty Entrepreneur',
     school: 'FUTA',
-    avatar: 'BN',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&q=80',
+    initials: 'BN',
     color: 'from-rose-500 to-pink-600',
     rating: 5,
     revenue: '3x Sales',
@@ -67,7 +73,8 @@ const TESTIMONIALS = [
     name: 'Ibrahim Musa',
     role: 'Tech Repair Service',
     school: 'BUK',
-    avatar: 'IM',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80',
+    initials: 'IM',
     color: 'from-indigo-500 to-violet-600',
     rating: 5,
     revenue: 'Steady Clients',
@@ -87,9 +94,31 @@ function Stars({ count }: { count: number }) {
   )
 }
 
+function AvatarPhoto({ src, initials, color, name }: { src: string; initials: string; color: string; name: string }) {
+  return (
+    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${color} overflow-hidden shadow-md shrink-0 ring-2 ring-white dark:ring-card`}>
+      <Image
+        src={src}
+        alt={name}
+        width={44}
+        height={44}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          const target = e.currentTarget as HTMLImageElement
+          target.style.display = 'none'
+          const parent = target.parentElement
+          if (parent) {
+            parent.innerHTML = `<span class="w-full h-full flex items-center justify-center text-white text-sm font-black">${initials}</span>`
+          }
+        }}
+      />
+    </div>
+  )
+}
+
 export function TestimonialsSection() {
   return (
-    <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background overflow-hidden">
+    <section id="testimonials" className="py-24 sm:py-32 px-4 sm:px-6 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -151,7 +180,7 @@ export function TestimonialsSection() {
               <div className="flex flex-col gap-5 p-6 flex-1">
                 {/* Metric highlight */}
                 <div className="flex items-start justify-between">
-                  <div className={`px-3 py-1.5 rounded-xl bg-gradient-to-br ${t.color} bg-opacity-10`}>
+                  <div className={`px-3 py-1.5 rounded-xl bg-gradient-to-br ${t.color}`}>
                     <p className="text-lg font-black text-white leading-none">{t.revenue}</p>
                     <p className="text-[10px] text-white/80 font-medium mt-0.5">{t.period}</p>
                   </div>
@@ -165,9 +194,7 @@ export function TestimonialsSection() {
 
                 {/* Author */}
                 <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-sm font-black shadow-md shrink-0`}>
-                    {t.avatar}
-                  </div>
+                  <AvatarPhoto src={t.avatar} initials={t.initials} color={t.color} name={t.name} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       <p className="text-sm font-bold text-foreground truncate">{t.name}</p>
@@ -182,6 +209,7 @@ export function TestimonialsSection() {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   )

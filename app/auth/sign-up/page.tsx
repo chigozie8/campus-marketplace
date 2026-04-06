@@ -453,7 +453,7 @@ function SignUpPageInner() {
                     'w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0',
                     agreedToTerms
                       ? 'bg-[#16a34a] border-[#16a34a]'
-                      : 'border-gray-300 bg-white hover:border-[#16a34a]/50'
+                      : 'border-gray-300 bg-white dark:bg-muted hover:border-[#16a34a]/50'
                   )}
                 >
                   {agreedToTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
