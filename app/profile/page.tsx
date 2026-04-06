@@ -8,6 +8,8 @@ import {
   GraduationCap, ShieldCheck, Bell, Lock, LogOut,
   ChevronRight, Loader2, CheckCircle2, Edit3, Star,
   Package, Heart, BadgeCheck, Save, AtSign, X, KeyRound, Copy,
+  MessageCircle, ShoppingBag, TrendingDown, Sparkles, BarChart2,
+  Banknote, UserPlus, Tag, ShieldAlert,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadToCloudinary } from '@/lib/cloudinary'
@@ -480,37 +482,51 @@ export default function ProfilePage() {
             </div>
 
             {/* Login Alerts */}
-            <div className={`rounded-2xl border overflow-hidden shadow-sm transition-all duration-300 ${loginAlerts ? 'border-blue-200 dark:border-blue-900/40' : 'border-gray-100 dark:border-border'}`}>
-              <div className={`flex items-center gap-4 p-4 transition-colors ${loginAlerts ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20' : 'bg-white dark:bg-card'}`}>
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 transition-colors ${loginAlerts ? 'bg-blue-500 shadow-blue-200 dark:shadow-blue-900/30' : 'bg-gray-100 dark:bg-muted'}`}>
-                  <Bell className={`w-5 h-5 ${loginAlerts ? 'text-white' : 'text-gray-500 dark:text-muted-foreground'}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm text-gray-900 dark:text-white">Login Alerts</p>
-                    {loginAlerts && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">ON</span>}
+            <div className={`rounded-3xl overflow-hidden shadow-lg transition-all duration-500 ${loginAlerts ? 'shadow-blue-200/60 dark:shadow-blue-900/40' : 'shadow-gray-100 dark:shadow-black/20'}`}>
+              <div className={`relative p-5 transition-all duration-500 ${loginAlerts ? 'bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600' : 'bg-white dark:bg-card border border-gray-100 dark:border-border'}`}>
+                {/* bg decoration */}
+                {loginAlerts && (
+                  <>
+                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/5 -translate-y-10 translate-x-10" />
+                    <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-white/5 translate-y-8 -translate-x-6" />
+                  </>
+                )}
+                <div className="relative flex items-start gap-4">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${loginAlerts ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-950/30'}`}>
+                    {loginAlerts
+                      ? <ShieldCheck className="w-7 h-7 text-white" />
+                      : <ShieldAlert className="w-7 h-7 text-blue-500" />
+                    }
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">Get an email alert on every new sign-in</p>
+                  <div className="flex-1 min-w-0 pt-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className={`font-black text-base ${loginAlerts ? 'text-white' : 'text-gray-900 dark:text-white'}`}>Login Alerts</p>
+                      {loginAlerts && (
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/25 text-white tracking-wider">PROTECTED</span>
+                      )}
+                    </div>
+                    <p className={`text-xs leading-relaxed ${loginAlerts ? 'text-blue-100' : 'text-gray-500'}`}>
+                      {loginAlerts ? 'You\'ll get an instant email whenever someone logs into your account.' : 'Get notified instantly when someone logs into your account.'}
+                    </p>
+                    {loginAlerts && userEmail && (
+                      <div className="mt-3 inline-flex items-center gap-2 bg-white/20 rounded-xl px-3 py-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse flex-shrink-0" />
+                        <p className="text-xs text-white font-medium truncate">{userEmail}</p>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={toggleLoginAlerts}
+                    disabled={loginAlertsLoading}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 mt-1 ${loginAlerts ? 'bg-white/30' : 'bg-gray-200 dark:bg-muted'}`}
+                  >
+                    {loginAlertsLoading
+                      ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-3 text-white" />
+                      : <span className={`absolute top-1 w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${loginAlerts ? 'bg-white translate-x-7' : 'bg-white translate-x-1'}`} />
+                    }
+                  </button>
                 </div>
-                <button
-                  onClick={toggleLoginAlerts}
-                  disabled={loginAlertsLoading}
-                  className={`relative w-12 h-7 rounded-full transition-colors duration-300 disabled:opacity-50 focus:outline-none flex-shrink-0 ${loginAlerts ? 'bg-blue-500' : 'bg-gray-200 dark:bg-muted'}`}
-                >
-                  {loginAlertsLoading
-                    ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-2 text-white" />
-                    : <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${loginAlerts ? 'translate-x-6' : 'translate-x-1'}`} />
-                  }
-                </button>
               </div>
-              {loginAlerts && userEmail && (
-                <div className="px-4 py-2.5 bg-blue-50/50 dark:bg-blue-950/10 border-t border-blue-100 dark:border-blue-900/20 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" />
-                  <p className="text-xs text-blue-700 dark:text-blue-400">
-                    Alerts sent to <span className="font-bold">{userEmail}</span>
-                  </p>
-                </div>
-              )}
             </div>
 
             <button
@@ -531,33 +547,50 @@ export default function ProfilePage() {
 
         {/* Notifications Tab */}
         {tab === 'Notifications' && (
-          <div className="space-y-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Choose what to be notified about</p>
-            <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border overflow-hidden">
+          <div className="space-y-4">
+            {/* Header card */}
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-5 shadow-lg shadow-purple-200/50 dark:shadow-purple-900/30">
+              <div className="absolute top-0 right-0 w-28 h-28 rounded-full bg-white/10 -translate-y-8 translate-x-8" />
+              <div className="absolute bottom-0 left-10 w-16 h-16 rounded-full bg-white/10 translate-y-6" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <Bell className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-black text-white text-base">Notifications</p>
+                  <p className="text-purple-100 text-xs mt-0.5">Control what updates you receive</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Notification cards */}
+            <div className="space-y-3">
               {([
-                { key: 'messages',     label: 'New Messages',   sub: 'When buyers send you a message',  color: 'bg-green-500' },
-                { key: 'orders',       label: 'New Orders',     sub: 'When someone places an order',    color: 'bg-blue-500'  },
-                { key: 'price_alerts', label: 'Price Alerts',   sub: 'Price drops on items you saved',  color: 'bg-orange-500'},
-                { key: 'promotions',   label: 'Promotions',     sub: 'VendoorX offers and updates',     color: 'bg-purple-500'},
-                { key: 'weekly_report',label: 'Weekly Report',  sub: 'Your weekly sales summary',       color: 'bg-primary'   },
-              ] as const).map(({ key, label, sub, color }) => {
+                { key: 'messages',      label: 'New Messages',   sub: 'When a buyer sends you a message',   Icon: MessageCircle, from: 'from-emerald-400', to: 'to-green-500',   glow: 'shadow-green-200/60 dark:shadow-green-900/30',   bg: 'bg-emerald-50 dark:bg-emerald-950/20',   border: 'border-emerald-200 dark:border-emerald-900/40' },
+                { key: 'orders',        label: 'New Orders',     sub: 'When someone places an order',        Icon: ShoppingBag,   from: 'from-blue-400',    to: 'to-indigo-500',  glow: 'shadow-blue-200/60 dark:shadow-blue-900/30',     bg: 'bg-blue-50 dark:bg-blue-950/20',         border: 'border-blue-200 dark:border-blue-900/40' },
+                { key: 'price_alerts',  label: 'Price Alerts',   sub: 'Price drops on items you saved',      Icon: TrendingDown,  from: 'from-orange-400',  to: 'to-amber-500',   glow: 'shadow-orange-200/60 dark:shadow-orange-900/30', bg: 'bg-orange-50 dark:bg-orange-950/20',     border: 'border-orange-200 dark:border-orange-900/40' },
+                { key: 'promotions',    label: 'Promotions',     sub: 'VendoorX special offers & deals',     Icon: Sparkles,      from: 'from-pink-400',    to: 'to-rose-500',    glow: 'shadow-pink-200/60 dark:shadow-pink-900/30',     bg: 'bg-pink-50 dark:bg-pink-950/20',         border: 'border-pink-200 dark:border-pink-900/40' },
+                { key: 'weekly_report', label: 'Weekly Report',  sub: 'Your weekly earnings summary',        Icon: BarChart2,     from: 'from-violet-400',  to: 'to-purple-500',  glow: 'shadow-purple-200/60 dark:shadow-purple-900/30', bg: 'bg-violet-50 dark:bg-violet-950/20',     border: 'border-violet-200 dark:border-violet-900/40' },
+              ] as const).map(({ key, label, sub, Icon, from, to, glow, bg, border }) => {
                 const on = notifPrefs[key]
                 const loading = notifLoading === key
                 return (
-                  <div key={key} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 dark:hover:bg-muted/30 transition-colors">
-                    <div className={`w-2 h-8 rounded-full flex-shrink-0 ${on ? color : 'bg-gray-200 dark:bg-muted'} transition-colors`} />
+                  <div key={key} className={`relative rounded-2xl border p-4 flex items-center gap-4 transition-all duration-300 shadow-sm ${on ? `${bg} ${border} ${glow} shadow-md` : 'bg-white dark:bg-card border-gray-100 dark:border-border'}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${on ? `${from} ${to} shadow-sm` : 'from-gray-100 to-gray-200 dark:from-muted dark:to-muted'}`}>
+                      <Icon className={`w-5 h-5 ${on ? 'text-white' : 'text-gray-400 dark:text-muted-foreground'}`} />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-gray-900 dark:text-white">{label}</p>
-                      <p className="text-xs text-gray-500">{sub}</p>
+                      <p className={`font-bold text-sm ${on ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{label}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{sub}</p>
                     </div>
                     <button
                       onClick={() => toggleNotif(key)}
                       disabled={!!notifLoading}
-                      className={`relative w-11 h-6 rounded-full transition-colors duration-300 disabled:opacity-60 flex-shrink-0 ${on ? color : 'bg-gray-200 dark:bg-muted'}`}
+                      className={`relative w-13 w-12 h-7 rounded-full transition-all duration-300 disabled:opacity-60 focus:outline-none flex-shrink-0 bg-gradient-to-r ${on ? `${from} ${to}` : 'bg-gray-200 dark:bg-muted from-transparent to-transparent'}`}
                     >
                       {loading
-                        ? <Loader2 className="w-3 h-3 animate-spin absolute top-1.5 left-1.5 text-white" />
-                        : <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${on ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-2 text-white" />
+                        : <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${on ? 'translate-x-5' : 'translate-x-1'}`} />
                       }
                     </button>
                   </div>
@@ -569,34 +602,69 @@ export default function ProfilePage() {
 
         {/* Activity Tab */}
         {tab === 'Activity' && (
-          <div className="space-y-3">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Your recent activity</p>
-            <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm divide-y divide-gray-50 dark:divide-border overflow-hidden">
-              {activityItems.length === 0 ? (
-                <div className="text-center py-12 px-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mx-auto mb-3">
-                    <Package className="w-6 h-6 text-gray-400" />
-                  </div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">No activity yet</p>
-                  <p className="text-xs text-gray-400">Your listings and account activity will appear here</p>
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 p-5 shadow-lg shadow-orange-200/50 dark:shadow-orange-900/30">
+              <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/10 -translate-y-6 translate-x-6" />
+              <div className="absolute bottom-0 left-8 w-14 h-14 rounded-full bg-white/10 translate-y-5" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <BarChart2 className="w-6 h-6 text-white" />
                 </div>
-              ) : activityItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/50 dark:hover:bg-muted/30 transition-colors">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black flex-shrink-0 ${
-                    item.type === 'sale'    ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' :
-                    item.type === 'listing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' :
-                    item.type === 'review'  ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400' :
-                    'bg-gray-100 text-gray-500 dark:bg-muted dark:text-muted-foreground'
-                  }`}>
-                    {item.type === 'sale' ? '₦' : item.type === 'listing' ? '+' : item.type === 'review' ? '★' : '◎'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.label}</p>
-                    <p className="text-xs text-gray-500">{item.time}</p>
-                  </div>
+                <div>
+                  <p className="font-black text-white text-base">Recent Activity</p>
+                  <p className="text-orange-100 text-xs mt-0.5">Your listings and account history</p>
                 </div>
-              ))}
+              </div>
             </div>
+
+            {activityItems.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-gray-200 dark:border-border bg-gray-50/50 dark:bg-muted/20 text-center py-14 px-6">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-muted dark:to-muted flex items-center justify-center mx-auto mb-4">
+                  <Package className="w-8 h-8 text-gray-300 dark:text-muted-foreground" />
+                </div>
+                <p className="text-base font-black text-gray-900 dark:text-white mb-1">Nothing here yet</p>
+                <p className="text-xs text-gray-400 leading-relaxed">Your listings, sales, and account<br />activity will show up here.</p>
+              </div>
+            ) : (
+              <div className="relative">
+                {/* Timeline line */}
+                <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-amber-300 via-orange-300 to-rose-200 dark:from-amber-900 dark:via-orange-900 dark:to-rose-900 rounded-full" />
+
+                <div className="space-y-3">
+                  {activityItems.map((item, i) => {
+                    const isSale    = item.type === 'sale'
+                    const isListing = item.type === 'listing'
+                    const isReview  = item.type === 'review'
+                    const Icon = isSale ? Banknote : isListing ? Tag : isReview ? Star : UserPlus
+                    const gradient = isSale    ? 'from-emerald-400 to-green-500'
+                                   : isListing ? 'from-blue-400 to-indigo-500'
+                                   : isReview  ? 'from-yellow-400 to-amber-500'
+                                   : 'from-violet-400 to-purple-500'
+                    const cardBg   = isSale    ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/20'
+                                   : isListing ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/20'
+                                   : isReview  ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/20'
+                                   : 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/20'
+                    return (
+                      <div key={i} className="flex items-center gap-4 pl-0">
+                        {/* Timeline dot / icon */}
+                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 z-10 shadow-md`}>
+                          <Icon className="w-5 h-5 text-white" />
+                        </div>
+                        {/* Card */}
+                        <div className={`flex-1 rounded-2xl border p-4 ${cardBg} ${i === 0 ? 'shadow-sm' : ''}`}>
+                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{item.label}</p>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
+                            <p className="text-xs text-gray-500">{item.time}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
