@@ -17,32 +17,29 @@ async function requireAdmin() {
   return adminRole ? user : null
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export async function DELETE(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const user = await requireAdmin()
+  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const admin = getAdminClient()
+  const { error } = await admin.from('blog_comments').delete().eq('id', id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
+export async function PATCH(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
   const admin = getAdminClient()
-
-  const updatePayload: Record<string, unknown> = { ...body }
-  if (body.status === 'published' && !body.published_at) {
-    const { data: existing } = await admin.from('blog_posts').select('published_at').eq('id', id).single()
-    if (!existing?.published_at) updatePayload.published_at = new Date().toISOString()
-  }
-
-  const { data, error } = await admin.from('blog_posts').update(updatePayload).eq('id', id).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ post: data })
-}
-
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const user = await requireAdmin()
-  if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-
-  const admin = getAdminClient()
-  const { error } = await admin.from('blog_posts').delete().eq('id', id)
+  const { error } = await admin.from('blog_comments').update(body).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }

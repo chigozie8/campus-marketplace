@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Plus, Edit3, Eye, Trash2, BookOpen, CheckCircle2, Clock, Star } from 'lucide-react'
+import { Plus, Edit3, Eye, Trash2, BookOpen, CheckCircle2, Clock, Star, MessageSquare } from 'lucide-react'
 import { AdminBlogActions } from '@/components/admin/blog-actions'
 
 export const metadata: Metadata = { title: 'Blog Management' }
@@ -37,13 +37,22 @@ export default async function AdminBlogPage() {
           <h1 className="text-2xl font-black text-foreground">Blog Management</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Create and manage blog posts</p>
         </div>
-        <Link
-          href="/admin/blog/new"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity"
-        >
-          <Plus className="w-4 h-4" />
-          New Post
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/blog/comments"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card text-foreground font-bold text-sm hover:bg-muted transition-colors"
+          >
+            <MessageSquare className="w-4 h-4" />
+            Comments
+          </Link>
+          <Link
+            href="/admin/blog/new"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            New Post
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

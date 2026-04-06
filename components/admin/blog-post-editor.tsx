@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  Save, Eye, Globe, Clock, Star, Image as ImageIcon, Tag, Hash,
-  Bold, Italic, List, ListOrdered, Quote, Code, Minus, Link2, Heading2, Heading3, AlertCircle
+  Save, Globe, Clock, Star, Tag, Hash,
+  Bold, Italic, List, ListOrdered, Quote, Code, Minus, Link2, Heading2, Heading3,
+  AlertCircle, Upload, X, Eye, ImageIcon, Loader2
 } from 'lucide-react'
 
 type Category = { id: string; name: string; slug: string }
-
 type PostData = {
   id?: string
   title: string
@@ -36,16 +36,16 @@ function toSlug(t: string) {
 }
 
 const TOOLBAR = [
-  { icon: Heading2, label: 'H2', action: (t: string) => `## ${t || 'Heading'}` },
-  { icon: Heading3, label: 'H3', action: (t: string) => `### ${t || 'Heading'}` },
-  { icon: Bold, label: 'Bold', action: (t: string) => `**${t || 'bold text'}**` },
-  { icon: Italic, label: 'Italic', action: (t: string) => `*${t || 'italic text'}*` },
-  { icon: List, label: 'Bullet list', action: (t: string) => `\n- ${t || 'Item 1'}\n- Item 2\n- Item 3` },
-  { icon: ListOrdered, label: 'Ordered list', action: (t: string) => `\n1. ${t || 'First'}\n2. Second\n3. Third` },
-  { icon: Quote, label: 'Blockquote', action: (t: string) => `\n> ${t || 'Quote text'}` },
-  { icon: Code, label: 'Code', action: (t: string) => `\`${t || 'code'}\`` },
-  { icon: Minus, label: 'Divider', action: () => `\n---\n` },
-  { icon: Link2, label: 'Link', action: (t: string) => `[${t || 'link text'}](https://example.com)` },
+  { icon: Heading2,     label: 'H2',           action: (t: string) => `## ${t || 'Heading'}` },
+  { icon: Heading3,     label: 'H3',           action: (t: string) => `### ${t || 'Heading'}` },
+  { icon: Bold,         label: 'Bold',         action: (t: string) => `**${t || 'bold text'}**` },
+  { icon: Italic,       label: 'Italic',       action: (t: string) => `*${t || 'italic text'}*` },
+  { icon: List,         label: 'Bullet list',  action: (t: string) => `\n- ${t || 'Item 1'}\n- Item 2\n- Item 3` },
+  { icon: ListOrdered,  label: 'Ordered list', action: (t: string) => `\n1. ${t || 'First'}\n2. Second\n3. Third` },
+  { icon: Quote,        label: 'Blockquote',   action: (t: string) => `\n> ${t || 'Quote text'}` },
+  { icon: Code,         label: 'Code',         action: (t: string) => `\`${t || 'code'}\`` },
+  { icon: Minus,        label: 'Divider',      action: () => `\n---\n` },
+  { icon: Link2,        label: 'Link',         action: (t: string) => `[${t || 'link text'}](https://example.com)` },
 ]
 
 export function BlogPostEditor({
@@ -61,8 +61,11 @@ export function BlogPostEditor({
   const [tagInput, setTagInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState<'write' | 'seo'>('write')
+  const [success, setSuccess] = useState('')
+  const [activeTab, setActiveTab] = useState<'write' | 'seo' | 'preview'>('write')
   const [textareaEl, setTextareaEl] = useState<HTMLTextAreaElement | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   const update = (k: keyof PostData, v: unknown) => setData(p => ({ ...p, [k]: v }))
@@ -94,12 +97,33 @@ export function BlogPostEditor({
     }
   }
 
-  function removeTag(t: string) {
-    update('tags', data.tags.filter(x => x !== t))
+  async function handleImageUpload(file: File) {
+    setUploadingImage(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: form })
+      const json = await res.json()
+      if (json.url) {
+        update('cover_image', json.url)
+      } else {
+        setError(json.error || 'Upload failed')
+      }
+    } catch {
+      setError('Upload failed. Please try again.')
+    }
+    setUploadingImage(false)
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) handleImageUpload(file)
+    e.target.value = ''
   }
 
   async function save(publishStatus?: 'draft' | 'published') {
     setError('')
+    setSuccess('')
     if (!data.title.trim()) { setError('Title is required'); return }
     if (!data.content.trim()) { setError('Content is required'); return }
 
@@ -114,28 +138,39 @@ export function BlogPostEditor({
         body: JSON.stringify(payload),
       })
       const json = await res.json()
-      if (!res.ok) { setError(json.error || 'Save failed'); setSaving(false); return }
-      router.push('/admin/blog')
-      router.refresh()
-    } catch { setError('Network error') }
+      if (!res.ok) {
+        setError(json.error || 'Save failed. Please try again.')
+        setSaving(false)
+        return
+      }
+      setSuccess(publishStatus === 'published' ? 'Published successfully!' : 'Saved as draft!')
+      setTimeout(() => {
+        router.push('/admin/blog')
+        router.refresh()
+      }, 800)
+    } catch {
+      setError('Network error. Please check your connection.')
+    }
     setSaving(false)
   }
+
+  const wordCount = data.content.split(/\s+/).filter(Boolean).length
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-      {/* Main Editor */}
+      {/* ── Main Editor ── */}
       <div className="xl:col-span-2 space-y-4">
 
         {/* Title */}
         <div className="rounded-2xl border border-border bg-card p-5">
           <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Post Title *</label>
-          <input
-            type="text"
+          <textarea
+            rows={2}
             value={data.title}
             onChange={e => handleTitleChange(e.target.value)}
             placeholder="Write an eye-catching title..."
-            className="w-full text-2xl font-black text-foreground bg-transparent border-0 outline-none placeholder:text-muted-foreground/50 placeholder:font-normal placeholder:text-xl resize-none"
+            className="w-full text-2xl font-black text-foreground bg-transparent border-0 outline-none placeholder:text-muted-foreground/40 placeholder:font-normal placeholder:text-xl resize-none leading-snug"
           />
         </div>
 
@@ -146,14 +181,14 @@ export function BlogPostEditor({
             rows={2}
             value={data.excerpt}
             onChange={e => update('excerpt', e.target.value)}
-            placeholder="One or two sentences that appear on the blog listing page..."
-            className="w-full text-sm text-foreground bg-transparent border-0 outline-none resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+            placeholder="One or two sentences shown on the blog listing page..."
+            className="w-full text-sm text-foreground bg-transparent border-0 outline-none resize-none placeholder:text-muted-foreground/40 leading-relaxed"
           />
         </div>
 
         {/* Tab Nav */}
         <div className="flex gap-1 border-b border-border">
-          {(['write', 'seo'] as const).map(tab => (
+          {(['write', 'preview', 'seo'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -163,11 +198,13 @@ export function BlogPostEditor({
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'write' ? '✍️ Write' : '🔍 SEO'}
+              {tab === 'write' ? '✍️ Write' : tab === 'preview' ? '👁 Preview' : '🔍 SEO'}
             </button>
           ))}
+          <span className="ml-auto self-center text-xs text-muted-foreground pr-1">{wordCount} words</span>
         </div>
 
+        {/* Write Tab */}
         {activeTab === 'write' && (
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
             {/* Markdown Toolbar */}
@@ -184,22 +221,41 @@ export function BlogPostEditor({
                 </button>
               ))}
             </div>
-            {/* Content Textarea */}
             <textarea
               ref={el => setTextareaEl(el)}
-              rows={28}
+              rows={30}
               value={data.content}
               onChange={e => update('content', e.target.value)}
-              placeholder="Write your article in Markdown...&#10;&#10;## Introduction&#10;&#10;Your story starts here..."
+              placeholder={`Write your article in Markdown...\n\n## Introduction\n\nYour story starts here...`}
               className="w-full px-5 py-4 text-sm font-mono text-foreground bg-transparent outline-none resize-none leading-relaxed placeholder:text-muted-foreground/40"
             />
             <div className="px-5 py-2 border-t border-border flex justify-between text-xs text-muted-foreground">
-              <span>{data.content.split(/\s+/).filter(Boolean).length} words</span>
-              <span>Markdown supported</span>
+              <span>Use **bold**, *italic*, ## headings, - lists, &gt; quotes</span>
+              <span>{data.content.length} chars</span>
             </div>
           </div>
         )}
 
+        {/* Preview Tab */}
+        {activeTab === 'preview' && (
+          <div className="rounded-2xl border border-border bg-card p-6 min-h-[400px]">
+            {data.content ? (
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-black prose-h2:text-2xl prose-h3:text-xl prose-p:leading-relaxed prose-a:text-primary prose-code:bg-muted prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-blockquote:border-l-primary prose-strong:text-foreground">
+                <p className="whitespace-pre-wrap text-sm font-mono text-muted-foreground/80 bg-muted/30 p-4 rounded-xl mb-4 text-xs">
+                  Live preview (markdown rendered in browser on the public page)
+                </p>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{data.content}</div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                <Eye className="w-10 h-10 mb-3 opacity-30" />
+                <p className="font-semibold">Write something to see the preview</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SEO Tab */}
         {activeTab === 'seo' && (
           <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
             <div>
@@ -211,7 +267,7 @@ export function BlogPostEditor({
                 placeholder={data.title || 'SEO title (defaults to post title)'}
                 className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
-              <p className="text-xs text-muted-foreground mt-1">{data.seo_title.length}/60 chars recommended</p>
+              <p className={`text-xs mt-1 ${data.seo_title.length > 60 ? 'text-amber-500' : 'text-muted-foreground'}`}>{data.seo_title.length}/60 chars</p>
             </div>
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">Meta Description</label>
@@ -222,31 +278,35 @@ export function BlogPostEditor({
                 placeholder="A 120–160 character summary for search engines..."
                 className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
               />
-              <p className="text-xs text-muted-foreground mt-1">{data.seo_description.length}/160 chars recommended</p>
+              <p className={`text-xs mt-1 ${data.seo_description.length > 160 ? 'text-amber-500' : 'text-muted-foreground'}`}>{data.seo_description.length}/160 chars</p>
             </div>
-
-            {/* Preview */}
-            <div className="rounded-xl bg-muted/30 p-4 border border-dashed border-border">
+            <div className="rounded-xl bg-white dark:bg-gray-950 border border-border p-4">
               <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wide">Google Preview</p>
-              <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold">{data.seo_title || data.title || 'Post Title'}</p>
+              <p className="text-blue-600 dark:text-blue-400 text-sm font-semibold truncate">{data.seo_title || data.title || 'Post Title'}</p>
               <p className="text-green-700 dark:text-green-500 text-xs">vendoorx.com/blog/{data.slug || 'post-slug'}</p>
-              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{data.seo_description || data.excerpt || 'Meta description...'}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed line-clamp-2">{data.seo_description || data.excerpt || 'Meta description...'}</p>
             </div>
           </div>
         )}
 
+        {/* Error / Success */}
         {error && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-sm">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-sm font-semibold">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {error}
           </div>
         )}
+        {success && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-sm font-semibold">
+            ✅ {success}
+          </div>
+        )}
       </div>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <div className="space-y-4">
 
-        {/* Publish Controls */}
+        {/* Publish */}
         <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
           <h3 className="font-bold text-sm text-foreground">Publish</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -255,31 +315,87 @@ export function BlogPostEditor({
               disabled={saving}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm font-bold hover:bg-muted disabled:opacity-50 transition-colors"
             >
-              <Save className="w-4 h-4" />
-              Save Draft
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Draft
             </button>
             <button
               onClick={() => save('published')}
               disabled={saving}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
-              <Globe className="w-4 h-4" />
-              {saving ? 'Saving...' : 'Publish'}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+              Publish
             </button>
           </div>
           <div className="flex items-center justify-between pt-3 border-t border-border">
             <label className="flex items-center gap-2 cursor-pointer">
               <Star className="w-4 h-4 text-amber-500" />
-              <span className="text-sm font-semibold text-foreground">Featured post</span>
+              <span className="text-sm font-semibold text-foreground">Featured</span>
             </label>
             <button
               type="button"
               onClick={() => update('is_featured', !data.is_featured)}
               className={`relative w-11 h-6 rounded-full transition-colors ${data.is_featured ? 'bg-amber-500' : 'bg-muted'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${data.is_featured ? 'left-[22px]' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-200 ${data.is_featured ? 'left-[22px]' : 'left-0.5'}`} />
             </button>
           </div>
+        </div>
+
+        {/* Cover Image */}
+        <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide">
+            <ImageIcon className="w-3 h-3 inline mr-1" />Cover Image
+          </label>
+
+          {/* Upload button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingImage}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all text-sm font-semibold text-muted-foreground hover:text-primary disabled:opacity-50"
+          >
+            {uploadingImage ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+            ) : (
+              <><Upload className="w-4 h-4" /> Upload from Gallery</>
+            )}
+          </button>
+
+          {/* Or URL */}
+          <div className="relative">
+            <span className="absolute inset-x-0 -top-2.5 flex items-center justify-center">
+              <span className="px-2 bg-card text-xs text-muted-foreground font-semibold">or paste URL</span>
+            </span>
+            <input
+              type="url"
+              value={data.cover_image}
+              onChange={e => update('cover_image', e.target.value)}
+              placeholder="https://images.unsplash.com/..."
+              className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 mt-1"
+            />
+          </div>
+
+          {/* Preview */}
+          {data.cover_image && (
+            <div className="relative mt-2 rounded-xl overflow-hidden h-40 bg-muted">
+              <img src={data.cover_image} alt="cover preview" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => update('cover_image', '')}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Slug */}
@@ -294,25 +410,6 @@ export function BlogPostEditor({
             className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <p className="text-xs text-muted-foreground mt-1">/blog/{data.slug || 'post-slug'}</p>
-        </div>
-
-        {/* Cover Image */}
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">
-            <ImageIcon className="w-3 h-3 inline mr-1" />Cover Image URL
-          </label>
-          <input
-            type="url"
-            value={data.cover_image}
-            onChange={e => update('cover_image', e.target.value)}
-            placeholder="https://images.unsplash.com/..."
-            className="w-full px-4 py-2.5 rounded-xl border border-border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          {data.cover_image && (
-            <div className="mt-3 rounded-xl overflow-hidden h-32 bg-muted">
-              <img src={data.cover_image} alt="cover" className="w-full h-full object-cover" />
-            </div>
-          )}
         </div>
 
         {/* Category */}
@@ -365,9 +462,10 @@ export function BlogPostEditor({
             {data.tags.map(t => (
               <span key={t} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-xs font-semibold">
                 {t}
-                <button onClick={() => removeTag(t)} className="text-muted-foreground hover:text-red-500 ml-0.5">×</button>
+                <button onClick={() => update('tags', data.tags.filter(x => x !== t))} className="text-muted-foreground hover:text-red-500 ml-0.5 leading-none">×</button>
               </span>
             ))}
+            {data.tags.length === 0 && <span className="text-xs text-muted-foreground">No tags yet</span>}
           </div>
         </div>
       </div>
