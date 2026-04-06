@@ -10,14 +10,14 @@ import {
   Package, Heart, BadgeCheck, Save, AtSign, X, KeyRound, Copy,
   MessageCircle, ShoppingBag, TrendingDown, Sparkles, BarChart2,
   Banknote, UserPlus, Tag, ShieldAlert, Building2, FileImage,
-  CreditCard, Clock, CheckCircle, XCircle, Upload,
+  CreditCard, Clock, CheckCircle, XCircle, Upload, Users, Megaphone,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadToCloudinary } from '@/lib/cloudinary'
 import { createClient } from '@/lib/supabase/client'
 
 const TABS = ['Profile', 'Security', 'Notifications', 'Activity', 'Verify'] as const
-type Tab = typeof TABS[number]
+type Tab = typeof TABS[number] | 'Admin'
 
 const ID_TYPES = [
   { value: 'nin',                   label: 'NIN (National ID Number)' },
@@ -59,6 +59,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [tab, setTab] = useState<Tab>('Profile')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [saving, startSave] = useTransition()
   const [loading, setLoading] = useState(true)
@@ -228,6 +229,13 @@ export default function ProfilePage() {
       }
 
       setLoading(false)
+
+      // Check admin status
+      try {
+        const adminRes = await fetch('/api/admin/me')
+        const adminJson = await adminRes.json()
+        if (adminJson.isAdmin) setIsAdmin(true)
+      } catch { /* silent */ }
     })
   }, [router])
 
@@ -567,12 +575,12 @@ export default function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-white dark:bg-card rounded-2xl p-1 mb-4 border border-gray-100 dark:border-border shadow-sm">
+        <div className="flex gap-1 bg-white dark:bg-card rounded-2xl p-1 mb-4 border border-gray-100 dark:border-border shadow-sm overflow-x-auto">
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 text-xs font-bold py-2 rounded-xl transition-all ${
+              className={`flex-1 text-xs font-bold py-2 rounded-xl transition-all whitespace-nowrap min-w-fit px-2 ${
                 tab === t
                   ? 'bg-[#0a0a0a] text-white shadow'
                   : 'text-gray-500 hover:text-gray-700'
@@ -581,6 +589,19 @@ export default function ProfilePage() {
               {t}
             </button>
           ))}
+          {isAdmin && (
+            <button
+              onClick={() => setTab('Admin')}
+              className={`flex-1 text-xs font-bold py-2 rounded-xl transition-all whitespace-nowrap min-w-fit px-2 flex items-center justify-center gap-1 ${
+                tab === 'Admin'
+                  ? 'bg-primary text-primary-foreground shadow'
+                  : 'text-primary/70 hover:text-primary hover:bg-primary/10'
+              }`}
+            >
+              <ShieldCheck className="w-3 h-3" />
+              Admin
+            </button>
+          )}
         </div>
 
         {/* Profile Tab */}
@@ -1174,6 +1195,68 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Admin Tab */}
+        {tab === 'Admin' && isAdmin && (
+          <div className="space-y-4">
+            {/* Hero card */}
+            <div className="bg-[#0a0a0a] dark:bg-card rounded-2xl p-5 border border-gray-800 dark:border-border">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-black text-white text-sm tracking-tight">Admin Control Panel</p>
+                  <p className="text-xs text-white/40 mt-0.5">Full platform management access</p>
+                </div>
+              </div>
+              <Link
+                href="/admin"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-primary text-primary-foreground rounded-xl font-black text-sm hover:bg-primary/90 active:scale-[0.98] transition-all"
+              >
+                <BarChart2 className="w-4 h-4" />
+                Open Admin Dashboard
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Quick links */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { href: '/admin/users',          label: 'Users',         icon: Users,      desc: 'Manage accounts',     color: 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400' },
+                { href: '/admin/listings',        label: 'Listings',      icon: ShoppingBag,desc: 'Moderate content',    color: 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400' },
+                { href: '/admin/orders',          label: 'Orders',        icon: Package,    desc: 'Track transactions',  color: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' },
+                { href: '/admin/verifications',   label: 'Verifications', icon: BadgeCheck, desc: 'Review seller IDs',   color: 'bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400' },
+                { href: '/admin/analytics',       label: 'Analytics',     icon: BarChart2,  desc: 'Platform insights',   color: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400' },
+                { href: '/admin/broadcast',       label: 'Broadcast',     icon: Megaphone,  desc: 'Notify all users',    color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
+                { href: '/admin/reviews',         label: 'Reviews',       icon: Star,       desc: 'Moderate reviews',    color: 'bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400' },
+                { href: '/admin/categories',      label: 'Categories',    icon: Tag,        desc: 'Manage categories',   color: 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400' },
+              ].map(({ href, label, icon: Icon, desc, color }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center gap-3 p-3.5 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl hover:shadow-md transition-all group"
+                >
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-gray-900 dark:text-foreground">{label}</p>
+                    <p className="text-[11px] text-gray-400 dark:text-muted-foreground">{desc}</p>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-2xl">
+              <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
+                This tab is only visible to verified admin accounts. Keep your credentials secure.
+              </p>
+            </div>
           </div>
         )}
       </div>
