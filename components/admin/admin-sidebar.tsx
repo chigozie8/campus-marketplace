@@ -17,6 +17,8 @@ import {
   BadgeCheck,
   Menu,
   X,
+  Package,
+  Megaphone,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -26,11 +28,13 @@ const NAV_ITEMS = [
   { label: 'Overview',       href: '/admin',                  icon: LayoutDashboard },
   { label: 'Users',          href: '/admin/users',            icon: Users },
   { label: 'Listings',       href: '/admin/listings',         icon: ShoppingBag },
+  { label: 'Orders',         href: '/admin/orders',           icon: Package },
   { label: 'Verifications',  href: '/admin/verifications',    icon: BadgeCheck },
   { label: 'Categories',     href: '/admin/categories',       icon: Tag },
   { label: 'Reviews',        href: '/admin/reviews',          icon: Star },
   { label: 'Messages',       href: '/admin/messages',         icon: MessageSquare },
   { label: 'Analytics',      href: '/admin/analytics',        icon: BarChart3 },
+  { label: 'Broadcast',      href: '/admin/broadcast',        icon: Megaphone },
   { label: 'Settings',       href: '/admin/settings',         icon: Settings },
 ]
 

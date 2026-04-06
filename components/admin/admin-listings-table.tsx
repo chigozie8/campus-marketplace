@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import {
   Search, Trash2, Star, Eye, ShoppingBag,
-  Loader2, CheckCircle2, XCircle, ExternalLink,
+  Loader2, CheckCircle2, XCircle, ExternalLink, Download,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -74,6 +74,34 @@ export function AdminListingsTable({ products }: Props) {
     startTransition(() => router.refresh())
   }
 
+  function exportCSV() {
+    const rows = [
+      ['Title', 'Seller', 'Category', 'Campus', 'Price', 'Original Price', 'Condition', 'Status', 'Featured', 'Views', 'WA Clicks', 'Date'],
+      ...filtered.map(p => [
+        p.title,
+        p.profiles?.full_name ?? '',
+        p.categories?.name ?? '',
+        p.campus ?? '',
+        p.price,
+        p.original_price ?? '',
+        p.condition,
+        p.is_available ? 'Active' : 'Sold',
+        p.is_featured ? 'Yes' : 'No',
+        p.views,
+        p.whatsapp_clicks,
+        new Date(p.created_at).toLocaleDateString(),
+      ]),
+    ]
+    const csv = rows.map(r => r.map(String).map(v => `"${v.replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `listings-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const FILTERS = [
     { key: 'all',      label: 'All' },
     { key: 'active',   label: 'Active' },
@@ -116,6 +144,14 @@ export function AdminListingsTable({ products }: Props) {
               {f.label}
             </button>
           ))}
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-background border border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+            title="Export CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
         </div>
       </div>
 

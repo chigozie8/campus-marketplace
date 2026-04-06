@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import {
   Users, ShoppingBag, Eye, Heart,
   TrendingUp, Star, MessageSquare, Tag,
-  ArrowUpRight, Clock,
+  ArrowUpRight, Clock, Package, CircleDollarSign,
+  BadgeCheck, Megaphone,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -11,7 +12,6 @@ export default async function AdminOverviewPage() {
   const supabase = await createClient()
   if (!supabase) redirect('/auth/login')
 
-  // Parallel fetches for all stats
   const [
     { count: totalUsers },
     { count: totalProducts },
@@ -19,6 +19,9 @@ export default async function AdminOverviewPage() {
     { count: totalReviews },
     { count: totalCategories },
     { count: totalMessages },
+    { count: pendingVerifications },
+    { count: totalOrders },
+    { data: orders },
     { data: recentProducts },
     { data: recentUsers },
     { data: topProducts },
@@ -29,6 +32,9 @@ export default async function AdminOverviewPage() {
     supabase.from('reviews').select('*', { count: 'exact', head: true }),
     supabase.from('categories').select('*', { count: 'exact', head: true }),
     supabase.from('messages').select('*', { count: 'exact', head: true }),
+    supabase.from('verifications').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('orders').select('*', { count: 'exact', head: true }),
+    supabase.from('orders').select('total_amount, status'),
     supabase.from('products')
       .select('id, title, price, created_at, is_available, images, profiles(full_name)')
       .order('created_at', { ascending: false })
@@ -43,21 +49,31 @@ export default async function AdminOverviewPage() {
       .limit(5),
   ])
 
-  const stats = [
-    { label: 'Total Users',    value: totalUsers ?? 0,    icon: Users,       href: '/admin/users',     color: 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400' },
-    { label: 'Total Listings', value: totalProducts ?? 0, icon: ShoppingBag, href: '/admin/listings',  color: 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400' },
-    { label: 'Total Saves',    value: totalFavorites ?? 0,icon: Heart,       href: '/admin/listings',  color: 'bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400' },
-    { label: 'Reviews',        value: totalReviews ?? 0,  icon: Star,        href: '/admin/reviews',   color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
-    { label: 'Categories',     value: totalCategories ?? 0, icon: Tag,       href: '/admin/categories',color: 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400' },
-    { label: 'AI Messages',    value: totalMessages ?? 0, icon: MessageSquare,href: '/admin/messages', color: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400' },
+  const totalRevenue = (orders ?? []).reduce((s: number, o: any) => {
+    return o.status === 'completed' ? s + Number(o.total_amount ?? 0) : s
+  }, 0)
+
+  const pendingOrders = (orders ?? []).filter((o: any) => o.status === 'pending').length
+
+  const topStats = [
+    { label: 'Total Users',    value: (totalUsers ?? 0).toLocaleString(),     icon: Users,           href: '/admin/users',          color: 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400' },
+    { label: 'Total Listings', value: (totalProducts ?? 0).toLocaleString(),  icon: ShoppingBag,     href: '/admin/listings',       color: 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400' },
+    { label: 'Orders',         value: (totalOrders ?? 0).toLocaleString(),    icon: Package,         href: '/admin/orders',         color: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' },
+    { label: 'Revenue',        value: `₦${totalRevenue.toLocaleString()}`,    icon: CircleDollarSign, href: '/admin/orders',        color: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' },
+    { label: 'Pending Orders', value: pendingOrders.toLocaleString(),         icon: Clock,           href: '/admin/orders',         color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
+    { label: 'Pending Verify', value: (pendingVerifications ?? 0).toLocaleString(), icon: BadgeCheck, href: '/admin/verifications', color: 'bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400' },
+    { label: 'Total Saves',    value: (totalFavorites ?? 0).toLocaleString(), icon: Heart,           href: '/admin/listings',       color: 'bg-pink-50 dark:bg-pink-950 text-pink-600 dark:text-pink-400' },
+    { label: 'Reviews',        value: (totalReviews ?? 0).toLocaleString(),   icon: Star,            href: '/admin/reviews',        color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
+    { label: 'Categories',     value: (totalCategories ?? 0).toLocaleString(), icon: Tag,            href: '/admin/categories',     color: 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400' },
+    { label: 'AI Messages',    value: (totalMessages ?? 0).toLocaleString(),  icon: MessageSquare,   href: '/admin/messages',       color: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400' },
   ]
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {stats.map(({ label, value, icon: Icon, href, color }) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {topStats.map(({ label, value, icon: Icon, href, color }) => (
           <Link
             key={label}
             href={href}
@@ -67,7 +83,7 @@ export default async function AdminOverviewPage() {
               <Icon className="w-4 h-4" />
             </div>
             <p className="text-2xl font-black text-foreground tabular-nums">
-              {value.toLocaleString()}
+              {value}
             </p>
             <p className="text-xs text-muted-foreground font-medium mt-0.5 flex items-center gap-1">
               {label}
@@ -75,6 +91,48 @@ export default async function AdminOverviewPage() {
             </p>
           </Link>
         ))}
+      </div>
+
+      {/* Quick actions row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link href="/admin/verifications"
+          className="flex items-center gap-3 px-4 py-3 bg-violet-50 dark:bg-violet-950 border border-violet-200 dark:border-violet-800 rounded-2xl hover:shadow-md transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900 flex items-center justify-center flex-shrink-0">
+            <BadgeCheck className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-foreground">Review Verifications</p>
+            <p className="text-xs text-muted-foreground">{pendingVerifications ?? 0} pending</p>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+
+        <Link href="/admin/broadcast"
+          className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-2xl hover:shadow-md transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Megaphone className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-foreground">Broadcast Message</p>
+            <p className="text-xs text-muted-foreground">Notify all users</p>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+
+        <Link href="/admin/orders"
+          className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl hover:shadow-md transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-foreground">Pending Orders</p>
+            <p className="text-xs text-muted-foreground">{pendingOrders} awaiting action</p>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
