@@ -5,6 +5,7 @@ import { VendorSidebar } from '@/components/vendor/vendor-sidebar'
 import { ConversationList } from './conversation-list'
 import { ChatWindow } from './chat-window'
 import { CustomerPanel } from './customer-panel'
+import { ArrowLeft } from 'lucide-react'
 import type { Conversation, Platform } from '@/lib/types'
 
 // --- Demo data (replace with real API integration) ---
@@ -101,27 +102,44 @@ export function InboxClient({ initials, fullName, email, products }: Props) {
         <VendorSidebar initials={initials} fullName={fullName} email={email} unreadInbox={totalUnread} />
 
         {/* Inbox 3-panel layout */}
-        <div className="flex-1 md:ml-60 flex overflow-hidden mt-0">
+        <div className="flex-1 md:ml-60 flex overflow-hidden">
 
-          {/* Left: conversation list */}
-          <ConversationList
-            conversations={filtered}
-            activeId={activeId}
-            filter={filter}
-            onFilterChange={setFilter}
-            onSelect={(id) => { setActiveId(id); markRead(id) }}
-          />
+          {/* Left: conversation list — hidden on mobile when a chat is open */}
+          <div className={`${activeId ? 'hidden md:flex' : 'flex'} w-full md:w-72 lg:w-80 flex-shrink-0`}>
+            <ConversationList
+              conversations={filtered}
+              activeId={activeId}
+              filter={filter}
+              onFilterChange={setFilter}
+              onSelect={(id) => { setActiveId(id); markRead(id) }}
+            />
+          </div>
 
-          {/* Center: chat window */}
-          <ChatWindow
-            conversation={active}
-            onSend={sendMessage}
-            products={products}
-          />
+          {/* Center: chat window — hidden on mobile when no chat is open */}
+          <div className={`${activeId ? 'flex' : 'hidden md:flex'} flex-1 flex-col overflow-hidden`}>
+            {/* Mobile back button */}
+            {activeId && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-card border-b border-gray-100 dark:border-border md:hidden">
+                <button
+                  onClick={() => setActiveId(null)}
+                  className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-white hover:text-gray-900 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to inbox
+                </button>
+              </div>
+            )}
+            <ChatWindow
+              conversation={active}
+              onSend={sendMessage}
+              products={products}
+            />
+          </div>
 
           {/* Right: customer panel (desktop only) */}
           {active && (
-            <CustomerPanel conversation={active} products={products} />
+            <div className="hidden lg:block">
+              <CustomerPanel conversation={active} products={products} />
+            </div>
           )}
         </div>
       </div>

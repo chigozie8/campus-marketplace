@@ -46,6 +46,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
     } else {
       setAvailable(prev => !prev)
       toast.success(!available ? 'Listing marked as active' : 'Listing marked as sold')
+      router.refresh()
     }
     setToggling(false)
   }

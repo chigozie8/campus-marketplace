@@ -77,7 +77,7 @@ export default function OrdersPage() {
         })
       supabase
         .from('orders')
-        .select('*, products(id, title, images, price), seller_profiles:profiles!orders_seller_id_fkey(full_name)')
+        .select('*, products(id, title, images, price), seller_profiles:profiles!seller_id(full_name)')
         .eq('buyer_id', user.id)
         .order('created_at', { ascending: false })
         .then(({ data }) => { setOrders((data as Order[]) || []); setLoading(false) })
