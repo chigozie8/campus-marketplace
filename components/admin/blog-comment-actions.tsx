@@ -1,69 +1,61 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, CheckCircle2, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { CheckCircle2, XCircle, Trash2, Loader2 } from 'lucide-react'
 
-export function AdminCommentActions({ commentId, isApproved }: { commentId: string; isApproved: boolean }) {
+export function BlogCommentActions({ commentId, isApproved }: { commentId: string; isApproved: boolean }) {
   const [loading, setLoading] = useState(false)
-  const [confirming, setConfirming] = useState(false)
   const router = useRouter()
 
-  async function toggleApproval() {
+  async function toggle() {
     setLoading(true)
-    await fetch(`/api/admin/blog/comments?id=${commentId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_approved: !isApproved }),
-    })
-    router.refresh()
-    setLoading(false)
+    try {
+      await fetch('/api/admin/blog/comments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: commentId, is_approved: !isApproved }),
+      })
+      router.refresh()
+    } finally { setLoading(false) }
   }
 
-  async function deleteComment() {
+  async function remove() {
+    if (!confirm('Delete this comment?')) return
     setLoading(true)
-    await fetch(`/api/admin/blog/comments?id=${commentId}`, { method: 'DELETE' })
-    router.refresh()
-    setLoading(false)
-    setConfirming(false)
-  }
-
-  if (confirming) {
-    return (
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <button
-          onClick={deleteComment}
-          disabled={loading}
-          className="px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? '...' : 'Delete'}
-        </button>
-        <button onClick={() => setConfirming(false)} className="px-2.5 py-1 rounded-lg bg-muted text-xs font-bold">
-          Cancel
-        </button>
-      </div>
-    )
+    try {
+      await fetch('/api/admin/blog/comments', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: commentId }),
+      })
+      router.refresh()
+    } finally { setLoading(false) }
   }
 
   return (
-    <div className="flex items-center gap-1 flex-shrink-0">
+    <div className="flex items-center gap-1.5 shrink-0">
       <button
-        onClick={toggleApproval}
+        onClick={toggle}
         disabled={loading}
         title={isApproved ? 'Unapprove' : 'Approve'}
-        className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60 ${
           isApproved
-            ? 'text-muted-foreground hover:bg-amber-50 dark:hover:bg-amber-950/20 hover:text-amber-500'
-            : 'text-muted-foreground hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:text-emerald-500'
+            ? 'bg-muted hover:bg-muted/80 text-muted-foreground'
+            : 'bg-primary/10 hover:bg-primary/20 text-primary'
         }`}
       >
-        {isApproved ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
+          isApproved ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+        {isApproved ? 'Unapprove' : 'Approve'}
       </button>
       <button
-        onClick={() => setConfirming(true)}
-        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-muted-foreground hover:text-red-500"
+        onClick={remove}
+        disabled={loading}
+        title="Delete comment"
+        className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-60"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   )

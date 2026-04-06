@@ -1,54 +1,30 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Trash2, Loader2 } from 'lucide-react'
 
-export function AdminBlogActions({ postId }: { postId: string }) {
-  const [confirming, setConfirming] = useState(false)
-  const [loading, setLoading] = useState(false)
+export function BlogActions({ postId, postTitle }: { postId: string; postTitle: string }) {
+  const [deleting, setDeleting] = useState(false)
   const router = useRouter()
 
   async function handleDelete() {
-    setLoading(true)
+    if (!confirm(`Delete "${postTitle}"? This cannot be undone.`)) return
+    setDeleting(true)
     try {
       const res = await fetch(`/api/admin/blog/${postId}`, { method: 'DELETE' })
-      if (res.ok) {
-        router.refresh()
-      } else {
-        alert('Failed to delete post.')
-      }
-    } catch {}
-    setLoading(false)
-    setConfirming(false)
-  }
-
-  if (confirming) {
-    return (
-      <div className="flex items-center gap-1">
-        <button
-          onClick={handleDelete}
-          disabled={loading}
-          className="px-2.5 py-1 rounded-lg bg-red-500 text-white text-xs font-bold hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? '...' : 'Delete'}
-        </button>
-        <button
-          onClick={() => setConfirming(false)}
-          className="px-2.5 py-1 rounded-lg bg-muted text-xs font-bold hover:bg-muted/80"
-        >
-          Cancel
-        </button>
-      </div>
-    )
+      if (res.ok) router.refresh()
+    } finally { setDeleting(false) }
   }
 
   return (
     <button
-      onClick={() => setConfirming(true)}
-      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-muted-foreground hover:text-red-500"
+      onClick={handleDelete}
+      disabled={deleting}
+      title="Delete post"
+      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-60"
     >
-      <Trash2 className="w-4 h-4" />
+      {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
     </button>
   )
 }

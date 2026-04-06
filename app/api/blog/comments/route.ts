@@ -1,83 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET(req: NextRequest) {
-  const postId = req.nextUrl.searchParams.get('post_id')
-  if (!postId) return NextResponse.json({ error: 'post_id required' }, { status: 400 })
-
-  const supabase = await createClient()
-  if (!supabase) return NextResponse.json({ error: 'DB unavailable' }, { status: 503 })
-
-  const { data, error } = await supabase
-    .from('blog_comments')
-    .select('*, profiles(full_name, avatar_url)')
-    .eq('post_id', postId)
-    .eq('is_approved', true)
-    .order('created_at', { ascending: true })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ comments: data ?? [] })
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
 }
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { post_id, content, parent_id, guest_name, guest_email } = body
+  const { postId, content, guestName, guestEmail, parentId } = body
 
-  if (!post_id || !content?.trim()) {
-    return NextResponse.json({ error: 'post_id and content required' }, { status: 400 })
+  if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
+  if (!content?.trim()) return NextResponse.json({ error: 'Comment cannot be empty' }, { status: 400 })
+
+  const supabase = await createServerClient()
+  const user = supabase
+    ? (await supabase.auth.getUser()).data.user
+    : null
+
+  if (!user && !guestName?.trim()) {
+    return NextResponse.json({ error: 'Name is required for guest comments' }, { status: 400 })
   }
-  if (content.trim().length > 2000) {
-    return NextResponse.json({ error: 'Comment too long (max 2000 chars)' }, { status: 400 })
-  }
 
-  const supabase = await createClient()
-  if (!supabase) return NextResponse.json({ error: 'DB unavailable' }, { status: 503 })
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const payload: Record<string, unknown> = {
-    post_id,
+  const admin = adminClient()
+  const { data, error } = await admin.from('blog_comments').insert({
+    post_id: postId,
     content: content.trim(),
-    parent_id: parent_id || null,
-    is_approved: true,
-  }
-
-  if (user) {
-    payload.user_id = user.id
-  } else {
-    if (!guest_name?.trim()) return NextResponse.json({ error: 'Name required for guest comments' }, { status: 400 })
-    payload.guest_name = guest_name.trim()
-    payload.guest_email = guest_email?.trim() || null
-  }
-
-  const { data, error } = await supabase
-    .from('blog_comments')
-    .insert(payload)
-    .select('*, profiles(full_name, avatar_url)')
-    .single()
+    user_id: user?.id || null,
+    guest_name: user ? null : guestName?.trim(),
+    guest_email: user ? null : guestEmail?.trim() || null,
+    parent_id: parentId || null,
+    is_approved: !!user,
+  }).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ comment: data })
-}
-
-export async function DELETE(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
-
-  const supabase = await createClient()
-  if (!supabase) return NextResponse.json({ error: 'DB unavailable' }, { status: 503 })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: adminRole } = await supabase
-    .from('admin_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single()
-  if (!adminRole) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-
-  const { error } = await supabase.from('blog_comments').delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
 }
