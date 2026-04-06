@@ -51,15 +51,6 @@ create policy "verifications_select_own" on public.vendor_verifications
 create policy "verifications_insert_own" on public.vendor_verifications
   for insert with check (auth.uid() = vendor_id);
 
--- Only admins (via service role) can update
-create policy "verifications_update_admin" on public.vendor_verifications
-  for update using (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid() and role = 'admin'
-    )
-  );
-
 -- ── Indexes ──────────────────────────────────────────────────
 create index if not exists idx_vendor_verifications_vendor_id on public.vendor_verifications(vendor_id);
 create index if not exists idx_vendor_verifications_status    on public.vendor_verifications(status);
