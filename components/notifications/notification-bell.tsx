@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import {
   Bell, BadgeCheck, XCircle, ShoppingBag, MessageCircle,
@@ -10,13 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 
 interface Notification {
-  id: string
-  type: string
-  title: string
-  body: string | null
-  read: boolean
-  data: Record<string, unknown> | null
-  created_at: string
+  id: string; type: string; title: string; body: string | null
+  read: boolean; data: Record<string, unknown> | null; created_at: string
 }
 
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; dot: string }> = {
@@ -30,10 +26,8 @@ const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: 
 }
 
 function getConfig(type: string) { return TYPE_CONFIG[type] ?? TYPE_CONFIG.info }
-
 function timeAgo(date: string) {
-  try { return formatDistanceToNow(new Date(date), { addSuffix: true }) }
-  catch { return '' }
+  try { return formatDistanceToNow(new Date(date), { addSuffix: true }) } catch { return '' }
 }
 
 export function NotificationBell() {
@@ -41,13 +35,17 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading]             = useState(true)
   const [markingAll, setMarkingAll]       = useState(false)
+  const [mounted, setMounted]             = useState(false)   // portal guard
   const [dropTop, setDropTop]             = useState(0)
   const [dropRight, setDropRight]         = useState(16)
+  const [dropWidth, setDropWidth]         = useState(368)
 
-  const buttonRef    = useRef<HTMLButtonElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const unread = notifications.filter(n => !n.read).length
+
+  /* portal guard — only runs on client */
+  useEffect(() => setMounted(true), [])
 
   /* ── Calculate desktop dropdown position ── */
   const calcPos = useCallback(() => {
@@ -56,16 +54,14 @@ export function NotificationBell() {
     const vw   = window.innerWidth
     setDropTop(rect.bottom + 8)
     setDropRight(Math.max(16, vw - rect.right))
+    setDropWidth(Math.min(368, vw - 32))
   }, [])
 
   /* ── Data fetch ── */
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/notifications')
-      if (res.ok) {
-        const json = await res.json()
-        setNotifications(json.notifications ?? [])
-      }
+      if (res.ok) setNotifications((await res.json()).notifications ?? [])
     } catch { /* silent */ } finally { setLoading(false) }
   }, [])
 
@@ -78,47 +74,42 @@ export function NotificationBell() {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!active || !user) return
-      channelRef = supabase
-        .channel(channelName)
+      channelRef = supabase.channel(channelName)
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'notifications',
           filter: `user_id=eq.${user.id}`,
-        }, (payload) => {
-          if (active) setNotifications(prev => [payload.new as Notification, ...prev])
-        })
+        }, payload => { if (active) setNotifications(p => [payload.new as Notification, ...p]) })
         .subscribe()
     })
 
-    const interval = setInterval(fetchNotifications, 30_000)
-    return () => {
-      active = false
-      clearInterval(interval)
-      if (channelRef) supabase.removeChannel(channelRef)
-    }
+    const iv = setInterval(fetchNotifications, 30_000)
+    return () => { active = false; clearInterval(iv); if (channelRef) supabase.removeChannel(channelRef) }
   }, [fetchNotifications])
 
-  /* ── Click outside to close ── */
+  /* ── Close on outside click ── */
   useEffect(() => {
+    if (!open) return
     function onDown(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
+      if (buttonRef.current && !buttonRef.current.closest('[data-notif-root]')?.contains(e.target as Node)) {
+        const overlay = document.getElementById('notif-overlay')
+        if (overlay && overlay.contains(e.target as Node)) return
+        setOpen(false)
+      }
     }
     document.addEventListener('mousedown', onDown)
     return () => document.removeEventListener('mousedown', onDown)
-  }, [])
+  }, [open])
 
-  /* ── Recalc desktop pos on resize / scroll ── */
+  /* ── Recalc pos on resize / scroll ── */
   useEffect(() => {
     if (!open) return
     calcPos()
     window.addEventListener('resize', calcPos)
     window.addEventListener('scroll', calcPos, { passive: true })
-    return () => {
-      window.removeEventListener('resize', calcPos)
-      window.removeEventListener('scroll', calcPos)
-    }
+    return () => { window.removeEventListener('resize', calcPos); window.removeEventListener('scroll', calcPos) }
   }, [open, calcPos])
 
-  /* ── Body scroll lock while open on mobile ── */
+  /* ── Body scroll lock on mobile ── */
   useEffect(() => {
     if (open && window.innerWidth < 640) {
       document.body.style.overflow = 'hidden'
@@ -129,25 +120,26 @@ export function NotificationBell() {
   }, [open])
 
   async function markOneRead(id: string) {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    setNotifications(p => p.map(n => n.id === id ? { ...n, read: true } : n))
     await fetch('/api/notifications/mark-read', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }),
     }).catch(() => {})
   }
 
   async function markAllRead() {
-    if (unread === 0) return
+    if (!unread) return
     setMarkingAll(true)
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    setNotifications(p => p.map(n => ({ ...n, read: true })))
     await fetch('/api/notifications/mark-all-read', { method: 'POST' }).catch(() => {})
     setMarkingAll(false)
   }
 
-  return (
-    <div ref={containerRef} className="relative">
+  const sharedProps = { notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose: () => setOpen(false) }
 
-      {/* ── Bell button ── */}
+  return (
+    <div data-notif-root="" className="relative">
+
+      {/* Bell */}
       <button
         ref={buttonRef}
         onClick={() => { calcPos(); setOpen(o => !o) }}
@@ -162,79 +154,65 @@ export function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <>
-          {/* ══════════════════════════════════════════
-              MOBILE  (< 640 px)  — bottom sheet
-              CSS: visible by default, hidden sm:hidden
-          ═══════════════════════════════════════════ */}
+      {/* ── Portal overlay — rendered directly in <body> ── */}
+      {mounted && open && createPortal(
+        <div id="notif-overlay">
 
-          {/* Backdrop */}
-          <div
-            className="sm:hidden fixed inset-0 bg-black/50 z-[9998]"
-            onClick={() => setOpen(false)}
-          />
-
-          {/* Sheet */}
-          <div
-            className="sm:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-card rounded-t-3xl shadow-2xl"
-            style={{ maxHeight: '85svh' }}
-          >
-            <div className="flex flex-col h-full overflow-hidden" style={{ maxHeight: '85svh' }}>
+          {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              MOBILE  (< 640 px) — bottom sheet
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+          <div className="sm:hidden">
+            {/* Dim backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50"
+              style={{ zIndex: 99998 }}
+              onClick={() => setOpen(false)}
+            />
+            {/* Sheet — flex column, max-height limits it, overflow-hidden clips corners */}
+            <div
+              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
+              style={{ maxHeight: '85svh', zIndex: 99999 }}
+            >
               {/* Drag handle */}
               <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
               </div>
-              <PanelContent
-                notifications={notifications} loading={loading}
-                unread={unread} markingAll={markingAll}
-                markAllRead={markAllRead} markOneRead={markOneRead}
-                onClose={() => setOpen(false)}
-              />
+              {/* Panel content — header + scrollable list + footer */}
+              <PanelContent {...sharedProps} />
             </div>
           </div>
 
-          {/* ══════════════════════════════════════════
-              DESKTOP  (≥ 640 px)  — fixed dropdown
-              CSS: hidden by default, visible sm:flex
-          ═══════════════════════════════════════════ */}
-          <div
-            className="hidden sm:flex flex-col fixed bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
-            style={{
-              top:       dropTop,
-              right:     dropRight,
-              width:     Math.min(368, (typeof window !== 'undefined' ? window.innerWidth : 400) - 32),
-              maxHeight: 520,
-              zIndex:    9999,
-            }}
-          >
-            <PanelContent
-              notifications={notifications} loading={loading}
-              unread={unread} markingAll={markingAll}
-              markAllRead={markAllRead} markOneRead={markOneRead}
-              onClose={() => setOpen(false)}
-            />
+          {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              DESKTOP (≥ 640 px) — fixed dropdown
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+          <div className="hidden sm:block">
+            <div
+              className="fixed flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
+              style={{ top: dropTop, right: dropRight, width: dropWidth, maxHeight: 520, zIndex: 99999 }}
+            >
+              <PanelContent {...sharedProps} />
+            </div>
           </div>
-        </>
+
+        </div>,
+        document.body
       )}
+
     </div>
   )
 }
 
-/* ─── Shared panel body ────────────────────────────────────────────────── */
+/* ─── Panel body ─────────────────────────────────────────────────────────── */
 interface PanelProps {
-  notifications: Notification[]
-  loading: boolean; unread: number; markingAll: boolean
-  markAllRead: () => void
-  markOneRead: (id: string) => void
-  onClose: () => void
+  notifications: Notification[]; loading: boolean; unread: number; markingAll: boolean
+  markAllRead: () => void; markOneRead: (id: string) => void; onClose: () => void
 }
 
 function PanelContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose }: PanelProps) {
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border flex-shrink-0">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-gray-700 dark:text-white" />
           <span className="font-black text-sm text-gray-900 dark:text-white">Notifications</span>
@@ -259,8 +237,8 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
         </div>
       </div>
 
-      {/* Scrollable list */}
-      <div className="overflow-y-auto flex-1">
+      {/* Scrollable list — flex-1 + min-h-0 so it shrinks & scrolls correctly */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center py-14">
             <Loader2 className="w-5 h-5 animate-spin text-gray-300" />
@@ -276,14 +254,12 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-border">
             {notifications.map(n => {
-              const cfg = getConfig(n.type)
-              const Icon = cfg.icon
+              const cfg = getConfig(n.type); const Icon = cfg.icon
               return (
                 <div key={n.id} onClick={() => { if (!n.read) markOneRead(n.id) }}
                   className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors ${
-                    n.read
-                      ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
-                      : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10'
+                    n.read ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
+                           : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
@@ -293,17 +269,13 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
                     <div className="flex items-start gap-2">
                       <p className={`text-[13px] font-bold leading-snug flex-1 min-w-0 ${
                         n.read ? 'text-gray-600 dark:text-gray-300' : 'text-gray-900 dark:text-white'
-                      }`}>
-                        {n.title}
-                      </p>
+                      }`}>{n.title}</p>
                       {!n.read && <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${cfg.dot}`} />}
                     </div>
                     {n.body && (
                       <p className={`text-[12px] leading-relaxed mt-0.5 break-words ${
                         n.read ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {n.body}
-                      </p>
+                      }`}>{n.body}</p>
                     )}
                     <p className="text-[10px] text-gray-400 mt-1.5 tabular-nums">{timeAgo(n.created_at)}</p>
                   </div>
@@ -316,11 +288,10 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className="px-4 py-3 border-t border-gray-100 dark:border-border flex-shrink-0">
+        <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 dark:border-border">
           <Link href="/notifications" onClick={onClose}
             className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold text-[#16a34a] hover:bg-[#16a34a]/10 transition-colors">
-            View all notifications
-            <ArrowRight className="w-3.5 h-3.5" />
+            View all notifications <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       )}
