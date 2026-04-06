@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'
+// Always use the internal address for server-to-server calls.
+// NEXT_PUBLIC_BACKEND_URL may be the public Replit domain which can't be
+// reached from within the same container — localhost:3001 is always correct.
+const BACKEND_INTERNAL = 'http://localhost:3001'
 
 async function proxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
   const pathStr = path.join('/')
 
   const { search } = new URL(req.url)
-  const target = `${BACKEND}/api/${pathStr}${search}`
+  const target = `${BACKEND_INTERNAL}/api/${pathStr}${search}`
 
   const headers = new Headers()
   const auth = req.headers.get('authorization')
