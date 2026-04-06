@@ -4,6 +4,7 @@ import {
   Eye, MessageCircle, Star, Package,
   Plus, TrendingUp, ShoppingBag, Users,
   BadgeCheck, Zap, ChevronRight,
+  LayoutDashboard, ClipboardList, Bell, Bot, Settings,
 } from 'lucide-react'
 import { DashboardActions } from '@/components/dashboard-actions'
 import { VendorShell } from '@/components/vendor/vendor-shell'
