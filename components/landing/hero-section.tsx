@@ -56,8 +56,8 @@ export function HeroSection({ user }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-background">
 
-      {/* Subtle radial glow behind content */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-green-400/8 dark:bg-green-500/5 blur-[120px] pointer-events-none" />
+      {/* Dark mode subtle glow only */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full dark:bg-green-500/5 blur-[120px] pointer-events-none" />
 
       <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
 
