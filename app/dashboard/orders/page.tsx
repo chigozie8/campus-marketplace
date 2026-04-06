@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2 } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
@@ -237,6 +237,13 @@ export default function OrdersPage() {
             <h1 className="text-xl font-black text-foreground">My Orders</h1>
             <p className="text-xs text-muted-foreground">Track and manage your orders</p>
           </div>
+          <Link
+            href="/dashboard/wallet"
+            className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center hover:bg-muted transition-colors"
+            title="My Wallet"
+          >
+            <Wallet className="w-4 h-4" />
+          </Link>
           <Button
             variant="ghost"
             size="sm"

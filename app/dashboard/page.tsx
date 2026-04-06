@@ -43,8 +43,8 @@ export default async function DashboardPage() {
 
   const initials  = profile?.full_name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || user.email?.charAt(0).toUpperCase() || '?'
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
-  const hour      = new Date().getHours()
-  const greeting  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const hour      = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' })).getHours()
+  const greeting  = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   const newListingBtn = (
     <Button
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
               <p className="text-xs font-black text-gray-900 dark:text-white">Share your store</p>
               <p className="text-[11px] text-gray-400 mt-0.5">Send buyers directly to your listings</p>
             </div>
-            <CopyStoreLink userId={user.id} />
+            <CopyStoreLink userId={user.id} fullName={profile?.full_name} />
           </div>
         </div>
 
