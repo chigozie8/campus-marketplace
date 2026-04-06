@@ -629,11 +629,15 @@ export default function ProfilePage() {
                     <button
                       onClick={() => toggleNotif(key)}
                       disabled={!!notifLoading}
-                      className={`relative w-13 w-12 h-7 rounded-full transition-all duration-300 disabled:opacity-60 focus:outline-none flex-shrink-0 bg-gradient-to-r ${on ? `${from} ${to}` : 'bg-gray-200 dark:bg-muted from-transparent to-transparent'}`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex-shrink-0 disabled:opacity-50 ${
+                        on
+                          ? 'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40'
+                          : 'bg-[#0a0a0a] text-white hover:bg-gray-800 dark:bg-primary dark:hover:bg-primary/90'
+                      }`}
                     >
                       {loading
-                        ? <Loader2 className="w-3 h-3 animate-spin absolute top-2 left-2 text-white" />
-                        : <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${on ? 'translate-x-5' : 'translate-x-1'}`} />
+                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        : on ? 'Disable' : 'Enable'
                       }
                     </button>
                   </div>
