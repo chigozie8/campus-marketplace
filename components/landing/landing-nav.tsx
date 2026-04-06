@@ -19,6 +19,7 @@ const NAV_LINKS = [
   { href: '/marketplace', label: 'Browse' },
   { href: '/#pricing', label: 'Pricing' },
   { href: '/#testimonials', label: 'Reviews' },
+  { href: '/blog', label: 'Blog' },
 ]
 
 const MOBILE_NAV_EXTRAS = [

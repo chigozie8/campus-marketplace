@@ -2,6 +2,17 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Blog Navigation + Trust & Safety Section
+- **Blog in landing nav** (`components/landing/landing-nav.tsx`) — "Blog" added to desktop + mobile nav links
+- **Blog in vendor sidebar** (`components/vendor/vendor-sidebar.tsx`) — "Blog" with BookOpen icon added between My Store and Settings; admin sidebar already had Blog
+- **Blog 404 fixed** — `app/(public)/blog/[slug]/page.tsx` now exists and serves all blog posts correctly (was the missing file causing 404)
+- **Trust & Safety Section** (`components/landing/trust-section.tsx`) — Full "Built for Nigerian Students to Trust" section placed after Testimonials on landing page:
+  - Escrow flow explainer (4-step: pay VendoorX → seller delivers → buyer confirms → funds released)
+  - 6 trust pillar cards: Escrow Protection, Paystack/CBN-licensed checkout, Full Refund Guarantee, Verified Student Sellers, 256-bit SSL, 24/7 Dispute Resolution
+  - Compliance badge strip: NDPR, CBN, SSL, Paystack — each with custom icon
+  - Social proof stats: ₦0 fraud losses, 100% disputes resolved, 4.9★ satisfaction
+  - Safety FAQ CTA link
+
 ### Full-Stack Blog System + Cookie Consent
 - **Cookie Consent Banner** (`components/cookie-consent.tsx`) — Animated GDPR/NDPR-compliant banner with customise preferences (necessary/analytics/marketing toggles), accept all, reject all. Stored in localStorage. Linked to /cookies policy page.
 - **Blog SQL Migration** (`scripts/010_blog.sql`) — Creates `blog_posts`, `blog_categories`, `blog_comments`, `blog_likes` with RLS, indexes, triggers, seeded categories, and 3 sample posts.

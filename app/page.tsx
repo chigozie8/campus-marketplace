@@ -14,6 +14,7 @@ import { PricingSection } from '@/components/landing/pricing-section'
 import { FaqSection } from '@/components/landing/faq-section'
 import { CtaSection } from '@/components/landing/cta-section'
 import { TrustedBySection } from '@/components/landing/trusted-by-section'
+import { TrustSection } from '@/components/landing/trust-section'
 import { LandingNav } from '@/components/landing/landing-nav'
 import { LandingFooter } from '@/components/landing/landing-footer'
 
@@ -185,6 +186,7 @@ export default async function Home() {
       <IntegrationsSection />
       <CategoriesSection />
       <TestimonialsSection />
+      <TrustSection />
       <PricingSection />
       <FaqSection />
       <CtaSection user={user} />
