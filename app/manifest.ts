@@ -58,21 +58,13 @@ export default function manifest(): MetadataRoute.Manifest {
   prefer_related_applications: false,
   // display_override gives browsers progressive enhancement options
   display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
-  // Screenshots help Google and app stores show rich previews
   screenshots: [
     {
-      src: '/screenshot-mobile.png',
-      sizes: '390x844',
-      type: 'image/png',
-      form_factor: 'narrow',
-      label: 'VendoorX campus marketplace on mobile',
-    },
-    {
-      src: '/screenshot-desktop.png',
-      sizes: '1280x800',
-      type: 'image/png',
+      src: '/vendoorx-explainer.jpg',
+      sizes: '1280x720',
+      type: 'image/jpeg',
       form_factor: 'wide',
-      label: 'VendoorX campus marketplace on desktop',
+      label: 'VendoorX campus marketplace',
     },
   ],
   }

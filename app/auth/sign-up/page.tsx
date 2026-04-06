@@ -425,6 +425,7 @@ function SignUpPageInner() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
                     placeholder="At least 8 characters"
                     value={password}
                     onChange={e => setPassword(e.target.value)}

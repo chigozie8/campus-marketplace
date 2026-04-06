@@ -13,10 +13,12 @@ import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
 import { ReferralCard } from '@/components/dashboard/referral-card'
 import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
 import { BoostStoreButton } from '@/components/dashboard/boost-store-button'
+import { BoostCallbackToast } from '@/components/dashboard/boost-callback-toast'
 import { PayoutSetupCard } from '@/components/dashboard/payout-setup-card'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/server'
+import { Suspense } from 'react'
 import type { Product } from '@/lib/types'
 
 export default async function DashboardPage() {
@@ -64,6 +66,9 @@ export default async function DashboardPage() {
       pageTitle="Dashboard"
       pageAction={newListingBtn}
     >
+      <Suspense fallback={null}>
+        <BoostCallbackToast />
+      </Suspense>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-10 space-y-5">
 
         {/* ── Greeting ── */}
