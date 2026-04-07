@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Phone, MessageCircle, X, Headphones } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const ALLOWED_PATHS = ['/', '/marketplace']
-const HIDDEN_PREFIXES = ['/dashboard', '/profile', '/seller', '/admin', '/inbox', '/assistant']
+const HIDDEN_PREFIXES = ['/dashboard', '/profile']
 
 const SUPPORT_PHONE = '07082039250'
 const SUPPORT_WHATSAPP = 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...'
@@ -16,19 +15,15 @@ export function FloatingSupport() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
 
-  const isAllowed =
-    ALLOWED_PATHS.includes(pathname) ||
-    pathname.startsWith('/marketplace/')
-
   const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix))
 
   useEffect(() => {
-    if (!isAllowed || isHidden) return
+    if (isHidden) return
     const timer = setTimeout(() => setVisible(true), 3000)
     return () => clearTimeout(timer)
-  }, [isAllowed, isHidden])
+  }, [isHidden])
 
-  if (!visible || !isAllowed || isHidden) return null
+  if (!visible || isHidden) return null
 
   return (
     <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-2">
