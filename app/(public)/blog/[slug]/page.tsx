@@ -151,8 +151,8 @@ export default async function BlogPostPage({
 
   const cat = post.blog_categories as { name: string; slug: string } | null
   const author = authorProfile as { full_name: string | null; avatar_url: string | null } | null
-  const likeCount = (post.blog_likes as { count: number }[])?.[0]?.count ?? 0
-  const commentCount = (post.blog_comments as { count: number }[])?.[0]?.count ?? 0
+  const likeCount = Number((post.blog_likes as { count: unknown }[])?.[0]?.count ?? 0)
+  const commentCount = Number((post.blog_comments as { count: unknown }[])?.[0]?.count ?? 0)
 
   const jsonLd = {
     '@context': 'https://schema.org',

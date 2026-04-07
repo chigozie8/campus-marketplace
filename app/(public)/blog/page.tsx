@@ -238,8 +238,8 @@ export default async function BlogPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {posts.map((post) => {
                   const cat = post.blog_categories as { name: string; slug: string } | null
-                  const likeCount = (post.blog_likes as { count: number }[])?.[0]?.count ?? 0
-                  const commentCount = (post.blog_comments as { count: number }[])?.[0]?.count ?? 0
+                  const likeCount = Number((post.blog_likes as { count: unknown }[])?.[0]?.count ?? 0)
+                  const commentCount = Number((post.blog_comments as { count: unknown }[])?.[0]?.count ?? 0)
                   return (
                     <Link
                       key={post.id}
