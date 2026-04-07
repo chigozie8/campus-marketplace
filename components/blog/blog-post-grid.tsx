@@ -35,7 +35,7 @@ export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
   const supabase = createPublicClient()
 
   let catId: string | null = null
-  if (catFilter) {
+  if (catFilter && supabase) {
     const { data: catRow } = await supabase
       .from('blog_categories')
       .select('id')
@@ -44,17 +44,19 @@ export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
     catId = catRow?.id ?? null
   }
 
-  let query = supabase
-    .from('blog_posts')
-    .select(SELECT_COLS, { count: 'exact' })
-    .eq('status', 'published')
-    .order('published_at', { ascending: false })
-    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
-
-  if (catId) query = query.eq('category_id', catId)
-  if (searchQuery) query = query.ilike('title', `%${searchQuery}%`)
-
-  const { data: posts = [], count = 0 } = await query
+  const { data: posts = [], count = 0 } = supabase
+    ? await (() => {
+        let q = supabase
+          .from('blog_posts')
+          .select(SELECT_COLS, { count: 'exact' })
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
+          .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
+        if (catId) q = q.eq('category_id', catId)
+        if (searchQuery) q = q.ilike('title', `%${searchQuery}%`)
+        return q
+      })()
+    : { data: [], count: 0 }
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE)
 
   return (
