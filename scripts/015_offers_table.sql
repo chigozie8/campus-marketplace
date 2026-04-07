@@ -41,10 +41,13 @@ create policy "Buyers can make offers"
     and auth.uid() != seller_id
   );
 
--- Sellers can update status (accept/decline)
+-- Sellers can update offer status only (accept/decline)
+-- WITH CHECK restricts writes to valid status values and prevents sellers
+-- from changing other fields (offer_price, buyer_id, etc.) via direct API.
 create policy "Sellers can update offer status"
   on public.offers for update
-  using (auth.uid() = seller_id);
-
--- Allow the service role (used by the API) to insert on behalf of buyers
--- (the api/offers route validates ownership before inserting)
+  using (auth.uid() = seller_id)
+  with check (
+    auth.uid() = seller_id
+    and status in ('accepted', 'declined')
+  );
