@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { unstable_cache } from 'next/cache'
-import { createPublicClient } from '@/lib/supabase/public'
+import { createServiceClient } from '@/lib/supabase/service'
 import {
   BookOpen, Clock, Eye, ArrowRight, TrendingUp,
   Flame, Calendar, Tag, Search, Rss,
@@ -45,7 +45,7 @@ const FEATURED_SELECT = `id, title, slug, excerpt, cover_image, read_time, publi
 
 const getCategories = unstable_cache(
   async () => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return []
     const { data } = await supabase.from('blog_categories').select('id, name, slug, color').order('name')
     return data ?? []
@@ -56,7 +56,7 @@ const getCategories = unstable_cache(
 
 const getFeaturedPost = unstable_cache(
   async () => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return null
     const { data } = await supabase
       .from('blog_posts')
@@ -74,7 +74,7 @@ const getFeaturedPost = unstable_cache(
 
 const getTrending = unstable_cache(
   async () => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return []
     const { data } = await supabase
       .from('blog_posts')

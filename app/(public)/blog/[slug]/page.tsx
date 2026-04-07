@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { unstable_cache } from 'next/cache'
-import { createPublicClient } from '@/lib/supabase/public'
+import { createServiceClient } from '@/lib/supabase/service'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
   Share2, ChevronRight, TrendingUp, AlertTriangle,
@@ -30,7 +30,7 @@ function fmtNum(n: number) {
 }
 
 export async function generateStaticParams() {
-  const supabase = createPublicClient()
+  const supabase = createServiceClient()
   if (!supabase) return []
   const { data } = await supabase.from('blog_posts').select('slug').eq('status', 'published')
   return (data ?? []).map(p => ({ slug: p.slug as string }))
@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 
 const getPost = unstable_cache(
   async (slug: string) => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return { data: null, error: null }
     return supabase
       .from('blog_posts')
@@ -52,7 +52,7 @@ const getPost = unstable_cache(
 
 const getRelated = unstable_cache(
   async (slug: string) => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return []
     const { data } = await supabase
       .from('blog_posts')
@@ -69,7 +69,7 @@ const getRelated = unstable_cache(
 
 const getAuthor = unstable_cache(
   async (authorId: string) => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return null
     const { data } = await supabase
       .from('profiles')
@@ -84,7 +84,7 @@ const getAuthor = unstable_cache(
 
 const getComments = unstable_cache(
   async (postId: string) => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return []
     const { data: rawComments } = await supabase
       .from('blog_comments')

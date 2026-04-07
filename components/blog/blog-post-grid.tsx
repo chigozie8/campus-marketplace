@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { unstable_cache } from 'next/cache'
-import { createPublicClient } from '@/lib/supabase/public'
+import { createServiceClient } from '@/lib/supabase/service'
 import {
   BookOpen, Clock, Eye, Heart, ArrowRight,
   Search, ChevronLeft, ChevronRight, MessageSquare,
@@ -34,7 +34,7 @@ interface Props {
 
 const getCachedPostGrid = unstable_cache(
   async (catFilter: string | undefined, searchQuery: string | undefined, page: number) => {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     if (!supabase) return { posts: [], count: 0, totalPages: 0 }
 
     let catId: string | null = null
