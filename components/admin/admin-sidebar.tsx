@@ -27,19 +27,20 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const NAV_ITEMS = [
-  { label: 'Overview',       href: '/admin',                  icon: LayoutDashboard },
-  { label: 'Users',          href: '/admin/users',            icon: Users },
-  { label: 'Listings',       href: '/admin/listings',         icon: ShoppingBag },
-  { label: 'Orders',         href: '/admin/orders',           icon: Package },
-  { label: 'Verifications',  href: '/admin/verifications',    icon: BadgeCheck },
-  { label: 'Categories',     href: '/admin/categories',       icon: Tag },
-  { label: 'Reviews',        href: '/admin/reviews',          icon: Star },
-  { label: 'Messages',       href: '/admin/messages',         icon: MessageSquare },
-  { label: 'Analytics',      href: '/admin/analytics',        icon: BarChart3 },
-  { label: 'Blog',           href: '/admin/blog',             icon: BookOpen },
-  { label: 'Pricing',        href: '/admin/pricing',          icon: DollarSign },
-  { label: 'Broadcast',      href: '/admin/broadcast',        icon: Megaphone },
-  { label: 'Settings',       href: '/admin/settings',         icon: Settings },
+  { label: 'Overview',        href: '/admin',                   icon: LayoutDashboard },
+  { label: 'Users',           href: '/admin/users',             icon: Users },
+  { label: 'Listings',        href: '/admin/listings',          icon: ShoppingBag },
+  { label: 'Orders',          href: '/admin/orders',            icon: Package },
+  { label: 'Verifications',   href: '/admin/verifications',     icon: BadgeCheck },
+  { label: 'Categories',      href: '/admin/categories',        icon: Tag },
+  { label: 'Reviews',         href: '/admin/reviews',           icon: Star },
+  { label: 'Messages',        href: '/admin/messages',          icon: MessageSquare },
+  { label: 'Analytics',       href: '/admin/analytics',         icon: BarChart3 },
+  { label: 'Blog',            href: '/admin/blog',              icon: BookOpen },
+  { label: 'Blog Categories', href: '/admin/blog/categories',   icon: Tag },
+  { label: 'Pricing',         href: '/admin/pricing',           icon: DollarSign },
+  { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
+  { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]
 
 interface Props {
@@ -80,25 +81,30 @@ export function AdminSidebar({ role, userEmail }: Props) {
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-          const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 group ${
-                active
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-              }`}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="flex-1">{label}</span>
-              {active && <ChevronRight className="w-3.5 h-3.5 opacity-70" />}
-            </Link>
-          )
-        })}
+        {(() => {
+          const bestMatch = NAV_ITEMS
+            .filter(i => i.href !== '/admin' && (pathname === i.href || pathname.startsWith(i.href + '/')))
+            .sort((a, b) => b.href.length - a.href.length)[0]?.href
+          return NAV_ITEMS.map(({ label, href, icon: Icon }) => {
+            const active = href === '/admin' ? pathname === '/admin' : bestMatch === href
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 group ${
+                  active
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                {active && <ChevronRight className="w-3.5 h-3.5 opacity-70" />}
+              </Link>
+            )
+          })
+        })()}
       </nav>
 
       {/* User footer */}
