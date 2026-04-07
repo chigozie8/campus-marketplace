@@ -39,16 +39,16 @@ export async function generateMetadata({
     .eq('slug', slug)
     .single() ?? { data: null }
 
-  if (!data) return { title: 'Article Not Found | VendorX Blog' }
+  if (!data) return { title: 'Article Not Found | VendoorX Blog' }
 
   const title = data.seo_title ?? data.title
-  const description = data.seo_description ?? data.excerpt ?? 'Read this article on the VendorX blog.'
+  const description = data.seo_description ?? data.excerpt ?? 'Read this article on the VendoorX blog.'
   const cat = (data.blog_categories as { name: string } | null)?.name
 
   return {
-    title: `${title} | VendorX Blog`,
+    title: `${title} | VendoorX Blog`,
     description,
-    keywords: [...(data.tags ?? []), 'VendorX', 'campus marketplace', 'Nigeria', cat].filter(Boolean).join(', '),
+    keywords: [...(data.tags ?? []), 'VendoorX', 'campus marketplace', 'Nigeria', cat].filter(Boolean).join(', '),
     openGraph: {
       title: data.title,
       description: description,
@@ -138,13 +138,13 @@ export default async function BlogPostPage({
     image: post.cover_image ?? '',
     datePublished: post.published_at ?? '',
     dateModified: post.updated_at ?? post.published_at ?? '',
-    author: { '@type': 'Person', name: author?.full_name ?? 'VendorX Team' },
+    author: { '@type': 'Person', name: author?.full_name ?? 'VendoorX Team' },
     publisher: {
       '@type': 'Organization',
-      name: 'VendorX',
-      logo: { '@type': 'ImageObject', url: 'https://vendorx.com/logo.png' },
+      name: 'VendoorX',
+      logo: { '@type': 'ImageObject', url: 'https://vendoorx.com/logo.png' },
     },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendorx.com/blog/${slug}` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendoorx.com/blog/${slug}` },
     keywords: (post.tags ?? []).join(', '),
   }
 
@@ -252,8 +252,8 @@ export default async function BlogPostPage({
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">{author?.full_name ?? 'VendorX Team'}</p>
-                  <p className="text-xs text-muted-foreground">Published on VendorX Blog</p>
+                  <p className="text-sm font-bold text-foreground">{author?.full_name ?? 'VendoorX Team'}</p>
+                  <p className="text-xs text-muted-foreground">Published on VendoorX Blog</p>
                 </div>
                 <div className="ml-auto">
                   <Link href="/blog" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
@@ -295,9 +295,9 @@ export default async function BlogPostPage({
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Written by</p>
-                  <p className="text-base font-black text-foreground">{author?.full_name ?? 'VendorX Team'}</p>
+                  <p className="text-base font-black text-foreground">{author?.full_name ?? 'VendoorX Team'}</p>
                   <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Helping Nigerian students buy and sell smarter on campus. Follow us on WhatsApp, Instagram & TikTok @VendorX.
+                    Helping Nigerian students buy and sell smarter on campus. Follow us on WhatsApp, Instagram & TikTok @VendoorX.
                   </p>
                 </div>
               </div>
@@ -314,7 +314,7 @@ export default async function BlogPostPage({
                 </div>
                 <div className="flex flex-col gap-2">
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendorx.com/blog/' + slug)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendoorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-sm font-semibold transition-colors"
                   >
@@ -322,7 +322,7 @@ export default async function BlogPostPage({
                     WhatsApp
                   </a>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendorx.com/blog/' + slug)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold transition-colors"
                   >
@@ -330,7 +330,7 @@ export default async function BlogPostPage({
                     Twitter / X
                   </a>
                   <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendorx.com/blog/' + slug)}`}
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] text-sm font-semibold transition-colors"
                   >
