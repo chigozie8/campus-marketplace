@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import {
   BookOpen, Clock, Eye, Heart, ArrowRight,
@@ -31,33 +32,39 @@ interface Props {
   page: number
 }
 
+const getCachedPostGrid = unstable_cache(
+  async (catFilter: string | undefined, searchQuery: string | undefined, page: number) => {
+    const supabase = createPublicClient()
+    if (!supabase) return { posts: [], count: 0, totalPages: 0 }
+
+    let catId: string | null = null
+    if (catFilter) {
+      const { data: catRow } = await supabase
+        .from('blog_categories')
+        .select('id')
+        .eq('slug', catFilter)
+        .single()
+      catId = catRow?.id ?? null
+    }
+
+    let q = supabase
+      .from('blog_posts')
+      .select(SELECT_COLS, { count: 'exact' })
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
+    if (catId) q = q.eq('category_id', catId)
+    if (searchQuery) q = q.ilike('title', `%${searchQuery}%`)
+
+    const { data, count } = await q
+    return { posts: data ?? [], count: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) }
+  },
+  ['blog-post-grid'],
+  { revalidate: 60, tags: ['blog-posts'] },
+)
+
 export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
-  const supabase = createPublicClient()
-
-  let catId: string | null = null
-  if (catFilter && supabase) {
-    const { data: catRow } = await supabase
-      .from('blog_categories')
-      .select('id')
-      .eq('slug', catFilter)
-      .single()
-    catId = catRow?.id ?? null
-  }
-
-  const { data: posts = [], count = 0 } = supabase
-    ? await (() => {
-        let q = supabase
-          .from('blog_posts')
-          .select(SELECT_COLS, { count: 'exact' })
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
-        if (catId) q = q.eq('category_id', catId)
-        if (searchQuery) q = q.ilike('title', `%${searchQuery}%`)
-        return q
-      })()
-    : { data: [], count: 0 }
-  const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE)
+  const { posts, count, totalPages } = await getCachedPostGrid(catFilter, searchQuery, page)
 
   return (
     <>

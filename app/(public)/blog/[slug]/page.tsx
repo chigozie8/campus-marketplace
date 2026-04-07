@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
@@ -28,18 +29,95 @@ function fmtNum(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
 }
 
+export async function generateStaticParams() {
+  const supabase = createPublicClient()
+  if (!supabase) return []
+  const { data } = await supabase.from('blog_posts').select('slug').eq('status', 'published')
+  return (data ?? []).map(p => ({ slug: p.slug as string }))
+}
+
+const getPost = unstable_cache(
+  async (slug: string) => {
+    const supabase = createPublicClient()
+    if (!supabase) return { data: null, error: null }
+    return supabase
+      .from('blog_posts')
+      .select(`*, blog_categories(name, slug, color), blog_likes(count), blog_comments(count)`)
+      .eq('slug', slug)
+      .single()
+  },
+  ['blog-post'],
+  { revalidate: 300, tags: ['blog-posts'] },
+)
+
+const getRelated = unstable_cache(
+  async (slug: string) => {
+    const supabase = createPublicClient()
+    if (!supabase) return []
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
+      .eq('status', 'published')
+      .neq('slug', slug)
+      .order('published_at', { ascending: false })
+      .limit(3)
+    return data ?? []
+  },
+  ['blog-related'],
+  { revalidate: 300, tags: ['blog-posts'] },
+)
+
+const getAuthor = unstable_cache(
+  async (authorId: string) => {
+    const supabase = createPublicClient()
+    if (!supabase) return null
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', authorId)
+      .single()
+    return data ?? null
+  },
+  ['blog-author'],
+  { revalidate: 300, tags: ['profiles'] },
+)
+
+const getComments = unstable_cache(
+  async (postId: string) => {
+    const supabase = createPublicClient()
+    if (!supabase) return []
+    const { data: rawComments } = await supabase
+      .from('blog_comments')
+      .select('*')
+      .eq('post_id', postId)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: true })
+    const commenterIds = [...new Set(
+      (rawComments ?? [])
+        .map((c: { user_id: string | null }) => c.user_id)
+        .filter((id): id is string => !!id),
+    )]
+    let profileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null }> = {}
+    if (commenterIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', commenterIds)
+      profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+    }
+    return (rawComments ?? []).map((c: { user_id: string | null; [key: string]: unknown }) => ({
+      ...c,
+      profiles: c.user_id ? (profileMap[c.user_id] ?? null) : null,
+    }))
+  },
+  ['blog-comments'],
+  { revalidate: 60, tags: ['blog-comments'] },
+)
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const supabase = createPublicClient()
-  const { data } = await supabase
-    ?.from('blog_posts')
-    .select('title, excerpt, cover_image, seo_title, seo_description, published_at, tags, blog_categories(name)')
-    .eq('slug', slug)
-    .single() ?? { data: null }
+  const { data } = await getPost(slug)
 
   if (!data) return { title: 'Article Not Found | VendoorX Blog' }
 
@@ -74,23 +152,8 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const supabase = createPublicClient()
 
-  const [postResult, relatedResult] = await Promise.all([
-    supabase?.from('blog_posts')
-      .select(`*, blog_categories(name, slug, color), blog_likes(count), blog_comments(count)`)
-      .eq('slug', slug)
-      .single() ?? Promise.resolve({ data: null, error: null }),
-    supabase?.from('blog_posts')
-      .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
-      .eq('status', 'published')
-      .neq('slug', slug)
-      .order('published_at', { ascending: false })
-      .limit(3) ?? Promise.resolve({ data: [], error: null }),
-  ])
-
-  const { data: post, error: postError } = postResult ?? { data: null, error: null }
-  const { data: related } = relatedResult ?? { data: [] }
+  const { data: post, error: postError } = await getPost(slug)
 
   if (postError && postError.code !== 'PGRST116') {
     return (
@@ -114,39 +177,12 @@ export default async function BlogPostPage({
 
   if (!post) notFound()
 
-  // Fetch author profile separately — blog_posts.author_id references auth.users,
-  // not profiles, so PostgREST cannot resolve the join automatically.
-  const { data: authorProfile } = post.author_id
-    ? await (supabase?.from('profiles').select('full_name, avatar_url').eq('id', post.author_id).single() ?? Promise.resolve({ data: null }))
-    : Promise.resolve({ data: null })
-
-  // User session and like state are resolved client-side in BlogPostClient
-  // to keep this route cacheable with ISR (no cookies() call in the server render).
-
-  // Fetch comments without embedded profiles join — same FK issue as above.
-  const { data: rawComments } = await (supabase?.from('blog_comments')
-    .select('*')
-    .eq('post_id', post.id)
-    .eq('is_approved', true)
-    .order('created_at', { ascending: true }) ?? { data: [] })
-
-  // Batch-fetch profiles for all commenters in one round-trip.
-  const commenterIds = [...new Set(
-    (rawComments ?? [])
-      .map((c: { user_id: string | null }) => c.user_id)
-      .filter((id): id is string => !!id)
-  )]
-  const { data: commenterProfiles } = commenterIds.length > 0
-    ? await (supabase?.from('profiles').select('id, full_name, avatar_url').in('id', commenterIds) ?? Promise.resolve({ data: [] }))
-    : Promise.resolve({ data: [] })
-
-  const profileMap = Object.fromEntries(
-    (commenterProfiles ?? []).map((p: { id: string; full_name: string | null; avatar_url: string | null }) => [p.id, p])
-  )
-  const commentsData = (rawComments ?? []).map((c: { user_id: string | null; [key: string]: unknown }) => ({
-    ...c,
-    profiles: c.user_id ? (profileMap[c.user_id] ?? null) : null,
-  }))
+  // All data fetched from unstable_cache — no cookies() calls, ISR-compatible.
+  const [related, authorProfile, commentsData] = await Promise.all([
+    getRelated(slug),
+    post.author_id ? getAuthor(post.author_id) : null,
+    getComments(post.id),
+  ])
 
   const cat = post.blog_categories as { name: string; slug: string } | null
   const author = authorProfile as { full_name: string | null; avatar_url: string | null } | null

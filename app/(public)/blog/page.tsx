@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { unstable_cache } from 'next/cache'
 import { createPublicClient } from '@/lib/supabase/public'
 import {
   BookOpen, Clock, Eye, ArrowRight, TrendingUp,
@@ -38,6 +39,55 @@ function fmtNum(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
 }
 
+const FEATURED_SELECT = `id, title, slug, excerpt, cover_image, read_time, published_at, views, tags,
+  blog_categories(name, slug),
+  blog_likes(count), blog_comments(count)`
+
+const getCategories = unstable_cache(
+  async () => {
+    const supabase = createPublicClient()
+    if (!supabase) return []
+    const { data } = await supabase.from('blog_categories').select('id, name, slug, color').order('name')
+    return data ?? []
+  },
+  ['blog-categories'],
+  { revalidate: 300, tags: ['blog-categories'] },
+)
+
+const getFeaturedPost = unstable_cache(
+  async () => {
+    const supabase = createPublicClient()
+    if (!supabase) return null
+    const { data } = await supabase
+      .from('blog_posts')
+      .select(FEATURED_SELECT)
+      .eq('status', 'published')
+      .eq('is_featured', true)
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+    return data ?? null
+  },
+  ['blog-featured-post'],
+  { revalidate: 60, tags: ['blog-posts'] },
+)
+
+const getTrending = unstable_cache(
+  async () => {
+    const supabase = createPublicClient()
+    if (!supabase) return []
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('id, title, slug, cover_image, views, read_time, published_at, blog_categories(name, slug)')
+      .eq('status', 'published')
+      .order('views', { ascending: false })
+      .limit(5)
+    return data ?? []
+  },
+  ['blog-trending'],
+  { revalidate: 60, tags: ['blog-posts'] },
+)
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -46,26 +96,10 @@ export default async function BlogPage({
   const { category: catFilter, page: pageParam, q: searchQuery } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1', 10))
 
-  const supabase = createPublicClient()
-
-  const SELECT_COLS = `id, title, slug, excerpt, cover_image, read_time, published_at, views, tags,
-    blog_categories(name, slug),
-    blog_likes(count), blog_comments(count)`
-
-  const [{ data: categories }, { data: featured }, { data: trending }] = await Promise.all([
-    supabase?.from('blog_categories').select('id, name, slug, color').order('name') ?? { data: [] },
-    catFilter || searchQuery ? { data: null } : supabase?.from('blog_posts')
-      .select(SELECT_COLS)
-      .eq('status', 'published')
-      .eq('is_featured', true)
-      .order('published_at', { ascending: false })
-      .limit(1)
-      .single() ?? { data: null },
-    supabase?.from('blog_posts')
-      .select('id, title, slug, cover_image, views, read_time, published_at, blog_categories(name, slug)')
-      .eq('status', 'published')
-      .order('views', { ascending: false })
-      .limit(5) ?? { data: [] },
+  const [categories, featured, trending] = await Promise.all([
+    getCategories(),
+    (catFilter || searchQuery) ? null : getFeaturedPost(),
+    getTrending(),
   ])
 
   const allCats = [{ id: 'all', name: 'All Posts', slug: '' }, ...(categories ?? [])]
