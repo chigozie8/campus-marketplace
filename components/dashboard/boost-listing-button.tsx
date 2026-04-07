@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Zap, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -13,12 +13,26 @@ interface Props {
 }
 
 export function BoostListingButton({ productId, productTitle, isBoosted, boostExpiresAt }: Props) {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading]       = useState(false)
+  const [priceKobo, setPriceKobo]   = useState<number | null>(null)
+  const [durationDays, setDuration] = useState(7)
+
+  useEffect(() => {
+    fetch('/api/boost/prices')
+      .then(r => r.json())
+      .then(d => {
+        if (d.listingPriceKobo) setPriceKobo(d.listingPriceKobo)
+        if (d.durationDays)     setDuration(d.durationDays)
+      })
+      .catch(() => setPriceKobo(150000))
+  }, [])
 
   const isActive = isBoosted && boostExpiresAt && new Date(boostExpiresAt) > new Date()
   const expiresIn = isActive
     ? Math.ceil((new Date(boostExpiresAt!).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : 0
+
+  const priceNaira = priceKobo != null ? (priceKobo / 100).toLocaleString('en-NG') : '…'
 
   async function handleBoost() {
     setLoading(true)
@@ -30,9 +44,7 @@ export function BoostListingButton({ productId, productTitle, isBoosted, boostEx
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to initiate boost')
-      if (data.authorizationUrl) {
-        window.location.href = data.authorizationUrl
-      }
+      if (data.authorizationUrl) window.location.href = data.authorizationUrl
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
@@ -54,16 +66,12 @@ export function BoostListingButton({ productId, productTitle, isBoosted, boostEx
       variant="outline"
       size="sm"
       onClick={handleBoost}
-      disabled={loading}
+      disabled={loading || priceKobo === null}
       className="gap-1.5 text-xs h-7 rounded-lg border-primary/30 text-primary hover:bg-primary/5 hover:border-primary"
-      title={`Boost "${productTitle}" for ₦1,500 — 7 days featured`}
+      title={`Boost "${productTitle}" for ${durationDays} days`}
     >
-      {loading ? (
-        <Loader2 className="w-3 h-3 animate-spin" />
-      ) : (
-        <Zap className="w-3 h-3" />
-      )}
-      Boost — ₦1,500
+      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+      Boost — ₦{priceNaira}
     </Button>
   )
 }

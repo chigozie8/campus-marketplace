@@ -2,14 +2,26 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
-const LISTING_BOOST_PRICE = 150000
-const STORE_BOOST_PRICE   = 250000
-
 function adminClient() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+async function getBoostPrices(supabase: Awaited<ReturnType<typeof createClient>>) {
+  if (!supabase) return { listingPrice: 150000, storePrice: 250000, durationDays: 7 }
+  const { data: rows } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .in('key', ['boost_listing_price_kobo', 'boost_store_price_kobo', 'boost_duration_days'])
+  const map: Record<string, string> = {}
+  for (const r of rows ?? []) map[r.key] = r.value
+  return {
+    listingPrice: parseInt(map['boost_listing_price_kobo'] ?? '150000', 10),
+    storePrice:   parseInt(map['boost_store_price_kobo']   ?? '250000', 10),
+    durationDays: parseInt(map['boost_duration_days']       ?? '7',      10),
+  }
 }
 
 export async function POST(req: Request) {
@@ -25,6 +37,8 @@ export async function POST(req: Request) {
 
     const paystackKey = process.env.PAYSTACK_SECRET_KEY
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:5000'
+
+    const { listingPrice, storePrice, durationDays } = await getBoostPrices(supabase)
 
     // ── INITIATE ──────────────────────────────────────────────
     if (action === 'initiate') {
@@ -44,17 +58,18 @@ export async function POST(req: Request) {
           headers: { Authorization: `Bearer ${paystackKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email,
-            amount: STORE_BOOST_PRICE,
+            amount: storePrice,
             currency: 'NGN',
             callback_url: `${siteUrl}/api/boost/callback`,
             metadata: {
               boost_type: 'store',
               user_id: user.id,
               action: 'boost',
+              duration_days: durationDays,
               custom_fields: [
                 { display_name: 'Boost Type', variable_name: 'boost_type', value: 'Store Page' },
-                { display_name: 'Seller', variable_name: 'seller', value: profile?.full_name || email },
-                { display_name: 'Duration', variable_name: 'duration', value: '7 days' },
+                { display_name: 'Seller',     variable_name: 'seller',     value: profile?.full_name || email },
+                { display_name: 'Duration',   variable_name: 'duration',   value: `${durationDays} days` },
               ],
             },
           }),
@@ -85,7 +100,7 @@ export async function POST(req: Request) {
         headers: { Authorization: `Bearer ${paystackKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          amount: LISTING_BOOST_PRICE,
+          amount: listingPrice,
           currency: 'NGN',
           callback_url: `${siteUrl}/api/boost/callback`,
           metadata: {
@@ -93,9 +108,10 @@ export async function POST(req: Request) {
             product_id: productId,
             user_id: user.id,
             action: 'boost',
+            duration_days: durationDays,
             custom_fields: [
-              { display_name: 'Product', variable_name: 'product', value: product.title },
-              { display_name: 'Duration', variable_name: 'duration', value: '7 days' },
+              { display_name: 'Product',  variable_name: 'product',  value: product.title },
+              { display_name: 'Duration', variable_name: 'duration', value: `${durationDays} days` },
             ],
           },
         }),
@@ -126,14 +142,15 @@ export async function POST(req: Request) {
       }
 
       const meta = verifyData.data?.metadata
+      // Use duration stored in payment metadata so old transactions honour the price they paid for
+      const days = meta?.duration_days ?? durationDays
       const boostExpires = new Date()
-      boostExpires.setDate(boostExpires.getDate() + 7)
+      boostExpires.setDate(boostExpires.getDate() + days)
       const expiresIso = boostExpires.toISOString()
 
       if (meta?.boost_type === 'store' || boostType === 'store') {
         const admin = adminClient()
 
-        // Save to user_metadata (always works)
         await admin.auth.admin.updateUserById(user.id, {
           user_metadata: {
             ...user.user_metadata,
@@ -141,7 +158,6 @@ export async function POST(req: Request) {
           },
         })
 
-        // Also try profiles table (works after migration)
         await supabase
           .from('profiles')
           .update({ store_boost_expires_at: expiresIso } as Record<string, string>)
@@ -150,7 +166,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, expiresAt: expiresIso, boostType: 'store' })
       }
 
-      // Listing boost
       const pid = meta?.product_id || productId
       if (!pid) return NextResponse.json({ error: 'No product ID in metadata' }, { status: 400 })
 
@@ -172,7 +187,7 @@ export async function POST(req: Request) {
       if (boostType === 'store') {
         const expiresAt = user.user_metadata?.store_boost_expires_at as string | undefined
         const isActive = !!expiresAt && new Date(expiresAt) > new Date()
-        return NextResponse.json({ isActive, expiresAt, boostPriceKobo: STORE_BOOST_PRICE })
+        return NextResponse.json({ isActive, expiresAt, boostPriceKobo: storePrice, durationDays })
       }
 
       const { data: product } = await supabase
@@ -185,7 +200,7 @@ export async function POST(req: Request) {
       if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
 
       const isActive = product.boost_expires_at && new Date(product.boost_expires_at) > new Date()
-      return NextResponse.json({ product, isActive, boostPriceKobo: LISTING_BOOST_PRICE })
+      return NextResponse.json({ product, isActive, boostPriceKobo: listingPrice, durationDays })
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
