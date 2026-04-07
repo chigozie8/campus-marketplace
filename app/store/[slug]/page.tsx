@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
+import { ShareButton } from '@/components/product/product-interactions'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -176,17 +177,20 @@ export default async function StorePage({ params }: PageProps) {
                 )}
               </div>
 
-              {whatsappNumber && (
-                <a
-                  href={`https://wa.me/${whatsappNumber}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] text-white text-xs font-bold hover:bg-[#20bd5a] transition-colors flex-shrink-0"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  Chat
-                </a>
-              )}
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                {whatsappNumber && (
+                  <a
+                    href={`https://wa.me/${whatsappNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] text-white text-xs font-bold hover:bg-[#20bd5a] transition-colors"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    Chat
+                  </a>
+                )}
+                <ShareButton title={`${name}'s Store on VendoorX`} />
+              </div>
             </div>
           </div>
 
