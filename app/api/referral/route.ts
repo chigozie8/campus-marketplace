@@ -17,7 +17,7 @@ export async function GET() {
       .eq('referred_by', referralCode)
       .order('created_at', { ascending: false })
 
-    if (error && !error.message.includes('column') && !error.message.includes('does not exist')) {
+    if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
