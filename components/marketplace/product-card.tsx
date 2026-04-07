@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, MessageCircle, MapPin, Star, BadgeCheck } from 'lucide-react'
+import { Heart, MessageCircle, MapPin, Star, BadgeCheck, GraduationCap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -40,6 +40,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
   const sellerName = product.profiles?.full_name || 'Unknown Seller'
   const sellerRating = product.profiles?.rating || 0
   const isVerified = product.profiles?.seller_verified || false
+  const isStudentVerified = product.profiles?.is_student_verified || false
   const discount = product.original_price && product.original_price > product.price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0
@@ -129,6 +130,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
           </div>
           <span className="truncate max-w-[80px] sm:max-w-none">{sellerName}</span>
           {isVerified && <BadgeCheck className="w-3 h-3 text-primary flex-shrink-0" />}
+          {isStudentVerified && <GraduationCap className="w-3 h-3 text-blue-500 flex-shrink-0" title="Verified student" />}
           {sellerRating > 0 && (
             <div className="flex items-center gap-0.5 ml-auto">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />

@@ -208,7 +208,7 @@ export default function NewListingPage() {
             <div className="flex items-center gap-2 mb-4">
               <ImagePlus className="w-4 h-4 text-primary" />
               <h2 className="font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">Photos &amp; Video</h2>
-              <span className="ml-auto text-xs text-gray-400">{uploadedUrls.length}/9 uploaded</span>
+              <span className="ml-auto text-xs text-gray-400 dark:text-muted-foreground">{uploadedUrls.length}/9 uploaded</span>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
@@ -219,7 +219,7 @@ export default function NewListingPage() {
                       {entry.isVideo
                         ? <Video className="w-6 h-6 text-primary animate-pulse" />
                         : <Loader2 className="w-6 h-6 text-primary animate-spin" />}
-                      <span className="text-[10px] text-gray-400 font-medium">
+                      <span className="text-[10px] text-gray-400 dark:text-muted-foreground font-medium">
                         {entry.isVideo ? 'Uploading video…' : 'Uploading…'}
                       </span>
                     </div>
@@ -281,7 +281,7 @@ export default function NewListingPage() {
                   className="aspect-square rounded-xl border-2 border-dashed border-gray-200 dark:border-border hover:border-primary/50 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 group"
                 >
                   <Camera className="w-6 h-6 text-gray-300 group-hover:text-primary transition-colors" />
-                  <span className="text-[11px] text-gray-400 group-hover:text-primary font-semibold transition-colors">Add photo/video</span>
+                  <span className="text-[11px] text-gray-400 dark:text-muted-foreground group-hover:text-primary font-semibold transition-colors">Add photo/video</span>
                 </button>
               )}
             </div>
@@ -294,7 +294,7 @@ export default function NewListingPage() {
               className="hidden"
               onChange={handleFileChange}
             />
-            <p className="text-xs text-gray-400 mt-3">
+            <p className="text-xs text-gray-400 dark:text-muted-foreground mt-3">
               First image is the cover. Up to 6 files — images (JPEG/PNG/WEBP, max 10 MB) or one video (MP4/WebM, max 50 MB).
             </p>
           </div>
@@ -415,11 +415,11 @@ export default function NewListingPage() {
                   min="0"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
                 />
-                <p className="text-xs text-gray-400 mt-1.5">This will be added to the product price at checkout.</p>
+                <p className="text-xs text-gray-400 dark:text-muted-foreground mt-1.5">This will be added to the product price at checkout.</p>
               </div>
             )}
             {form.delivery_type === 'free' && (
-              <p className="text-xs text-gray-400">Buyers won&apos;t pay anything extra for delivery — great for boosting conversions!</p>
+              <p className="text-xs text-gray-400 dark:text-muted-foreground">Buyers won&apos;t pay anything extra for delivery — great for boosting conversions!</p>
             )}
           </div>
 
@@ -473,7 +473,7 @@ export default function NewListingPage() {
               <div>
                 <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">University / Campus</label>
                 <div className="relative">
-                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <input
                     value={form.campus}
                     onChange={e => setField('campus', e.target.value)}
@@ -485,7 +485,7 @@ export default function NewListingPage() {
               <div>
                 <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">Hostel / Block</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <input
                     value={form.location}
                     onChange={e => setField('location', e.target.value)}

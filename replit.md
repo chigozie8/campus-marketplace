@@ -2,6 +2,49 @@
 
 ## Recently Completed Features (Latest Session)
 
+### T001–T013 Build Pass — All Features Verified & Gaps Fixed
+
+**T001 — Next.js 16 proxy convention:** Confirmed `proxy.ts` is correctly set up (exports `proxy` function). Removed a conflicting `middleware.ts` that was causing a startup error. Logs confirm `proxy.ts: 504ms` running cleanly.
+
+**T002 — Image CSS position:** All `<Image fill>` parents have `position: relative` set. No changes needed.
+
+**T003 — University email validation + badge:**
+- Added `is_student_verified: boolean` to `Profile` type (`lib/types.ts`)
+- Added blue "Student" badge (GraduationCap icon) to seller store pages (`app/store/[slug]/page.tsx`) — appears alongside the verified seller badge
+- Added GraduationCap badge to product card seller row (`components/marketplace/product-card.tsx`)
+- Sign-up already auto-detects university email domain and stores `is_student_verified` in user metadata
+
+**T004 — Search autocomplete:** `SearchAutocomplete` component was fully implemented and integrated in the marketplace page. Verified working.
+
+**T005 — Price drop indicator:** Strikethrough "Was ₦X" and `{N}% off` badge already implemented on both product card and product detail page. Verified working.
+
+**T006 — Reviews API route:** Created `app/api/reviews/route.ts`:
+- `GET ?productId=xxx` — fetch reviews with count and average rating
+- `POST` — create review (with duplicate check), triggers trust score update via backend
+- Existing `ReviewsSection` component + `MakeOfferDialog` + `ReportDialog` all integrated in product detail page
+
+**T007 — Offer/Price Negotiation:** `MakeOfferDialog` fully built and integrated. Working.
+
+**T008 — Dispute Resolution:** `ReportDialog` fully built, calls `/api/disputes`, integrated on product detail page.
+
+**T009 — Referral Program:** Fully implemented — `?ref=` on sign-up, referral stored in user metadata, `ReferralCard` in dashboard.
+
+**T010 — Promoted Listings:** `BoostListingButton` + `BoostStoreButton` in seller dashboard. Boost API with Paystack payment. Working.
+
+**T011 — Product Video Support:** Upload route accepts mp4/webm/mov (50MB), ProductGallery renders video with controls, seller new listing form allows video files.
+
+**T012 — Dark Mode Polish:**
+- `app/auth/sign-up/page.tsx` — Fixed 7 missing `dark:text-muted-foreground` on gray-400 text elements, icons, and dividers
+- `app/seller/new/page.tsx` — Fixed 6 missing dark: classes on upload counter, uploading state text, "Add photo/video" label, instructions text, delivery fee hints, and location icons
+
+**T013 — Restart & Verify:** Both workflows restarted. App serving 200s. Backend API on port 3001. `proxy.ts` running correctly.
+
+**Additional (backend audit):**
+- Created `scripts/012_trust_score_functions.sql` — SQL for Supabase `increment_vendor_orders` and `increment_vendor_disputes` RPC functions needed by the trust score system. Run in Supabase SQL Editor.
+
+### Pending User Action
+- Run `scripts/012_trust_score_functions.sql` in Supabase SQL Editor to activate the trust score system's database functions
+
 ### WhatsApp Notification Sound + Pricing Admin Panel
 
 - **`hooks/use-notification-sound.ts`** — Web Audio API sound synthesizer (zero files needed):

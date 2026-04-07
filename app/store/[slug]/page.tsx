@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap } from 'lucide-react'
+import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
 
 interface PageProps {
@@ -135,6 +135,15 @@ export default async function StorePage({ params }: PageProps) {
                   <h1 className="text-lg font-black text-foreground">{name}</h1>
                   {seller.seller_verified && (
                     <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" />
+                  )}
+                  {seller.is_student_verified && (
+                    <span
+                      title={`Verified ${seller.university || 'student'}`}
+                      className="flex items-center gap-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 px-1.5 py-0.5 rounded-full"
+                    >
+                      <GraduationCap className="w-3 h-3" />
+                      Student
+                    </span>
                   )}
                   {isStoreFeatured && (
                     <span className="flex items-center gap-0.5 text-[10px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">

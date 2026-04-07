@@ -337,7 +337,7 @@ function SignUpPageInner() {
                       </div>
                       <div>
                         <p className="text-sm font-bold leading-none">{label}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
+                        <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5">{sub}</p>
                       </div>
                       {role === value && (
                         <CheckCircle2 className="w-4 h-4 text-[#16a34a] absolute top-3 right-3" />
@@ -384,10 +384,10 @@ function SignUpPageInner() {
               {/* University */}
               <div className="space-y-1.5">
                 <Label htmlFor="university" className="text-sm font-semibold text-gray-700 dark:text-foreground">
-                  University <span className="text-gray-400 font-normal">(optional)</span>
+                  University <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
-                  <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <Input
                     id="university"
                     type="text"
@@ -402,10 +402,10 @@ function SignUpPageInner() {
               {/* WhatsApp */}
               <div className="space-y-1.5">
                 <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700 dark:text-foreground">
-                  WhatsApp number <span className="text-gray-400 font-normal">(optional)</span>
+                  WhatsApp number <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <Input
                     id="whatsapp"
                     type="tel"
@@ -415,7 +415,7 @@ function SignUpPageInner() {
                     className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
                   />
                 </div>
-                <p className="text-[11px] text-gray-400">Buyers will contact you directly via WhatsApp</p>
+                <p className="text-[11px] text-gray-400 dark:text-muted-foreground">Buyers will contact you directly via WhatsApp</p>
               </div>
 
               {/* Password */}
@@ -436,7 +436,7 @@ function SignUpPageInner() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-muted-foreground hover:text-gray-600 dark:hover:text-foreground transition-colors p-1"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -482,7 +482,7 @@ function SignUpPageInner() {
 
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
-              <span className="text-xs text-gray-400 font-medium">ALREADY REGISTERED?</span>
+              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">ALREADY REGISTERED?</span>
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
             </div>
 
@@ -497,7 +497,7 @@ function SignUpPageInner() {
               </Link>
             </Button>
 
-            <div className="mt-7 flex items-center justify-center gap-4 text-xs text-gray-400">
+            <div className="mt-7 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>

@@ -11,6 +11,7 @@ export type Profile = {
   bio: string | null
   is_seller: boolean
   seller_verified: boolean
+  is_student_verified: boolean
   rating: number
   total_sales: number
   created_at: string
