@@ -59,6 +59,16 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
     .single()
 
   if (error || !data) throw Object.assign(new Error('Order not found.'), { status: 404 })
+
+  // When an order is marked completed/delivered, try to credit referral milestone
+  if (status === 'completed' || status === 'delivered') {
+    const order = data as OrderRow
+    if (order.buyer_id) {
+      // Fire-and-forget — don't block the response if this fails
+      supabaseAdmin.rpc('credit_referral', { p_buyer_id: order.buyer_id }).catch(() => {})
+    }
+  }
+
   return data as OrderRow
 }
 
