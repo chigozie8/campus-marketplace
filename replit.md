@@ -33,9 +33,13 @@
 
 **T011 — Product Video Support:** Upload route accepts mp4/webm/mov (50MB), ProductGallery renders video with controls, seller new listing form allows video files.
 
-**T012 — Dark Mode Polish:**
-- `app/auth/sign-up/page.tsx` — Fixed 7 missing `dark:text-muted-foreground` on gray-400 text elements, icons, and dividers
-- `app/seller/new/page.tsx` — Fixed 6 missing dark: classes on upload counter, uploading state text, "Add photo/video" label, instructions text, delivery fee hints, and location icons
+**T012 — Dark Mode Polish (re-audited this session):**
+- `components/landing/testimonials-section.tsx` — Avatar `bg-gray-100` → `dark:bg-muted`; ring `ring-white` → `dark:ring-border`
+- `components/dashboard-actions.tsx` — Cancel button `text-gray-600 bg-gray-100` → added `dark:text-gray-300 dark:bg-muted dark:hover:bg-muted/70`
+- `components/admin/admin-orders-table.tsx` — Fallback status/payment badge `bg-gray-100 text-gray-500` → added `dark:bg-gray-800 dark:text-gray-400`
+- `components/products/products-client.tsx` — Status badge now uses `dark:bg-emerald-950/30 dark:text-emerald-400` (active) and `dark:bg-gray-800 dark:text-gray-400` (inactive)
+- Also: `app/api/admin/site-settings/route.ts` — Added `revalidateTag('site-settings')` call on every successful PUT to instantly bust the 60s Next.js cache
+- `lib/site-settings.ts` — Now uses `unstable_cache` with `{ tags: ['site-settings'] }` for proper ISR + tag-based revalidation
 
 **T013 — Restart & Verify:** Both workflows restarted. App serving 200s. Backend API on port 3001. `proxy.ts` running correctly.
 

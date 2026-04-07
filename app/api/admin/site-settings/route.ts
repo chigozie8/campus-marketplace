@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
@@ -16,7 +17,7 @@ export async function GET() {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const supabase = await createClient()
-  const { data } = await supabase!.from('site_settings').select('*').order('group_name').order('key')
+  const { data } = await supabase!.from('site_settings').select('*').order('key')
   return NextResponse.json(data ?? [])
 }
 
@@ -40,5 +41,7 @@ export async function PUT(req: Request) {
     .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  revalidateTag('site-settings')
   return NextResponse.json({ ok: true })
 }

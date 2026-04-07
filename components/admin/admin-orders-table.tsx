@@ -192,12 +192,12 @@ export function AdminOrdersTable({ orders }: Props) {
                     ₦{Number(o.total_amount).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${STATUS_COLORS[o.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${STATUS_COLORS[o.status] ?? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                       {o.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center hidden md:table-cell">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${PAYMENT_COLORS[o.payment_status] ?? 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${PAYMENT_COLORS[o.payment_status] ?? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                       {o.payment_status}
                     </span>
                   </td>

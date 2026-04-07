@@ -119,7 +119,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
           <div className="flex gap-2">
             <button
               onClick={() => toast.dismiss(id)}
-              className="flex-1 px-3 py-2.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+              className="flex-1 px-3 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-muted rounded-xl hover:bg-gray-200 dark:hover:bg-muted/70 transition-colors"
             >
               Cancel
             </button>

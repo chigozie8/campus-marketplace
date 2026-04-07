@@ -102,7 +102,7 @@ function Stars({ count }: { count: number }) {
 
 function Avatar({ src, initials, name }: { src: string; initials: string; name: string }) {
   return (
-    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 shrink-0 ring-2 ring-white shadow-md">
+    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 dark:bg-muted shrink-0 ring-2 ring-white dark:ring-border shadow-md">
       <Image
         src={src}
         alt={name}
