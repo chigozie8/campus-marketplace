@@ -22,15 +22,31 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   const [deleting, setDeleting]   = useState(false)
   const [duping, setDuping]       = useState(false)
   const [open, setOpen]           = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const [menuPos, setMenuPos]     = useState({ top: 0, right: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
+      if (btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false)
     }
     if (open) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
+
+  useEffect(() => {
+    function handleScroll() { if (open) setOpen(false) }
+    if (open) window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [open])
+
+  function handleToggleOpen() {
+    if (open) { setOpen(false); return }
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+    }
+    setOpen(true)
+  }
 
   async function toggleAvailability() {
     setOpen(false)
@@ -139,9 +155,10 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   const busy = toggling || deleting || duping
 
   return (
-    <div className="relative" ref={menuRef}>
+    <>
       <button
-        onClick={() => setOpen(prev => !prev)}
+        ref={btnRef}
+        onClick={handleToggleOpen}
         className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted text-gray-400 hover:text-gray-700 transition-colors"
         title="Actions"
         disabled={busy}
@@ -152,7 +169,10 @@ export function DashboardActions({ productId, isAvailable }: Props) {
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-full mb-1 w-52 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-50 overflow-hidden">
+        <div
+          style={{ top: menuPos.top, right: menuPos.right }}
+          className="fixed w-52 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-[9999] overflow-hidden"
+        >
           <Link
             href={`/marketplace/${productId}`}
             onClick={() => setOpen(false)}
@@ -199,6 +219,6 @@ export function DashboardActions({ productId, isAvailable }: Props) {
           </button>
         </div>
       )}
-    </div>
+    </>
   )
 }

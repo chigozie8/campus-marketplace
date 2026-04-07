@@ -5,7 +5,7 @@ import {
   Plus, TrendingUp, ShoppingBag,
   BadgeCheck, Zap, ChevronRight,
   LayoutDashboard, ClipboardList, Bell, Bot, Settings,
-  Heart, Wallet, Trophy, ArrowUpRight, AlertCircle,
+  Heart, Wallet, Trophy, ArrowUpRight, AlertCircle, Inbox,
 } from 'lucide-react'
 import { DashboardActions } from '@/components/dashboard-actions'
 import { ProfileCompletion } from '@/components/dashboard/profile-completion'
@@ -223,6 +223,7 @@ export default async function DashboardPage() {
               { href: '/assistant',        icon: Bot,             label: 'AI Assistant',   active: false },
               { href: '/favorites',        icon: Heart,           label: 'Saved Items',    active: false },
               { href: '/profile',          icon: Settings,        label: 'Profile & Settings', active: false },
+              { href: '/inbox',            icon: Inbox,           label: 'Inbox',              active: false },
             ].map(({ href, icon: Icon, label, active }) => (
               <Link
                 key={href}
