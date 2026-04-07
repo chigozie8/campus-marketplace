@@ -25,11 +25,10 @@ const categories = [
   { value: 'electronics', label: 'Electronics' },
   { value: 'fashion', label: 'Fashion' },
   { value: 'books', label: 'Books' },
-  { value: 'food-drinks', label: 'Food & Drinks' },
+  { value: 'food', label: 'Food & Drinks' },
+  { value: 'furniture', label: 'Furniture' },
   { value: 'services', label: 'Services' },
-  { value: 'housing', label: 'Housing' },
   { value: 'sports', label: 'Sports' },
-  { value: 'beauty', label: 'Beauty' },
 ]
 
 const sortOptions = [
