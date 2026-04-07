@@ -104,18 +104,18 @@ export function ProductInteractions({
     if (navigator.share) {
       try {
         await navigator.share({ title: productTitle, text: `Check out this listing on VendoorX: ${productTitle}`, url })
-      } catch {
-        // User cancelled or share failed — fall through to clipboard
-        if (navigator.clipboard) {
-          await navigator.clipboard.writeText(url)
-          toast.success('Link copied to clipboard!')
-        }
+        return
+      } catch (err) {
+        // User cancelled the share sheet — do nothing
+        if (err instanceof Error && err.name === 'AbortError') return
+        // Other error — fall through to clipboard copy
       }
-    } else if (navigator.clipboard) {
+    }
+    // clipboard.writeText requires document focus; use execCommand as fallback
+    try {
       await navigator.clipboard.writeText(url)
       toast.success('Link copied to clipboard!')
-    } else {
-      // Last resort fallback
+    } catch {
       const input = document.createElement('input')
       input.value = url
       document.body.appendChild(input)
@@ -226,8 +226,10 @@ export function ShareButton({ title }: { title: string }) {
       try {
         await navigator.share({ title, text: `Check this out on VendoorX: ${title}`, url })
         return
-      } catch {
-        // cancelled or unsupported — fall through
+      } catch (err) {
+        // User cancelled the share sheet — do nothing
+        if (err instanceof Error && err.name === 'AbortError') return
+        // Other error — fall through to copy
       }
     }
     try {
