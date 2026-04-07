@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { VendorSidebar } from '@/components/vendor/vendor-sidebar'
 import { ConversationList } from './conversation-list'
 import { ChatWindow } from './chat-window'
@@ -8,159 +8,194 @@ import { CustomerPanel } from './customer-panel'
 import { ArrowLeft } from 'lucide-react'
 import type { Conversation, Platform } from '@/lib/types'
 import { useNotificationSound } from '@/hooks/use-notification-sound'
-
-// --- Demo data (replace with real API integration) ---
-const DEMO_CONVERSATIONS: Conversation[] = [
-  {
-    id: '1', platform: 'whatsapp', customer_name: 'Amaka Obi',
-    customer_phone: '+2348012345678', last_message: 'Is this still available?',
-    last_message_at: new Date(Date.now() - 1000 * 60 * 3).toISOString(), unread_count: 2,
-    messages: [
-      { id: 'm1', conversation_id: '1', direction: 'incoming', content: 'Hello, is this item still available?', created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString(), platform: 'whatsapp' },
-      { id: 'm2', conversation_id: '1', direction: 'outgoing', content: 'Yes it is! Are you interested?', created_at: new Date(Date.now() - 1000 * 60 * 8).toISOString(), platform: 'whatsapp' },
-      { id: 'm3', conversation_id: '1', direction: 'incoming', content: 'Is this still available?', created_at: new Date(Date.now() - 1000 * 60 * 3).toISOString(), platform: 'whatsapp' },
-    ],
-  },
-  {
-    id: '2', platform: 'instagram', customer_name: 'Tunde Bello',
-    last_message: 'Can I get a discount?', last_message_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), unread_count: 0,
-    messages: [
-      { id: 'm4', conversation_id: '2', direction: 'incoming', content: 'Hi! Saw your product on IG. Can I get a discount?', created_at: new Date(Date.now() - 1000 * 60 * 20).toISOString(), platform: 'instagram' },
-      { id: 'm5', conversation_id: '2', direction: 'outgoing', content: 'Hey! Best I can do is 5% off for first order.', created_at: new Date(Date.now() - 1000 * 60 * 17).toISOString(), platform: 'instagram' },
-      { id: 'm6', conversation_id: '2', direction: 'incoming', content: 'Can I get a discount?', created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), platform: 'instagram' },
-    ],
-  },
-  {
-    id: '3', platform: 'facebook', customer_name: 'Ngozi Adeyemi',
-    last_message: 'What is the delivery time?', last_message_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), unread_count: 1,
-    messages: [
-      { id: 'm7', conversation_id: '3', direction: 'incoming', content: 'Hello! What is the delivery time for this product?', created_at: new Date(Date.now() - 1000 * 60 * 50).toISOString(), platform: 'facebook' },
-      { id: 'm8', conversation_id: '3', direction: 'outgoing', content: 'Delivery is same day on campus, 1-2 days off campus.', created_at: new Date(Date.now() - 1000 * 60 * 47).toISOString(), platform: 'facebook' },
-      { id: 'm9', conversation_id: '3', direction: 'incoming', content: 'What is the delivery time?', created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), platform: 'facebook' },
-    ],
-  },
-  {
-    id: '4', platform: 'whatsapp', customer_name: 'Chidi Eze',
-    last_message: 'I will take 2 pieces', last_message_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(), unread_count: 0,
-    messages: [
-      { id: 'm10', conversation_id: '4', direction: 'incoming', content: 'Do you do bulk orders?', created_at: new Date(Date.now() - 1000 * 60 * 100).toISOString(), platform: 'whatsapp' },
-      { id: 'm11', conversation_id: '4', direction: 'outgoing', content: 'Yes! I offer 10% off for 5+ items.', created_at: new Date(Date.now() - 1000 * 60 * 95).toISOString(), platform: 'whatsapp' },
-      { id: 'm12', conversation_id: '4', direction: 'incoming', content: 'I will take 2 pieces', created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(), platform: 'whatsapp' },
-    ],
-  },
-  {
-    id: '5', platform: 'instagram', customer_name: 'Blessing Okoro',
-    last_message: 'Sent you a DM on IG!', last_message_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), unread_count: 3,
-    messages: [
-      { id: 'm13', conversation_id: '5', direction: 'incoming', content: 'Sent you a DM on IG!', created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), platform: 'instagram' },
-    ],
-  },
-]
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   initials: string
   fullName: string
   email: string
   products: { id: string; title: string; price: number; images: string[] | null }[]
+  userId: string
 }
 
-const DEMO_REPLIES: Record<string, string[]> = {
-  whatsapp: [
-    'Okay, let me check and get back to you shortly 😊',
-    'That sounds great! Can you confirm the price?',
-    'Is it still available? I need it urgently!',
-    'Thanks! I\'ll let my friend know too 🙏',
-    'Can you do delivery to Moremi Hall?',
-  ],
-  instagram: [
-    'Saw your IG post — is this the latest version?',
-    'DM-ing you now! 📩',
-    'Love this! Do you have it in black?',
-    'How long does delivery take on campus?',
-  ],
-  facebook: [
-    'Interested! How do I pay?',
-    'Is the price negotiable?',
-    'What condition is it in? Any scratches?',
-    'Can I pick it up at the library gate?',
-  ],
-}
-
-export function InboxClient({ initials, fullName, email, products }: Props) {
-  const [conversations, setConversations] = useState<Conversation[]>(DEMO_CONVERSATIONS)
+export function InboxClient({ initials, fullName, email, products, userId }: Props) {
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [filter, setFilter] = useState<Platform | 'all'>('all')
-  const replyTimers = useRef<ReturnType<typeof setTimeout>[]>([])
   const { playWhatsApp } = useNotificationSound()
+  const supabase = createClient()
+  const prevConvIds = useRef<Set<string>>(new Set())
 
-  const totalUnread = conversations.reduce((s, c) => s + c.unread_count, 0)
-  const active = conversations.find(c => c.id === activeId) || null
+  // ── Load conversations from Supabase ────────────────────────────────────────
+  const loadConversations = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(`
+        id, platform, customer_name, customer_phone, last_message,
+        last_message_at, unread_count, seller_id,
+        conversation_messages (
+          id, conversation_id, direction, content, created_at, platform
+        )
+      `)
+      .or(`seller_id.eq.${userId},seller_id.is.null`)
+      .order('last_message_at', { ascending: false })
+      .limit(50)
 
-  const filtered = filter === 'all'
-    ? conversations
-    : conversations.filter(c => c.platform === filter)
-
-  function addIncomingMessage(convId: string, platform: string, content: string) {
-    const msg = {
-      id: `m${Date.now()}-in`,
-      conversation_id: convId,
-      direction: 'incoming' as const,
-      content,
-      created_at: new Date().toISOString(),
-      platform: platform as Conversation['platform'],
+    if (error) {
+      console.error('[inbox] load error:', error)
+      setLoading(false)
+      return
     }
-    setConversations(prev => prev.map(c =>
-      c.id === convId
-        ? {
-            ...c,
-            messages: [...c.messages, msg],
-            last_message: content,
-            last_message_at: msg.created_at,
-            unread_count: c.id === activeId ? 0 : c.unread_count + 1,
-          }
-        : c,
-    ))
-    playWhatsApp()
-  }
 
-  function sendMessage(content: string) {
+    if (data && data.length > 0) {
+      const mapped: Conversation[] = data.map((c) => ({
+        id: c.id,
+        platform: c.platform as Conversation['platform'],
+        customer_name: c.customer_name,
+        customer_phone: c.customer_phone ?? undefined,
+        last_message: c.last_message ?? '',
+        last_message_at: c.last_message_at ?? new Date().toISOString(),
+        unread_count: c.unread_count ?? 0,
+        messages: (c.conversation_messages ?? []).map((m: {
+          id: string; conversation_id: string; direction: string;
+          content: string; created_at: string; platform: string
+        }) => ({
+          id: m.id,
+          conversation_id: m.conversation_id,
+          direction: m.direction as 'incoming' | 'outgoing',
+          content: m.content,
+          created_at: m.created_at,
+          platform: m.platform as Conversation['platform'],
+        })),
+      }))
+      setConversations(mapped)
+      data.forEach((c) => prevConvIds.current.add(c.id))
+    }
+    setLoading(false)
+  }, [userId, supabase])
+
+  useEffect(() => {
+    loadConversations()
+  }, [loadConversations])
+
+  // ── Realtime: subscribe to new/updated conversations ────────────────────────
+  useEffect(() => {
+    const channel = supabase
+      .channel('inbox-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations' },
+        async (payload) => {
+          const updated = payload.new as Conversation & { id: string }
+          if (!updated?.id) return
+
+          // Fetch full conversation with messages
+          const { data } = await supabase
+            .from('conversations')
+            .select(`
+              id, platform, customer_name, customer_phone, last_message,
+              last_message_at, unread_count,
+              conversation_messages (
+                id, conversation_id, direction, content, created_at, platform
+              )
+            `)
+            .eq('id', updated.id)
+            .single()
+
+          if (!data) return
+
+          const mapped: Conversation = {
+            id: data.id,
+            platform: data.platform as Conversation['platform'],
+            customer_name: data.customer_name,
+            customer_phone: data.customer_phone ?? undefined,
+            last_message: data.last_message ?? '',
+            last_message_at: data.last_message_at ?? new Date().toISOString(),
+            unread_count: data.unread_count ?? 0,
+            messages: (data.conversation_messages ?? []).map((m: {
+              id: string; conversation_id: string; direction: string;
+              content: string; created_at: string; platform: string
+            }) => ({
+              id: m.id,
+              conversation_id: m.conversation_id,
+              direction: m.direction as 'incoming' | 'outgoing',
+              content: m.content,
+              created_at: m.created_at,
+              platform: m.platform as Conversation['platform'],
+            })),
+          }
+
+          const isNew = !prevConvIds.current.has(data.id)
+          if (isNew) {
+            prevConvIds.current.add(data.id)
+            playWhatsApp()
+            setConversations((prev) => [mapped, ...prev])
+          } else {
+            setConversations((prev) =>
+              prev.map((c) => c.id === data.id ? mapped : c)
+            )
+            if (data.unread_count > 0 && data.id !== activeId) {
+              playWhatsApp()
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase, activeId, playWhatsApp])
+
+  // ── Send message (store + sync) ─────────────────────────────────────────────
+  async function sendMessage(content: string) {
+    const active = conversations.find((c) => c.id === activeId)
     if (!active || !content.trim()) return
-    const msg = {
-      id: `m${Date.now()}`,
+
+    const optimistic = {
+      id: `opt-${Date.now()}`,
       conversation_id: active.id,
       direction: 'outgoing' as const,
       content,
       created_at: new Date().toISOString(),
       platform: active.platform,
     }
-    setConversations(prev => prev.map(c =>
+
+    setConversations((prev) => prev.map((c) =>
       c.id === active.id
-        ? { ...c, messages: [...c.messages, msg], last_message: content, last_message_at: msg.created_at }
+        ? { ...c, messages: [...c.messages, optimistic], last_message: content, last_message_at: optimistic.created_at }
         : c
     ))
 
-    const replies = DEMO_REPLIES[active.platform] ?? DEMO_REPLIES.whatsapp
-    const reply = replies[Math.floor(Math.random() * replies.length)]
-    const delay = 1800 + Math.random() * 2000
-    const timer = setTimeout(() => {
-      addIncomingMessage(active.id, active.platform, reply)
-    }, delay)
-    replyTimers.current.push(timer)
+    await supabase.from('conversation_messages').insert({
+      conversation_id: active.id,
+      direction: 'outgoing',
+      content,
+      platform: active.platform,
+    })
+
+    await supabase.from('conversations').update({
+      last_message: content,
+      last_message_at: new Date().toISOString(),
+      unread_count: 0,
+    }).eq('id', active.id)
   }
 
   function markRead(id: string) {
-    setConversations(prev => prev.map(c => c.id === id ? { ...c, unread_count: 0 } : c))
+    setConversations((prev) => prev.map((c) => c.id === id ? { ...c, unread_count: 0 } : c))
+    supabase.from('conversations').update({ unread_count: 0 }).eq('id', id).then(() => {})
   }
+
+  const totalUnread = conversations.reduce((s, c) => s + c.unread_count, 0)
+  const active = conversations.find((c) => c.id === activeId) || null
+  const filtered = filter === 'all' ? conversations : conversations.filter((c) => c.platform === filter)
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] dark:bg-background">
       <div className="flex h-screen overflow-hidden">
         <VendorSidebar initials={initials} fullName={fullName} email={email} unreadInbox={totalUnread} />
 
-        {/* Inbox 3-panel layout */}
         <div className="flex-1 md:ml-60 flex overflow-hidden">
 
-          {/* Left: conversation list — hidden on mobile when a chat is open */}
           <div className={`${activeId ? 'hidden md:flex' : 'flex'} w-full md:w-72 lg:w-80 flex-shrink-0`}>
             <ConversationList
               conversations={filtered}
@@ -168,12 +203,11 @@ export function InboxClient({ initials, fullName, email, products }: Props) {
               filter={filter}
               onFilterChange={setFilter}
               onSelect={(id) => { setActiveId(id); markRead(id) }}
+              loading={loading}
             />
           </div>
 
-          {/* Center: chat window — hidden on mobile when no chat is open */}
           <div className={`${activeId ? 'flex' : 'hidden md:flex'} flex-1 flex-col overflow-hidden`}>
-            {/* Mobile back button */}
             {activeId && (
               <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-card border-b border-gray-100 dark:border-border md:hidden">
                 <button
@@ -191,7 +225,6 @@ export function InboxClient({ initials, fullName, email, products }: Props) {
             />
           </div>
 
-          {/* Right: customer panel (desktop only) */}
           {active && (
             <div className="hidden lg:block">
               <CustomerPanel conversation={active} products={products} />

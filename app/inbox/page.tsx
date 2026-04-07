@@ -27,6 +27,7 @@ export default async function InboxPage() {
       fullName={profile?.full_name || 'Vendor'}
       email={user.email || ''}
       products={products || []}
+      userId={user.id}
     />
   )
 }

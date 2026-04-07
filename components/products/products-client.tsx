@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { DashboardActions } from '@/components/dashboard-actions'
+import { EmptyState } from '@/components/empty-state'
 import type { Product } from '@/lib/types'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.com'
@@ -94,21 +95,17 @@ export function ProductsClient({ products, initials, fullName, email }: Props) {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm text-center py-16 px-6">
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mx-auto mb-4">
-              <Package className="w-7 h-7 text-gray-400" />
-            </div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
-              {search ? 'No products match your search' : 'No products yet'}
-            </h3>
-            <p className="text-xs text-gray-400 mb-5">
-              {search ? 'Try a different keyword' : 'Add your first product to start selling'}
-            </p>
-            {!search && (
-              <Link href="/seller/new" className="inline-flex items-center gap-1.5 bg-gray-950 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-black/10">
-                <Plus className="w-3.5 h-3.5" /> Add Product
-              </Link>
-            )}
+          <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm text-center py-10 px-6">
+            <EmptyState
+              variant={search ? 'search' : 'box'}
+              title={search ? 'No products match your search' : 'No products yet'}
+              description={search ? 'Try a different keyword or clear your search' : 'Add your first product to start selling on VendoorX'}
+              action={!search ? (
+                <Link href="/seller/new" className="inline-flex items-center gap-1.5 bg-gray-950 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-black/10">
+                  <Plus className="w-3.5 h-3.5" /> Add Product
+                </Link>
+              ) : undefined}
+            />
           </div>
         ) : view === 'grid' ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

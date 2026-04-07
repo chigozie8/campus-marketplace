@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
   // Required for Supabase SSR package
   serverExternalPackages: ['@supabase/ssr'],
 

@@ -25,9 +25,10 @@ interface Props {
   filter: Platform | 'all'
   onFilterChange: (f: Platform | 'all') => void
   onSelect: (id: string) => void
+  loading?: boolean
 }
 
-export function ConversationList({ conversations, activeId, filter, onFilterChange, onSelect }: Props) {
+export function ConversationList({ conversations, activeId, filter, onFilterChange, onSelect, loading }: Props) {
   return (
     <div className="w-full md:w-72 lg:w-80 flex-shrink-0 bg-white dark:bg-card border-r border-gray-100 dark:border-border flex flex-col h-full">
       {/* Header */}
@@ -60,9 +61,22 @@ export function ConversationList({ conversations, activeId, filter, onFilterChan
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">
-        {conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 text-gray-400 text-sm">
-            <p>No conversations</p>
+        {loading ? (
+          <div className="flex flex-col gap-0">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start gap-3 px-4 py-3.5 border-b border-gray-50 dark:border-border/50">
+                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-muted animate-pulse flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-gray-100 dark:bg-muted rounded animate-pulse w-2/3" />
+                  <div className="h-2.5 bg-gray-100 dark:bg-muted rounded animate-pulse w-4/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-gray-400 text-sm gap-2">
+            <p className="font-semibold">No conversations yet</p>
+            <p className="text-xs text-gray-300 text-center px-4">Messages from WhatsApp, Instagram & Facebook will appear here</p>
           </div>
         ) : (
           conversations.map(c => (

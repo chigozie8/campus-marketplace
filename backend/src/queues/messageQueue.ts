@@ -24,8 +24,25 @@ if (redis) {
   const worker = new Worker<MessageJob>(
     'messages',
     async (job: Job<MessageJob>) => {
-      const { from, text } = job.data
+      const { from, text, platform = 'whatsapp' } = job.data
       logger.info(`[messageQueue] Processing message from ${from}: "${text}"`)
+
+      // Write to Supabase conversations for real-time inbox
+      try {
+        const { upsertConversation, addMessage, incrementUnread } = await import('../services/conversationService.js')
+        const convId = await upsertConversation({
+          platform,
+          externalId: from,
+          customerPhone: platform === 'whatsapp' ? from : undefined,
+          customerName: from,
+        })
+        if (convId) {
+          await addMessage({ conversationId: convId, direction: 'incoming', content: text, platform })
+          await incrementUnread(convId)
+        }
+      } catch (err) {
+        logger.error('[messageQueue] Failed to persist conversation:', err)
+      }
 
       const { handleIncomingMessage } = await import('../bots/messageHandler.js')
       await handleIncomingMessage(from, text)

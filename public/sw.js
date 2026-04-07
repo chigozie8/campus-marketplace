@@ -1,8 +1,7 @@
-// VendoorX Service Worker — Network-first, offline fallback only
-const CACHE_VERSION = 'v5'
+// VendoorX Service Worker — Network-first, offline fallback + Web Push
+const CACHE_VERSION = 'v6'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 
-// Pages to pre-cache for offline fallback only
 const OFFLINE_PAGES = ['/offline']
 
 // ── Install: only cache the offline fallback page ─────────────────────────────
@@ -21,7 +20,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-// ── Activate: delete all old caches, then force-reload every open tab ────────
+// ── Activate: delete all old caches ───────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
@@ -31,7 +30,6 @@ self.addEventListener('activate', (event) => {
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: 'window' }))
       .then((clients) => {
-        // Force every open tab to reload so stale JS chunks are replaced immediately
         clients.forEach((client) => client.navigate(client.url))
       })
   )
@@ -42,19 +40,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Only handle GET requests
   if (request.method !== 'GET') return
-
-  // Skip cross-origin requests (Supabase, CDN, etc.)
   if (url.origin !== self.location.origin) return
-
-  // Skip API routes — always network only
   if (url.pathname.startsWith('/api/')) return
-
-  // Skip Next.js internal routes
   if (url.pathname.startsWith('/_next/') && !request.mode === 'navigate') return
 
-  // Navigation requests: network-first, offline page as fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(async () => {
@@ -67,6 +57,49 @@ self.addEventListener('fetch', (event) => {
     )
     return
   }
+})
+
+// ── Web Push Notifications ────────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  if (!event.data) return
+
+  let data = {}
+  try {
+    data = event.data.json()
+  } catch {
+    data = { title: 'VendoorX', body: event.data.text() }
+  }
+
+  const {
+    title = 'VendoorX',
+    body = 'You have a new notification',
+    icon = '/icon-192.png',
+    badge = '/icon-192.png',
+    url = '/',
+  } = data
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon,
+      badge,
+      data: { url },
+      vibrate: [100, 50, 100],
+      requireInteraction: false,
+    })
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = event.notification.data?.url || '/'
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      const existing = clients.find((c) => c.url === url && 'focus' in c)
+      if (existing) return existing.focus()
+      return self.clients.openWindow(url)
+    })
+  )
 })
 
 // ── Messages ──────────────────────────────────────────────────────────────────
