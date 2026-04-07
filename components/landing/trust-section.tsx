@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, RotateCcw, BadgeCheck, Landmark, Eye, Users, Headphones } from 'lucide-react'
+import { Shield, Lock, RotateCcw, BadgeCheck, Landmark, Eye, Users, Headphones, Phone, MessageCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 const TRUST_PILLARS = [
@@ -236,19 +236,41 @@ export function TrustSection() {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="text-center flex flex-col sm:flex-row items-center justify-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
-            <Eye className="w-4 h-4" />
-            <span>Questions about our safety systems?</span>
+        {/* Support + CTA */}
+        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
+            <div className="text-center sm:text-left">
+              <p className="font-black text-gray-950 dark:text-white text-lg">Need help or have a question?</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Our Nigerian support team is available Mon–Sat 8am–10pm WAT.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+              <a
+                href="tel:07082039250"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/25"
+              >
+                <Phone className="w-4 h-4" />
+                07082039250
+              </a>
+              <a
+                href="https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white text-sm font-bold transition-all hover:scale-105 active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+              <Link
+                href="/trust"
+                className="flex items-center gap-1.5 text-sm font-bold text-emerald-700 dark:text-emerald-400 hover:underline underline-offset-4"
+              >
+                Full Safety Guide
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
-          <Link
-            href="/help"
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline underline-offset-4"
-          >
-            Read the Safety FAQ
-            <Users className="w-3.5 h-3.5" />
-          </Link>
         </div>
 
       </div>

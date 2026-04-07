@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, MapPin, ShoppingCart, CreditCard, CheckCircle2 } from 'lucide-react'
+import { Loader2, MapPin, ShoppingCart, CreditCard, CheckCircle2, Shield, Lock, Phone } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -178,20 +178,42 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
               <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
               <span>{address}</span>
             </div>
+            {/* Escrow protection badge */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+              <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Escrow Protected — Your Money Is Safe</p>
+                <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 leading-relaxed">
+                  Payment goes to VendoorX escrow — not the seller. Released only after you confirm delivery.
+                  Full refund if anything goes wrong.
+                </p>
+              </div>
+            </div>
+
             <Button
               onClick={handlePay}
               disabled={initPayment.isPending}
-              className="w-full h-11 rounded-xl font-bold text-sm gap-2"
+              className="w-full h-11 rounded-xl font-bold text-sm gap-2 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/25"
             >
-              <CreditCard className="w-4 h-4" />
-              Pay ₦{total.toLocaleString()} with Paystack
+              <Lock className="w-4 h-4" />
+              Pay Securely ₦{total.toLocaleString()} via Paystack
             </Button>
-            <button
-              onClick={() => setStep('address')}
-              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Edit address
-            </button>
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setStep('address')}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Edit address
+              </button>
+              <a
+                href="tel:07082039250"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Phone className="w-3 h-3" />
+                07082039250
+              </a>
+            </div>
           </div>
         )}
 

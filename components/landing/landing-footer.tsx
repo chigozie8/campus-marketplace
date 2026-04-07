@@ -12,6 +12,7 @@ const LINKS = {
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
   ],
   Legal: [
+    { label: 'Trust & Safety',      href: '/trust',            icon: ShieldCheck },
     { label: 'Privacy Policy',      href: '/privacy',          icon: ShieldCheck },
     { label: 'Terms of Service',    href: '/terms',            icon: BookOpen },
     { label: 'Cookie Policy',       href: '/cookies',          icon: BookOpen },

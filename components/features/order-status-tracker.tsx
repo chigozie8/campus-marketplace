@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Clock, Package, Truck, Star, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Package, Truck, Star, XCircle, Shield, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { OrderStatus } from '@/lib/api'
 
@@ -105,6 +105,25 @@ export function OrderStatusTracker({ status, compact = false }: OrderStatusTrack
           )
         })}
       </div>
+
+      {/* Escrow status note */}
+      {(status === 'paid' || status === 'shipped') && (
+        <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+          <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
+            <span className="font-bold">Your money is safe in escrow.</span> Funds are held by VendoorX and will only be released to the seller after you confirm delivery. If anything goes wrong, you get a full refund.
+          </p>
+        </div>
+      )}
+
+      {status === 'delivered' && (
+        <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+          <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+            <span className="font-bold">Item delivered.</span> Escrow will auto-release to the seller in 48 hours if no dispute is raised. Happy with your order? Confirm delivery to release payment now.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

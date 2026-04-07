@@ -144,13 +144,31 @@ export default function HelpPage() {
         <div className="max-w-2xl mx-auto text-center">
           <Star className="w-10 h-10 text-primary mx-auto mb-4" />
           <h2 className="text-2xl font-black text-foreground mb-3">Still need help?</h2>
-          <p className="text-muted-foreground mb-8">Our support team is online Monday–Saturday, 8am–10pm. We typically respond within 2 hours.</p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] shadow-lg shadow-primary/25"
-          >
-            Contact Support <ArrowRight className="w-4 h-4" />
-          </Link>
+          <p className="text-muted-foreground mb-8">
+            Our Nigerian support team is available Mon–Sat 8am–10pm WAT. We typically respond within 2 hours.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="tel:07082039250"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-emerald-500/25"
+            >
+              📞 Call 07082039250
+            </a>
+            <a
+              href="https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with..."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-green-500/25"
+            >
+              💬 WhatsApp Us
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-border bg-background hover:bg-muted text-foreground font-bold text-sm transition-all hover:scale-[1.02]"
+            >
+              Email Support <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -160,12 +160,34 @@ export default function RefundPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-muted/30 p-5 flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <p className="text-sm text-muted-foreground">Need to raise a dispute or have a refund question?</p>
-            <div className="flex gap-4">
-              <Link href="/contact" className="text-sm font-semibold text-primary hover:underline">Contact Support</Link>
-              <Link href="/help" className="text-sm font-semibold text-primary hover:underline">Help Center</Link>
+          <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 p-6">
+            <h2 className="text-lg font-black text-foreground mb-1">Need to raise a dispute or request a refund?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              Our Nigerian support team is ready to help. We respond within 2 hours during business hours.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="tel:07082039250"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/25"
+              >
+                📞 Call 07082039250
+              </a>
+              <a
+                href="https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20want%20to%20request%20a%20refund%20for%20my%20order..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm transition-all hover:scale-105 active:scale-95"
+              >
+                💬 WhatsApp Support
+              </a>
+              <Link
+                href="/contact"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-border bg-background hover:bg-muted text-foreground font-bold text-sm transition-all hover:scale-105 active:scale-95"
+              >
+                Email Support
+              </Link>
             </div>
+            <p className="text-[11px] text-muted-foreground mt-4">Mon – Sat: 8am – 10pm WAT · Sunday: 10am – 6pm WAT</p>
           </div>
         </div>
       </section>

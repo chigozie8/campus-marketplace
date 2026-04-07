@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, MessageCircle, Mail, MapPin, Clock, CheckCircle2, Send } from 'lucide-react'
+import { ArrowRight, MessageCircle, Mail, MapPin, Clock, CheckCircle2, Send, Phone, Shield } from 'lucide-react'
 
 const SUBJECTS = [
   'General Enquiry',
@@ -15,19 +15,29 @@ const SUBJECTS = [
 
 const CONTACT_CARDS = [
   {
+    icon: Phone,
+    title: 'Call Us',
+    desc: 'Speak directly with our Nigerian support team. Fastest resolution for urgent issues.',
+    cta: 'Call 07082039250',
+    href: 'tel:07082039250',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+    border: 'border-emerald-200 dark:border-emerald-900/40',
+  },
+  {
     icon: MessageCircle,
     title: 'WhatsApp Support',
-    desc: 'Get fastest responses via WhatsApp during business hours.',
+    desc: 'Fast responses via WhatsApp. Share screenshots and details easily.',
     cta: 'Chat Now',
-    href: 'https://wa.me/2348000000000?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
-    color: '#25D366',
+    href: 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
+    color: 'text-green-600',
     bg: 'bg-green-50 dark:bg-green-950/30',
     border: 'border-green-200 dark:border-green-900/40',
   },
   {
     icon: Mail,
     title: 'Email Support',
-    desc: 'For detailed issues requiring documentation or attachments.',
+    desc: 'For detailed issues, refund requests, or partnership enquiries.',
     cta: 'Send Email',
     href: 'mailto:support@vendoorx.com',
     color: 'text-blue-500',
@@ -36,7 +46,7 @@ const CONTACT_CARDS = [
   },
   {
     icon: Clock,
-    title: 'Response Time',
+    title: 'Hours',
     desc: 'Mon – Sat: 8am – 10pm WAT\nSunday: 10am – 6pm WAT',
     bg: 'bg-amber-50 dark:bg-amber-950/30',
     border: 'border-amber-200 dark:border-amber-900/40',
@@ -77,7 +87,7 @@ export default function ContactPage() {
 
       {/* Contact cards */}
       <section className="py-12 px-4 border-b border-border">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {CONTACT_CARDS.map(({ icon: Icon, title, desc, cta, href, bg, border, color }) => (
             <div key={title} className={`rounded-2xl border-2 ${border} ${bg} p-5 flex flex-col gap-3`}>
               <div className="w-10 h-10 rounded-xl bg-white dark:bg-card flex items-center justify-center shadow-sm">
