@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
   Share2, ChevronRight, TrendingUp, AlertTriangle,
@@ -34,7 +34,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data } = await supabase
     ?.from('blog_posts')
     .select('title, excerpt, cover_image, seo_title, seo_description, published_at, tags, blog_categories(name)')
@@ -74,7 +74,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const [postResult, relatedResult] = await Promise.all([
     supabase?.from('blog_posts')
@@ -114,17 +114,14 @@ export default async function BlogPostPage({
 
   if (!post) notFound()
 
-  const { data: { user } } = await (supabase?.auth.getUser() ?? Promise.resolve({ data: { user: null } }))
-
   // Fetch author profile separately — blog_posts.author_id references auth.users,
   // not profiles, so PostgREST cannot resolve the join automatically.
   const { data: authorProfile } = post.author_id
     ? await (supabase?.from('profiles').select('full_name, avatar_url').eq('id', post.author_id).single() ?? Promise.resolve({ data: null }))
     : Promise.resolve({ data: null })
 
-  const { data: userLike } = user
-    ? await (supabase?.from('blog_likes').select('id').eq('post_id', post.id).eq('user_id', user.id).single() ?? { data: null })
-    : { data: null }
+  // User session and like state are resolved client-side in BlogPostClient
+  // to keep this route cacheable with ISR (no cookies() call in the server render).
 
   // Fetch comments without embedded profiles join — same FK issue as above.
   const { data: rawComments } = await (supabase?.from('blog_comments')
@@ -291,8 +288,6 @@ export default async function BlogPostPage({
               {/* Rendered content + interactions */}
               <BlogPostClient
                 post={{ id: post.id, slug: post.slug, title: post.title, content: post.content, likeCount, commentCount }}
-                initialLiked={!!userLike}
-                user={user ? { id: user.id, email: user.email! } : null}
                 comments={commentsData ?? []}
               />
 

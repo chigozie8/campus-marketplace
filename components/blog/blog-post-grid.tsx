@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import {
   BookOpen, Clock, Eye, Heart, ArrowRight,
   Search, ChevronLeft, ChevronRight, MessageSquare,
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   let catId: string | null = null
   if (catFilter) {

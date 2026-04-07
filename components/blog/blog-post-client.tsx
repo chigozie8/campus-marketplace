@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import { Heart, MessageSquare, Send, Reply, Check, Link2, ChevronDown, ChevronUp } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 type Comment = {
   id: string
@@ -26,8 +27,6 @@ type Post = {
 
 type Props = {
   post: Post
-  initialLiked: boolean
-  user: { id: string; email: string } | null
   comments: Comment[]
 }
 
@@ -87,8 +86,9 @@ function CommentItem({
   )
 }
 
-export function BlogPostClient({ post, initialLiked, user, comments: initComments }: Props) {
-  const [liked, setLiked] = useState(initialLiked)
+export function BlogPostClient({ post, comments: initComments }: Props) {
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null)
+  const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [liking, setLiking] = useState(false)
   const [comments, setComments] = useState<Comment[]>(initComments)
@@ -102,6 +102,24 @@ export function BlogPostClient({ post, initialLiked, user, comments: initComment
   const commentRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
+    const supabase = createClient()
+
+    async function loadSession() {
+      const { data: { user: sessionUser } } = await supabase.auth.getUser()
+      if (!sessionUser) return
+      setUser({ id: sessionUser.id, email: sessionUser.email ?? '' })
+
+      const { data: likeRow } = await supabase
+        .from('blog_likes')
+        .select('id')
+        .eq('post_id', post.id)
+        .eq('user_id', sessionUser.id)
+        .single()
+      if (likeRow) setLiked(true)
+    }
+
+    loadSession()
+
     fetch('/api/blog/views', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

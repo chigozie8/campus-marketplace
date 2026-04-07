@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import {
   BookOpen, Clock, Eye, ArrowRight, TrendingUp,
   Flame, Calendar, Tag, Search, Rss,
@@ -46,7 +46,7 @@ export default async function BlogPage({
   const { category: catFilter, page: pageParam, q: searchQuery } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1', 10))
 
-  const supabase = await createClient()
+  const supabase = createPublicClient()
 
   const SELECT_COLS = `id, title, slug, excerpt, cover_image, read_time, published_at, views, tags,
     blog_categories(name, slug),
