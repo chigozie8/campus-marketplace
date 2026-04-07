@@ -54,7 +54,6 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
   }
 
   return (
-    <LazyMotion features={domAnimation}>
     <m.div
       layout
       className="rounded-2xl border border-border/60 bg-card overflow-hidden"
@@ -193,7 +192,6 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
         )}
       </AnimatePresence>
     </m.div>
-    </LazyMotion>
   )
 }
 
@@ -288,17 +286,19 @@ export default function OrdersPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
-            {orders.map(order => (
-              <OrderCard key={order.id} order={order} onRefund={handleRefund} />
-            ))}
+          <LazyMotion features={domAnimation}>
+            <div className="space-y-3">
+              {orders.map(order => (
+                <OrderCard key={order.id} order={order} onRefund={handleRefund} />
+              ))}
 
-            {data && data.meta.totalPages > 1 && (
-              <p className="text-center text-xs text-muted-foreground pt-2">
-                Page {data.meta.page} of {data.meta.totalPages}
-              </p>
-            )}
-          </div>
+              {data && data.meta.totalPages > 1 && (
+                <p className="text-center text-xs text-muted-foreground pt-2">
+                  Page {data.meta.page} of {data.meta.totalPages}
+                </p>
+              )}
+            </div>
+          </LazyMotion>
         )}
       </div>
     </div>
