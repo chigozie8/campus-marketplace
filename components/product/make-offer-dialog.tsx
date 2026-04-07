@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { Tag, Loader2, X, Send, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -72,17 +72,18 @@ export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerI
         Make an Offer
       </Button>
 
+      <LazyMotion features={domAnimation}>
       <AnimatePresence>
         {open && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={handleClose}
             />
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -166,10 +167,11 @@ export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerI
                   </form>
                 </>
               )}
-            </motion.div>
+            </m.div>
           </div>
         )}
       </AnimatePresence>
+      </LazyMotion>
     </>
   )
 }

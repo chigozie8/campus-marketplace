@@ -7,7 +7,7 @@ import { useMyOrders } from '@/hooks/use-orders'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
 import type { BackendOrder } from '@/lib/api'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
@@ -54,7 +54,8 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
   }
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation}>
+    <m.div
       layout
       className="rounded-2xl border border-border/60 bg-card overflow-hidden"
     >
@@ -107,7 +108,7 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
 
       <AnimatePresence>
         {expanded && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -188,10 +189,11 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   )
 }
 

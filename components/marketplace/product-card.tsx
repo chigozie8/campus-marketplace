@@ -6,7 +6,7 @@ import { Heart, MessageCircle, MapPin, Star, BadgeCheck, GraduationCap } from 'l
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { m, LazyMotion, domAnimation } from 'framer-motion'
 
 interface ProductCardProps {
   product: Product
@@ -46,7 +46,8 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     : 0
 
   return (
-    <motion.div
+    <LazyMotion features={domAnimation}>
+    <m.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
@@ -79,7 +80,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
         </div>
 
         {/* Favourite button */}
-        <motion.button
+        <m.button
           whileTap={{ scale: 0.85 }}
           onClick={() => onToggleFavorite?.(product.id)}
           className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-sm"
@@ -91,7 +92,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
               isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
             )}
           />
-        </motion.button>
+        </m.button>
 
         {/* WhatsApp hover overlay */}
         <div className="absolute inset-0 bg-[#25D366]/0 group-hover:bg-[#25D366]/10 transition-colors duration-300 pointer-events-none" />
@@ -140,7 +141,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
         </div>
 
         {/* WhatsApp CTA */}
-        <motion.a
+        <m.a
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -150,8 +151,9 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
         >
           <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span className="hidden xs:inline">Chat on </span>WhatsApp
-        </motion.a>
+        </m.a>
       </div>
-    </motion.div>
+    </m.div>
+    </LazyMotion>
   )
 }

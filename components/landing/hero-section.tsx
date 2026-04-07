@@ -154,6 +154,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
                   alt={alt}
                   width={40}
                   height={40}
+                  priority
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement

@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { BlogPostClient } from '@/components/blog/blog-post-client'
 
+export const revalidate = 300
+
 const CAT_STYLES: Record<string, string> = {
   'seller-tips':      'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
   'platform-updates': 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',

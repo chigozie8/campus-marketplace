@@ -458,6 +458,38 @@ export function NotificationsSkeleton() {
   )
 }
 
+export function BlogPostGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
+          <Skeleton className="aspect-[16/10] w-full rounded-none" />
+          <div className="p-4 sm:p-5 space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-5/6" />
+            <div className="flex gap-1 mt-1">
+              <Skeleton className="h-5 w-12 rounded" />
+              <Skeleton className="h-5 w-14 rounded" />
+            </div>
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <div className="flex gap-3">
+                <Skeleton className="h-3 w-8" />
+                <Skeleton className="h-3 w-8" />
+              </div>
+              <div className="flex gap-3">
+                <Skeleton className="h-3 w-6" />
+                <Skeleton className="h-3 w-6" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function AssistantSkeleton() {
   return (
     <div className="flex flex-col h-[100dvh] bg-white dark:bg-background overflow-hidden">
