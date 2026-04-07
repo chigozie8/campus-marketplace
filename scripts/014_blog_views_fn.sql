@@ -14,6 +14,7 @@ CREATE OR REPLACE FUNCTION public.increment_blog_views(post_id uuid)
 RETURNS void
 LANGUAGE sql
 SECURITY DEFINER
+SET search_path = public
 AS $$
   UPDATE public.blog_posts
   SET views = views + 1
