@@ -9,7 +9,7 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { CookieConsent } from '@/components/cookie-consent'
-import { CrispChat } from '@/components/crisp-chat'
+import { TawkToChat } from '@/components/tawkto-chat'
 import { PushNotificationPrompt } from '@/components/push-notification-prompt'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
@@ -346,7 +346,7 @@ export default function RootLayout({
             <ServiceWorkerRegistration />
             <PwaInstallPrompt />
             <PushNotificationPrompt />
-            <CrispChat />
+            <TawkToChat />
             <CookieConsent />
             <Toaster richColors position="top-right" />
             {process.env.NODE_ENV === 'production' && <Analytics />}
