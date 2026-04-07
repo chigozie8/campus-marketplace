@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { MessageCircle, X, Send, Bot, User, Minimize2, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +57,7 @@ function now() {
 }
 
 export function ChatWidget() {
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -148,6 +150,8 @@ export function ChatWidget() {
       ),
     )
   }
+
+  if (pathname.startsWith('/dashboard')) return null
 
   return (
     <>

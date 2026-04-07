@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Phone, MessageCircle, X, Headphones } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const HIDDEN_PREFIXES = ['/dashboard', '/profile']
+const DASHBOARD_ONLY = '/dashboard'
 
 const SUPPORT_PHONE = '07082039250'
 const SUPPORT_WHATSAPP = 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...'
@@ -15,15 +15,15 @@ export function FloatingSupport() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
 
-  const isHidden = HIDDEN_PREFIXES.some(prefix => pathname.startsWith(prefix))
+  const isOnDashboard = pathname.startsWith(DASHBOARD_ONLY)
 
   useEffect(() => {
-    if (isHidden) return
-    const timer = setTimeout(() => setVisible(true), 3000)
+    if (!isOnDashboard) return
+    const timer = setTimeout(() => setVisible(true), 1500)
     return () => clearTimeout(timer)
-  }, [isHidden])
+  }, [isOnDashboard])
 
-  if (!visible || isHidden) return null
+  if (!visible || !isOnDashboard) return null
 
   return (
     <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-2">
