@@ -170,7 +170,10 @@ export function LandingNav({ user }: LandingNavProps) {
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label="Toggle menu"
               >
-                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                <span className="relative block w-5 h-5">
+                  <Menu className={`absolute inset-0 w-5 h-5 transition-all duration-300 ease-in-out ${menuOpen ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'}`} />
+                  <X className={`absolute inset-0 w-5 h-5 transition-all duration-300 ease-in-out ${menuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
+                </span>
               </button>
             </div>
           </div>
@@ -182,12 +185,12 @@ export function LandingNav({ user }: LandingNavProps) {
         <div className="fixed inset-0 z-[60] lg:hidden">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setMenuOpen(false)}
           />
 
           {/* Drawer panel */}
-          <div className="absolute top-0 right-0 bottom-0 w-[300px] sm:w-[340px] bg-white dark:bg-gray-950 shadow-2xl flex flex-col overflow-hidden">
+          <div className="absolute top-0 right-0 bottom-0 w-[300px] sm:w-[340px] bg-white dark:bg-gray-950 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 ease-out">
 
             {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-5 border-b border-gray-100 dark:border-gray-800">
