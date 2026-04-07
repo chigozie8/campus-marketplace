@@ -91,6 +91,7 @@ export function BlogPostClient({ post, comments: initComments }: Props) {
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [liking, setLiking] = useState(false)
+  const [sessionLoading, setSessionLoading] = useState(true)
   const [comments, setComments] = useState<Comment[]>(initComments)
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null)
   const [showComments, setShowComments] = useState(true)
@@ -105,17 +106,21 @@ export function BlogPostClient({ post, comments: initComments }: Props) {
     const supabase = createClient()
 
     async function loadSession() {
-      const { data: { user: sessionUser } } = await supabase.auth.getUser()
-      if (!sessionUser) return
-      setUser({ id: sessionUser.id, email: sessionUser.email ?? '' })
+      try {
+        const { data: { user: sessionUser } } = await supabase.auth.getUser()
+        if (!sessionUser) return
+        setUser({ id: sessionUser.id, email: sessionUser.email ?? '' })
 
-      const { data: likeRow } = await supabase
-        .from('blog_likes')
-        .select('id')
-        .eq('post_id', post.id)
-        .eq('user_id', sessionUser.id)
-        .single()
-      if (likeRow) setLiked(true)
+        const { data: likeRow } = await supabase
+          .from('blog_likes')
+          .select('id')
+          .eq('post_id', post.id)
+          .eq('user_id', sessionUser.id)
+          .single()
+        if (likeRow) setLiked(true)
+      } finally {
+        setSessionLoading(false)
+      }
     }
 
     loadSession()
@@ -220,13 +225,13 @@ export function BlogPostClient({ post, comments: initComments }: Props) {
         <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-background/95 backdrop-blur border border-border shadow-2xl pointer-events-auto">
           <button
             onClick={toggleLike}
-            disabled={!user || liking}
-            title={!user ? 'Sign in to like' : liked ? 'Unlike' : 'Like'}
+            disabled={sessionLoading || !user || liking}
+            title={sessionLoading ? 'Loading…' : !user ? 'Sign in to like' : liked ? 'Unlike' : 'Like'}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 ${
               liked
                 ? 'bg-red-50 dark:bg-red-950/30 text-red-500 border border-red-200 dark:border-red-900/40'
                 : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
-            } ${!user ? 'opacity-60 cursor-not-allowed' : ''}`}
+            } ${sessionLoading ? 'animate-pulse' : !user ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <Heart className={`w-4 h-4 transition-all ${liked ? 'fill-red-500 scale-110' : ''}`} />
             {likeCount}
