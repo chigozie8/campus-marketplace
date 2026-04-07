@@ -76,8 +76,7 @@ export default async function BlogPostPage({
 
   const [postResult, relatedResult] = await Promise.all([
     supabase?.from('blog_posts')
-      .select(`*, blog_categories(name, slug, color), profiles(full_name, avatar_url),
-        blog_likes(count), blog_comments(count)`)
+      .select(`*, blog_categories(name, slug, color), blog_likes(count), blog_comments(count)`)
       .eq('slug', slug)
       .single() ?? Promise.resolve({ data: null, error: null }),
     supabase?.from('blog_posts')
@@ -115,18 +114,43 @@ export default async function BlogPostPage({
 
   const { data: { user } } = await (supabase?.auth.getUser() ?? Promise.resolve({ data: { user: null } }))
 
+  // Fetch author profile separately — blog_posts.author_id references auth.users,
+  // not profiles, so PostgREST cannot resolve the join automatically.
+  const { data: authorProfile } = post.author_id
+    ? await (supabase?.from('profiles').select('full_name, avatar_url').eq('id', post.author_id).single() ?? Promise.resolve({ data: null }))
+    : Promise.resolve({ data: null })
+
   const { data: userLike } = user
     ? await (supabase?.from('blog_likes').select('id').eq('post_id', post.id).eq('user_id', user.id).single() ?? { data: null })
     : { data: null }
 
-  const { data: commentsData } = await (supabase?.from('blog_comments')
-    .select('*, profiles(full_name, avatar_url)')
+  // Fetch comments without embedded profiles join — same FK issue as above.
+  const { data: rawComments } = await (supabase?.from('blog_comments')
+    .select('*')
     .eq('post_id', post.id)
     .eq('is_approved', true)
     .order('created_at', { ascending: true }) ?? { data: [] })
 
+  // Batch-fetch profiles for all commenters in one round-trip.
+  const commenterIds = [...new Set(
+    (rawComments ?? [])
+      .map((c: { user_id: string | null }) => c.user_id)
+      .filter((id): id is string => !!id)
+  )]
+  const { data: commenterProfiles } = commenterIds.length > 0
+    ? await (supabase?.from('profiles').select('id, full_name, avatar_url').in('id', commenterIds) ?? Promise.resolve({ data: [] }))
+    : Promise.resolve({ data: [] })
+
+  const profileMap = Object.fromEntries(
+    (commenterProfiles ?? []).map((p: { id: string; full_name: string | null; avatar_url: string | null }) => [p.id, p])
+  )
+  const commentsData = (rawComments ?? []).map((c: { user_id: string | null; [key: string]: unknown }) => ({
+    ...c,
+    profiles: c.user_id ? (profileMap[c.user_id] ?? null) : null,
+  }))
+
   const cat = post.blog_categories as { name: string; slug: string } | null
-  const author = post.profiles as { full_name: string | null; avatar_url: string | null } | null
+  const author = authorProfile as { full_name: string | null; avatar_url: string | null } | null
   const likeCount = (post.blog_likes as { count: number }[])?.[0]?.count ?? 0
   const commentCount = (post.blog_comments as { count: number }[])?.[0]?.count ?? 0
 
