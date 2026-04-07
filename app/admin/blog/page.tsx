@@ -139,10 +139,10 @@ export default async function AdminBlogPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 justify-end">
                           <Link
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
+                            href={post.status === 'published' ? `/blog/${post.slug}` : `/admin/blog/${post.id}/preview`}
+                            target={post.status === 'published' ? '_blank' : undefined}
                             className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                            title="View post"
+                            title={post.status === 'published' ? 'View live post' : 'Preview draft'}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </Link>
