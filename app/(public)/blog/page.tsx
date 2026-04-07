@@ -65,6 +65,16 @@ export default async function BlogPage({
       .limit(5) ?? { data: [] },
   ])
 
+  let catId: string | null = null
+  if (catFilter && supabase) {
+    const { data: catRow } = await supabase
+      .from('blog_categories')
+      .select('id')
+      .eq('slug', catFilter)
+      .single()
+    catId = catRow?.id ?? null
+  }
+
   let query = supabase
     ?.from('blog_posts')
     .select(SELECT_COLS, { count: 'exact' })
@@ -72,7 +82,7 @@ export default async function BlogPage({
     .order('published_at', { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
 
-  if (catFilter) query = query?.eq('blog_categories.slug', catFilter)
+  if (catId) query = query?.eq('category_id', catId)
   if (searchQuery) query = query?.ilike('title', `%${searchQuery}%`)
 
   const { data: posts = [], count = 0 } = await (query ?? Promise.resolve({ data: [], count: 0 }))

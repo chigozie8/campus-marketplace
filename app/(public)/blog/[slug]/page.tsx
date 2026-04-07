@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
   Share2, ChevronRight, TrendingUp, AlertTriangle,
+  ServerCrash,
 } from 'lucide-react'
 import { BlogPostClient } from '@/components/blog/blog-post-client'
 
@@ -38,16 +39,16 @@ export async function generateMetadata({
     .eq('slug', slug)
     .single() ?? { data: null }
 
-  if (!data) return { title: 'Article Not Found | VendoorX Blog' }
+  if (!data) return { title: 'Article Not Found | VendorX Blog' }
 
   const title = data.seo_title ?? data.title
-  const description = data.seo_description ?? data.excerpt ?? 'Read this article on the VendoorX blog.'
+  const description = data.seo_description ?? data.excerpt ?? 'Read this article on the VendorX blog.'
   const cat = (data.blog_categories as { name: string } | null)?.name
 
   return {
-    title: `${title} | VendoorX Blog`,
+    title: `${title} | VendorX Blog`,
     description,
-    keywords: [...(data.tags ?? []), 'VendoorX', 'campus marketplace', 'Nigeria', cat].filter(Boolean).join(', '),
+    keywords: [...(data.tags ?? []), 'VendorX', 'campus marketplace', 'Nigeria', cat].filter(Boolean).join(', '),
     openGraph: {
       title: data.title,
       description: description,
@@ -73,19 +74,42 @@ export default async function BlogPostPage({
   const { slug } = await params
   const supabase = await createClient()
 
-  const [{ data: post }, { data: related }] = await Promise.all([
+  const [postResult, relatedResult] = await Promise.all([
     supabase?.from('blog_posts')
       .select(`*, blog_categories(name, slug, color), profiles(full_name, avatar_url),
         blog_likes(count), blog_comments(count)`)
       .eq('slug', slug)
-      .single() ?? { data: null },
+      .single() ?? Promise.resolve({ data: null, error: null }),
     supabase?.from('blog_posts')
       .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
       .eq('status', 'published')
       .neq('slug', slug)
       .order('published_at', { ascending: false })
-      .limit(3) ?? { data: [] },
+      .limit(3) ?? Promise.resolve({ data: [], error: null }),
   ])
+
+  const { data: post, error: postError } = postResult ?? { data: null, error: null }
+  const { data: related } = relatedResult ?? { data: [] }
+
+  if (postError && postError.code !== 'PGRST116') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <ServerCrash className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+          <h1 className="text-xl font-black text-foreground mb-2">Something went wrong</h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            We couldn&apos;t load this article right now. Please try again in a moment.
+          </p>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Blog
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   if (!post) notFound()
 
@@ -114,13 +138,13 @@ export default async function BlogPostPage({
     image: post.cover_image ?? '',
     datePublished: post.published_at ?? '',
     dateModified: post.updated_at ?? post.published_at ?? '',
-    author: { '@type': 'Person', name: author?.full_name ?? 'VendoorX Team' },
+    author: { '@type': 'Person', name: author?.full_name ?? 'VendorX Team' },
     publisher: {
       '@type': 'Organization',
-      name: 'VendoorX',
-      logo: { '@type': 'ImageObject', url: 'https://vendoorx.com/logo.png' },
+      name: 'VendorX',
+      logo: { '@type': 'ImageObject', url: 'https://vendorx.com/logo.png' },
     },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendoorx.com/blog/${slug}` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendorx.com/blog/${slug}` },
     keywords: (post.tags ?? []).join(', '),
   }
 
@@ -228,8 +252,8 @@ export default async function BlogPostPage({
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">{author?.full_name ?? 'VendoorX Team'}</p>
-                  <p className="text-xs text-muted-foreground">Published on VendoorX Blog</p>
+                  <p className="text-sm font-bold text-foreground">{author?.full_name ?? 'VendorX Team'}</p>
+                  <p className="text-xs text-muted-foreground">Published on VendorX Blog</p>
                 </div>
                 <div className="ml-auto">
                   <Link href="/blog" className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
@@ -271,9 +295,9 @@ export default async function BlogPostPage({
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Written by</p>
-                  <p className="text-base font-black text-foreground">{author?.full_name ?? 'VendoorX Team'}</p>
+                  <p className="text-base font-black text-foreground">{author?.full_name ?? 'VendorX Team'}</p>
                   <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Helping Nigerian students buy and sell smarter on campus. Follow us on WhatsApp, Instagram & TikTok @VendoorX.
+                    Helping Nigerian students buy and sell smarter on campus. Follow us on WhatsApp, Instagram & TikTok @VendorX.
                   </p>
                 </div>
               </div>
@@ -290,7 +314,7 @@ export default async function BlogPostPage({
                 </div>
                 <div className="flex flex-col gap-2">
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-sm font-semibold transition-colors"
                   >
@@ -298,7 +322,7 @@ export default async function BlogPostPage({
                     WhatsApp
                   </a>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold transition-colors"
                   >
@@ -306,7 +330,7 @@ export default async function BlogPostPage({
                     Twitter / X
                   </a>
                   <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendorx.com/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] text-sm font-semibold transition-colors"
                   >
