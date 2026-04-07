@@ -11,7 +11,7 @@ import { ProductJsonLd } from '@/components/seo/product-jsonld'
 import { ProductInteractions } from '@/components/product/product-interactions'
 import { ShareButton } from '@/components/product/share-button'
 import { ProductGallery } from '@/components/product/product-gallery'
-import { ReviewsSection } from '@/components/reviews-section'
+import { ReviewsSection } from '@/components/marketplace/reviews-section'
 import { MakeOfferDialog } from '@/components/product/make-offer-dialog'
 import { ReportDialog } from '@/components/product/report-dialog'
 import { ProductBuyButton } from '@/components/features/product-buy-button'
@@ -71,15 +71,21 @@ export default async function ProductDetailPage({ params }: Props) {
   const supabase = await createClient()
   if (!supabase) notFound()
 
-  const [{ data: product, error }, sessionResult] = await Promise.all([
+  const [{ data: product, error }, sessionResult, { data: reviewsData }] = await Promise.all([
     supabase.from('products').select('*, profiles(*), categories(*)').eq('id', id).single(),
     supabase.auth.getUser(),
+    supabase
+      .from('reviews')
+      .select('*, profiles!reviews_reviewer_id_fkey(full_name)')
+      .eq('product_id', id)
+      .order('created_at', { ascending: false }),
   ])
 
   if (error || !product) notFound()
 
   const p = product as Product
   const userId = sessionResult.data.user?.id ?? null
+  const initialReviews = (reviewsData ?? []) as import('@/lib/types').Review[]
 
   // Get likes count and whether the current user liked it
   const { count: likesCount } = await supabase
@@ -293,7 +299,12 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {/* Reviews section — full width below the grid */}
           <div className="mt-10 max-w-2xl">
-            <ReviewsSection productId={p.id} sellerId={p.seller_id} />
+            <ReviewsSection
+              productId={p.id}
+              sellerId={p.seller_id}
+              initialReviews={initialReviews}
+              currentUserId={userId}
+            />
           </div>
         </main>
       </div>

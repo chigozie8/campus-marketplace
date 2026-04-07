@@ -43,19 +43,19 @@ export async function POST(req: Request) {
       status: 'pending',
     })
 
-    if (insertError && !insertError.message.includes('does not exist')) {
+    if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
     const buyerName = buyerProfile?.full_name || 'A buyer'
     const discount = Math.round(((product.price - offerPrice) / product.price) * 100)
-    const notifMessage = `${buyerName} offered ₦${Number(offerPrice).toLocaleString()} (${discount}% off) for "${product.title}"${message ? `: "${message}"` : ''}`
+    const notifBody = `${buyerName} offered ₦${Number(offerPrice).toLocaleString()} (${discount}% off) for "${product.title}"${message ? `: "${message}"` : ''}`
 
     try {
       await supabase.from('notifications').insert({
         user_id: product.seller_id,
         title: 'New Offer Received 💰',
-        message: notifMessage,
+        body: notifBody,
         type: 'offer',
         data: { productId, offerPrice, buyerId: user.id },
       })
@@ -86,7 +86,7 @@ export async function GET(req: Request) {
       .eq(field, user.id)
       .order('created_at', { ascending: false })
 
-    if (error && !error.message.includes('does not exist')) {
+    if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

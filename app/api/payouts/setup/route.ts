@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
-const BACKEND_URL = 'http://localhost:3001'
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001'
 
 export async function POST(req: Request) {
   const supabase = await createClient()
