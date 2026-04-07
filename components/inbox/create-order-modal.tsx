@@ -50,13 +50,13 @@ export function CreateOrderModal({ customerName, products, onClose }: Props) {
         ) : (
           <div className="p-5 space-y-4">
             <div>
-              <p className="text-xs text-gray-500 mb-1">Customer</p>
+              <p className="text-xs text-gray-500 dark:text-muted-foreground mb-1">Customer</p>
               <p className="font-semibold text-sm text-gray-900 dark:text-white">{customerName}</p>
             </div>
 
             {/* Product selector */}
             <div>
-              <p className="text-xs text-gray-500 mb-2">Select product</p>
+              <p className="text-xs text-gray-500 dark:text-muted-foreground mb-2">Select product</p>
               <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                 {products.map(p => (
                   <button
@@ -88,21 +88,21 @@ export function CreateOrderModal({ customerName, products, onClose }: Props) {
             {selected && (
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <p className="text-xs text-gray-500 mb-1">Quantity</p>
+                  <p className="text-xs text-gray-500 dark:text-muted-foreground mb-1">Quantity</p>
                   <div className="flex items-center gap-2">
                     <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-border font-bold text-gray-600 hover:bg-gray-50 dark:hover:bg-muted transition-colors flex items-center justify-center">
+                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-border font-bold text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors flex items-center justify-center">
                       −
                     </button>
                     <span className="w-8 text-center font-bold text-sm text-gray-900 dark:text-white">{qty}</span>
                     <button onClick={() => setQty(q => q + 1)}
-                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-border font-bold text-gray-600 hover:bg-gray-50 dark:hover:bg-muted transition-colors flex items-center justify-center">
+                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-border font-bold text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-muted transition-colors flex items-center justify-center">
                       +
                     </button>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Total</p>
+                  <p className="text-xs text-gray-500 dark:text-muted-foreground mb-1">Total</p>
                   <p className="font-black text-lg text-gray-950 dark:text-white">₦{total.toLocaleString()}</p>
                 </div>
               </div>
@@ -110,7 +110,7 @@ export function CreateOrderModal({ customerName, products, onClose }: Props) {
 
             {/* Notes */}
             <div>
-              <p className="text-xs text-gray-500 mb-1">Notes (optional)</p>
+              <p className="text-xs text-gray-500 dark:text-muted-foreground mb-1">Notes (optional)</p>
               <textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}

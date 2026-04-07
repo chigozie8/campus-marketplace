@@ -458,7 +458,7 @@ function SignUpPageInner() {
                 >
                   {agreedToTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                 </button>
-                <span className="text-sm text-gray-600 leading-snug select-none">
+                <span className="text-sm text-gray-600 dark:text-muted-foreground leading-snug select-none">
                   I agree to the{' '}
                   <Link href="/terms" className="text-[#16a34a] hover:underline font-medium">Terms of Service</Link>
                   {' '}and{' '}
@@ -481,15 +481,15 @@ function SignUpPageInner() {
             </form>
 
             <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
               <span className="text-xs text-gray-400 font-medium">ALREADY REGISTERED?</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
             </div>
 
             <Button
               asChild
               variant="outline"
-              className="w-full h-12 border-2 border-gray-200 hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
+              className="w-full h-12 border-2 border-gray-200 dark:border-border hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
             >
               <Link href="/auth/login">
                 Sign in to existing account
@@ -502,12 +502,12 @@ function SignUpPageInner() {
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Secure & private</span>
               </div>
-              <div className="w-px h-3 bg-gray-200" />
+              <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <span>No credit card</span>
             </div>
           </div>

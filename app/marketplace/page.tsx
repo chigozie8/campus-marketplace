@@ -53,7 +53,7 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
           <ShoppingBag className="w-10 h-10 text-gray-300 dark:text-muted-foreground" />
         </div>
         <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Service unavailable</h3>
-        <p className="text-gray-500 text-sm max-w-xs leading-relaxed">
+        <p className="text-gray-500 dark:text-muted-foreground text-sm max-w-xs leading-relaxed">
           Database connection is not configured. Please check your environment variables.
         </p>
       </div>
@@ -89,7 +89,7 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
           <ShoppingBag className="w-10 h-10 text-gray-300 dark:text-muted-foreground" />
         </div>
         <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">No listings found</h3>
-        <p className="text-gray-500 text-sm mb-6 max-w-xs leading-relaxed">
+        <p className="text-gray-500 dark:text-muted-foreground text-sm mb-6 max-w-xs leading-relaxed">
           {searchParams.q
             ? `No results for "${searchParams.q}". Try a different search.`
             : 'Be the first to list something in this category!'}
@@ -326,7 +326,7 @@ export default async function MarketplacePage({
             <h2 className="font-black text-gray-900 dark:text-white text-base sm:text-lg truncate">
               {params.q ? `Results for "${params.q}"` : 'Latest Listings'}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Sorted by newest first</p>
+            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-0.5">Sorted by newest first</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Suspense>

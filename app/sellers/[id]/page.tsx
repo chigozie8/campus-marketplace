@@ -157,7 +157,7 @@ export default async function SellerProfilePage({ params }: Props) {
         <div className="mb-4 flex items-center gap-2">
           <ShoppingBag className="w-4 h-4 text-primary" />
           <h2 className="font-bold text-base text-gray-900 dark:text-white">Active Listings</h2>
-          <span className="ml-auto text-sm text-gray-500">{(products || []).length} items</span>
+          <span className="ml-auto text-sm text-gray-500 dark:text-muted-foreground">{(products || []).length} items</span>
         </div>
 
         {!products || products.length === 0 ? (
@@ -217,7 +217,7 @@ export default async function SellerProfilePage({ params }: Props) {
               <h2 className="font-black text-base text-gray-900 dark:text-white tracking-tight">
                 Reviews
               </h2>
-              <span className="ml-auto text-sm text-gray-500">{avgRating.toFixed(1)} avg · {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
+              <span className="ml-auto text-sm text-gray-500 dark:text-muted-foreground">{avgRating.toFixed(1)} avg · {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
             </div>
 
             {/* Rating breakdown */}
@@ -227,7 +227,7 @@ export default async function SellerProfilePage({ params }: Props) {
                 const pct = reviews.length ? Math.round((count / reviews.length) * 100) : 0
                 return (
                   <div key={star} className="flex items-center gap-2 mb-1.5 last:mb-0">
-                    <span className="text-xs text-gray-500 w-3">{star}</span>
+                    <span className="text-xs text-gray-500 dark:text-muted-foreground w-3">{star}</span>
                     <Star className="w-3 h-3 fill-amber-400 text-amber-400 flex-shrink-0" />
                     <div className="flex-1 h-1.5 bg-gray-100 dark:bg-muted rounded-full overflow-hidden">
                       <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
@@ -255,7 +255,7 @@ export default async function SellerProfilePage({ params }: Props) {
                         {reviewer?.avatar_url ? (
                           <Image src={reviewer.avatar_url} alt={reviewerName} width={36} height={36} className="w-full h-full object-cover" />
                         ) : (
-                          <span className="text-xs font-black text-gray-500">{reviewerInitials || <User className="w-4 h-4 text-gray-400" />}</span>
+                          <span className="text-xs font-black text-gray-500 dark:text-muted-foreground">{reviewerInitials || <User className="w-4 h-4 text-gray-400" />}</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

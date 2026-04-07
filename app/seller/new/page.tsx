@@ -186,7 +186,7 @@ export default function NewListingPage() {
             </button>
             <div>
               <h1 className="font-black text-base tracking-tight leading-none">New Listing</h1>
-              <p className="text-[11px] text-gray-500 mt-0.5">{progress}/5 steps complete</p>
+              <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-0.5">{progress}/5 steps complete</p>
             </div>
           </div>
           <div className="flex-1 max-w-[120px]">
@@ -307,7 +307,7 @@ export default function NewListingPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+              <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">
                 Title <span className="text-red-400">*</span>
               </label>
               <input
@@ -324,7 +324,7 @@ export default function NewListingPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Description</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
                 value={form.description}
                 onChange={e => setField('description', e.target.value)}
@@ -343,7 +343,7 @@ export default function NewListingPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">
                   Asking Price (₦) <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -357,7 +357,7 @@ export default function NewListingPage() {
                 {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Original Price (₦)</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">Original Price (₦)</label>
                 <input
                   type="number"
                   value={form.original_price}
@@ -404,7 +404,7 @@ export default function NewListingPage() {
             </div>
             {form.delivery_type === 'paid' && (
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">
                   Delivery Fee (₦) <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -431,7 +431,7 @@ export default function NewListingPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Category</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-2 block">Category</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {categories.map(cat => (
                     <button
@@ -446,7 +446,7 @@ export default function NewListingPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Condition</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-2 block">Condition</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {CONDITIONS.map(({ value, label, color }) => (
                     <button
@@ -471,7 +471,7 @@ export default function NewListingPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">University / Campus</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">University / Campus</label>
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -483,7 +483,7 @@ export default function NewListingPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Hostel / Block</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">Hostel / Block</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -539,7 +539,7 @@ export default function NewListingPage() {
             </div>
             <ul className="space-y-1">
               {['Clear, well-lit photos sell 3x faster', 'Mention condition details in the description', 'Competitive pricing gets more WhatsApp clicks'].map(tip => (
-                <li key={tip} className="text-xs text-gray-500 flex items-start gap-1.5">
+                <li key={tip} className="text-xs text-gray-500 dark:text-muted-foreground flex items-start gap-1.5">
                   <span className="text-primary mt-0.5">•</span>{tip}
                 </li>
               ))}

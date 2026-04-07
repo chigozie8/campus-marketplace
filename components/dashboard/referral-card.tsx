@@ -45,7 +45,7 @@ export function ReferralCard() {
         <div className="flex items-center gap-1.5 bg-white dark:bg-card rounded-xl px-3 py-1.5 border border-primary/20 flex-shrink-0">
           <Users className="w-3.5 h-3.5 text-primary" />
           <span className="text-sm font-black text-primary">{data.referralCount}</span>
-          <span className="text-xs text-gray-500">{data.referralCount === 1 ? 'referral' : 'referrals'}</span>
+          <span className="text-xs text-gray-500 dark:text-muted-foreground">{data.referralCount === 1 ? 'referral' : 'referrals'}</span>
         </div>
       </div>
 
