@@ -74,19 +74,20 @@ export function NotificationBell() {
     let channelRef: ReturnType<typeof supabase.channel> | null = null
     let active = true
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!active || !user) return
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || !session?.user) return
+      const userId = session.user.id
       channelRef = supabase.channel(channelName)
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${userId}`,
         }, payload => {
           if (!active) return
           setNotifications(p => [payload.new as Notification, ...p])
           playNotification()
         })
         .subscribe()
-    })
+    }).catch(() => {})
 
     const iv = setInterval(fetchNotifications, 30_000)
     return () => { active = false; clearInterval(iv); if (channelRef) supabase.removeChannel(channelRef) }
