@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Search, SlidersHorizontal, ShoppingBag, Sparkles } from 'lucide-react'
+import { ArrowLeft, Plus, Search, SlidersHorizontal, ShoppingBag, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
@@ -43,6 +43,126 @@ const CATEGORY_PILLS = [
   { label: 'Sports', slug: 'sports', emoji: '🏋️' },
 ]
 
+const PAGE_SIZE = 24
+
+function buildPageUrl(params: SearchParams, page: number): string {
+  const qs = new URLSearchParams()
+  if (params.category && params.category !== 'all') qs.set('category', params.category)
+  if (params.sort) qs.set('sort', params.sort)
+  if (params.q) qs.set('q', params.q)
+  if (page > 1) qs.set('page', String(page))
+  const str = qs.toString()
+  return `/marketplace${str ? `?${str}` : ''}`
+}
+
+function PaginationNav({
+  currentPage,
+  totalPages,
+  searchParams,
+}: {
+  currentPage: number
+  totalPages: number
+  searchParams: SearchParams
+}) {
+  if (totalPages <= 1) return null
+
+  const MAX_VISIBLE = 5
+  let startPage = Math.max(1, currentPage - Math.floor(MAX_VISIBLE / 2))
+  let endPage = startPage + MAX_VISIBLE - 1
+  if (endPage > totalPages) {
+    endPage = totalPages
+    startPage = Math.max(1, endPage - MAX_VISIBLE + 1)
+  }
+  const pageNumbers = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+
+  return (
+    <nav
+      aria-label="Pagination"
+      className="flex items-center justify-center gap-1.5 mt-10 mb-2 flex-wrap"
+    >
+      {/* Previous */}
+      {currentPage > 1 ? (
+        <Link
+          href={buildPageUrl(searchParams, currentPage - 1)}
+          className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-muted-foreground bg-white dark:bg-card border border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-muted hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Prev
+        </Link>
+      ) : (
+        <span className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-300 dark:text-muted bg-white dark:bg-card border border-gray-100 dark:border-border cursor-not-allowed">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Prev
+        </span>
+      )}
+
+      {/* First page + ellipsis */}
+      {startPage > 1 && (
+        <>
+          <Link
+            href={buildPageUrl(searchParams, 1)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold text-gray-600 dark:text-muted-foreground bg-white dark:bg-card border border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-muted hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
+          >
+            1
+          </Link>
+          {startPage > 2 && (
+            <span className="w-9 h-9 flex items-center justify-center text-xs text-gray-400">…</span>
+          )}
+        </>
+      )}
+
+      {/* Page numbers */}
+      {pageNumbers.map(page => (
+        <Link
+          key={page}
+          href={buildPageUrl(searchParams, page)}
+          aria-current={page === currentPage ? 'page' : undefined}
+          className={`w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold transition-all shadow-sm ${
+            page === currentPage
+              ? 'bg-[#0a0a0a] dark:bg-white text-white dark:text-gray-950 border border-transparent'
+              : 'bg-white dark:bg-card text-gray-600 dark:text-muted-foreground border border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-muted hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          {page}
+        </Link>
+      ))}
+
+      {/* Last page + ellipsis */}
+      {endPage < totalPages && (
+        <>
+          {endPage < totalPages - 1 && (
+            <span className="w-9 h-9 flex items-center justify-center text-xs text-gray-400">…</span>
+          )}
+          <Link
+            href={buildPageUrl(searchParams, totalPages)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-xs font-bold text-gray-600 dark:text-muted-foreground bg-white dark:bg-card border border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-muted hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
+          >
+            {totalPages}
+          </Link>
+        </>
+      )}
+
+      {/* Next */}
+      {currentPage < totalPages ? (
+        <Link
+          href={buildPageUrl(searchParams, currentPage + 1)}
+          className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-muted-foreground bg-white dark:bg-card border border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-muted hover:text-gray-900 dark:hover:text-white transition-all shadow-sm"
+          aria-label="Next page"
+        >
+          Next
+          <ChevronRight className="w-3.5 h-3.5" />
+        </Link>
+      ) : (
+        <span className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-gray-300 dark:text-muted bg-white dark:bg-card border border-gray-100 dark:border-border cursor-not-allowed">
+          Next
+          <ChevronRight className="w-3.5 h-3.5" />
+        </span>
+      )}
+    </nav>
+  )
+}
+
 async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient()
 
@@ -60,27 +180,44 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     )
   }
 
-  let query = supabase
-    .from('products')
-    .select('*, profiles(*), categories(*)')
-    .eq('is_available', true)
+  const currentPage = Math.max(1, parseInt(searchParams.page ?? '1', 10) || 1)
+  const from = (currentPage - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
+  // Resolve category filter
+  let categoryId: string | null = null
   if (searchParams.category && searchParams.category !== 'all') {
     const { data: cat } = await supabase
       .from('categories').select('id').eq('slug', searchParams.category).single()
-    if (cat) query = query.eq('category_id', cat.id)
+    categoryId = cat?.id ?? null
   }
 
-  if (searchParams.q) query = query.ilike('title', `%${searchParams.q}%`)
+  // Count query (head-only, no data transfer)
+  let countQuery = supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_available', true)
+  if (categoryId) countQuery = countQuery.eq('category_id', categoryId)
+  if (searchParams.q) countQuery = countQuery.ilike('title', `%${searchParams.q}%`)
+  const { count: totalCount } = await countQuery
+  const total = totalCount ?? 0
+  const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  if (searchParams.sort === 'price_asc') query = query.order('price', { ascending: true })
-  else if (searchParams.sort === 'price_desc') query = query.order('price', { ascending: false })
-  else if (searchParams.sort === 'popular') query = query.order('views', { ascending: false })
-  else query = query.order('created_at', { ascending: false })
+  // Data query with sort + range
+  let dataQuery = supabase
+    .from('products')
+    .select('*, profiles(*), categories(*)')
+    .eq('is_available', true)
+  if (categoryId) dataQuery = dataQuery.eq('category_id', categoryId)
+  if (searchParams.q) dataQuery = dataQuery.ilike('title', `%${searchParams.q}%`)
+  if (searchParams.sort === 'price_asc') dataQuery = dataQuery.order('price', { ascending: true })
+  else if (searchParams.sort === 'price_desc') dataQuery = dataQuery.order('price', { ascending: false })
+  else if (searchParams.sort === 'popular') dataQuery = dataQuery.order('views', { ascending: false })
+  else dataQuery = dataQuery.order('created_at', { ascending: false })
 
-  query = query.limit(24)
+  dataQuery = dataQuery.range(from, to)
 
-  const { data: products, error } = await query
+  const { data: products, error } = await dataQuery
 
   if (error || !products || products.length === 0) {
     return (
@@ -111,10 +248,10 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     name: 'Campus Marketplace Listings',
     description: 'Buy and sell items from verified student sellers across Nigerian universities',
     url: `${SITE_URL}/marketplace`,
-    numberOfItems: (products as Product[]).length,
+    numberOfItems: total,
     itemListElement: (products as Product[]).map((product, index) => ({
       '@type': 'ListItem',
-      position: index + 1,
+      position: from + index + 1,
       url: `${SITE_URL}/marketplace/${product.id}`,
       name: product.title,
       image: product.images?.[0] || `${SITE_URL}/og-image.png`,
@@ -152,6 +289,16 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      <PaginationNav
+        currentPage={currentPage}
+        totalPages={totalPages}
+        searchParams={searchParams}
+      />
+      {total > 0 && (
+        <p className="text-center text-xs text-gray-400 dark:text-muted-foreground mt-3">
+          Showing {from + 1}–{Math.min(to + 1, total)} of {total.toLocaleString()} listings
+        </p>
+      )}
     </>
   )
 }
@@ -183,6 +330,7 @@ export default async function MarketplacePage({
   const supabase = await createClient()
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
   const activeCategory = params.category || 'all'
+  const currentPage = Math.max(1, parseInt(params.page ?? '1', 10) || 1)
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
@@ -326,7 +474,9 @@ export default async function MarketplacePage({
             <h2 className="font-black text-gray-900 dark:text-white text-base sm:text-lg truncate">
               {params.q ? `Results for "${params.q}"` : 'Latest Listings'}
             </h2>
-            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-0.5">Sorted by newest first</p>
+            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-0.5">
+              {currentPage > 1 ? `Page ${currentPage}` : 'Sorted by newest first'}
+            </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Suspense>
