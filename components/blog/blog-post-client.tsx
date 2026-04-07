@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef, useTransition } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Heart, MessageSquare, Send, Reply, Check, Link2, ChevronDown, ChevronUp, Copy } from 'lucide-react'
+import rehypeRaw from 'rehype-raw'
+import { Heart, MessageSquare, Send, Reply, Check, Link2, ChevronDown, ChevronUp } from 'lucide-react'
 
 type Comment = {
   id: string
@@ -24,7 +25,6 @@ type Post = {
 }
 
 type Props = {
-  mode: 'progress-only' | 'full'
   post: Post
   initialLiked: boolean
   user: { id: string; email: string } | null
@@ -33,7 +33,6 @@ type Props = {
 
 function ReadingProgress() {
   const [progress, setProgress] = useState(0)
-
   useEffect(() => {
     function onScroll() {
       const el = document.documentElement
@@ -44,11 +43,10 @@ function ReadingProgress() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
   return (
     <div className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-transparent pointer-events-none">
       <div
-        className="h-full bg-gradient-to-r from-[#16a34a] to-[#4ade80] transition-all duration-100 rounded-r-full shadow-sm shadow-[#16a34a]/50"
+        className="h-full bg-gradient-to-r from-primary to-green-400 transition-all duration-100 rounded-r-full"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -56,9 +54,7 @@ function ReadingProgress() {
 }
 
 function CommentItem({
-  comment,
-  depth = 0,
-  onReply,
+  comment, depth = 0, onReply,
 }: {
   comment: Comment
   depth?: number
@@ -67,7 +63,6 @@ function CommentItem({
   const name = comment.profiles?.full_name ?? comment.guest_name ?? 'Anonymous'
   const initials = name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
   const date = new Date(comment.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
-
   return (
     <div className={`flex gap-3 ${depth > 0 ? 'ml-8 sm:ml-12 border-l-2 border-border pl-4' : ''}`}>
       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-black text-primary">
@@ -92,42 +87,7 @@ function CommentItem({
   )
 }
 
-function CodeBlock({ children, className }: { children?: React.ReactNode; className?: string }) {
-  const [copied, setCopied] = useState(false)
-  const code = String(children).replace(/\n$/, '')
-
-  function copy() {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
-  if (!className) {
-    return (
-      <code className="px-1.5 py-0.5 rounded bg-muted text-primary text-[0.85em] font-mono">
-        {children}
-      </code>
-    )
-  }
-
-  return (
-    <div className="relative group my-4">
-      <button
-        onClick={copy}
-        className="absolute top-3 right-3 z-10 p-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white/60 hover:text-white opacity-0 group-hover:opacity-100 transition-all"
-        aria-label="Copy code"
-      >
-        {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-      </button>
-      <pre className="overflow-x-auto rounded-xl bg-zinc-900 p-4 text-sm text-zinc-100 font-mono leading-relaxed">
-        <code>{code}</code>
-      </pre>
-    </div>
-  )
-}
-
-export function BlogPostClient({ mode, post, initialLiked, user, comments: initComments }: Props) {
+export function BlogPostClient({ post, initialLiked, user, comments: initComments }: Props) {
   const [liked, setLiked] = useState(initialLiked)
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [liking, setLiking] = useState(false)
@@ -139,7 +99,6 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [, startTransition] = useTransition()
   const commentRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -149,8 +108,6 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
       body: JSON.stringify({ postId: post.id }),
     }).catch(() => {})
   }, [post.id])
-
-  if (mode === 'progress-only') return <ReadingProgress />
 
   async function toggleLike() {
     if (!user || liking) return
@@ -193,10 +150,7 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? 'Failed to post comment'); return }
-
-      if (user) {
-        setComments(prev => [...prev, json.comment])
-      }
+      if (user) setComments(prev => [...prev, json.comment])
       setForm({ content: '', guest_name: '', guest_email: '' })
       setReplyTo(null)
       setSuccess(true)
@@ -206,7 +160,7 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
   }
 
   function copyLink() {
-    navigator.clipboard.writeText(`https://vendoorx.com/blog/${post.slug}`)
+    navigator.clipboard.writeText(window.location.href)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -215,42 +169,32 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
   const replies = comments.filter(c => !!c.parent_id)
 
   return (
-    <div>
+    <>
+      <ReadingProgress />
+
       {/* ── ARTICLE CONTENT ── */}
       <div className="prose prose-zinc dark:prose-invert max-w-none
         prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground
+        prose-h1:text-3xl prose-h1:mt-10 prose-h1:mb-5
         prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
         prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
         prose-p:text-[1.05rem] prose-p:leading-[1.8] prose-p:text-foreground/90
         prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-        prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:py-1 prose-blockquote:not-italic
+        prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:py-1 prose-blockquote:not-italic
         prose-img:rounded-2xl prose-img:shadow-xl
-        prose-strong:text-foreground
+        prose-strong:text-foreground prose-strong:font-bold
         prose-li:text-foreground/90 prose-li:leading-relaxed
         prose-hr:border-border prose-hr:my-10
-        prose-table:rounded-xl prose-table:overflow-hidden
-        prose-th:bg-muted prose-th:text-foreground
-        prose-td:border-border
+        prose-code:bg-muted prose-code:text-primary prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+        prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-pre:rounded-2xl prose-pre:shadow-lg
       ">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            code: ({ className, children }) => (
-              <CodeBlock className={className}>{children}</CodeBlock>
-            ),
-            img: ({ src, alt }) => (
-              src ? (
-                <span className="block my-8 relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={alt ?? ''} className="w-full rounded-2xl shadow-xl" loading="lazy" />
-                  {alt && <span className="block text-center text-xs text-muted-foreground mt-2 italic">{alt}</span>}
-                </span>
-              ) : null
-            ),
-          }}
-        >
-          {post.content}
-        </ReactMarkdown>
+        {post.content ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+            {post.content}
+          </ReactMarkdown>
+        ) : (
+          <p className="text-muted-foreground italic">No content yet.</p>
+        )}
       </div>
 
       {/* ── ENGAGEMENT BAR ── */}
@@ -303,7 +247,6 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
 
         {showComments && (
           <>
-            {/* Comment form */}
             <form onSubmit={submitComment} className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
               <h3 className="text-sm font-black text-foreground mb-4">
                 {replyTo ? `↩ Replying to ${replyTo.name}` : 'Leave a comment'}
@@ -326,7 +269,7 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
                   />
                   <input
                     type="email"
-                    placeholder="Email (optional, not shown)"
+                    placeholder="Email (optional)"
                     value={form.guest_email}
                     onChange={e => setForm(f => ({ ...f, guest_email: e.target.value }))}
                     className="px-4 py-3 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm transition-all"
@@ -337,14 +280,14 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
               <textarea
                 ref={commentRef}
                 rows={4}
-                placeholder={user ? 'Share your thoughts…' : 'Share your thoughts…'}
+                placeholder="Share your thoughts…"
                 value={form.content}
                 onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
                 required
                 className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm resize-none transition-all mb-3"
               />
 
-              {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+              {error   && <p className="text-red-500 text-xs mb-3">{error}</p>}
               {success && (
                 <p className="text-primary text-xs mb-3 flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
@@ -353,11 +296,7 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
               )}
 
               <div className="flex items-center justify-between">
-                {!user && (
-                  <p className="text-xs text-muted-foreground">
-                    Guest comments are reviewed before appearing.
-                  </p>
-                )}
+                {!user && <p className="text-xs text-muted-foreground">Guest comments are reviewed before appearing.</p>}
                 <button
                   type="submit"
                   disabled={submitting || !form.content.trim()}
@@ -369,7 +308,6 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
               </div>
             </form>
 
-            {/* Comment list */}
             {comments.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <MessageSquare className="w-8 h-8 mx-auto mb-3 opacity-30" />
@@ -392,6 +330,6 @@ export function BlogPostClient({ mode, post, initialLiked, user, comments: initC
           </>
         )}
       </div>
-    </div>
+    </>
   )
 }

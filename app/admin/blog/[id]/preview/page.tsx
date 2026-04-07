@@ -4,9 +4,10 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
-  ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
+  ArrowLeft, Calendar, Clock, Eye, Tag,
   ChevronRight, AlertTriangle, Pencil,
 } from 'lucide-react'
+import { MarkdownContent } from '@/components/blog/markdown-content'
 
 export const metadata: Metadata = { title: 'Preview Post | Admin' }
 
@@ -157,22 +158,7 @@ export default async function PreviewBlogPostPage({
         </div>
 
         {/* Content */}
-        {post.content ? (
-          <div
-            className="prose prose-gray dark:prose-invert prose-lg max-w-none
-              prose-headings:font-black prose-headings:tracking-tight
-              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-img:rounded-2xl prose-img:shadow-lg
-              prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:rounded-r-xl prose-blockquote:not-italic
-              prose-code:bg-muted prose-code:text-foreground prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-        ) : (
-          <div className="flex items-center gap-3 p-6 rounded-2xl bg-muted border border-border">
-            <BookOpen className="w-5 h-5 text-muted-foreground" />
-            <p className="text-muted-foreground text-sm">No content written yet.</p>
-          </div>
-        )}
+        <MarkdownContent content={post.content ?? ''} />
 
         {/* Tags */}
         {post.tags && (post.tags as string[]).length > 0 && (

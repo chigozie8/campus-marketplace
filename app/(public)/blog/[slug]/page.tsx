@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
-  Share2, ChevronRight, TrendingUp,
+  Share2, ChevronRight, TrendingUp, AlertTriangle,
 } from 'lucide-react'
 import { BlogPostClient } from '@/components/blog/blog-post-client'
 
@@ -78,7 +78,6 @@ export default async function BlogPostPage({
       .select(`*, blog_categories(name, slug, color), profiles(full_name, avatar_url),
         blog_likes(count), blog_comments(count)`)
       .eq('slug', slug)
-      .eq('status', 'published')
       .single() ?? { data: null },
     supabase?.from('blog_posts')
       .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
@@ -134,14 +133,13 @@ export default async function BlogPostPage({
 
       <div className="min-h-screen bg-background">
 
-        {/* ── READING PROGRESS (client only) ── */}
-        <BlogPostClient
-          mode="progress-only"
-          post={{ id: post.id, slug: post.slug, title: post.title, content: post.content, likeCount, commentCount }}
-          initialLiked={!!userLike}
-          user={user ? { id: user.id, email: user.email! } : null}
-          comments={commentsData ?? []}
-        />
+        {/* ── DRAFT BANNER ── */}
+        {post.status !== 'published' && (
+          <div className="sticky top-0 z-50 bg-amber-500 text-white px-4 py-2.5 flex items-center gap-3 shadow-md">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span className="text-sm font-bold">Draft Preview — this post is not visible to the public yet.</span>
+          </div>
+        )}
 
         {/* ── COVER IMAGE ── */}
         {post.cover_image && (
@@ -242,7 +240,6 @@ export default async function BlogPostPage({
 
               {/* Rendered content + interactions */}
               <BlogPostClient
-                mode="full"
                 post={{ id: post.id, slug: post.slug, title: post.title, content: post.content, likeCount, commentCount }}
                 initialLiked={!!userLike}
                 user={user ? { id: user.id, email: user.email! } : null}
