@@ -39,7 +39,7 @@ export function PwaInstallPrompt() {
     if (isIos) {
       setPlatform('ios')
       // Always show chip on every load/refresh for iOS
-      const t = setTimeout(() => setChipVisible(true), 1500)
+      const t = setTimeout(() => setChipVisible(true), 300)
       return () => clearTimeout(t)
     }
 
@@ -56,7 +56,7 @@ export function PwaInstallPrompt() {
     setPlatform('android')
     const t = setTimeout(() => {
       setChipVisible(true)
-    }, 1500)
+    }, 300)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
