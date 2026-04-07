@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { ArrowRight, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp, ChevronRight, Phone, Mail, Loader2, CheckCircle2 } from 'lucide-react'
+import type { SiteSettings } from '@/lib/site-settings-defaults'
+import { DEFAULT_SETTINGS } from '@/lib/site-settings-defaults'
 
 const LINKS = {
   Company: [
@@ -20,52 +22,6 @@ const LINKS = {
     { label: 'Dispute Resolution',  href: '/refund#disputes',  icon: Users },
   ],
 }
-
-const SOCIALS = [
-  {
-    href: 'https://wa.me/15792583013',
-    label: 'WhatsApp',
-    bg: '#25D366',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.85L.057 23.928a.5.5 0 0 0 .606.65l6.277-1.642A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.878 9.878 0 0 1-5.029-1.373l-.36-.214-3.733.977.998-3.645-.235-.375A9.865 9.865 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z" />
-      </svg>
-    ),
-  },
-  {
-    href: 'https://instagram.com/vendoorx',
-    label: 'Instagram',
-    bg: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
-    icon: <Instagram className="w-4 h-4 text-white" />,
-  },
-  {
-    href: 'https://facebook.com/vendoorx',
-    label: 'Facebook',
-    bg: '#1877F2',
-    icon: <Facebook className="w-4 h-4 text-white" />,
-  },
-  {
-    href: 'https://twitter.com/vendoorx',
-    label: 'Twitter / X',
-    bg: '#000000',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zM17.083 19.77h1.833L7.084 4.126H5.117L17.083 19.77z" />
-      </svg>
-    ),
-  },
-  {
-    href: 'https://tiktok.com/@vendoorx',
-    label: 'TikTok',
-    bg: '#010101',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
-        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
-      </svg>
-    ),
-  },
-]
 
 const SPONSORS = [
   { name: 'UNILAG', full: 'University of Lagos' },
@@ -148,7 +104,53 @@ function NewsletterForm() {
   )
 }
 
-export function LandingFooter() {
+export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }) {
+  const SOCIALS = [
+    {
+      href: settings?.social_whatsapp_url ?? DEFAULT_SETTINGS.social_whatsapp_url,
+      label: 'WhatsApp',
+      bg: '#25D366',
+      icon: (
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.85L.057 23.928a.5.5 0 0 0 .606.65l6.277-1.642A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.878 9.878 0 0 1-5.029-1.373l-.36-.214-3.733.977.998-3.645-.235-.375A9.865 9.865 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z" />
+        </svg>
+      ),
+    },
+    {
+      href: settings?.social_instagram_url ?? DEFAULT_SETTINGS.social_instagram_url,
+      label: 'Instagram',
+      bg: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
+      icon: <Instagram className="w-4 h-4 text-white" />,
+    },
+    {
+      href: settings?.social_facebook_url ?? DEFAULT_SETTINGS.social_facebook_url,
+      label: 'Facebook',
+      bg: '#1877F2',
+      icon: <Facebook className="w-4 h-4 text-white" />,
+    },
+    {
+      href: settings?.social_twitter_url ?? DEFAULT_SETTINGS.social_twitter_url,
+      label: 'Twitter / X',
+      bg: '#000000',
+      icon: (
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zM17.083 19.77h1.833L7.084 4.126H5.117L17.083 19.77z" />
+        </svg>
+      ),
+    },
+    {
+      href: settings?.social_tiktok_url ?? DEFAULT_SETTINGS.social_tiktok_url,
+      label: 'TikTok',
+      bg: '#010101',
+      icon: (
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
+        </svg>
+      ),
+    },
+  ]
+
   return (
     <footer className="bg-background border-t border-border font-sans overflow-hidden">
 

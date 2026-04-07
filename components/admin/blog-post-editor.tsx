@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useId } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Save, Globe, Clock, Star, Tag, Hash,
@@ -55,7 +55,8 @@ export function BlogPostEditor({
   const [seoOpen, setSeoOpen]     = useState(false)
   const [textareaEl, setTextareaEl] = useState<HTMLTextAreaElement | null>(null)
   const [uploading, setUploading] = useState(false)
-  const fileInputId               = useRef(`img-${Math.random().toString(36).slice(2)}`)
+  const _fileInputId              = useId()
+  const fileInputId               = useRef(`img-${_fileInputId.replace(/:/g, '')}`)
   const router                    = useRouter()
 
   const update = (k: keyof PostData, v: unknown) => setData(p => ({ ...p, [k]: v }))

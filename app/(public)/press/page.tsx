@@ -1,18 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Quote } from 'lucide-react'
+import { getSiteSettings } from '@/lib/site-settings'
 
 export const metadata: Metadata = {
   title: 'Press Kit | VendoorX',
   description: 'Download VendoorX brand assets, logos, and media kit for press coverage. Contact our CEO Kenneth Okoronkwo for interview requests.',
 }
-
-const STATS = [
-  { value: '50,000+', label: 'Active Vendors' },
-  { value: '120+',    label: 'Nigerian Campuses' },
-  { value: '₦2B+',   label: 'Transactions Processed' },
-  { value: '4.9/5',  label: 'Average Rating' },
-]
 
 const ASSETS = [
   { name: 'VendoorX Logo (SVG)', desc: 'Full colour, dark & light variants', size: 'SVG' },
@@ -22,7 +16,14 @@ const ASSETS = [
   { name: 'Product Screenshots', desc: 'Marketplace, dashboard, and store pages', size: 'ZIP' },
 ]
 
-export default function PressPage() {
+export default async function PressPage() {
+  const settings = await getSiteSettings()
+  const STATS = [
+    { value: settings.stat_active_vendors, label: 'Active Vendors' },
+    { value: settings.stat_campuses,        label: 'Nigerian Campuses' },
+    { value: settings.stat_transactions,    label: 'Transactions Processed' },
+    { value: settings.stat_rating,          label: 'Average Rating' },
+  ]
   return (
     <div className="bg-background">
 

@@ -5,51 +5,37 @@ import Image from 'next/image'
 import { Sparkles, ArrowRight, Play, Shield, Zap, Users, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
+import type { SiteSettings } from '@/lib/site-settings-defaults'
+import { DEFAULT_SETTINGS } from '@/lib/site-settings-defaults'
+
+const AVATAR_META = [
+  { alt: 'Nigerian campus seller',   fallback: 'AO', color: 'bg-primary' },
+  { alt: 'Nigerian student vendor',   fallback: 'CE', color: 'bg-emerald-600' },
+  { alt: 'Campus entrepreneur',       fallback: 'BN', color: 'bg-teal-600' },
+  { alt: 'Active vendor',             fallback: 'OA', color: 'bg-green-700' },
+  { alt: 'Nigerian campus student',   fallback: 'FA', color: 'bg-cyan-600' },
+]
 
 interface HeroSectionProps {
   user?: User | null
+  settings?: Partial<SiteSettings>
 }
 
-const AVATARS = [
-  {
-    src: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&crop=faces&q=80',
-    alt: 'Nigerian campus seller',
-    fallback: 'AO',
-    color: 'bg-primary',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=80&h=80&fit=crop&crop=faces&q=80',
-    alt: 'Nigerian student vendor',
-    fallback: 'CE',
-    color: 'bg-emerald-600',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=faces&q=80',
-    alt: 'Campus entrepreneur',
-    fallback: 'BN',
-    color: 'bg-teal-600',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&h=80&fit=crop&crop=faces&q=80',
-    alt: 'Active vendor',
-    fallback: 'OA',
-    color: 'bg-green-700',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=80&h=80&fit=crop&crop=faces&q=80',
-    alt: 'Nigerian campus student',
-    fallback: 'FA',
-    color: 'bg-cyan-600',
-  },
-]
-
-const FEATURES = [
-  { icon: Shield, text: 'Verified Vendors' },
-  { icon: Zap, text: 'WhatsApp Orders' },
-  { icon: Users, text: '50K+ Sellers' },
-]
-
-export function HeroSection({ user }: HeroSectionProps) {
+export function HeroSection({ user, settings }: HeroSectionProps) {
+  const vendorCount = settings?.stat_active_vendors ?? DEFAULT_SETTINGS.stat_active_vendors
+  const avatarSrcs = [
+    settings?.hero_avatar_1 ?? DEFAULT_SETTINGS.hero_avatar_1,
+    settings?.hero_avatar_2 ?? DEFAULT_SETTINGS.hero_avatar_2,
+    settings?.hero_avatar_3 ?? DEFAULT_SETTINGS.hero_avatar_3,
+    settings?.hero_avatar_4 ?? DEFAULT_SETTINGS.hero_avatar_4,
+    settings?.hero_avatar_5 ?? DEFAULT_SETTINGS.hero_avatar_5,
+  ]
+  const AVATARS = AVATAR_META.map((meta, i) => ({ ...meta, src: avatarSrcs[i] }))
+  const FEATURES = [
+    { icon: Shield, text: 'Verified Vendors' },
+    { icon: Zap, text: 'WhatsApp Orders' },
+    { icon: Users, text: `${vendorCount} Sellers` },
+  ]
   const isAuthed = !!user
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
 
@@ -191,7 +177,7 @@ export function HeroSection({ user }: HeroSectionProps) {
               ))}
             </div>
             <span className="text-sm text-muted-foreground font-medium">
-              <span className="text-foreground font-bold">50,000+</span> active vendors
+              <span className="text-foreground font-bold">{vendorCount}</span> active vendors
             </span>
           </div>
         </div>

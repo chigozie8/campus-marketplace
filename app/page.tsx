@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { buildMetadata, SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
+import { getSiteSettings } from '@/lib/site-settings'
 import { HeroSection } from '@/components/landing/hero-section'
 import { StatsBar } from '@/components/landing/stats-bar'
 import { ProblemSolutionSection } from '@/components/landing/problem-solution-section'
@@ -156,6 +157,7 @@ const itemListJsonLd = {
 export default async function Home() {
   const supabase = await createClient()
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
+  const settings = await getSiteSettings()
 
   return (
     <main className="min-h-screen bg-background">
@@ -176,7 +178,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <LandingNav user={user} />
-      <HeroSection user={user} />
+      <HeroSection user={user} settings={settings} />
       <StatsBar />
       <TrustedBySection />
       <ProblemSolutionSection />
@@ -190,7 +192,7 @@ export default async function Home() {
       <PricingSection />
       <FaqSection />
       <CtaSection user={user} />
-      <LandingFooter />
+      <LandingFooter settings={settings} />
     </main>
   )
 }

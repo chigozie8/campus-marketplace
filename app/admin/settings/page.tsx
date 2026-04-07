@@ -1,17 +1,23 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AdminRolesManager } from '@/components/admin/admin-roles-manager'
+import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
+import { getSiteSettings } from '@/lib/site-settings'
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient()
   if (!supabase) redirect('/auth/login')
 
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+
   const { data: currentAdmin } = await supabase
     .from('admin_roles')
     .select('role')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .single()
+
+  if (!currentAdmin) redirect('/')
 
   const isSuperAdmin = currentAdmin?.role === 'super_admin'
 
@@ -20,21 +26,32 @@ export default async function AdminSettingsPage() {
     .select('id, user_id, email, role, created_at')
     .order('created_at')
 
+  const settings = await getSiteSettings()
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-8 pb-12">
+
       <div>
         <h2 className="text-lg font-black text-foreground tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage admin access and roles</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage admin access, social links, platform stats, and site content</p>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border">
-          <h3 className="font-black text-sm text-foreground">Admin Team</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isSuperAdmin ? 'As Super Admin, you can add and remove other admins.' : 'Contact a Super Admin to manage team members.'}
-          </p>
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">Site Content</h3>
+        <SiteSettingsEditor initialSettings={settings} />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">Admin Team</h3>
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h4 className="font-black text-sm text-foreground">Admin Roles</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isSuperAdmin ? 'As Super Admin, you can add and remove other admins.' : 'Contact a Super Admin to manage team members.'}
+            </p>
+          </div>
+          <AdminRolesManager admins={admins ?? []} isSuperAdmin={isSuperAdmin} currentUserId={user.id} />
         </div>
-        <AdminRolesManager admins={admins ?? []} isSuperAdmin={isSuperAdmin} currentUserId={user!.id} />
       </div>
     </div>
   )
