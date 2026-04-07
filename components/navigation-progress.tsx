@@ -17,7 +17,7 @@ function NavigationSpinnerInner() {
 
   const stop = useCallback(() => {
     if (hideTimer.current) clearTimeout(hideTimer.current)
-    hideTimer.current = setTimeout(() => setSpinning(false), 400)
+    hideTimer.current = setTimeout(() => setSpinning(false), 1200)
   }, [])
 
   useEffect(() => {

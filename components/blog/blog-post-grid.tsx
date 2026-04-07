@@ -32,36 +32,44 @@ interface Props {
   page: number
 }
 
-const getCachedPostGrid = unstable_cache(
-  async (catFilter: string | undefined, searchQuery: string | undefined, page: number) => {
-    const supabase = createServiceClient()
-    if (!supabase) return { posts: [], count: 0, totalPages: 0 }
+function makePostGridCacheKey(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
+  return ['blog-post-grid', catFilter ?? '__all__', searchQuery ?? '', String(page)]
+}
 
-    let catId: string | null = null
-    if (catFilter) {
-      const { data: catRow } = await supabase
-        .from('blog_categories')
-        .select('id')
-        .eq('slug', catFilter)
-        .single()
-      catId = catRow?.id ?? null
-    }
+async function fetchPostGrid(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
+  const supabase = createServiceClient()
+  if (!supabase) return { posts: [], count: 0, totalPages: 0 }
 
-    let q = supabase
-      .from('blog_posts')
-      .select(SELECT_COLS, { count: 'exact' })
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
-    if (catId) q = q.eq('category_id', catId)
-    if (searchQuery) q = q.ilike('title', `%${searchQuery}%`)
+  let catId: string | null = null
+  if (catFilter) {
+    const { data: catRow } = await supabase
+      .from('blog_categories')
+      .select('id')
+      .eq('slug', catFilter)
+      .single()
+    catId = catRow?.id ?? null
+  }
 
-    const { data, count } = await q
-    return { posts: data ?? [], count: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) }
-  },
-  ['blog-post-grid'],
-  { revalidate: 60, tags: ['blog-posts'] },
-)
+  let q = supabase
+    .from('blog_posts')
+    .select(SELECT_COLS, { count: 'exact' })
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
+  if (catId) q = q.eq('category_id', catId)
+  if (searchQuery) q = q.ilike('title', `%${searchQuery}%`)
+
+  const { data, count } = await q
+  return { posts: data ?? [], count: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) }
+}
+
+function getCachedPostGrid(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
+  return unstable_cache(
+    () => fetchPostGrid(catFilter, searchQuery, page),
+    makePostGridCacheKey(catFilter, searchQuery, page),
+    { revalidate: 60, tags: ['blog-posts'] },
+  )()
+}
 
 export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
   const { posts, count, totalPages } = await getCachedPostGrid(catFilter, searchQuery, page)

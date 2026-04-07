@@ -14,11 +14,7 @@ export function ThemeToggle() {
   }, [])
 
   if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon" className="w-9 h-9" aria-label="Toggle theme">
-        <span className="w-4 h-4" />
-      </Button>
-    )
+    return <span className="w-9 h-9 pointer-events-none inline-block shrink-0" aria-hidden="true" />
   }
 
   const isDark = theme === 'dark'

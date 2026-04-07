@@ -23,11 +23,18 @@ export function DashboardActions({ productId, isAvailable }: Props) {
   const [duping, setDuping]       = useState(false)
   const [open, setOpen]           = useState(false)
   const [menuPos, setMenuPos]     = useState({ top: 0, right: 0 })
-  const btnRef = useRef<HTMLButtonElement>(null)
+  const btnRef  = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false)
+      const t = e.target as Node
+      if (
+        btnRef.current && !btnRef.current.contains(t) &&
+        menuRef.current && !menuRef.current.contains(t)
+      ) {
+        setOpen(false)
+      }
     }
     if (open) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -170,6 +177,7 @@ export function DashboardActions({ productId, isAvailable }: Props) {
 
       {open && (
         <div
+          ref={menuRef}
           style={{ top: menuPos.top, right: menuPos.right }}
           className="fixed w-52 bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-xl shadow-black/10 z-[9999] overflow-hidden"
         >
