@@ -16,6 +16,16 @@ export function TawkToChat() {
   useEffect(() => {
     if (!propertyId) return
 
+    // Tawk.to cannot store cookies inside an iframed/restricted environment
+    // (e.g. Replit preview). Skip loading in that case — works fine on the
+    // live site where the page is loaded directly in the browser.
+    try {
+      if (window.self !== window.top) return
+    } catch {
+      // Cross-origin iframe — skip
+      return
+    }
+
     window.Tawk_API = window.Tawk_API || {}
     window.Tawk_LoadStart = new Date()
 
@@ -32,8 +42,6 @@ export function TawkToChat() {
       }
     }
   }, [propertyId, widgetId])
-
-  if (!propertyId) return null
 
   return null
 }
