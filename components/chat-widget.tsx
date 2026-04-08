@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { usePathname } from 'next/navigation'
 import { MessageCircle, X, Send, Bot, User, Minimize2, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -31,33 +30,13 @@ const QUICK_REPLIES = [
   'Is it free to join?',
 ]
 
-const BOT_RESPONSES: Record<string, string> = {
-  default:
-    "Thanks for reaching out! A VendoorX support agent will get back to you shortly. In the meantime, check out our FAQ section for quick answers. 🙏",
-  'how do i create a store':
-    "Creating your store is super easy! Just sign up for free, complete your vendor profile, and start listing products. It takes less than 5 minutes. Want me to walk you through it?",
-  'what are the pricing plans':
-    "We have 3 plans:\n• **Starter** — Free forever, up to 10 listings\n• **Growth** — ₦2,500/mo, unlimited listings + analytics\n• **Pro** — ₦5,000/mo, everything + AI assistant & verified badge\n\nAll plans charge 0% commission on sales!",
-  'how do payments work':
-    "VendoorX uses Paystack for secure payments. Buyers pay directly, and funds settle to your bank account within 1-2 business days. Growth and Pro plans have full Paystack integration built in.",
-  'is it free to join':
-    "Yes! Joining VendoorX is completely free. The Starter plan lets you list up to 10 products at no cost, forever. No credit card required. Upgrade anytime as your business grows! 🚀",
-}
-
-function getBotReply(text: string): string {
-  const lower = text.toLowerCase().trim()
-  for (const [key, reply] of Object.entries(BOT_RESPONSES)) {
-    if (key !== 'default' && lower.includes(key)) return reply
-  }
-  return BOT_RESPONSES.default
-}
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '15792583013'
 
 function now() {
   return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 export function ChatWidget() {
-  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -107,6 +86,16 @@ export function ChatWidget() {
     }
   }, [open, minimized])
 
+  // Fix mobile keyboard pushing layout — scroll messages into view
+  useEffect(() => {
+    if (!open) return
+    const handler = () => {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    }
+    window.visualViewport?.addEventListener('resize', handler)
+    return () => window.visualViewport?.removeEventListener('resize', handler)
+  }, [open])
+
   const handleOpen = useCallback(() => {
     setOpen(true)
     setUnread(0)
@@ -114,29 +103,42 @@ export function ChatWidget() {
     setMinimized(false)
   }, [])
 
-  const sendMessage = useCallback(
-    (text: string) => {
-      if (!text.trim()) return
-      const userMsg: Message = { id: Date.now().toString(), role: 'user', text: text.trim(), time: now() }
-      setMessages((prev) => [...prev, userMsg])
-      setInput('')
-      setTyping(true)
-
-      setTimeout(() => {
-        setTyping(false)
-        const reply = getBotReply(text)
-        setMessages((prev) => [
-          ...prev,
-          { id: (Date.now() + 1).toString(), role: 'bot', text: reply, time: now() },
-        ])
-      }, 1200 + Math.random() * 600)
-    },
-    [],
-  )
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', text: text.trim(), time: now() }
+    setMessages((prev) => [...prev, userMsg])
+    setInput('')
+    setTyping(true)
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text.trim() }),
+      })
+      const data = await res.json()
+      setMessages((prev) => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: 'bot', text: data.reply || "I couldn't get a response. Try reaching us on WhatsApp!", time: now() },
+      ])
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: 'bot', text: "Oops, something went wrong! 😅 Tap the WhatsApp button in the header to reach our team directly.", time: now() },
+      ])
+    } finally {
+      setTyping(false)
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     sendMessage(input)
+  }
+
+  const handleWhatsApp = () => {
+    const summary = messages.filter(m => m.role === 'user').map(m => m.text).join(' | ')
+    const text = encodeURIComponent(`Hi VendoorX! I need help. My question: ${summary || 'I need assistance'}`)
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank', 'noopener,noreferrer')
   }
 
   // Render bold text (**text**)
@@ -150,8 +152,6 @@ export function ChatWidget() {
       ),
     )
   }
-
-  if (pathname.startsWith('/dashboard')) return null
 
   return (
     <>
@@ -189,9 +189,10 @@ export function ChatWidget() {
       {open && (
         <div
           className={cn(
-            'fixed bottom-24 right-5 md:bottom-8 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-background rounded-3xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300',
-            minimized ? 'h-[64px]' : 'h-[520px]',
+            'fixed bottom-24 right-4 z-50 bg-background rounded-3xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300',
+            minimized ? 'h-[64px]' : 'h-[min(520px,calc(100dvh-130px))]',
           )}
+          style={{ width: 'min(360px, calc(100vw - 2rem))' }}
         >
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3.5 bg-primary text-white flex-shrink-0">
@@ -206,6 +207,16 @@ export function ChatWidget() {
               <p className="text-[11px] text-white/80 leading-tight">Typically replies in minutes</p>
             </div>
             <div className="flex items-center gap-1">
+              <button
+                onClick={handleWhatsApp}
+                className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="Chat on WhatsApp"
+                title="Talk to a real person on WhatsApp"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+              </button>
               <button
                 onClick={() => setMinimized((m) => !m)}
                 className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
@@ -303,7 +314,8 @@ export function ChatWidget() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 bg-muted rounded-full px-4 py-2 text-sm outline-none border border-transparent focus:border-primary/40 transition-colors placeholder:text-muted-foreground/60"
+                  className="flex-1 bg-muted rounded-full px-4 py-2 outline-none border border-transparent focus:border-primary/40 transition-colors placeholder:text-muted-foreground/60"
+                  style={{ fontSize: 16 }}
                   maxLength={400}
                 />
                 <button
