@@ -24,19 +24,19 @@ interface Plan {
 
 const FALLBACK_PLANS: Plan[] = [
   {
-    id: 'starter', name: 'Starter', tagline: 'Perfect to get going',
+    id: 'starter', name: 'Starter', tagline: 'Perfect for getting started',
     monthly_price: 0, annual_price: 0, cta_text: 'Get Started Free', cta_href: '/auth/sign-up',
     is_highlighted: false, badge: null, color: 'from-slate-500 to-slate-700', sort_order: 1,
     features: [
       { text: 'Up to 10 product listings', included: true },
-      { text: 'WhatsApp order links', included: true },
-      { text: 'Public store profile page', included: true },
+      { text: 'WhatsApp buyer links', included: true },
+      { text: 'Your own public store page', included: true },
       { text: 'Basic buyer enquiries', included: true },
       { text: 'Community support', included: true },
       { text: 'Order management dashboard', included: false },
-      { text: 'Sales analytics', included: false },
-      { text: 'Paystack payment integration', included: false },
-      { text: 'Customer records & CRM', included: false },
+      { text: 'Sales & revenue analytics', included: false },
+      { text: 'Accept online card payments', included: false },
+      { text: 'Customer records & history', included: false },
       { text: 'AI listing assistant', included: false },
     ],
   },
@@ -46,13 +46,13 @@ const FALLBACK_PLANS: Plan[] = [
     is_highlighted: true, badge: 'Most Popular', color: 'from-green-500 to-emerald-700', sort_order: 2,
     features: [
       { text: 'Unlimited product listings', included: true },
-      { text: 'WhatsApp order links', included: true },
-      { text: 'Public store profile page', included: true },
-      { text: 'Priority email support', included: true },
+      { text: 'WhatsApp buyer links', included: true },
+      { text: 'Your own public store page', included: true },
+      { text: 'Priority support', included: true },
       { text: 'Order management dashboard', included: true },
-      { text: 'Sales analytics', included: true },
-      { text: 'Paystack payment integration', included: true },
-      { text: 'Customer records & CRM', included: true },
+      { text: 'Sales & revenue analytics', included: true },
+      { text: 'Accept online card payments', included: true },
+      { text: 'Customer records & history', included: true },
       { text: 'AI listing assistant', included: false },
       { text: 'Verified seller badge', included: false },
     ],
@@ -63,13 +63,13 @@ const FALLBACK_PLANS: Plan[] = [
     is_highlighted: false, badge: 'Best Value', color: 'from-gray-800 to-black', sort_order: 3,
     features: [
       { text: 'Unlimited product listings', included: true },
-      { text: 'WhatsApp order links', included: true },
-      { text: 'Public store profile page', included: true },
+      { text: 'WhatsApp buyer links', included: true },
+      { text: 'Your own public store page', included: true },
       { text: '24/7 priority support', included: true },
       { text: 'Order management dashboard', included: true },
-      { text: 'Advanced sales analytics', included: true },
-      { text: 'Paystack payment integration', included: true },
-      { text: 'Customer records & CRM', included: true },
+      { text: 'Advanced analytics & insights', included: true },
+      { text: 'Accept online card payments', included: true },
+      { text: 'Customer records & history', included: true },
       { text: 'AI listing assistant', included: true },
       { text: 'Verified seller badge', included: true },
     ],
@@ -108,14 +108,14 @@ export function PricingSection() {
         <div className="text-center mb-14">
           <span className="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-[0.18em] mb-5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <Star className="w-3 h-3 fill-primary" />
-            Pricing Plans
+            Simple Pricing
           </span>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground text-balance mt-3 mb-5 leading-[1.05]">
-            Pick your plan.{' '}
-            <span className="text-primary">Grow faster.</span>
+            Start free.{' '}
+            <span className="text-primary">Upgrade when ready.</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed text-pretty mb-10">
-            Zero commission on every sale. No hidden fees. Cancel anytime.
+            Zero commission on every naira you earn. No hidden charges. Cancel whenever you want.
           </p>
 
           <div className="inline-flex items-center gap-1 p-1 rounded-full bg-muted border border-border shadow-inner">
@@ -137,7 +137,7 @@ export function PricingSection() {
             >
               Annual
               <span className="text-[10px] font-black text-primary bg-primary/15 px-2 py-0.5 rounded-full border border-primary/20">
-                -20%
+                Save 20%
               </span>
             </button>
           </div>
@@ -202,10 +202,10 @@ export function PricingSection() {
                         </span>
                         {price > 0 && <span className="text-sm text-muted-foreground mb-1.5 leading-none">/mo</span>}
                       </div>
-                      {price === 0 && <p className="text-xs text-muted-foreground mt-1.5">No credit card required</p>}
+                      {price === 0 && <p className="text-xs text-muted-foreground mt-1.5">No card needed. No tricks.</p>}
                       {price > 0 && annual && (
                         <p className="text-xs text-primary font-bold mt-1.5">
-                          Save ₦{((plan.monthly_price - plan.annual_price) * 12).toLocaleString()} per year
+                          You save ₦{((plan.monthly_price - plan.annual_price) * 12).toLocaleString()} per year
                         </p>
                       )}
                     </div>
@@ -263,7 +263,7 @@ export function PricingSection() {
 
         {/* Trust strip */}
         <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
-          {['0% commission on all sales', 'Cancel or upgrade anytime', 'Secure Paystack payments', '14-day money-back guarantee'].map((item) => (
+          {['0% commission — ever', 'Cancel or upgrade anytime', '100% secure payments', '14-day money-back guarantee'].map((item) => (
             <span key={item} className="flex items-center gap-2">
               <Check className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
               {item}

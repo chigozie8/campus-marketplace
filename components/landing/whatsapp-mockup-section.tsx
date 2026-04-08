@@ -11,32 +11,23 @@ const MENU_BUTTONS = [
   { icon: Settings, label: 'Settings' },
 ]
 
-const TRUSTED_BRANDS = [
-  'UniLagMarket',
-  'OAU Connect',
-  'ABU Trade',
-  'FUTA Hub',
-  'UI Marketplace',
-  'LASU Deals',
-]
-
 const FLOATING_BADGES = [
   {
     icon: CheckCircle2,
-    title: 'Zero app needed',
-    subtitle: 'Works in WhatsApp',
+    title: 'No app download',
+    subtitle: 'Runs inside WhatsApp',
     position: '-right-4 sm:-right-10 top-20',
   },
   {
     icon: Star,
     title: '4.9 / 5 rating',
-    subtitle: 'From 12k+ users',
+    subtitle: 'From 12,500+ users',
     position: '-left-4 sm:-left-10 bottom-28',
     iconColor: 'text-amber-500',
   },
   {
     icon: Zap,
-    title: 'Instant Connect',
+    title: 'Close deals fast',
     subtitle: 'Chat in seconds',
     position: '-right-4 sm:-right-10 bottom-48',
   },
@@ -108,17 +99,17 @@ export function WhatsappMockupSection() {
       <div className="relative max-w-5xl mx-auto px-6 flex flex-col items-center gap-8">
         {/* Section label */}
         <p className="text-xs font-semibold tracking-[0.18em] uppercase text-primary">
-          See how it works
+          See it in action
         </p>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-center text-balance text-foreground">
-          Your personal WhatsApp<br className="hidden sm:block" /> store — managed by{' '}
-          <span className="text-primary">VendoorX</span>
+          Your store lives inside{' '}
+          <span className="text-primary">WhatsApp.</span>
+          <br className="hidden sm:block" /> Buyers never have to leave.
         </h2>
 
         <p className="text-base sm:text-lg text-muted-foreground text-center max-w-lg leading-relaxed text-pretty">
-          VendoorX gives you a smart WhatsApp storefront. Browse, buy, and sell right inside the
-          chat — no app download needed.
+          VendoorX powers a smart WhatsApp storefront for you. Buyers browse, message, and buy right from the chat they already use every day — no app to download, no link to click.
         </p>
 
         {/* ── iPhone mockup ── */}
@@ -134,10 +125,9 @@ export function WhatsappMockupSection() {
             className="relative mx-auto transition-transform duration-500 hover:scale-[1.02]"
             style={{
               width: 300,
-              // Titanium-look frame
               background: 'linear-gradient(160deg, #2a2a2a 0%, #111 40%, #1c1c1c 100%)',
               borderRadius: '52px',
-              padding: '3px', // frame border
+              padding: '3px',
               boxShadow: [
                 '0 60px 120px rgba(0,0,0,0.55)',
                 '0 0 0 0.5px rgba(255,255,255,0.12)',
@@ -256,28 +246,23 @@ export function WhatsappMockupSection() {
                     gap: 4,
                   }}
                 >
-                  {/* FaceID dot */}
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1a1a1a', border: '1.5px solid #2a2a2a' }} />
-                  {/* Front camera */}
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#141414', border: '1.5px solid #252525' }} />
                 </div>
 
                 {/* Status icons — right */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, minWidth: 34, justifyContent: 'flex-end' }}>
-                  {/* Signal bars */}
                   <svg width="14" height="10" viewBox="0 0 14 10" fill="white">
                     <rect x="0" y="7" width="2.5" height="3" rx="0.5" />
                     <rect x="3.5" y="5" width="2.5" height="5" rx="0.5" />
                     <rect x="7" y="3" width="2.5" height="7" rx="0.5" />
                     <rect x="10.5" y="0.5" width="2.5" height="9.5" rx="0.5" opacity="0.35" />
                   </svg>
-                  {/* WiFi */}
                   <svg width="13" height="10" viewBox="0 0 13 10" fill="white">
                     <path d="M6.5 8a1 1 0 110 2 1 1 0 010-2z" />
                     <path d="M3.2 6.2A4.7 4.7 0 016.5 5c1.2 0 2.4.4 3.3 1.2" stroke="white" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
                     <path d="M1 4A7.5 7.5 0 016.5 2c2 0 3.8.8 5.2 2" stroke="white" strokeWidth="1.3" fill="none" strokeLinecap="round" opacity="0.5"/>
                   </svg>
-                  {/* Battery */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <div style={{ width: 19, height: 10, border: '1.2px solid rgba(255,255,255,0.7)', borderRadius: 2.5, padding: 1.5, position: 'relative' }}>
                       <div style={{ width: '80%', height: '100%', background: 'white', borderRadius: 1 }} />
@@ -298,14 +283,12 @@ export function WhatsappMockupSection() {
                   borderBottom: '1px solid rgba(0,0,0,0.15)',
                 }}
               >
-                {/* Back arrow + badge count */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   <svg width="8" height="13" viewBox="0 0 8 13" fill="none">
                     <path d="M7 1L1 6.5 7 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 600 }}>244</span>
                 </div>
-                {/* Avatar */}
                 <div
                   style={{
                     width: 36,
@@ -325,7 +308,6 @@ export function WhatsappMockupSection() {
                 >
                   VX
                 </div>
-                {/* Name + status */}
                 <div style={{ flex: 1 }}>
                   <div style={{ color: 'white', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>
                     VendoorX
@@ -334,7 +316,6 @@ export function WhatsappMockupSection() {
                     online
                   </div>
                 </div>
-                {/* Action icons */}
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
                     <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.69A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
@@ -345,7 +326,7 @@ export function WhatsappMockupSection() {
                 </div>
               </div>
 
-              {/* ── Chat body — WhatsApp wallpaper bg ── */}
+              {/* ── Chat body ── */}
               <div
                 style={{
                   background: '#ECE5DD',
@@ -367,7 +348,7 @@ export function WhatsappMockupSection() {
                 {/* Welcome message bubble */}
                 <IncomingBubble time="9:41 AM">
                   <p style={{ fontSize: 12.5, color: '#111', lineHeight: 1.45, margin: 0 }}>
-                    Welcome back, <strong>Ken!</strong> Ready to grow your campus business today?
+                    Welcome back, <strong>Amaka!</strong> Your store is live. Ready to make some sales today?
                   </p>
                 </IncomingBubble>
 
@@ -464,7 +445,7 @@ export function WhatsappMockupSection() {
                 {/* Confirmation */}
                 <IncomingBubble time="9:42 AM">
                   <p style={{ fontSize: 12.5, color: '#111', lineHeight: 1.45, margin: 0 }}>
-                    Great! Your store link is ready to share. You have <strong>3 active listings</strong>.
+                    Perfect! Your store link is ready. You have <strong>3 active listings</strong> visible to buyers right now.
                   </p>
                 </IncomingBubble>
               </div>
@@ -480,18 +461,15 @@ export function WhatsappMockupSection() {
                   borderTop: '1px solid rgba(0,0,0,0.06)',
                 }}
               >
-                {/* Emoji button */}
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8696a0" strokeWidth="2" strokeLinecap="round">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
                   </svg>
                 </div>
-                {/* Input field */}
                 <div style={{ flex: 1, background: 'white', borderRadius: 20, padding: '6px 12px', fontSize: 11, color: '#aaa', boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}>
                   Message
                 </div>
-                {/* Mic / send */}
                 <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 6px rgba(37,211,102,0.45)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
                     <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
@@ -523,21 +501,16 @@ export function WhatsappMockupSection() {
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Trusted by strip */}
-      <div className="mt-24 max-w-4xl mx-auto px-6">
-        <p className="text-center text-xs font-bold tracking-[0.22em] uppercase text-muted-foreground/60 mb-8">
-          Trusted by campus communities
-        </p>
-        <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4">
-          {TRUSTED_BRANDS.map((brand) => (
-            <span
-              key={brand}
-              className="text-lg font-black italic text-muted-foreground/30 hover:text-primary/60 transition-all duration-300 cursor-default select-none"
-            >
-              {brand}
-            </span>
+        {/* Bottom trust strip */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
+          {[
+            '🇳🇬 Built for Nigeria',
+            '💬 WhatsApp-native',
+            '⚡ Live in under 5 minutes',
+            '🔒 Fully secure',
+          ].map((item) => (
+            <span key={item} className="font-medium">{item}</span>
           ))}
         </div>
       </div>

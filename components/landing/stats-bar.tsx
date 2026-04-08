@@ -9,6 +9,7 @@ const STATS = [
     prefix: '',
     suffix: 'K+',
     label: 'Active Vendors',
+    sublabel: 'Selling right now',
     icon: Users,
     isDecimal: false,
   },
@@ -17,6 +18,7 @@ const STATS = [
     prefix: '',
     suffix: '+',
     label: 'Nigerian Campuses',
+    sublabel: 'From UNILAG to BUK',
     icon: Building2,
     isDecimal: false,
   },
@@ -25,6 +27,7 @@ const STATS = [
     prefix: '₦',
     suffix: 'B+',
     label: 'Sales Processed',
+    sublabel: 'And growing daily',
     icon: TrendingUp,
     isDecimal: true,
   },
@@ -33,6 +36,7 @@ const STATS = [
     prefix: '',
     suffix: '/5',
     label: 'Average Rating',
+    sublabel: 'From 12,500+ reviews',
     icon: Star,
     isDecimal: true,
   },
@@ -80,6 +84,7 @@ function Stat({
   prefix,
   suffix,
   label,
+  sublabel,
   icon: Icon,
   isDecimal,
 }: (typeof STATS)[number]) {
@@ -88,9 +93,9 @@ function Stat({
   return (
     <div
       ref={ref}
-      className="flex flex-col items-center justify-center gap-1.5 py-6 px-4 group"
+      className="flex flex-col items-center justify-center gap-1 py-7 px-4 group"
     >
-      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-1 transition-transform duration-300 group-hover:scale-110">
+      <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-2 transition-transform duration-300 group-hover:scale-110">
         <Icon className="w-4.5 h-4.5 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">
@@ -98,7 +103,8 @@ function Stat({
         {isDecimal ? count.toFixed(1) : count}
         {suffix}
       </p>
-      <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">{label}</p>
+      <p className="text-xs sm:text-sm text-foreground font-semibold text-center">{label}</p>
+      <p className="text-[11px] text-muted-foreground text-center leading-tight">{sublabel}</p>
     </div>
   )
 }

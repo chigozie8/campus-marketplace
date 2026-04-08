@@ -7,28 +7,28 @@ const STEPS = [
     step: '01',
     icon: UserPlus,
     title: 'Create your free account',
-    description: 'Sign up in seconds with your email. Complete your seller profile with your campus, WhatsApp number, and what you sell.',
+    description: 'Sign up in seconds. Add your name, campus, WhatsApp number, and what you sell. Your store profile goes live immediately — no approval waiting.',
     color: 'from-emerald-500 to-green-600',
   },
   {
     step: '02',
     icon: Camera,
-    title: 'List your products',
-    description: 'Upload photos, write a description, set your price, and choose your category. Your listing goes live instantly.',
+    title: 'List your first product',
+    description: 'Upload a photo, write a short description, set your price, and pick a category. Done. Your listing is visible to buyers across your campus right away.',
     color: 'from-teal-500 to-cyan-600',
   },
   {
     step: '03',
     icon: Share2,
-    title: 'Share across platforms',
-    description: 'Share your listings to WhatsApp Status, Instagram Stories, and Facebook with one click.',
+    title: 'Share everywhere in one tap',
+    description: 'Hit share and your listing lands on WhatsApp Status, Instagram Stories, and Facebook instantly. One action. Maximum reach. Zero hassle.',
     color: 'from-cyan-500 to-blue-600',
   },
   {
     step: '04',
     icon: MessageCircle,
-    title: 'Close deals on WhatsApp',
-    description: 'Buyers tap "Chat on WhatsApp" and land directly in your DMs. Negotiate, confirm, and get paid — no platform interference.',
+    title: 'Close the deal on WhatsApp',
+    description: 'Buyers click "Chat on WhatsApp" and land right in your DMs. Negotiate, confirm, and get paid — all in the app you already know and love.',
     color: 'from-green-500 to-emerald-600',
   },
 ]
@@ -49,11 +49,11 @@ export function HowItWorksSection() {
             How it works
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mt-4 mb-5">
-            Selling made{' '}
-            <span className="text-primary">ridiculously simple</span>
+            From sign-up to first sale{' '}
+            <span className="text-primary">in under 5 minutes</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
-            From sign-up to first sale in under 5 minutes. No technical skills required.
+            No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale.
           </p>
         </div>
 

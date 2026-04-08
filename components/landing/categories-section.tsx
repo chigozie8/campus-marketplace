@@ -6,12 +6,12 @@ import { Laptop, Shirt, BookOpen, UtensilsCrossed, Briefcase, Home, Dumbbell, Sp
 const categories = [
   { icon: Laptop, name: 'Electronics', count: '12.4K', slug: 'electronics', gradient: 'from-blue-500 to-indigo-600', bgColor: 'bg-blue-50 dark:bg-blue-950/40' },
   { icon: Shirt, name: 'Fashion', count: '18.2K', slug: 'fashion', gradient: 'from-pink-500 to-rose-600', bgColor: 'bg-pink-50 dark:bg-pink-950/40' },
-  { icon: BookOpen, name: 'Books', count: '9.7K', slug: 'books', gradient: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50 dark:bg-amber-950/40' },
+  { icon: BookOpen, name: 'Textbooks', count: '9.7K', slug: 'books', gradient: 'from-amber-500 to-orange-600', bgColor: 'bg-amber-50 dark:bg-amber-950/40' },
   { icon: UtensilsCrossed, name: 'Food & Drinks', count: '5.1K', slug: 'food-drinks', gradient: 'from-orange-500 to-red-600', bgColor: 'bg-orange-50 dark:bg-orange-950/40' },
   { icon: Briefcase, name: 'Services', count: '3.8K', slug: 'services', gradient: 'from-violet-500 to-purple-600', bgColor: 'bg-violet-50 dark:bg-violet-950/40' },
   { icon: Home, name: 'Housing', count: '2.3K', slug: 'housing', gradient: 'from-indigo-500 to-blue-600', bgColor: 'bg-indigo-50 dark:bg-indigo-950/40' },
-  { icon: Dumbbell, name: 'Sports', count: '4.5K', slug: 'sports', gradient: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50 dark:bg-green-950/40' },
-  { icon: Sparkles, name: 'Beauty', count: '6.9K', slug: 'beauty', gradient: 'from-rose-500 to-pink-600', bgColor: 'bg-rose-50 dark:bg-rose-950/40' },
+  { icon: Dumbbell, name: 'Sports & Fitness', count: '4.5K', slug: 'sports', gradient: 'from-green-500 to-emerald-600', bgColor: 'bg-green-50 dark:bg-green-950/40' },
+  { icon: Sparkles, name: 'Beauty & Care', count: '6.9K', slug: 'beauty', gradient: 'from-rose-500 to-pink-600', bgColor: 'bg-rose-50 dark:bg-rose-950/40' },
 ]
 
 export function CategoriesSection() {
@@ -27,13 +27,13 @@ export function CategoriesSection() {
         {/* Header */}
         <div className="text-center mb-14">
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-            Browse by Category
+            Shop by Category
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-balance mt-4 mb-5">
-            Find what you need, <span className="text-primary">fast</span>
+            Whatever you need, <span className="text-primary">it&apos;s here.</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto text-balance leading-relaxed">
-            From textbooks to tech, fashion to food — everything a student needs is right here.
+            From second-hand laptops to fresh jollof rice — your entire campus life, in one marketplace.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export function CategoriesSection() {
             >
               {/* Hover gradient overlay */}
               <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-              
+
               {/* Icon container */}
               <div
                 className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${bgColor} flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
@@ -62,7 +62,7 @@ export function CategoriesSection() {
                   {name}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                  {count} items
+                  {count} listings
                   <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </p>
               </div>

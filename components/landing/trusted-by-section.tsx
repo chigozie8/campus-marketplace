@@ -31,10 +31,10 @@ export function TrustedBySection() {
     <section className="py-14 sm:py-16 overflow-hidden bg-background border-y border-border/40">
       <div className="max-w-5xl mx-auto px-4 mb-8 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground/70 mb-2">
-          Trusted by campus communities across Nigeria
+          Trusted by students on campuses all over Nigeria
         </p>
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-          Students from <span className="text-primary">120+ universities</span> trade on VendoorX
+          <span className="text-primary">120+ universities.</span> One marketplace. Yours.
         </h2>
       </div>
 

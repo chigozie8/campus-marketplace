@@ -14,7 +14,7 @@ const TESTIMONIALS = [
     metric: '₦180K',
     metricLabel: 'first month',
     rating: 5,
-    quote: 'I made ₦180,000 in my first month selling clothes on VendoorX. The WhatsApp button is genius — buyers just chat me directly and we close the deal in minutes.',
+    quote: 'I made ₦180,000 in my first month selling clothes on VendoorX. The WhatsApp button is genius — buyers just chat me directly and we close deals in minutes. I\'ve never sold this fast.',
     verified: true,
     accent: '#16a34a',
   },
@@ -26,9 +26,9 @@ const TESTIMONIALS = [
     initials: 'CE',
     flag: '🇳🇬',
     metric: '3 Laptops',
-    metricLabel: 'one week',
+    metricLabel: 'in one week',
     rating: 5,
-    quote: 'Sold 3 laptops in one week just from listing them here. The platform is clean, fast, and the seller dashboard shows me exactly how many people viewed my listings.',
+    quote: 'Sold 3 laptops in one week just from listing them here. The platform is clean, fast, and my dashboard shows exactly how many people are viewing my listings in real time.',
     verified: true,
     accent: '#2563eb',
   },
@@ -42,7 +42,7 @@ const TESTIMONIALS = [
     metric: 'Daily Orders',
     metricLabel: 'campus-wide',
     rating: 5,
-    quote: 'My jollof rice business blew up after I listed on VendoorX. I get daily orders from students across campus. Best business decision I ever made.',
+    quote: 'My jollof rice business completely blew up after I listed on VendoorX. I get daily orders from students all over campus now. Best business decision I\'ve ever made.',
     verified: true,
     accent: '#ea580c',
   },
@@ -54,9 +54,9 @@ const TESTIMONIALS = [
     initials: 'OA',
     flag: '🇳🇬',
     metric: 'School Fees',
-    metricLabel: 'recouped',
+    metricLabel: 'fully recouped',
     rating: 5,
-    quote: 'Made back my school fees selling used textbooks! Students are always looking for affordable books and VendoorX puts me right in front of them.',
+    quote: 'I made back my school fees just selling used textbooks! Students are always looking for affordable books and VendoorX puts me right in front of them. It basically sells for me.',
     verified: false,
     accent: '#7c3aed',
   },
@@ -68,9 +68,9 @@ const TESTIMONIALS = [
     initials: 'BN',
     flag: '🇳🇬',
     metric: '3× Sales',
-    metricLabel: 'after badge',
+    metricLabel: 'after getting verified',
     rating: 5,
-    quote: 'The verified seller badge gives buyers confidence. My sales tripled once I got verified. VendoorX is the real deal for serious campus entrepreneurs.',
+    quote: 'The verified seller badge changed everything. Buyers feel safe buying from me now. My sales literally tripled after I got verified. VendoorX is the real deal for serious entrepreneurs.',
     verified: true,
     accent: '#db2777',
   },
@@ -82,9 +82,9 @@ const TESTIMONIALS = [
     initials: 'IM',
     flag: '🇳🇬',
     metric: 'Steady Clients',
-    metricLabel: 'every week',
+    metricLabel: 'every single week',
     rating: 5,
-    quote: 'I offer laptop repairs and VendoorX sends me steady clients every week. The AI assistant helped me write better service descriptions. Amazing platform!',
+    quote: 'I offer laptop repairs and VendoorX sends me a steady stream of clients every week. I didn\'t even run ads — people just find my listing and message me directly. It runs itself.',
     verified: true,
     accent: '#0891b2',
   },
@@ -132,11 +132,11 @@ export function TestimonialsSection() {
             Real Students. Real Results.
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-gray-950 dark:text-white text-balance leading-tight mb-4">
-            Nigerian campuses are{' '}
-            <span className="text-[#16a34a]">making money</span>
+            Nigerian students are{' '}
+            <span className="text-[#16a34a]">eating good</span> on VendoorX
           </h2>
           <p className="text-gray-500 dark:text-muted-foreground text-lg max-w-xl mx-auto">
-            From UNILAG to BUK — students across Nigeria are building real businesses on VendoorX.
+            From Lagos to Kano, students across Nigeria are turning their skills and products into real income. Here&apos;s what they&apos;re saying.
           </p>
         </div>
 
@@ -226,7 +226,7 @@ export function TestimonialsSection() {
 
         {/* Bottom CTA strip */}
         <div className="mt-16 text-center">
-          <p className="text-sm text-gray-400 mb-2">Join over 50,000 students already hustling on VendoorX</p>
+          <p className="text-sm text-gray-400 mb-2">Join over 50,000 students already making money on VendoorX</p>
           <a
             href="/auth/sign-up"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#16a34a] text-white font-black text-sm hover:bg-[#15803d] transition-colors shadow-lg shadow-[#16a34a]/25"

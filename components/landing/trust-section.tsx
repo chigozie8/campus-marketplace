@@ -1,6 +1,6 @@
 'use client'
 
-import { Shield, Lock, RotateCcw, BadgeCheck, Landmark, Eye, Users, Headphones, Phone, MessageCircle, ArrowRight } from 'lucide-react'
+import { Shield, Lock, RotateCcw, BadgeCheck, Landmark, Headphones, Phone, MessageCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 const TRUST_PILLARS = [
@@ -9,9 +9,9 @@ const TRUST_PILLARS = [
     color: 'text-emerald-600 dark:text-emerald-400',
     bg: 'bg-emerald-50 dark:bg-emerald-950/40',
     border: 'border-emerald-100 dark:border-emerald-900/50',
-    title: 'Escrow-Protected Payments',
+    title: 'Your Money is Held Safely',
     body:
-      'Your money is never sent directly to the seller. VendoorX holds it in secure escrow until you confirm your item arrived safely — then we release the funds.',
+      'When you buy something, your payment is held securely by VendoorX — not sent directly to the seller. We only release it once you confirm your item has arrived safely.',
     badge: 'Buyer Protected',
     badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
   },
@@ -20,9 +20,9 @@ const TRUST_PILLARS = [
     color: 'text-blue-600 dark:text-blue-400',
     bg: 'bg-blue-50 dark:bg-blue-950/40',
     border: 'border-blue-100 dark:border-blue-900/50',
-    title: 'Paystack Secure Checkout',
+    title: 'Safe & Secure Checkout',
     body:
-      'All payments are processed by Paystack — Nigeria\'s most trusted payment gateway, licensed by the Central Bank of Nigeria (CBN). We never store your card details.',
+      'All payments on VendoorX are handled by Nigeria\'s most trusted and licensed payment partner. We never store your card details — your financial info is always protected.',
     badge: 'CBN Licensed',
     badgeColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
   },
@@ -33,7 +33,7 @@ const TRUST_PILLARS = [
     border: 'border-orange-100 dark:border-orange-900/50',
     title: 'Full Refund Guarantee',
     body:
-      'If your item never arrives, or it\'s significantly different from what was listed, you get a full refund — no arguments, no hassle. We have your back.',
+      'If your item never shows up, or it\'s completely different from what was listed, you get every naira back — no arguments, no runaround, no stress. We have your back.',
     badge: '100% Refundable',
     badgeColor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
   },
@@ -44,7 +44,7 @@ const TRUST_PILLARS = [
     border: 'border-purple-100 dark:border-purple-900/50',
     title: 'Verified Student Sellers',
     body:
-      'Every seller on VendoorX must verify with their Nigerian university email address. You know exactly who you\'re buying from — a real student at a real campus.',
+      'Every seller on VendoorX must verify with a real Nigerian university email. You always know you\'re buying from an actual student at a real campus — not a random stranger.',
     badge: 'University Verified',
     badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
   },
@@ -53,9 +53,9 @@ const TRUST_PILLARS = [
     color: 'text-gray-700 dark:text-gray-300',
     bg: 'bg-gray-50 dark:bg-gray-900/40',
     border: 'border-gray-100 dark:border-gray-800/50',
-    title: '256-Bit SSL Encryption',
+    title: 'Bank-Grade Encryption',
     body:
-      'Every page, every transaction, every message is encrypted with bank-grade 256-bit SSL. Your personal details and payment data are completely private.',
+      'Every page, every payment, every message on VendoorX is protected with the same level of encryption used by banks. Your personal data and payment information are completely private.',
     badge: 'Bank-Grade SSL',
     badgeColor: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
   },
@@ -64,9 +64,9 @@ const TRUST_PILLARS = [
     color: 'text-rose-600 dark:text-rose-400',
     bg: 'bg-rose-50 dark:bg-rose-950/40',
     border: 'border-rose-100 dark:border-rose-900/50',
-    title: '24/7 Dispute Resolution',
+    title: 'Real Nigerian Support',
     body:
-      'Got a problem? Our Nigerian support team reviews every dispute within 24 hours. We\'re not overseas — we understand campus life in Nigeria deeply.',
+      'Got a problem? Our Nigerian support team personally reviews every dispute within 24 hours. We\'re not overseas — we understand exactly what campus life in Nigeria looks like.',
     badge: 'Nigerian Support',
     badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
   },
@@ -75,7 +75,7 @@ const TRUST_PILLARS = [
 const COMPLIANCE_BADGES = [
   {
     label: 'NDPR Compliant',
-    sub: 'Nigeria Data Protection Regulation',
+    sub: 'Nigeria Data Protection',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="8" fill="#008751" />
@@ -85,7 +85,7 @@ const COMPLIANCE_BADGES = [
   },
   {
     label: 'CBN Compliant',
-    sub: 'Central Bank of Nigeria Guidelines',
+    sub: 'Central Bank of Nigeria',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="8" fill="#1a56db" />
@@ -95,7 +95,7 @@ const COMPLIANCE_BADGES = [
   },
   {
     label: 'SSL Secured',
-    sub: '256-bit TLS Encryption',
+    sub: 'Bank-Level Encryption',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="8" fill="#059669" />
@@ -106,8 +106,8 @@ const COMPLIANCE_BADGES = [
     ),
   },
   {
-    label: 'Paystack Powered',
-    sub: 'Trusted by 200,000+ Nigerian businesses',
+    label: 'Secure Payments',
+    sub: 'Trusted by 200,000+ businesses',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7" xmlns="http://www.w3.org/2000/svg">
         <rect width="32" height="32" rx="8" fill="#0ba4db" />
@@ -119,10 +119,10 @@ const COMPLIANCE_BADGES = [
 ]
 
 const HOW_IT_WORKS_STEPS = [
-  { step: '1', text: 'You pay VendoorX (not the seller) via Paystack', color: 'bg-emerald-500' },
-  { step: '2', text: 'Seller is notified and delivers your item', color: 'bg-blue-500' },
-  { step: '3', text: 'You confirm safe receipt in your dashboard', color: 'bg-purple-500' },
-  { step: '4', text: 'We release payment to the seller — job done', color: 'bg-orange-500' },
+  { step: '1', text: 'You pay VendoorX securely — not the seller directly', color: 'bg-emerald-500' },
+  { step: '2', text: 'Seller is notified and delivers your item to you', color: 'bg-blue-500' },
+  { step: '3', text: 'You confirm you received it safely in your account', color: 'bg-purple-500' },
+  { step: '4', text: 'We release the payment to the seller — done!', color: 'bg-orange-500' },
 ]
 
 export function TrustSection() {
@@ -139,15 +139,14 @@ export function TrustSection() {
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-950 dark:text-white mb-4 tracking-tight">
-            Built for{' '}
+            Built so{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
-              Nigerian Students
+              Nigerian students
             </span>{' '}
-            to Trust
+            can trade with confidence
           </h2>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            We know trust is earned, not demanded. That&apos;s why every naira on VendoorX is
-            protected end-to-end — from the moment you pay to the moment your item arrives.
+            Trust is earned, not demanded. Every naira on VendoorX is protected from the moment you pay to the moment your item arrives — or you get it back, period.
           </p>
         </div>
 
@@ -158,7 +157,7 @@ export function TrustSection() {
               <Landmark className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h3 className="font-black text-gray-950 dark:text-white text-lg">
-              How Escrow Protection Works
+              How Your Money is Protected
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -174,7 +173,7 @@ export function TrustSection() {
           <p className="mt-6 text-xs text-gray-400 dark:text-gray-500 text-center">
             If anything goes wrong at step 2 or 3, you get a{' '}
             <span className="font-bold text-emerald-600 dark:text-emerald-400">100% refund</span>{' '}
-            — no questions asked.
+            — no questions asked, no drama.
           </p>
         </div>
 
@@ -204,7 +203,7 @@ export function TrustSection() {
         {/* Compliance badge strip */}
         <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-8 mb-12">
           <p className="text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6">
-            Certified, Compliant &amp; Audited
+            Certified, Compliant &amp; Independently Verified
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {COMPLIANCE_BADGES.map(({ label, sub, icon }) => (
@@ -224,7 +223,7 @@ export function TrustSection() {
         {/* Social proof strip */}
         <div className="grid grid-cols-3 gap-4 mb-12">
           {[
-            { stat: '₦0', label: 'Funds ever lost to fraud', sub: 'Since launch' },
+            { stat: '₦0', label: 'Lost to fraud', sub: 'Since day one' },
             { stat: '100%', label: 'Disputes resolved', sub: 'Within 24 hours' },
             { stat: '4.9★', label: 'Buyer satisfaction', sub: 'From 12,500+ reviews' },
           ].map(({ stat, label, sub }) => (
@@ -242,7 +241,7 @@ export function TrustSection() {
             <div className="text-center sm:text-left">
               <p className="font-black text-gray-950 dark:text-white text-lg">Need help or have a question?</p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Our Nigerian support team is available Mon–Sat 8am–10pm WAT.
+                Our Nigerian support team is available Mon–Sat, 8am–10pm (WAT).
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
@@ -251,16 +250,16 @@ export function TrustSection() {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/25"
               >
                 <Phone className="w-4 h-4" />
-                07082039250
+                Call Support
               </a>
               <a
-                href="https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with..."
+                href="https://wa.me/15792583013?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with..."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white text-sm font-bold transition-all hover:scale-105 active:scale-95"
               >
                 <MessageCircle className="w-4 h-4" />
-                WhatsApp
+                WhatsApp Us
               </a>
               <Link
                 href="/trust"

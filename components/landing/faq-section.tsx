@@ -8,52 +8,52 @@ const FAQS = [
   {
     category: 'Getting Started',
     q: 'Is VendoorX completely free to join?',
-    a: 'Yes — joining VendoorX is 100% free. The Starter plan lets you list up to 10 products, generate WhatsApp order links, and receive buyers at zero cost, forever. We only charge if you choose to upgrade to a paid plan for advanced features.',
+    a: 'Yes — joining VendoorX is 100% free, forever. The Starter plan lets you list up to 10 products, get a public store page, and connect buyers directly via WhatsApp at zero cost. We only charge when you choose to unlock advanced features on a paid plan.',
   },
   {
     category: 'Getting Started',
-    q: 'Do I need a website to use VendoorX?',
-    a: 'Not at all. VendoorX gives you a ready-made public store profile page you can share with anyone. No coding, no hosting, no setup — just sign up, add your products, and your store is live within minutes.',
+    q: 'Do I need a website or any technical skills?',
+    a: 'Not at all. VendoorX gives you a ready-made store page you can share with anyone, instantly. No coding, no hosting, no setup headache — just sign up, add your products, and your store is live within 2 minutes.',
   },
   {
     category: 'Payments',
     q: 'How do payments work on VendoorX?',
-    a: 'On the free Starter plan, payments are handled directly between you and your buyer — cash on campus, bank transfer, etc. On Growth and Pro plans, you get Paystack integration so buyers can pay directly and you receive automatic payment confirmations.',
+    a: 'On the free plan, you settle payments directly with your buyer however you like — cash, bank transfer, etc. On Growth and Pro plans, buyers can pay you online with their card right from your store page, and you get an instant alert the moment money lands. Simple.',
   },
   {
     category: 'Payments',
-    q: 'Does VendoorX charge commission on my sales?',
-    a: 'Never. VendoorX charges zero commission on any sale you make, regardless of your plan. The subscription fee is all you pay — keep every naira you earn.',
+    q: 'Does VendoorX take a cut of my sales?',
+    a: 'Never. VendoorX takes zero commission on any sale you make — regardless of your plan. The only thing you pay is your subscription fee (if you choose a paid plan). Every naira you earn goes straight to you.',
   },
   {
     category: 'Platform',
-    q: 'What platforms does VendoorX work with?',
-    a: 'VendoorX is built around WhatsApp, Instagram, and Facebook. You can share your listings and store directly to WhatsApp Status, Instagram Stories, and Facebook with a single tap.',
+    q: 'Which social platforms can I share my listings to?',
+    a: 'You can share your listings to WhatsApp Status, Instagram Stories, Facebook, TikTok, and more — in a single tap. VendoorX generates the perfect post for each platform so you don\'t have to think about it.',
   },
   {
     category: 'Platform',
     q: 'How does the Verified Seller badge work?',
-    a: 'The Verified Seller badge is available on the Pro plan. Our team reviews your profile, products, and history before granting verification. Verified sellers consistently convert more buyers because the badge signals trust and legitimacy.',
+    a: 'The Verified Seller badge is available on the Pro plan. Our team reviews your profile and products before granting verification. Once verified, a trust badge appears on your store and listings — giving buyers confidence to choose you over unverified sellers. Verified sellers consistently close more deals.',
   },
   {
     category: 'Platform',
     q: 'Is VendoorX only for university students in Nigeria?',
-    a: 'VendoorX is focused on Nigerian campuses and university students, but anyone can use the platform. We currently serve 120+ campuses across Nigeria including UNILAG, UI, OAU, FUTA, ABU, and BUK.',
+    a: 'VendoorX is built specifically for Nigerian campus communities, but anyone can use it. We currently serve 120+ campuses across Nigeria including UNILAG, OAU, UI, FUTA, ABU, UNIBEN, BUK, and many more.',
   },
   {
     category: 'Billing',
     q: 'Can I cancel my subscription anytime?',
-    a: 'Yes. You can upgrade, downgrade, or cancel your subscription at any time from your dashboard settings. When you cancel, you keep access until the end of your billing period, then you revert to the free Starter plan.',
+    a: 'Yes, completely. You can upgrade, downgrade, or cancel from your dashboard settings at any time. When you cancel, you keep all your features until the end of the billing period, then you move back to the free Starter plan — no surprises.',
   },
   {
     category: 'Platform',
     q: 'What is the AI listing assistant?',
-    a: 'The AI listing assistant (available on the Pro plan) helps you write better product titles, descriptions, and pricing recommendations. It analyses successful listings in your category and suggests copy that attracts more buyers and converts faster.',
+    a: 'The AI listing assistant (Pro plan only) helps you write better product titles, descriptions, and even suggests the right price for your items. It looks at what\'s working in your category and gives you copy that attracts more buyers and converts faster. Think of it as a personal copywriter for your store.',
   },
   {
     category: 'Getting Started',
-    q: 'How do I get started?',
-    a: 'Click "Get Started Free" anywhere on this page. Sign up with your email or Google account, create your store profile, and add your first product. The whole setup takes under 5 minutes — no credit card needed.',
+    q: 'How do I get started right now?',
+    a: 'Click "Get Started Free" anywhere on this page. Sign up with your email or Google account in seconds, create your store profile, and add your first product. The whole thing takes under 5 minutes — no card needed, no approval waiting.',
   },
 ]
 
@@ -125,12 +125,12 @@ export function FaqSection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground text-balance mt-4 mb-5 leading-tight">
             Questions we{' '}
             <span className="relative inline-block">
-              <span className="relative z-10 text-primary">always get asked</span>
+              <span className="relative z-10 text-primary">get asked all the time</span>
               <span className="absolute -bottom-1 left-0 w-full h-2 bg-primary/15 rounded-full -z-0" />
             </span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed">
-            Everything you need to know before you sign up. Still curious? We&apos;re always reachable.
+            Everything you need to know before signing up. Still not sure? We&apos;re always reachable on WhatsApp.
           </p>
         </div>
 
@@ -145,17 +145,17 @@ export function FaqSection() {
         <div className="mt-12 rounded-3xl bg-primary/5 border border-primary/15 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <p className="font-bold text-foreground text-base mb-1">Still have a question?</p>
-            <p className="text-sm text-muted-foreground">Our team typically replies within 5 minutes on WhatsApp.</p>
+            <p className="text-sm text-muted-foreground">Our team typically responds within 5 minutes on WhatsApp.</p>
           </div>
-          <Link
-            href="https://wa.me/2348000000000"
+          <a
+            href="https://wa.me/15792583013?text=Hi%20VendoorX%2C%20I%20have%20a%20question..."
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#25D366] text-white text-sm font-bold hover:bg-[#20c05c] transition-all hover:scale-[1.03] shadow-lg shadow-[#25D366]/25 whitespace-nowrap"
           >
             <MessageCircle className="w-4 h-4" />
             Chat with us on WhatsApp
-          </Link>
+          </a>
         </div>
       </div>
     </section>
