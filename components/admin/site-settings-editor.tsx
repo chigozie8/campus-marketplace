@@ -79,21 +79,20 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
     }
   }
 
-  async function saveSettingValue(key: keyof SiteSettings, value: string) {
+  async function autoSaveUpload(key: keyof SiteSettings, url: string) {
     setSaving(key)
     setError(null)
     try {
       const res = await fetch('/api/admin/site-settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, value }),
+        body: JSON.stringify({ key, value: url }),
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Save failed')
-      setValues(v => ({ ...v, [key]: value }))
       setSaved(key)
       setTimeout(() => setSaved(null), 2500)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Save failed')
+      setError(e instanceof Error ? e.message : 'Auto-save failed')
     } finally {
       setSaving(null)
     }
@@ -126,15 +125,17 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
                   <div className="flex items-end gap-3">
                     <ImageUploadField
                       value={values[key]}
-                      onChange={url => saveSettingValue(key, url)}
                       label={label}
                       shape="circle"
                       previewSize={44}
                       className="flex-1"
+                      onChange={url => setValues(v => ({ ...v, [key]: url }))}
+                      onUpload={url => autoSaveUpload(key, url)}
                     />
                     <button
                       onClick={() => saveSetting(key)}
                       disabled={saving === key}
+                      title="Save manually-typed URL"
                       className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-xs font-bold shrink-0 transition-all mb-0.5"
                     >
                       {saving === key ? (
@@ -182,7 +183,7 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
       ))}
 
       <p className="text-xs text-muted-foreground text-center pb-4">
-        Each field saves independently. Changes go live immediately on the next page load.
+        Each field saves independently. Uploaded images auto-save; for pasted URLs, click Save.
       </p>
     </div>
   )

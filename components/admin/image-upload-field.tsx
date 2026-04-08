@@ -7,6 +7,7 @@ import { Upload, Loader2, ImageIcon, X } from 'lucide-react'
 interface ImageUploadFieldProps {
   value: string
   onChange: (url: string) => void
+  onUpload?: (url: string) => void
   label?: string
   shape?: 'circle' | 'square'
   previewSize?: number
@@ -14,9 +15,14 @@ interface ImageUploadFieldProps {
   className?: string
 }
 
+function isValidImageUrl(url: string): boolean {
+  return /^https?:\/\/.{4,}/.test(url.trim())
+}
+
 export function ImageUploadField({
   value,
   onChange,
+  onUpload,
   label,
   shape = 'circle',
   previewSize = 48,
@@ -24,17 +30,18 @@ export function ImageUploadField({
   className,
 }: ImageUploadFieldProps) {
   const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const roundedClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl'
+  const showPreview = isValidImageUrl(value)
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
 
     setUploading(true)
-    setError(null)
+    setUploadError(null)
 
     try {
       const form = new FormData()
@@ -44,9 +51,12 @@ export function ImageUploadField({
       const json = await res.json()
 
       if (!res.ok) throw new Error(json.error || 'Upload failed')
-      onChange(json.url as string)
+
+      const uploadedUrl = json.url as string
+      onChange(uploadedUrl)
+      onUpload?.(uploadedUrl)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      setUploadError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -62,12 +72,12 @@ export function ImageUploadField({
       )}
 
       <div className="flex items-start gap-3">
-        {/* Thumbnail preview */}
+        {/* Thumbnail preview — only rendered for valid http(s) URLs */}
         <div
           className={`shrink-0 bg-muted border border-border overflow-hidden flex items-center justify-center ${roundedClass}`}
           style={{ width: previewSize, height: previewSize }}
         >
-          {value ? (
+          {showPreview ? (
             <Image
               src={value}
               alt="preview"
@@ -82,13 +92,13 @@ export function ImageUploadField({
         </div>
 
         <div className="flex-1 min-w-0 space-y-2">
-          {/* URL text input fallback */}
+          {/* URL text input — updates local state only (no auto-save) */}
           <div className="flex items-center gap-2">
             <input
               type="url"
               value={value}
               onChange={e => onChange(e.target.value)}
-              placeholder="https://... or upload below"
+              placeholder="https://... or click Upload below"
               className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-muted border border-border text-xs font-mono focus:outline-none focus:border-primary transition-colors"
             />
             {value && (
@@ -103,7 +113,7 @@ export function ImageUploadField({
             )}
           </div>
 
-          {/* Upload button */}
+          {/* Upload button — auto-saves via onUpload callback when provided */}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -117,8 +127,8 @@ export function ImageUploadField({
             )}
           </button>
 
-          {error && (
-            <p className="text-xs text-red-500 mt-1">{error}</p>
+          {uploadError && (
+            <p className="text-xs text-red-500">{uploadError}</p>
           )}
         </div>
       </div>
