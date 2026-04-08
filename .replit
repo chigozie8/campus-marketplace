@@ -67,6 +67,6 @@ NEXT_PUBLIC_TAWKTO_WIDGET_ID = "1jll4pjbb"
 NEXT_PUBLIC_SUPPORT_WHATSAPP = "15792583013"
 
 [deployment]
-deploymentTarget = "vm"
-run = ["bash", "-c", "cd backend && npm run start & npm run start"]
-build = ["bash", "-c", "npm install && cd backend && npm install && cd .. && npm run build"]
+deploymentTarget = "autoscale"
+run = ["npm", "run", "start"]
+build = ["npm", "run", "build"]
