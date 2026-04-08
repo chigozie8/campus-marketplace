@@ -165,11 +165,11 @@ export default async function AdminOverviewPage() {
         </div>
         {/* Recent webhook-confirmed payments */}
         <div className="px-5 pb-5">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Recent Webhook Events (Paystack charge.success)</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Recent Paid Orders (payment_ref set by Paystack webhook)</p>
           {(recentWebhookOrders ?? []).length === 0 ? (
             <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-muted/30 border border-border">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <p className="text-[11px] text-muted-foreground">No webhook-confirmed payments yet — send a test transaction to verify the pipeline.</p>
+              <p className="text-[11px] text-muted-foreground">No paid orders with a payment reference yet — send a test transaction to verify the pipeline.</p>
             </div>
           ) : (
             <div className="space-y-1.5">
