@@ -93,7 +93,7 @@ function PwaInstallPromptCore() {
       <button
         onClick={() => setModalOpen(true)}
         aria-label="Install VendoorX app"
-        className={`fixed z-40 bottom-[84px] left-4 sm:bottom-6 sm:left-6 flex items-center gap-2 bg-[#0a0a0a] dark:bg-zinc-800 text-white pl-2.5 pr-3.5 py-2 rounded-full shadow-xl shadow-black/25 hover:scale-105 active:scale-95 transition-all duration-200 ${
+        className={`fixed z-40 bottom-[84px] left-4 sm:bottom-6 sm:left-6 flex items-center gap-2 bg-white text-[#0a0a0a] border border-zinc-200 pl-2.5 pr-3.5 py-2 rounded-full shadow-xl shadow-black/30 hover:scale-105 active:scale-95 transition-all duration-200 ${
           chipVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
         }`}
       >
