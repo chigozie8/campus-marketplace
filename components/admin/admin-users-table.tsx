@@ -659,7 +659,7 @@ export function AdminUsersTable({ users }: Props) {
                   {/* ── LISTINGS ── */}
                   {activeSection === 'listings' && (
                     <div className="space-y-3">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{detailData.listings.length} listing{detailData.listings.length !== 1 ? 's' : ''}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{detailData.listings.length} active listing{detailData.listings.length !== 1 ? 's' : ''}</p>
                       {detailData.listings.length === 0 ? (
                         <div className="py-6 text-center text-sm text-muted-foreground">No listings yet</div>
                       ) : detailData.listings.map((p) => (
@@ -693,8 +693,8 @@ export function AdminUsersTable({ users }: Props) {
                   {/* ── ORDERS ── */}
                   {activeSection === 'orders' && (
                     <div className="space-y-4">
-                      <OrderList label="As Buyer" orders={detailData.buyerOrders} />
-                      <OrderList label="As Seller" orders={detailData.sellerOrders} />
+                      <OrderList label="Order History (as Buyer)" orders={detailData.buyerOrders} />
+                      <OrderList label="Order History (as Seller)" orders={detailData.sellerOrders} />
                     </div>
                   )}
 

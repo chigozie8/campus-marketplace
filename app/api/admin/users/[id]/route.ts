@@ -59,22 +59,22 @@ export async function GET(
       .from('products')
       .select('id, title, price, is_available, views, created_at, images')
       .eq('seller_id', id)
-      .order('created_at', { ascending: false })
-      .limit(20),
+      .eq('is_available', true)
+      .order('created_at', { ascending: false }),
 
     adminClient
       .from('orders')
       .select('id, status, payment_status, total_amount, payment_ref, created_at, products(title)')
       .eq('buyer_id', id)
       .order('created_at', { ascending: false })
-      .limit(10),
+      .limit(100),
 
     adminClient
       .from('orders')
       .select('id, status, payment_status, total_amount, payment_ref, created_at, products(title)')
       .eq('seller_id', id)
       .order('created_at', { ascending: false })
-      .limit(10),
+      .limit(100),
 
     adminClient
       .from('wallets')
