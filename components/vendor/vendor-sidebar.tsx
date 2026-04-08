@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Inbox, Package, ShoppingBag,
   Settings, LogOut, Bell, Store, BookOpen,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
   { href: '/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
@@ -27,6 +28,13 @@ interface Props {
 
 export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+  }
 
   return (
     <aside className="hidden md:flex flex-col w-60 bg-white dark:bg-sidebar border-r border-gray-100 dark:border-sidebar-border fixed h-full z-30">
@@ -96,15 +104,13 @@ export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Pr
             <p className="text-[10px] text-gray-400 dark:text-muted-foreground truncate">{email}</p>
           </div>
         </div>
-        <form action="/api/auth/sign-out" method="POST">
-          <button
-            type="submit"
-            className="flex items-center gap-2.5 text-xs text-gray-500 hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all font-medium"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            Sign out
-          </button>
-        </form>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-2.5 text-xs text-gray-500 hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all font-medium"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          Sign out
+        </button>
       </div>
     </aside>
   )

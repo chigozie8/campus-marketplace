@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Plus, LogOut, Inbox } from 'lucide-react'
 import { VendorSidebar } from './vendor-sidebar'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   children: React.ReactNode
@@ -22,6 +23,13 @@ export function VendorShell({
   unreadInbox = 0, pageTitle, pageAction,
 }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+  }
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -56,11 +64,9 @@ export function VendorShell({
           <Link href="/seller/new" className="flex items-center gap-1 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg">
             <Plus className="w-3.5 h-3.5" /> Sell
           </Link>
-          <form action="/api/auth/sign-out" method="POST">
-            <button type="submit" className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all">
-              <LogOut className="w-4 h-4" />
-            </button>
-          </form>
+          <button onClick={handleSignOut} className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all">
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
