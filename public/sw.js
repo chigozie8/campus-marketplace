@@ -1,8 +1,19 @@
 // VendoorX Service Worker — Network-first, offline fallback + Web Push
-const CACHE_VERSION = 'v6'
+// Note: When running inside Capacitor native app, native push is handled
+// by the @capacitor/push-notifications plugin — web push is skipped.
+const CACHE_VERSION = 'v7'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 
 const OFFLINE_PAGES = ['/offline']
+
+// Detect if running inside Capacitor native shell
+function isCapacitorNative() {
+  return (
+    self.location.protocol === 'capacitor:' ||
+    navigator.userAgent.includes('Capacitor') ||
+    (typeof self.__CAPACITOR__ !== 'undefined')
+  )
+}
 
 // ── Install: only cache the offline fallback page ─────────────────────────────
 self.addEventListener('install', (event) => {
@@ -60,7 +71,9 @@ self.addEventListener('fetch', (event) => {
 })
 
 // ── Web Push Notifications ────────────────────────────────────────────────────
+// Skip entirely when inside Capacitor — native push plugin handles it
 self.addEventListener('push', (event) => {
+  if (isCapacitorNative()) return
   if (!event.data) return
 
   let data = {}
@@ -91,6 +104,7 @@ self.addEventListener('push', (event) => {
 })
 
 self.addEventListener('notificationclick', (event) => {
+  if (isCapacitorNative()) return
   event.notification.close()
   const url = event.notification.data?.url || '/'
   event.waitUntil(

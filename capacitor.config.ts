@@ -5,34 +5,42 @@ const config: CapacitorConfig = {
   appName: 'VendoorX',
   webDir: 'out',
   server: {
-    // For production: point to your live site so native shell uses the web app
     url: 'https://vendoorx.com',
     cleartext: false,
     androidScheme: 'https',
+    allowNavigation: ['vendoorx.com', '*.vendoorx.com'],
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
-      backgroundColor: '#052e16',
+      launchShowDuration: 2500,
+      launchAutoHide: false,
+      backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,
-      iosSpinnerStyle: 'small',
       splashFullScreen: true,
       splashImmersive: true,
-      layoutName: 'launch_screen',
-      useDialog: true,
     },
     StatusBar: {
       style: 'DARK',
-      backgroundColor: '#052e16',
+      backgroundColor: '#16a34a',
+      overlaysWebView: false,
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#16a34a',
+    },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
   android: {
-    // Override buildConfig for release signing (fill in keystore details)
+    allowMixedContent: false,
+    captureInput: true,
+    webContentsDebuggingEnabled: false,
     buildOptions: {
       keystorePath: undefined,
       keystoreAlias: undefined,
@@ -41,6 +49,8 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     scrollEnabled: true,
+    limitsNavigationsToAppBoundDomains: true,
+    preferredContentMode: 'mobile',
   },
 }
 

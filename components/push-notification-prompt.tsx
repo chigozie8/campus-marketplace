@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, BellOff, X } from 'lucide-react'
+import { Bell, X } from 'lucide-react'
+import { isNative } from '@/lib/capacitor'
 
 const DISMISSED_KEY = 'push-prompt-dismissed'
 
@@ -12,6 +13,7 @@ export function PushNotificationPrompt() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (isNative()) return
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return
     if (localStorage.getItem(DISMISSED_KEY)) return
     if (Notification.permission === 'granted') { setGranted(true); return }
