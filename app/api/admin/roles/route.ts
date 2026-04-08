@@ -33,11 +33,17 @@ export async function POST(req: NextRequest) {
 
   const sc = serviceClient()
 
-  // Look up the user by email in auth.users using the service role
-  const { data: { users }, error: listError } = await sc.auth.admin.listUsers({ perPage: 1000 })
-  if (listError) return NextResponse.json({ error: 'Failed to look up users' }, { status: 500 })
-
-  const matchedUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase())
+  // Look up the user by email in auth.users using the service role (paginated)
+  let matchedUser: { id: string; email?: string } | undefined
+  let page = 1
+  const PER_PAGE = 1000
+  while (!matchedUser) {
+    const { data, error: listError } = await sc.auth.admin.listUsers({ page, perPage: PER_PAGE })
+    if (listError) return NextResponse.json({ error: 'Failed to look up users' }, { status: 500 })
+    matchedUser = data.users.find(u => u.email?.toLowerCase() === email.toLowerCase())
+    if (data.users.length < PER_PAGE) break
+    page++
+  }
 
   if (!matchedUser) {
     return NextResponse.json({
