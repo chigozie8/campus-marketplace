@@ -6,14 +6,14 @@ const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment variables.')
+  console.warn('[VendoorX] Warning: Missing SUPABASE_URL or SUPABASE_ANON_KEY. Database features will not work until these are configured.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl || 'http://placeholder', supabaseAnonKey || 'placeholder')
 
 export const supabaseAdmin = createClient(
-  supabaseUrl,
-  supabaseServiceRoleKey ?? supabaseAnonKey,
+  supabaseUrl || 'http://placeholder',
+  supabaseServiceRoleKey ?? supabaseAnonKey ?? 'placeholder',
   {
     auth: {
       autoRefreshToken: false,
