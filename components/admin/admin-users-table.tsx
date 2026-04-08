@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useCallback } from 'react'
 import {
   Search, BadgeCheck, Trash2, Store, Loader2,
   Bell, Ban, Download, X, Send, CheckCircle2, Eye,
+  ShoppingBag, Package, Wallet, Bell as BellIcon, Copy, Check,
+  Shield, Star, ClipboardList, CreditCard, AlertTriangle,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -21,7 +23,27 @@ interface User {
   created_at: string
 }
 
+interface UserDetail {
+  profile: Record<string, any> | null
+  verification: Record<string, any> | null
+  listings: any[]
+  buyerOrders: any[]
+  sellerOrders: any[]
+  wallet: Record<string, any> | null
+  pushTokens: any[]
+}
+
 interface Props { users: User[] }
+
+const STATUS_BADGE: Record<string, string> = {
+  pending:   'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  completed: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+  cancelled: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
+  disputed:  'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+  delivered: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+  paid:      'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
+  shipped:   'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300',
+}
 
 export function AdminUsersTable({ users }: Props) {
   const router = useRouter()
@@ -37,9 +59,15 @@ export function AdminUsersTable({ users }: Props) {
   const [notifyDone, setNotifyDone] = useState(false)
 
   const [detailUser, setDetailUser] = useState<User | null>(null)
+  const [detailData, setDetailData] = useState<UserDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   const [banningId, setBanningId] = useState<string | null>(null)
   const [bannedIds, setBannedIds] = useState<Set<string>>(new Set())
+
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  const [activeSection, setActiveSection] = useState<'profile' | 'listings' | 'orders' | 'wallet'>('profile')
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase()
@@ -84,8 +112,7 @@ export function AdminUsersTable({ users }: Props) {
   async function toggleBan(user: User) {
     const isBanned = bannedIds.has(user.id)
     const action = isBanned ? 'unban' : 'ban'
-    const label = isBanned ? 'unban' : 'ban'
-    if (!confirm(`Are you sure you want to ${label} ${user.full_name ?? 'this user'}?`)) return
+    if (!confirm(`Are you sure you want to ${action} ${user.full_name ?? 'this user'}?`)) return
     setBanningId(user.id)
     const res = await fetch(`/api/admin/users/${user.id}/ban`, {
       method: 'POST',
@@ -117,6 +144,34 @@ export function AdminUsersTable({ users }: Props) {
       setNotifyBody('')
       setNotifyDone(false)
     }, 1500)
+  }
+
+  const openDetail = useCallback(async (u: User) => {
+    if (detailUser?.id === u.id) {
+      setDetailUser(null)
+      setDetailData(null)
+      return
+    }
+    setDetailUser(u)
+    setDetailData(null)
+    setDetailLoading(true)
+    setActiveSection('profile')
+    try {
+      const res = await fetch(`/api/admin/users/${u.id}`)
+      const json = await res.json()
+      setDetailData(json)
+    } catch {
+      setDetailData(null)
+    } finally {
+      setDetailLoading(false)
+    }
+  }, [detailUser])
+
+  function copyText(key: string, text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedKey(key)
+      setTimeout(() => setCopiedKey(null), 1800)
+    })
   }
 
   function exportCSV() {
@@ -151,10 +206,17 @@ export function AdminUsersTable({ users }: Props) {
     { key: 'verified', label: 'Verified' },
   ] as const
 
+  const SECTIONS = [
+    { key: 'profile',  label: 'Profile', icon: Shield },
+    { key: 'listings', label: 'Listings', icon: ShoppingBag },
+    { key: 'orders',   label: 'Orders', icon: ClipboardList },
+    { key: 'wallet',   label: 'Wallet', icon: Wallet },
+  ] as const
+
   return (
     <>
       <div className="flex gap-4">
-        <div className={`bg-card border border-border rounded-2xl overflow-hidden flex-1 min-w-0 transition-all ${detailUser ? 'lg:max-w-[calc(100%-320px)]' : ''}`}>
+        <div className={`bg-card border border-border rounded-2xl overflow-hidden flex-1 min-w-0 transition-all ${detailUser ? 'lg:max-w-[calc(100%-380px)]' : ''}`}>
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row gap-3 p-4 border-b border-border">
             <div className="relative flex-1">
@@ -273,9 +335,13 @@ export function AdminUsersTable({ users }: Props) {
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            onClick={() => setDetailUser(detailUser?.id === u.id ? null : u)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
-                            title="View details"
+                            onClick={() => openDetail(u)}
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all ${
+                              detailUser?.id === u.id
+                                ? 'text-primary bg-primary/10'
+                                : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+                            }`}
+                            title="View full profile"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -322,84 +388,267 @@ export function AdminUsersTable({ users }: Props) {
           </div>
         </div>
 
-        {/* User detail panel */}
+        {/* Full-profile side panel */}
         {detailUser && (
-          <div className="hidden lg:flex flex-col w-[300px] flex-shrink-0 bg-card border border-border rounded-2xl overflow-hidden h-fit sticky top-4">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <h3 className="font-black text-sm text-foreground">User Profile</h3>
-              <button onClick={() => setDetailUser(null)}
+          <div className="hidden lg:flex flex-col w-[360px] flex-shrink-0 bg-card border border-border rounded-2xl overflow-hidden h-fit sticky top-4 max-h-[90vh]">
+            {/* Panel header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
+              <h3 className="font-black text-sm text-foreground">Full User Profile</h3>
+              <button onClick={() => { setDetailUser(null); setDetailData(null) }}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-5 space-y-4">
-              <div className="flex flex-col items-center text-center gap-2">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+
+            {/* Avatar + badges */}
+            <div className="px-5 pt-5 pb-3 flex-shrink-0">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {detailUser.avatar_url
                     ? <img src={detailUser.avatar_url} alt="" className="w-full h-full object-cover" />
-                    : <span className="text-primary text-2xl font-black">{(detailUser.full_name ?? 'U').charAt(0).toUpperCase()}</span>
+                    : <span className="text-primary text-xl font-black">{(detailUser.full_name ?? 'U').charAt(0).toUpperCase()}</span>
                   }
                 </div>
-                <div>
-                  <p className="font-bold text-foreground">{detailUser.full_name ?? 'Unnamed'}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-foreground text-sm truncate">{detailUser.full_name ?? 'Unnamed'}</p>
                   <p className="text-xs text-muted-foreground">{detailUser.phone ?? 'No phone'}</p>
-                </div>
-                <div className="flex gap-1.5 flex-wrap justify-center">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${detailUser.is_seller ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
-                    {detailUser.is_seller ? 'Seller' : 'Buyer'}
-                  </span>
-                  {detailUser.seller_verified && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                      Verified
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${detailUser.is_seller ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                      {detailUser.is_seller ? 'Seller' : 'Buyer'}
                     </span>
-                  )}
-                  {bannedIds.has(detailUser.id) && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive/20 text-destructive">Banned</span>
-                  )}
+                    {detailUser.seller_verified && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">Verified</span>
+                    )}
+                    {bannedIds.has(detailUser.id) && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/20 text-destructive">Banned</span>
+                    )}
+                    {detailData?.profile?.trust_score != null && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">
+                        Trust {detailData.profile.trust_score}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="h-px bg-border" />
-
-              <div className="space-y-2">
-                <ProfileRow label="University" value={detailUser.university ?? '—'} />
-                <ProfileRow label="Campus" value={detailUser.campus ?? '—'} />
-                <ProfileRow label="Rating" value={`${detailUser.rating ?? 0}/5`} />
-                <ProfileRow label="Total Sales" value={String(detailUser.total_sales ?? 0)} />
-                <ProfileRow label="Joined" value={new Date(detailUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} />
-              </div>
-
-              <div className="h-px bg-border" />
-
-              <div className="space-y-2">
+            {/* Section tabs */}
+            <div className="flex gap-0.5 px-5 pb-3 flex-shrink-0">
+              {SECTIONS.map(({ key, label, icon: Icon }) => (
                 <button
-                  onClick={() => { setNotifyUser(detailUser); setNotifyTitle(''); setNotifyBody('') }}
-                  className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-                >
-                  <Bell className="w-4 h-4" />
-                  Send Notification
-                </button>
-                <button
-                  onClick={() => toggleBan(detailUser)}
-                  disabled={banningId === detailUser.id}
-                  className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 ${
-                    bannedIds.has(detailUser.id)
-                      ? 'bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100'
-                      : 'bg-background border border-border text-muted-foreground hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950'
+                  key={key}
+                  onClick={() => setActiveSection(key as any)}
+                  className={`flex-1 flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl text-[9px] font-bold transition-all ${
+                    activeSection === key
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                   }`}
                 >
-                  <Ban className="w-4 h-4" />
-                  {bannedIds.has(detailUser.id) ? 'Unban User' : 'Ban User'}
+                  <Icon className="w-3 h-3" />
+                  {label}
                 </button>
-                <button
-                  onClick={() => deleteUser(detailUser.id)}
-                  className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-sm font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete User
-                </button>
-              </div>
+              ))}
+            </div>
+
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 px-5 pb-5 space-y-4">
+              {detailLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : !detailData ? (
+                <div className="flex items-center justify-center py-10">
+                  <AlertTriangle className="w-5 h-5 text-muted-foreground mr-2" />
+                  <span className="text-sm text-muted-foreground">Failed to load</span>
+                </div>
+              ) : (
+                <>
+                  {/* ── PROFILE ── */}
+                  {activeSection === 'profile' && (
+                    <div className="space-y-3">
+                      <DetailSection label="Basic Info">
+                        <InfoRow label="University" value={detailData.profile?.university ?? '—'} />
+                        <InfoRow label="Campus" value={detailData.profile?.campus ?? '—'} />
+                        <InfoRow label="Email" value={detailData.profile?.email ?? '—'} copyKey="email" copyText={detailData.profile?.email} copiedKey={copiedKey} onCopy={copyText} />
+                        <InfoRow label="WhatsApp" value={detailData.profile?.whatsapp_number ?? '—'} copyKey="wa" copyText={detailData.profile?.whatsapp_number} copiedKey={copiedKey} onCopy={copyText} />
+                        <InfoRow label="Rating" value={`${detailData.profile?.rating ?? 0} / 5`} />
+                        <InfoRow label="Total Sales" value={String(detailData.profile?.total_sales ?? 0)} />
+                        <InfoRow label="Joined" value={new Date(detailData.profile?.created_at ?? '').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} />
+                      </DetailSection>
+
+                      <DetailSection label="Trust & Activity">
+                        <InfoRow label="Trust Score" value={detailData.profile?.trust_score != null ? `${detailData.profile.trust_score} / 100` : '—'} />
+                        <InfoRow label="Total Orders" value={String(detailData.profile?.total_orders ?? 0)} />
+                        <InfoRow label="Successful" value={String(detailData.profile?.successful_orders ?? 0)} />
+                        <InfoRow label="Failed" value={String(detailData.profile?.failed_orders ?? 0)} />
+                        <InfoRow label="Disputes" value={String(detailData.profile?.disputes_count ?? 0)} />
+                        <InfoRow label="Business Verified" value={detailData.profile?.is_business_verified ? 'Yes' : 'No'} />
+                        <InfoRow label="Student Verified" value={detailData.profile?.is_student_verified ? 'Yes' : 'No'} />
+                      </DetailSection>
+
+                      {detailData.verification && (
+                        <DetailSection label="Verification Record">
+                          <InfoRow label="Status" value={detailData.verification.status ?? '—'} />
+                          <InfoRow label="Business" value={detailData.verification.business_name ?? '—'} />
+                          <InfoRow label="ID Type" value={detailData.verification.id_type ?? '—'} />
+                          <InfoRow label="ID Number" value={detailData.verification.id_number ?? '—'} copyKey="id_number" copyText={detailData.verification.id_number} copiedKey={copiedKey} onCopy={copyText} />
+                          <InfoRow label="City" value={`${detailData.verification.location_city ?? '—'}, ${detailData.verification.location_state ?? '—'}`} />
+                          {detailData.verification.rejection_reason && (
+                            <InfoRow label="Rejection" value={detailData.verification.rejection_reason} />
+                          )}
+                        </DetailSection>
+                      )}
+
+                      <DetailSection label={`Push Tokens (${detailData.pushTokens.length})`}>
+                        {detailData.pushTokens.length === 0 ? (
+                          <p className="text-[11px] text-muted-foreground">No push subscriptions</p>
+                        ) : detailData.pushTokens.map((t: any) => (
+                          <div key={t.id} className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold text-foreground capitalize">{t.platform} ({t.token_type})</span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleDateString('en-GB')}</span>
+                          </div>
+                        ))}
+                      </DetailSection>
+
+                      <div className="space-y-2 pt-1">
+                        <button
+                          onClick={() => { setNotifyUser(detailUser); setNotifyTitle(''); setNotifyBody('') }}
+                          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                        >
+                          <BellIcon className="w-4 h-4" />
+                          Send Notification
+                        </button>
+                        <button
+                          onClick={() => toggleBan(detailUser)}
+                          disabled={banningId === detailUser.id}
+                          className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 ${
+                            bannedIds.has(detailUser.id)
+                              ? 'bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100'
+                              : 'bg-background border border-border text-muted-foreground hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950'
+                          }`}
+                        >
+                          <Ban className="w-4 h-4" />
+                          {bannedIds.has(detailUser.id) ? 'Unban User' : 'Ban User'}
+                        </button>
+                        <button
+                          onClick={() => deleteUser(detailUser.id)}
+                          className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete User
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── LISTINGS ── */}
+                  {activeSection === 'listings' && (
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{detailData.listings.length} listing{detailData.listings.length !== 1 ? 's' : ''}</p>
+                      {detailData.listings.length === 0 ? (
+                        <div className="py-6 text-center text-sm text-muted-foreground">No listings yet</div>
+                      ) : detailData.listings.map((p: any) => (
+                        <div key={p.id} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+                          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {p.images?.[0]
+                              ? <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
+                              : <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-foreground truncate">{p.title}</p>
+                            <p className="text-[11px] text-muted-foreground">₦{Number(p.price).toLocaleString()}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${p.is_available ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                                {p.is_available ? 'Active' : 'Inactive'}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                <Eye className="w-3 h-3" /> {p.views ?? 0}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground shrink-0">
+                            {new Date(p.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ── ORDERS ── */}
+                  {activeSection === 'orders' && (
+                    <div className="space-y-4">
+                      <OrderList label="As Buyer" orders={detailData.buyerOrders} />
+                      <OrderList label="As Seller" orders={detailData.sellerOrders} />
+                    </div>
+                  )}
+
+                  {/* ── WALLET ── */}
+                  {activeSection === 'wallet' && (
+                    <div className="space-y-3">
+                      <DetailSection label="Wallet Balance">
+                        {detailData.wallet ? (
+                          <>
+                            <div className="flex items-center justify-between py-1">
+                              <span className="text-xs text-muted-foreground">Available</span>
+                              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                                ₦{Number(detailData.wallet.available ?? 0).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between py-1">
+                              <span className="text-xs text-muted-foreground">Pending (escrow)</span>
+                              <span className="text-sm font-black text-amber-600 dark:text-amber-400">
+                                ₦{Number(detailData.wallet.pending ?? 0).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between py-1">
+                              <span className="text-xs text-muted-foreground">Currency</span>
+                              <span className="text-xs font-bold text-foreground">{detailData.wallet.currency ?? 'NGN'}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-1">
+                              <span className="text-xs text-muted-foreground">Last updated</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {detailData.wallet.updated_at ? new Date(detailData.wallet.updated_at).toLocaleDateString('en-GB') : '—'}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground">No wallet created yet</p>
+                        )}
+                      </DetailSection>
+
+                      {detailData.verification && (
+                        <DetailSection label="Bank Account">
+                          <div className="space-y-2">
+                            <InfoRow label="Bank" value={detailData.verification.bank_name ?? detailData.profile?.payout_bank_name ?? '—'} />
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-muted-foreground">Account No.</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-foreground font-mono">
+                                  {detailData.verification.account_number ?? '—'}
+                                </span>
+                                {detailData.verification.account_number && (
+                                  <button
+                                    onClick={() => copyText('account_number', detailData.verification.account_number)}
+                                    className="p-0.5 rounded hover:bg-accent transition-all"
+                                    title="Copy account number"
+                                  >
+                                    {copiedKey === 'account_number'
+                                      ? <Check className="w-3 h-3 text-emerald-500" />
+                                      : <Copy className="w-3 h-3 text-muted-foreground" />
+                                    }
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </DetailSection>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}
@@ -475,11 +724,73 @@ export function AdminUsersTable({ users }: Props) {
   )
 }
 
-function ProfileRow({ label, value }: { label: string; value: string }) {
+function DetailSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex justify-between gap-2">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xs font-semibold text-foreground text-right">{value}</span>
+    <div className="space-y-2">
+      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <div className="rounded-xl bg-muted/30 border border-border px-3 py-2.5 space-y-2">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function InfoRow({
+  label, value, copyKey, copyText: copyVal, copiedKey, onCopy
+}: {
+  label: string
+  value: string
+  copyKey?: string
+  copyText?: string
+  copiedKey?: string | null
+  onCopy?: (key: string, text: string) => void
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs text-muted-foreground flex-shrink-0">{label}</span>
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="text-xs font-semibold text-foreground text-right truncate">{value}</span>
+        {copyKey && copyVal && onCopy && (
+          <button
+            onClick={() => onCopy(copyKey, copyVal)}
+            className="p-0.5 rounded hover:bg-accent transition-all flex-shrink-0"
+            title={`Copy ${label}`}
+          >
+            {copiedKey === copyKey
+              ? <Check className="w-3 h-3 text-emerald-500" />
+              : <Copy className="w-3 h-3 text-muted-foreground" />
+            }
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function OrderList({ label, orders }: { label: string; orders: any[] }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label} ({orders.length})</p>
+      {orders.length === 0 ? (
+        <div className="py-3 text-center text-xs text-muted-foreground bg-muted/30 rounded-xl border border-border">No orders</div>
+      ) : orders.map((o: any) => (
+        <div key={o.id} className="flex items-start gap-2 p-2.5 rounded-xl bg-muted/30 border border-border">
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-bold text-foreground truncate">
+              {(o.products as any)?.title ?? 'Order'}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full capitalize ${STATUS_BADGE[o.status] ?? 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                {o.status}
+              </span>
+              <span className="text-[10px] font-bold text-foreground">₦{Number(o.total_amount).toLocaleString()}</span>
+            </div>
+          </div>
+          <span className="text-[10px] text-muted-foreground shrink-0">
+            {new Date(o.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
