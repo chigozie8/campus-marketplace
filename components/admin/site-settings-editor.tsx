@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Save, Loader2, CheckCircle2, Phone, Share2, BarChart3, ImageIcon } from 'lucide-react'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
+import { ImageUploadField } from '@/components/admin/image-upload-field'
 
 type SettingRow = { key: keyof SiteSettings; label: string; placeholder?: string; type?: 'url' | 'text' | 'image-url' }
 
@@ -79,6 +79,26 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
     }
   }
 
+  async function saveSettingValue(key: keyof SiteSettings, value: string) {
+    setSaving(key)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/site-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Save failed')
+      setValues(v => ({ ...v, [key]: value }))
+      setSaved(key)
+      setTimeout(() => setSaved(null), 2500)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Save failed')
+    } finally {
+      setSaving(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {error && (
@@ -102,55 +122,59 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
           <div className="p-5 space-y-5">
             {section.settings.map(({ key, label, placeholder, type }) => (
               <div key={key}>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2 block">
-                  {label}
-                </label>
-                <div className="flex gap-2 items-center">
-                  {type === 'image-url' ? (
-                    <>
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-muted border border-border shrink-0">
-                        {values[key] && (
-                          <Image
-                            src={values[key]}
-                            alt={label}
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        )}
-                      </div>
+                {type === 'image-url' ? (
+                  <div className="flex items-end gap-3">
+                    <ImageUploadField
+                      value={values[key]}
+                      onChange={url => saveSettingValue(key, url)}
+                      label={label}
+                      shape="circle"
+                      previewSize={44}
+                      className="flex-1"
+                    />
+                    <button
+                      onClick={() => saveSetting(key)}
+                      disabled={saving === key}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-xs font-bold shrink-0 transition-all mb-0.5"
+                    >
+                      {saving === key ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : saved === key ? (
+                        <><CheckCircle2 className="w-3.5 h-3.5" /> Saved</>
+                      ) : (
+                        <><Save className="w-3.5 h-3.5" /> Save</>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2 block">
+                      {label}
+                    </label>
+                    <div className="flex gap-2 items-center">
                       <input
-                        type="url"
+                        type={type === 'url' ? 'url' : 'text'}
                         value={values[key]}
                         onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))}
-                        placeholder="https://..."
-                        className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-muted border border-border text-sm focus:outline-none focus:border-primary transition-colors font-mono text-xs"
+                        placeholder={placeholder}
+                        className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm focus:outline-none focus:border-primary transition-colors"
                       />
-                    </>
-                  ) : (
-                    <input
-                      type={type === 'url' ? 'url' : 'text'}
-                      value={values[key]}
-                      onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))}
-                      placeholder={placeholder}
-                      className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm focus:outline-none focus:border-primary transition-colors"
-                    />
-                  )}
-                  <button
-                    onClick={() => saveSetting(key)}
-                    disabled={saving === key}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-xs font-bold shrink-0 transition-all"
-                  >
-                    {saving === key ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : saved === key ? (
-                      <><CheckCircle2 className="w-3.5 h-3.5" /> Saved</>
-                    ) : (
-                      <><Save className="w-3.5 h-3.5" /> Save</>
-                    )}
-                  </button>
-                </div>
+                      <button
+                        onClick={() => saveSetting(key)}
+                        disabled={saving === key}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-xs font-bold shrink-0 transition-all"
+                      >
+                        {saving === key ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : saved === key ? (
+                          <><CheckCircle2 className="w-3.5 h-3.5" /> Saved</>
+                        ) : (
+                          <><Save className="w-3.5 h-3.5" /> Save</>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

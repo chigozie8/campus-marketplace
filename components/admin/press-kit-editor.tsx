@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { FileText, Plus, Trash2, Save, Loader2, CheckCircle2 } from 'lucide-react'
 import { type SiteSettings, type PressAsset, parsePressAssets } from '@/lib/site-settings-defaults'
+import { ImageUploadField } from '@/components/admin/image-upload-field'
 
 type Props = { initialSettings: SiteSettings }
 
@@ -11,6 +12,7 @@ const PRESS_KEYS: Array<keyof SiteSettings> = [
   'press_founder_name',
   'press_founder_title',
   'press_founder_initials',
+  'press_founder_photo',
   'press_founder_bio',
   'press_founder_bio2',
   'press_founder_quote',
@@ -59,6 +61,7 @@ export function PressKitEditor({ initialSettings }: Props) {
         press_founder_name: settings.press_founder_name,
         press_founder_title: settings.press_founder_title,
         press_founder_initials: settings.press_founder_initials,
+        press_founder_photo: settings.press_founder_photo,
         press_founder_bio: settings.press_founder_bio,
         press_founder_bio2: settings.press_founder_bio2,
         press_founder_quote: settings.press_founder_quote,
@@ -111,10 +114,20 @@ export function PressKitEditor({ initialSettings }: Props) {
           <Field label="Title">
             <input className={inputCls} value={settings.press_founder_title} onChange={e => set('press_founder_title', e.target.value)} />
           </Field>
-          <Field label="Initials (avatar)">
+          <Field label="Initials (fallback avatar)">
             <input className={inputCls} maxLength={3} value={settings.press_founder_initials} onChange={e => set('press_founder_initials', e.target.value)} />
           </Field>
         </div>
+
+        <ImageUploadField
+          label="Founder / CEO Photo"
+          value={settings.press_founder_photo}
+          onChange={url => set('press_founder_photo', url)}
+          shape="square"
+          previewSize={64}
+          className="mb-4 p-4 rounded-xl border border-border bg-muted/30"
+        />
+
         <Field label="Bio paragraph 1">
           <textarea className={textareaCls} rows={3} value={settings.press_founder_bio} onChange={e => set('press_founder_bio', e.target.value)} />
         </Field>
@@ -143,12 +156,12 @@ export function PressKitEditor({ initialSettings }: Props) {
         }
       >
         <p className="text-xs text-muted-foreground mb-4">
-          Add download URLs for brand assets. Leave URL blank to show a greyed-out download button.
+          Add download URLs for brand assets (logos, PDFs, etc.). Upload a file or paste a link. Leave URL blank to show a greyed-out download button.
         </p>
         <div className="flex flex-col gap-3">
           {assets.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-6 rounded-xl border border-dashed border-border">
-              No assets yet. Click "Add asset" to add one.
+              No assets yet. Click &ldquo;Add asset&rdquo; to add one.
             </p>
           )}
           {assets.map((asset, i) => (
@@ -165,9 +178,15 @@ export function PressKitEditor({ initialSettings }: Props) {
                 </Field>
               </div>
               <div className="flex items-end gap-3">
-                <Field label="Download URL" className="flex-1">
-                  <input className={inputCls} type="url" value={asset.url} onChange={e => setAsset(i, 'url', e.target.value)} placeholder="https://…" />
-                </Field>
+                <ImageUploadField
+                  label="Download URL (or upload file)"
+                  value={asset.url}
+                  onChange={url => setAsset(i, 'url', url)}
+                  shape="square"
+                  previewSize={40}
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/svg+xml,application/pdf"
+                  className="flex-1"
+                />
                 <button
                   onClick={() => removeAsset(i)}
                   className="mb-0.5 p-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"

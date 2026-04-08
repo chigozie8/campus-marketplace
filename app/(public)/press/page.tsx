@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Quote } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { parsePressAssets } from '@/lib/site-settings-defaults'
@@ -62,12 +63,25 @@ export default async function PressPage() {
             <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl border border-border bg-card">
               {/* Avatar */}
               <div className="shrink-0 flex flex-col items-center sm:items-start gap-3">
-                <div
-                  className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #16a34a 0%, #0d9488 100%)' }}
-                >
-                  {settings.press_founder_initials}
-                </div>
+                {settings.press_founder_photo ? (
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
+                    <Image
+                      src={settings.press_founder_photo}
+                      alt={settings.press_founder_name}
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #16a34a 0%, #0d9488 100%)' }}
+                  >
+                    {settings.press_founder_initials}
+                  </div>
+                )}
                 <div className="flex flex-col gap-1">
                   <a
                     href="tel:+15792583013"

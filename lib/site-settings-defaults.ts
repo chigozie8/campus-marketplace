@@ -11,6 +11,7 @@ export type SiteSettings = {
   press_founder_name: string
   press_founder_title: string
   press_founder_initials: string
+  press_founder_photo: string
   press_founder_bio: string
   press_founder_bio2: string
   press_founder_quote: string
@@ -143,6 +144,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_founder_name: 'Kenneth Okoronkwo',
   press_founder_title: 'Founder & CEO',
   press_founder_initials: 'KO',
+  press_founder_photo: '',
   press_founder_bio: 'Kenneth Okoronkwo is the founder and CEO of VendoorX, Nigeria\'s leading campus commerce platform. A serial entrepreneur and software engineer, Kenneth built VendoorX to solve the informal, unstructured nature of campus trade in Nigeria.',
   press_founder_bio2: 'Under his leadership, VendoorX has grown to serve 50,000+ vendors across 120+ Nigerian universities, processing over ₦2 billion in verified transactions.',
   press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
