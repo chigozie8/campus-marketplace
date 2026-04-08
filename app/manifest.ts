@@ -16,11 +16,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/icon-192',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
       },
       {
         src: '/icon-512',
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any',
       },
       {
         src: '/icon-512',
@@ -56,8 +58,7 @@ export default function manifest(): MetadataRoute.Manifest {
   lang: 'en-NG',
   dir: 'ltr',
   prefer_related_applications: false,
-  // display_override gives browsers progressive enhancement options
-  display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+  display_override: ['standalone', 'minimal-ui'],
   screenshots: [
     {
       src: '/vendoorx-explainer.jpg',
