@@ -141,6 +141,7 @@ export interface BackendOrder {
   status: OrderStatus
   delivery_address: string
   payment_ref?: string
+  delivered_at?: string
   created_at: string
   updated_at?: string
   products?: { title: string; name?: string; price: number; images?: string[]; image_url?: string }

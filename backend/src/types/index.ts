@@ -45,6 +45,7 @@ export interface OrderRow {
   status: OrderStatus
   delivery_address: string
   payment_ref?: string
+  delivered_at?: string
   created_at: string
   updated_at?: string
 }

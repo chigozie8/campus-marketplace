@@ -51,9 +51,13 @@ export async function findOrdersByVendor(vendorId: string, page = 1, limit = 20)
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<OrderRow> {
+  const now = new Date().toISOString()
+  const updates: Record<string, string> = { status, updated_at: now }
+  if (status === 'delivered') updates.delivered_at = now
+
   const { data, error } = await supabaseAdmin
     .from('orders')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('id', id)
     .select()
     .single()

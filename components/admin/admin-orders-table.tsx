@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Search, Package, Eye, X, Loader2, Download } from 'lucide-react'
+import { Search, Package, Eye, X, Loader2, Download, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface Order {
@@ -23,6 +23,9 @@ interface Props { orders: Order[] }
 
 const STATUS_COLORS: Record<string, string> = {
   pending:   'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300',
+  paid:      'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300',
+  shipped:   'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300',
+  delivered: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300',
   completed: 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
   cancelled: 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300',
   disputed:  'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300',
@@ -95,7 +98,7 @@ export function AdminOrdersTable({ orders }: Props) {
     URL.revokeObjectURL(url)
   }
 
-  const STATUS_FILTERS  = ['all', 'pending', 'completed', 'cancelled', 'disputed']
+  const STATUS_FILTERS  = ['all', 'pending', 'paid', 'shipped', 'delivered', 'completed', 'cancelled', 'disputed']
   const PAYMENT_FILTERS = ['all', 'unpaid', 'paid', 'refunded']
 
   return (
@@ -287,11 +290,31 @@ export function AdminOrdersTable({ orders }: Props) {
 
             <div className="h-px bg-border" />
 
+            {/* Manual completion for delivered orders (dispute resolution) */}
+            {selected.status === 'delivered' && (
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-3">
+                <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mb-2">Escrow Release</p>
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mb-3 leading-relaxed">
+                  Order is in delivered state. Manually mark as completed to release escrow funds to the seller (use during dispute resolution).
+                </p>
+                <button
+                  onClick={() => updateStatus(selected.id, 'completed')}
+                  disabled={updatingId === selected.id}
+                  className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all disabled:opacity-50"
+                >
+                  {updatingId === selected.id
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <><CheckCircle2 className="w-3.5 h-3.5" /> Mark as Completed & Release Funds</>
+                  }
+                </button>
+              </div>
+            )}
+
             {/* Status updater */}
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Update Status</p>
               <div className="grid grid-cols-2 gap-2">
-                {['pending', 'completed', 'cancelled', 'disputed'].map(s => (
+                {['pending', 'delivered', 'completed', 'cancelled', 'disputed'].map(s => (
                   <button
                     key={s}
                     onClick={() => updateStatus(selected.id, s)}

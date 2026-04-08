@@ -53,6 +53,28 @@ router.post('/:id/pay', async (req, res, next) => {
   }
 })
 
+// Buyer confirms delivery — releases escrow to seller
+router.post('/:id/confirm-delivery', async (req, res, next) => {
+  try {
+    const order = await orderService.getOrderById(req.params.id)
+    const userId = (req as AuthRequest).user.id
+
+    if (order.buyer_id !== userId) {
+      res.status(403).json({ success: false, message: 'Only the buyer can confirm delivery.' })
+      return
+    }
+    if (order.status !== 'delivered') {
+      res.status(400).json({ success: false, message: `Cannot confirm delivery — order status is "${order.status}".` })
+      return
+    }
+
+    const updated = await orderService.updateOrderStatus(order.id, 'completed')
+    res.status(200).json({ success: true, data: updated, message: 'Delivery confirmed! Funds released to seller.' })
+  } catch (err) {
+    next(err)
+  }
+})
+
 router.get('/verify/:reference', async (req, res, next) => {
   try {
     const transaction = await paymentService.verifyPayment(req.params.reference)

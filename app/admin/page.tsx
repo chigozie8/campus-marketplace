@@ -4,7 +4,7 @@ import {
   Users, ShoppingBag, Eye, Heart,
   TrendingUp, Star, MessageSquare, Tag,
   ArrowUpRight, Clock, Package, CircleDollarSign,
-  BadgeCheck, Megaphone,
+  BadgeCheck, Megaphone, Shield, CheckCircle2, AlertTriangle, Lock,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -25,6 +25,7 @@ export default async function AdminOverviewPage() {
     { data: recentProducts },
     { data: recentUsers },
     { data: topProducts },
+    { count: deliveredOrders },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('products').select('*', { count: 'exact', head: true }),
@@ -47,7 +48,15 @@ export default async function AdminOverviewPage() {
       .select('id, title, views, whatsapp_clicks, price, images')
       .order('views', { ascending: false })
       .limit(5),
+    supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivered'),
   ])
+
+  const paystackConfigured = !!process.env.PAYSTACK_SECRET_KEY
+  const webhookConfigured = !!process.env.PAYSTACK_WEBHOOK_SECRET
+  const escrowOrders = deliveredOrders ?? 0
+  const escrowRevenue = (orders ?? [])
+    .filter((o: any) => o.status === 'delivered')
+    .reduce((s: number, o: any) => s + Number(o.total_amount ?? 0), 0)
 
   const totalRevenue = (orders ?? []).reduce((s: number, o: any) => {
     return o.status === 'completed' ? s + Number(o.total_amount ?? 0) : s
@@ -91,6 +100,69 @@ export default async function AdminOverviewPage() {
             </p>
           </Link>
         ))}
+      </div>
+
+      {/* Escrow & Webhook health */}
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+          <Lock className="w-4 h-4 text-primary" />
+          <h2 className="font-black text-sm text-foreground">Escrow & Payment Pipeline</h2>
+        </div>
+        <div className="p-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {/* Paystack key */}
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+            {paystackConfigured
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              : <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            }
+            <div>
+              <p className="text-[11px] font-bold text-foreground">Paystack Key</p>
+              <p className={`text-[10px] font-semibold ${paystackConfigured ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                {paystackConfigured ? 'Configured' : 'Not set'}
+              </p>
+            </div>
+          </div>
+          {/* Webhook secret */}
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+            {webhookConfigured
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              : <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            }
+            <div>
+              <p className="text-[11px] font-bold text-foreground">Webhook Secret</p>
+              <p className={`text-[10px] font-semibold ${webhookConfigured ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                {webhookConfigured ? 'Configured' : 'Not set'}
+              </p>
+            </div>
+          </div>
+          {/* Orders in escrow */}
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+            <Shield className={`w-4 h-4 shrink-0 mt-0.5 ${escrowOrders > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
+            <div>
+              <p className="text-[11px] font-bold text-foreground">In Escrow</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">
+                {escrowOrders} order{escrowOrders !== 1 ? 's' : ''} awaiting release
+              </p>
+            </div>
+          </div>
+          {/* Escrow value */}
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+            <CircleDollarSign className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[11px] font-bold text-foreground">Held Value</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">
+                ₦{escrowRevenue.toLocaleString()} pending
+              </p>
+            </div>
+          </div>
+        </div>
+        {!paystackConfigured && (
+          <div className="px-5 pb-4">
+            <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+              ⚠️ <strong>PAYSTACK_SECRET_KEY</strong> is not set. Payments and escrow will not function until this is configured.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Quick actions row */}

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,125 @@ async function getToken() {
   return data.session?.access_token ?? null
 }
 
-function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: string) => void }) {
+const AUTO_RELEASE_HOURS = 48
+
+function useCountdown(deliveredAt: string | undefined) {
+  const [remaining, setRemaining] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!deliveredAt) return
+    function tick() {
+      const deadline = new Date(deliveredAt!).getTime() + AUTO_RELEASE_HOURS * 60 * 60 * 1000
+      const diff = deadline - Date.now()
+      setRemaining(Math.max(0, diff))
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [deliveredAt])
+
+  return remaining
+}
+
+function formatCountdown(ms: number) {
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  if (hours > 0) return `${hours}h ${minutes}m remaining`
+  if (minutes > 0) return `${minutes}m ${seconds}s remaining`
+  return `${seconds}s remaining`
+}
+
+function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; onConfirmed: () => void }) {
+  const [showDialog, setShowDialog] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
+  const remaining = useCountdown(order.delivered_at ?? order.updated_at)
+
+  if (confirmed || order.status !== 'delivered') return null
+
+  async function handleConfirm() {
+    setConfirming(true)
+    try {
+      const token = await getToken()
+      const res = await fetch(`/api/backend/orders/${order.id}/confirm-delivery`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Confirmation failed')
+      toast.success('Delivery confirmed! Funds released to the seller.')
+      setConfirmed(true)
+      setShowDialog(false)
+      onConfirmed()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+          Received your order? Release payment to the seller.
+        </p>
+      </div>
+
+      {remaining !== null && remaining > 0 && (
+        <div className="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400">
+          <Timer className="w-3.5 h-3.5 shrink-0" />
+          <span>Auto-release in <span className="font-bold tabular-nums">{formatCountdown(remaining)}</span> if you don&apos;t confirm</span>
+        </div>
+      )}
+      {remaining === 0 && (
+        <p className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold">
+          Auto-release period has ended — funds have been automatically released to the seller.
+        </p>
+      )}
+
+      {!showDialog ? (
+        <button
+          onClick={() => setShowDialog(true)}
+          className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-bold transition-all shadow-md shadow-emerald-500/20"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          Confirm Delivery
+        </button>
+      ) : (
+        <div className="space-y-2.5">
+          <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
+            By confirming, you release <span className="font-bold">₦{order.total_amount.toLocaleString()}</span> to the seller. Only confirm if you&apos;ve received your item in good condition.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDialog(false)}
+              className="flex-1 h-9 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={confirming}
+              className="flex-1 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
+            >
+              {confirming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+              Yes, I got it!
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function OrderCard({ order, onRefund, onDeliveryConfirmed }: { order: BackendOrder; onRefund: (id: string) => void; onDeliveryConfirmed: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [requestingRefund, setRequestingRefund] = useState(false)
   const [refundReason, setRefundReason] = useState('')
@@ -144,6 +262,9 @@ function OrderCard({ order, onRefund }: { order: BackendOrder; onRefund: (id: st
                 </Link>
               )}
 
+              {/* Confirm delivery */}
+              <ConfirmDeliverySection order={order} onConfirmed={onDeliveryConfirmed} />
+
               {/* Refund request */}
               {canRefund && !showRefundForm && (
                 <button
@@ -222,6 +343,10 @@ export default function OrdersPage() {
     refetch()
   }
 
+  function handleDeliveryConfirmed() {
+    refetch()
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
       <div className="max-w-2xl mx-auto px-4 py-6 pb-28">
@@ -289,7 +414,12 @@ export default function OrdersPage() {
           <LazyMotion features={domAnimation}>
             <div className="space-y-3">
               {orders.map(order => (
-                <OrderCard key={order.id} order={order} onRefund={handleRefund} />
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  onRefund={handleRefund}
+                  onDeliveryConfirmed={handleDeliveryConfirmed}
+                />
               ))}
 
               {data && data.meta.totalPages > 1 && (
