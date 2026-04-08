@@ -8,6 +8,7 @@ import type { CheckoutProduct } from './checkout-modal'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { hapticImpact } from '@/lib/capacitor'
 
 interface ProductBuyButtonProps {
   product: CheckoutProduct
@@ -19,6 +20,7 @@ export function ProductBuyButton({ product, className }: ProductBuyButtonProps) 
   const router = useRouter()
 
   async function handleClick() {
+    hapticImpact('medium')
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 

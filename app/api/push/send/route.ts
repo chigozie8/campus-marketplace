@@ -8,6 +8,10 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 )
 
+function isNativeSubscription(endpoint: string) {
+  return endpoint.startsWith('native:')
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
@@ -27,6 +31,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ sent: 0 })
     }
 
+    const webSubs = subs.filter((s) => !isNativeSubscription(s.endpoint))
+    const nativeCount = subs.length - webSubs.length
+
     const payload = JSON.stringify({
       title: title || 'VendoorX',
       body: body || 'You have a new notification',
@@ -35,22 +42,26 @@ export async function POST(req: Request) {
       url: url || '/',
     })
 
-    const results = await Promise.allSettled(
-      subs.map((sub) =>
-        webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload
+    let sent = 0
+    const expiredEndpoints: string[] = []
+
+    if (webSubs.length > 0) {
+      const results = await Promise.allSettled(
+        webSubs.map((sub) =>
+          webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
         )
       )
-    )
 
-    const sent = results.filter((r) => r.status === 'fulfilled').length
-    const failed = results.filter((r) => r.status === 'rejected')
+      sent = results.filter((r) => r.status === 'fulfilled').length
 
-    if (failed.length > 0) {
-      const expiredEndpoints = subs
-        .filter((_, i) => results[i].status === 'rejected')
-        .map((s) => s.endpoint)
+      webSubs.forEach((sub, i) => {
+        if (results[i].status === 'rejected') {
+          expiredEndpoints.push(sub.endpoint)
+        }
+      })
 
       if (expiredEndpoints.length > 0) {
         await supabase
@@ -60,7 +71,11 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ sent, failed: failed.length })
+    return NextResponse.json({
+      sent,
+      failed: expiredEndpoints.length,
+      native_skipped: nativeCount,
+    })
   } catch (err) {
     console.error('[push/send]', err)
     return NextResponse.json({ error: 'Failed to send' }, { status: 500 })

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
+import { hapticImpact, hapticNotification } from '@/lib/capacitor'
 
 export interface CheckoutProduct {
   id: string
@@ -46,6 +47,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
       return
     }
 
+    hapticImpact('medium')
     const result = await createOrder.mutateAsync({
       product_id: product.id,
       quantity,
@@ -58,6 +60,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
 
   async function handlePay() {
     if (!orderId) return
+    hapticNotification('success')
     setStep('paying')
 
     try {
