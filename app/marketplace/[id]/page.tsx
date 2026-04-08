@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
+import { TrustBadge, SellerTierBadge } from '@/components/TrustBadge'
+import { quickSellerScore } from '@/lib/trust'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
@@ -108,6 +110,12 @@ export default async function ProductDetailPage({ params }: Props) {
   const sellerRating = p.profiles?.rating || 0
   const isVerified = p.profiles?.seller_verified || false
   const cond = conditionConfig[p.condition] || conditionConfig.good
+
+  const listingTrustScore = quickSellerScore({
+    rating: sellerRating,
+    totalSales: p.profiles?.total_sales ?? 0,
+    sellerVerified: isVerified,
+  })
 
   return (
     <>
@@ -241,18 +249,18 @@ export default async function ProductDetailPage({ params }: Props) {
               )}
 
               {/* Seller card */}
-              <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4">
-                <h3 className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-3">Seller</h3>
+              <Link href={`/sellers/${p.seller_id}`} className="block bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border p-4 hover:shadow-md transition-shadow group">
+                <h3 className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-3">About the Seller</h3>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm flex-shrink-0">
                     {sellerName.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-sm text-gray-900 dark:text-white truncate">{sellerName}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-sm text-gray-900 dark:text-white truncate group-hover:text-primary transition-colors">{sellerName}</span>
                       {isVerified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5">
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                       {sellerRating > 0 && (
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -265,7 +273,11 @@ export default async function ProductDetailPage({ params }: Props) {
                     </div>
                   </div>
                 </div>
-              </div>
+                <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                  <TrustBadge score={listingTrustScore} size="sm" showScore={true} />
+                  <SellerTierBadge score={listingTrustScore} size="sm" />
+                </div>
+              </Link>
 
               {/* Make an Offer */}
               {p.is_available && (

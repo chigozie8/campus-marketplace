@@ -9,7 +9,7 @@ import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
-import { SellerTierBadge, TrustBadge, TrustScoreBar, getMilestoneBadge } from '@/components/TrustBadge'
+import { SellerTierBadge, TrustBadge, getMilestoneBadge, getSellerTier } from '@/components/TrustBadge'
 import { quickSellerScore } from '@/lib/trust'
 
 type Props = { params: Promise<{ id: string }> }
@@ -53,6 +53,14 @@ export default async function SellerProfilePage({ params }: Props) {
     sellerVerified: profile.seller_verified ?? false,
   })
   const sellerMilestone = getMilestoneBadge(sellerTrustScore)
+  const sellerTier = getSellerTier(sellerTrustScore)
+
+  const tierDescriptions = {
+    gold:   { desc: 'Exceptional seller with high ratings, verified status and strong sales history.', next: null, nextScore: null },
+    silver: { desc: 'Trusted seller with a solid track record and good buyer feedback.', next: 'Gold', nextScore: 85 },
+    bronze: { desc: 'Active seller building their reputation on VendoorX.', next: 'Silver', nextScore: 70 },
+  }
+  const tierInfo = sellerTier ? tierDescriptions[sellerTier] : null
 
   function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime()
@@ -143,8 +151,8 @@ export default async function SellerProfilePage({ params }: Props) {
             ))}
           </div>
 
-          {/* Trust bar */}
-          <div className="relative z-10 mt-4 pt-4 border-t border-white/10 space-y-1.5">
+          {/* Trust bar + tier info */}
+          <div className="relative z-10 mt-4 pt-4 border-t border-white/10 space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-white/50 font-semibold">Trust Score</span>
               <span className="text-white font-black">{sellerTrustScore}/100</span>
@@ -159,6 +167,17 @@ export default async function SellerProfilePage({ params }: Props) {
                 style={{ width: `${sellerTrustScore}%` }}
               />
             </div>
+            {tierInfo && (
+              <div className="space-y-1">
+                <p className="text-white/50 text-[10px] leading-relaxed">{tierInfo.desc}</p>
+                {tierInfo.next && tierInfo.nextScore && (
+                  <p className="text-white/40 text-[10px]">
+                    {tierInfo.nextScore - sellerTrustScore} pts to reach{' '}
+                    <span className="text-white/70 font-semibold">{tierInfo.next} Tier</span>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

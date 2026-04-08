@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendVerificationApprovedEmail, sendVerificationRejectedEmail } from '@/lib/email'
+import { checkAndNotifySellerMilestones } from '@/lib/trust-milestones'
 
 async function assertAdmin() {
   const supabase = await createClient()
@@ -88,6 +89,8 @@ export async function PATCH(
     if (email) {
       if (status === 'approved') {
         sendVerificationApprovedEmail(email, vendorName).catch(() => {})
+        // Verification approval boosts seller trust score — check for new milestones
+        checkAndNotifySellerMilestones(vendorId).catch(() => {})
       } else {
         sendVerificationRejectedEmail(email, vendorName, rejection_reason).catch(() => {})
       }
