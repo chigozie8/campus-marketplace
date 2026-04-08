@@ -36,7 +36,14 @@ export async function GET(
   ] = await Promise.all([
     adminClient
       .from('profiles')
-      .select('id, full_name, avatar_url, phone, email, university, campus, is_seller, seller_verified, trust_score, rating, total_sales, created_at, bio, whatsapp_number, payout_bank_name, is_business_verified, is_student_verified, total_orders, successful_orders, failed_orders, disputes_count')
+      .select([
+        'id', 'full_name', 'avatar_url', 'phone', 'email', 'university', 'campus',
+        'is_seller', 'seller_verified', 'trust_score', 'rating', 'total_sales',
+        'created_at', 'bio', 'whatsapp_number', 'payout_bank_name', 'payout_bank_code',
+        'payout_account_number', 'payout_account_name', 'paystack_subaccount_code',
+        'is_business_verified', 'is_student_verified',
+        'total_orders', 'successful_orders', 'failed_orders', 'disputes_count',
+      ].join(', '))
       .eq('id', id)
       .single(),
 
@@ -50,21 +57,21 @@ export async function GET(
 
     adminClient
       .from('products')
-      .select('id, title, price, is_available, views, created_at, images, category_id')
+      .select('id, title, price, is_available, views, created_at, images')
       .eq('seller_id', id)
       .order('created_at', { ascending: false })
       .limit(20),
 
     adminClient
       .from('orders')
-      .select('id, status, payment_status, total_amount, payment_ref, created_at, updated_at, products(title)')
+      .select('id, status, payment_status, total_amount, payment_ref, created_at, products(title)')
       .eq('buyer_id', id)
       .order('created_at', { ascending: false })
       .limit(10),
 
     adminClient
       .from('orders')
-      .select('id, status, payment_status, total_amount, payment_ref, created_at, updated_at, products(title)')
+      .select('id, status, payment_status, total_amount, payment_ref, created_at, products(title)')
       .eq('seller_id', id)
       .order('created_at', { ascending: false })
       .limit(10),
@@ -82,6 +89,39 @@ export async function GET(
       .order('created_at', { ascending: false }),
   ])
 
+  type BankAccount = {
+    source: 'profile' | 'verification'
+    bank_name: string
+    account_number: string
+    account_name: string | null
+    bank_code: string | null
+    paystack_subaccount_code: string | null
+  }
+
+  const bankAccounts: BankAccount[] = []
+
+  if (profile?.payout_account_number) {
+    bankAccounts.push({
+      source: 'profile',
+      bank_name: profile.payout_bank_name ?? '—',
+      account_number: profile.payout_account_number,
+      account_name: profile.payout_account_name ?? null,
+      bank_code: profile.payout_bank_code ?? null,
+      paystack_subaccount_code: profile.paystack_subaccount_code ?? null,
+    })
+  }
+
+  if (verification?.account_number && verification.account_number !== profile?.payout_account_number) {
+    bankAccounts.push({
+      source: 'verification',
+      bank_name: verification.bank_name ?? '—',
+      account_number: verification.account_number,
+      account_name: null,
+      bank_code: null,
+      paystack_subaccount_code: null,
+    })
+  }
+
   return NextResponse.json({
     profile,
     verification,
@@ -89,6 +129,7 @@ export async function GET(
     buyerOrders: buyerOrders ?? [],
     sellerOrders: sellerOrders ?? [],
     wallet,
+    bankAccounts,
     pushTokens: pushTokens ?? [],
   })
 }

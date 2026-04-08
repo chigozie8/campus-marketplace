@@ -4,8 +4,8 @@ import { useState, useTransition, useCallback } from 'react'
 import {
   Search, BadgeCheck, Trash2, Store, Loader2,
   Bell, Ban, Download, X, Send, CheckCircle2, Eye,
-  ShoppingBag, Package, Wallet, Bell as BellIcon, Copy, Check,
-  Shield, Star, ClipboardList, CreditCard, AlertTriangle,
+  ShoppingBag, Wallet, Copy, Check,
+  Shield, ClipboardList, AlertTriangle,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -23,15 +23,101 @@ interface User {
   created_at: string
 }
 
-interface UserDetail {
-  profile: Record<string, any> | null
-  verification: Record<string, any> | null
-  listings: any[]
-  buyerOrders: any[]
-  sellerOrders: any[]
-  wallet: Record<string, any> | null
-  pushTokens: any[]
+interface UserProfile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  phone: string | null
+  email: string | null
+  university: string | null
+  campus: string | null
+  is_seller: boolean
+  seller_verified: boolean
+  trust_score: number | null
+  rating: number
+  total_sales: number
+  created_at: string
+  bio: string | null
+  whatsapp_number: string | null
+  is_business_verified: boolean | null
+  is_student_verified: boolean | null
+  total_orders: number | null
+  successful_orders: number | null
+  failed_orders: number | null
+  disputes_count: number | null
 }
+
+interface VerificationRecord {
+  status: string | null
+  full_name: string | null
+  business_name: string | null
+  phone_number: string | null
+  location_city: string | null
+  location_state: string | null
+  id_type: string | null
+  id_number: string | null
+  bank_name: string | null
+  account_number: string | null
+  rejection_reason: string | null
+  reviewed_at: string | null
+  created_at: string
+}
+
+interface Listing {
+  id: string
+  title: string
+  price: number
+  is_available: boolean
+  views: number | null
+  created_at: string
+  images: string[] | null
+}
+
+interface Order {
+  id: string
+  status: string
+  payment_status: string | null
+  total_amount: number
+  payment_ref: string | null
+  created_at: string
+  products: { title: string } | null
+}
+
+interface WalletRecord {
+  available: number
+  pending: number
+  currency: string
+  updated_at: string
+}
+
+interface BankAccount {
+  source: 'profile' | 'verification'
+  bank_name: string
+  account_number: string
+  account_name: string | null
+  bank_code: string | null
+  paystack_subaccount_code: string | null
+}
+
+interface PushToken {
+  id: string
+  token_type: string
+  platform: string
+  created_at: string
+}
+
+interface UserDetail {
+  profile: UserProfile | null
+  verification: VerificationRecord | null
+  listings: Listing[]
+  buyerOrders: Order[]
+  sellerOrders: Order[]
+  wallet: WalletRecord | null
+  bankAccounts: BankAccount[]
+  pushTokens: PushToken[]
+}
+
+type SectionKey = 'profile' | 'listings' | 'orders' | 'wallet'
 
 interface Props { users: User[] }
 
@@ -43,6 +129,17 @@ const STATUS_BADGE: Record<string, string> = {
   delivered: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
   paid:      'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300',
   shipped:   'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300',
+}
+
+const EMPTY_DETAIL: UserDetail = {
+  profile: null,
+  verification: null,
+  listings: [],
+  buyerOrders: [],
+  sellerOrders: [],
+  wallet: null,
+  bankAccounts: [],
+  pushTokens: [],
 }
 
 export function AdminUsersTable({ users }: Props) {
@@ -60,14 +157,14 @@ export function AdminUsersTable({ users }: Props) {
 
   const [detailUser, setDetailUser] = useState<User | null>(null)
   const [detailData, setDetailData] = useState<UserDetail | null>(null)
+  const [detailError, setDetailError] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
 
   const [banningId, setBanningId] = useState<string | null>(null)
   const [bannedIds, setBannedIds] = useState<Set<string>>(new Set())
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
-
-  const [activeSection, setActiveSection] = useState<'profile' | 'listings' | 'orders' | 'wallet'>('profile')
+  const [activeSection, setActiveSection] = useState<SectionKey>('profile')
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase()
@@ -150,18 +247,35 @@ export function AdminUsersTable({ users }: Props) {
     if (detailUser?.id === u.id) {
       setDetailUser(null)
       setDetailData(null)
+      setDetailError(false)
       return
     }
     setDetailUser(u)
     setDetailData(null)
+    setDetailError(false)
     setDetailLoading(true)
     setActiveSection('profile')
     try {
       const res = await fetch(`/api/admin/users/${u.id}`)
-      const json = await res.json()
-      setDetailData(json)
+      if (!res.ok) {
+        setDetailError(true)
+        setDetailData(EMPTY_DETAIL)
+      } else {
+        const json: UserDetail = await res.json()
+        setDetailData({
+          profile: json.profile ?? null,
+          verification: json.verification ?? null,
+          listings: json.listings ?? [],
+          buyerOrders: json.buyerOrders ?? [],
+          sellerOrders: json.sellerOrders ?? [],
+          wallet: json.wallet ?? null,
+          bankAccounts: json.bankAccounts ?? [],
+          pushTokens: json.pushTokens ?? [],
+        })
+      }
     } catch {
-      setDetailData(null)
+      setDetailError(true)
+      setDetailData(EMPTY_DETAIL)
     } finally {
       setDetailLoading(false)
     }
@@ -206,12 +320,12 @@ export function AdminUsersTable({ users }: Props) {
     { key: 'verified', label: 'Verified' },
   ] as const
 
-  const SECTIONS = [
-    { key: 'profile',  label: 'Profile', icon: Shield },
+  const SECTIONS: { key: SectionKey; label: string; icon: React.ElementType }[] = [
+    { key: 'profile',  label: 'Profile',  icon: Shield },
     { key: 'listings', label: 'Listings', icon: ShoppingBag },
-    { key: 'orders',   label: 'Orders', icon: ClipboardList },
-    { key: 'wallet',   label: 'Wallet', icon: Wallet },
-  ] as const
+    { key: 'orders',   label: 'Orders',   icon: ClipboardList },
+    { key: 'wallet',   label: 'Wallet',   icon: Wallet },
+  ]
 
   return (
     <>
@@ -394,7 +508,7 @@ export function AdminUsersTable({ users }: Props) {
             {/* Panel header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
               <h3 className="font-black text-sm text-foreground">Full User Profile</h3>
-              <button onClick={() => { setDetailUser(null); setDetailData(null) }}
+              <button onClick={() => { setDetailUser(null); setDetailData(null); setDetailError(false) }}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 <X className="w-4 h-4" />
@@ -438,7 +552,7 @@ export function AdminUsersTable({ users }: Props) {
               {SECTIONS.map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
-                  onClick={() => setActiveSection(key as any)}
+                  onClick={() => setActiveSection(key)}
                   className={`flex-1 flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl text-[9px] font-bold transition-all ${
                     activeSection === key
                       ? 'bg-primary text-primary-foreground'
@@ -457,10 +571,10 @@ export function AdminUsersTable({ users }: Props) {
                 <div className="flex items-center justify-center py-10">
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </div>
-              ) : !detailData ? (
-                <div className="flex items-center justify-center py-10">
-                  <AlertTriangle className="w-5 h-5 text-muted-foreground mr-2" />
-                  <span className="text-sm text-muted-foreground">Failed to load</span>
+              ) : detailError || !detailData ? (
+                <div className="flex items-center justify-center py-10 gap-2">
+                  <AlertTriangle className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Failed to load profile</span>
                 </div>
               ) : (
                 <>
@@ -470,11 +584,11 @@ export function AdminUsersTable({ users }: Props) {
                       <DetailSection label="Basic Info">
                         <InfoRow label="University" value={detailData.profile?.university ?? '—'} />
                         <InfoRow label="Campus" value={detailData.profile?.campus ?? '—'} />
-                        <InfoRow label="Email" value={detailData.profile?.email ?? '—'} copyKey="email" copyText={detailData.profile?.email} copiedKey={copiedKey} onCopy={copyText} />
-                        <InfoRow label="WhatsApp" value={detailData.profile?.whatsapp_number ?? '—'} copyKey="wa" copyText={detailData.profile?.whatsapp_number} copiedKey={copiedKey} onCopy={copyText} />
+                        <InfoRow label="Email" value={detailData.profile?.email ?? '—'} copyKey="email" copyValue={detailData.profile?.email ?? null} copiedKey={copiedKey} onCopy={copyText} />
+                        <InfoRow label="WhatsApp" value={detailData.profile?.whatsapp_number ?? '—'} copyKey="wa" copyValue={detailData.profile?.whatsapp_number ?? null} copiedKey={copiedKey} onCopy={copyText} />
                         <InfoRow label="Rating" value={`${detailData.profile?.rating ?? 0} / 5`} />
                         <InfoRow label="Total Sales" value={String(detailData.profile?.total_sales ?? 0)} />
-                        <InfoRow label="Joined" value={new Date(detailData.profile?.created_at ?? '').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} />
+                        <InfoRow label="Joined" value={detailData.profile?.created_at ? new Date(detailData.profile.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
                       </DetailSection>
 
                       <DetailSection label="Trust & Activity">
@@ -492,7 +606,7 @@ export function AdminUsersTable({ users }: Props) {
                           <InfoRow label="Status" value={detailData.verification.status ?? '—'} />
                           <InfoRow label="Business" value={detailData.verification.business_name ?? '—'} />
                           <InfoRow label="ID Type" value={detailData.verification.id_type ?? '—'} />
-                          <InfoRow label="ID Number" value={detailData.verification.id_number ?? '—'} copyKey="id_number" copyText={detailData.verification.id_number} copiedKey={copiedKey} onCopy={copyText} />
+                          <InfoRow label="ID Number" value={detailData.verification.id_number ?? '—'} copyKey="id_number" copyValue={detailData.verification.id_number} copiedKey={copiedKey} onCopy={copyText} />
                           <InfoRow label="City" value={`${detailData.verification.location_city ?? '—'}, ${detailData.verification.location_state ?? '—'}`} />
                           {detailData.verification.rejection_reason && (
                             <InfoRow label="Rejection" value={detailData.verification.rejection_reason} />
@@ -503,7 +617,7 @@ export function AdminUsersTable({ users }: Props) {
                       <DetailSection label={`Push Tokens (${detailData.pushTokens.length})`}>
                         {detailData.pushTokens.length === 0 ? (
                           <p className="text-[11px] text-muted-foreground">No push subscriptions</p>
-                        ) : detailData.pushTokens.map((t: any) => (
+                        ) : detailData.pushTokens.map((t) => (
                           <div key={t.id} className="flex items-center justify-between">
                             <span className="text-[11px] font-semibold text-foreground capitalize">{t.platform} ({t.token_type})</span>
                             <span className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleDateString('en-GB')}</span>
@@ -516,7 +630,7 @@ export function AdminUsersTable({ users }: Props) {
                           onClick={() => { setNotifyUser(detailUser); setNotifyTitle(''); setNotifyBody('') }}
                           className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
                         >
-                          <BellIcon className="w-4 h-4" />
+                          <Bell className="w-4 h-4" />
                           Send Notification
                         </button>
                         <button
@@ -548,7 +662,7 @@ export function AdminUsersTable({ users }: Props) {
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{detailData.listings.length} listing{detailData.listings.length !== 1 ? 's' : ''}</p>
                       {detailData.listings.length === 0 ? (
                         <div className="py-6 text-center text-sm text-muted-foreground">No listings yet</div>
-                      ) : detailData.listings.map((p: any) => (
+                      ) : detailData.listings.map((p) => (
                         <div key={p.id} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
                           <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {p.images?.[0]
@@ -618,33 +732,40 @@ export function AdminUsersTable({ users }: Props) {
                         )}
                       </DetailSection>
 
-                      {detailData.verification && (
-                        <DetailSection label="Bank Account">
-                          <div className="space-y-2">
-                            <InfoRow label="Bank" value={detailData.verification.bank_name ?? detailData.profile?.payout_bank_name ?? '—'} />
+                      <DetailSection label={`Bank Accounts (${detailData.bankAccounts.length})`}>
+                        {detailData.bankAccounts.length === 0 ? (
+                          <p className="text-[11px] text-muted-foreground">No bank accounts saved</p>
+                        ) : detailData.bankAccounts.map((acct, i) => (
+                          <div key={i} className="space-y-1.5 pb-2 border-b border-border/50 last:border-0 last:pb-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary capitalize">{acct.source}</span>
+                              <span className="text-[11px] font-bold text-foreground">{acct.bank_name}</span>
+                            </div>
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-xs text-muted-foreground">Account No.</span>
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-foreground font-mono">
-                                  {detailData.verification.account_number ?? '—'}
-                                </span>
-                                {detailData.verification.account_number && (
-                                  <button
-                                    onClick={() => copyText('account_number', detailData.verification.account_number)}
-                                    className="p-0.5 rounded hover:bg-accent transition-all"
-                                    title="Copy account number"
-                                  >
-                                    {copiedKey === 'account_number'
-                                      ? <Check className="w-3 h-3 text-emerald-500" />
-                                      : <Copy className="w-3 h-3 text-muted-foreground" />
-                                    }
-                                  </button>
-                                )}
+                                <span className="text-xs font-bold text-foreground font-mono">{acct.account_number}</span>
+                                <button
+                                  onClick={() => copyText(`acct_${i}`, acct.account_number)}
+                                  className="p-0.5 rounded hover:bg-accent transition-all"
+                                  title="Copy account number"
+                                >
+                                  {copiedKey === `acct_${i}`
+                                    ? <Check className="w-3 h-3 text-emerald-500" />
+                                    : <Copy className="w-3 h-3 text-muted-foreground" />
+                                  }
+                                </button>
                               </div>
                             </div>
+                            {acct.account_name && (
+                              <InfoRow label="Name" value={acct.account_name} />
+                            )}
+                            {acct.paystack_subaccount_code && (
+                              <InfoRow label="Subaccount" value={acct.paystack_subaccount_code} copyKey={`sub_${i}`} copyValue={acct.paystack_subaccount_code} copiedKey={copiedKey} onCopy={copyText} />
+                            )}
                           </div>
-                        </DetailSection>
-                      )}
+                        ))}
+                      </DetailSection>
                     </div>
                   )}
                 </>
@@ -736,12 +857,12 @@ function DetailSection({ label, children }: { label: string; children: React.Rea
 }
 
 function InfoRow({
-  label, value, copyKey, copyText: copyVal, copiedKey, onCopy
+  label, value, copyKey, copyValue, copiedKey, onCopy
 }: {
   label: string
   value: string
   copyKey?: string
-  copyText?: string
+  copyValue?: string | null
   copiedKey?: string | null
   onCopy?: (key: string, text: string) => void
 }) {
@@ -750,9 +871,9 @@ function InfoRow({
       <span className="text-xs text-muted-foreground flex-shrink-0">{label}</span>
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="text-xs font-semibold text-foreground text-right truncate">{value}</span>
-        {copyKey && copyVal && onCopy && (
+        {copyKey && copyValue && onCopy && (
           <button
-            onClick={() => onCopy(copyKey, copyVal)}
+            onClick={() => onCopy(copyKey, copyValue)}
             className="p-0.5 rounded hover:bg-accent transition-all flex-shrink-0"
             title={`Copy ${label}`}
           >
@@ -767,17 +888,17 @@ function InfoRow({
   )
 }
 
-function OrderList({ label, orders }: { label: string; orders: any[] }) {
+function OrderList({ label, orders }: { label: string; orders: Order[] }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label} ({orders.length})</p>
       {orders.length === 0 ? (
         <div className="py-3 text-center text-xs text-muted-foreground bg-muted/30 rounded-xl border border-border">No orders</div>
-      ) : orders.map((o: any) => (
+      ) : orders.map((o) => (
         <div key={o.id} className="flex items-start gap-2 p-2.5 rounded-xl bg-muted/30 border border-border">
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-bold text-foreground truncate">
-              {(o.products as any)?.title ?? 'Order'}
+              {o.products?.title ?? 'Order'}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full capitalize ${STATUS_BADGE[o.status] ?? 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
