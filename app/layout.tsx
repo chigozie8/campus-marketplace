@@ -11,6 +11,7 @@ import { SplashScreen } from '@/components/splash-screen'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ChatWidget } from '@/components/chat-widget'
 import { PushNotificationPrompt } from '@/components/push-notification-prompt'
+import { CapacitorInit } from '@/components/capacitor-init'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
 import './globals.css'
@@ -339,6 +340,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
+            <CapacitorInit />
             <SplashScreen />
             <NavigationProgress />
             {children}

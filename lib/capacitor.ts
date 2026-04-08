@@ -63,8 +63,7 @@ export async function hapticImpact(style: 'light' | 'medium' | 'heavy' = 'medium
 export async function hapticNotification(type: 'success' | 'warning' | 'error' = 'success') {
   if (!isNative()) return
   try {
-    const { Haptics } = await getHaptics()
-    const { NotificationType } = await import('@capacitor/haptics')
+    const { Haptics, NotificationType } = await import('@capacitor/haptics')
     const typeMap = {
       success: NotificationType.Success,
       warning: NotificationType.Warning,

@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 const config: CapacitorConfig = {
   appId: 'com.vendoorx.app',
   appName: 'VendoorX',
-  webDir: 'out',
+  webDir: 'public',
   server: {
     url: 'https://vendoorx.com',
     cleartext: false,
