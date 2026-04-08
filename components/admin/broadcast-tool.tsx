@@ -29,7 +29,7 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ sent: number } | null>(null)
+  const [result, setResult] = useState<{ sent: number; push_sent?: number; push_failed?: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [history, setHistory] = useState<BroadcastEntry[]>([])
@@ -186,11 +186,19 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
           )}
 
           {result && (
-            <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
-              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-              <p className="text-sm font-semibold text-green-700 dark:text-green-300">
-                Sent to {result.sent.toLocaleString()} {result.sent === 1 ? 'user' : 'users'}!
-              </p>
+            <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
+              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-green-700 dark:text-green-300">
+                  In-app: delivered to {result.sent.toLocaleString()} {result.sent === 1 ? 'user' : 'users'}
+                </p>
+                {result.push_sent !== undefined && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                    Push: {result.push_sent.toLocaleString()} device{result.push_sent !== 1 ? 's' : ''} notified
+                    {result.push_failed ? ` · ${result.push_failed} failed` : ''}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 

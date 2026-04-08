@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { sendFcmNotification } from '@/lib/firebase-admin'
+import webpush from 'web-push'
 
 function adminClient() {
   return createAdmin(
@@ -23,6 +25,27 @@ async function requireAdmin() {
   return data ? user : null
 }
 
+function isNativeEndpoint(endpoint: string) {
+  return endpoint.startsWith('native:')
+}
+function extractFcmToken(endpoint: string) {
+  const parts = endpoint.split(':')
+  return parts.slice(2).join(':')
+}
+
+const vapidReady =
+  !!process.env.VAPID_SUBJECT &&
+  !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
+  !!process.env.VAPID_PRIVATE_KEY
+
+if (vapidReady) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  )
+}
+
 // GET — list recent broadcast campaigns (distinct title+body)
 export async function GET() {
   const user = await requireAdmin()
@@ -37,7 +60,6 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Deduplicate by title+body, keeping most recent timestamp and counting recipients
   const map = new Map<string, { title: string; body: string; created_at: string; count: number }>()
   for (const n of data ?? []) {
     const key = `${n.title}|||${n.body}`
@@ -79,10 +101,13 @@ export async function POST(req: NextRequest) {
     profiles = data ?? []
   }
 
-  if (profiles.length === 0) return NextResponse.json({ sent: 0 })
+  if (profiles.length === 0) return NextResponse.json({ sent: 0, push_sent: 0 })
 
-  const notifications = profiles.map((p) => ({
-    user_id: p.id,
+  const userIds = profiles.map(p => p.id)
+
+  // 1. Insert in-app notifications in batches
+  const notifications = userIds.map((id) => ({
+    user_id: id,
     type: 'broadcast',
     title,
     body,
@@ -96,7 +121,72 @@ export async function POST(req: NextRequest) {
     if (!error) sent += Math.min(BATCH, notifications.length - i)
   }
 
-  return NextResponse.json({ sent })
+  // 2. Dispatch push notifications to subscribed devices
+  let pushSent = 0
+  let pushFailed = 0
+  const expiredEndpoints: string[] = []
+
+  try {
+    // Fetch push subscriptions for all targeted users
+    const { data: subs } = await sc
+      .from('push_subscriptions')
+      .select('user_id, endpoint, p256dh, auth')
+      .in('user_id', userIds)
+
+    if (subs && subs.length > 0) {
+      const notifPayload = JSON.stringify({
+        title,
+        body,
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        url: '/dashboard/notifications',
+      })
+
+      const pushResults = await Promise.allSettled(
+        subs.map(async (sub) => {
+          if (isNativeEndpoint(sub.endpoint)) {
+            // FCM / native push
+            const fcmToken = extractFcmToken(sub.endpoint)
+            const result = await sendFcmNotification(fcmToken, { title, body, url: '/dashboard/notifications' })
+            return { endpoint: sub.endpoint, result }
+          } else if (vapidReady) {
+            // Web push
+            await webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+              notifPayload
+            )
+            return { endpoint: sub.endpoint, result: 'sent' as const }
+          }
+          return { endpoint: sub.endpoint, result: 'error' as const }
+        })
+      )
+
+      for (const r of pushResults) {
+        if (r.status === 'fulfilled') {
+          if (r.value.result === 'sent') {
+            pushSent++
+          } else if (r.value.result === 'invalid') {
+            expiredEndpoints.push(r.value.endpoint)
+            pushFailed++
+          } else {
+            pushFailed++
+          }
+        } else {
+          // Web push rejected (expired/invalid subscription)
+          pushFailed++
+        }
+      }
+
+      // Clean up expired subscriptions
+      if (expiredEndpoints.length > 0) {
+        await sc.from('push_subscriptions').delete().in('endpoint', expiredEndpoints)
+      }
+    }
+  } catch (pushErr) {
+    console.error('[broadcast] Push dispatch error:', pushErr)
+  }
+
+  return NextResponse.json({ sent, push_sent: pushSent, push_failed: pushFailed })
 }
 
 // DELETE — remove all notifications for a broadcast campaign (by title + body)

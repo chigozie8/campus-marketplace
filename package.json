@@ -64,6 +64,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/swagger-ui-express": "^4.1.8",
+    "@types/web-push": "^3.6.4",
     "@upstash/redis": "^1.37.0",
     "@vercel/analytics": "^1.6.1",
     "autoprefixer": "^10.4.27",
