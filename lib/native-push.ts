@@ -1,6 +1,6 @@
 'use client'
 
-import { isNative } from './capacitor'
+import { isNative, getPlatform } from './capacitor'
 
 export interface NativePushHandler {
   onRegistration?: (token: string) => void
@@ -51,10 +51,11 @@ export async function registerNativePush(handlers: NativePushHandler = {}) {
 
 async function sendTokenToServer(token: string) {
   try {
+    const platform = getPlatform()
     await fetch('/api/push/native-subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, platform: 'native' }),
+      body: JSON.stringify({ token, platform }),
     })
   } catch {}
 }

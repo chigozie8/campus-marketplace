@@ -1,19 +1,37 @@
 // VendoorX Service Worker — Network-first, offline fallback + Web Push
 // Note: When running inside Capacitor native app, native push is handled
 // by the @capacitor/push-notifications plugin — web push is skipped.
-const CACHE_VERSION = 'v7'
+const CACHE_VERSION = 'v8'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
+const FLAGS_CACHE = 'vendoorx-flags'
+const NATIVE_FLAG_KEY = '/native-mode'
 
 const OFFLINE_PAGES = ['/offline']
 
-// Detect if running inside Capacitor native shell
-function isCapacitorNative() {
-  return (
-    self.location.protocol === 'capacitor:' ||
-    navigator.userAgent.includes('Capacitor') ||
-    (typeof self.__CAPACITOR__ !== 'undefined')
-  )
+// In-memory native mode flag — set by SET_NATIVE_MODE message or restored from cache
+let nativeModeActive = false
+
+// Restore native mode flag from cache on SW startup
+async function restoreNativeFlag() {
+  try {
+    const cache = await caches.open(FLAGS_CACHE)
+    const flagRes = await cache.match(NATIVE_FLAG_KEY)
+    if (flagRes) {
+      nativeModeActive = true
+    }
+  } catch {}
 }
+
+// Persist native mode flag to cache so it survives SW restarts
+async function persistNativeFlag() {
+  try {
+    const cache = await caches.open(FLAGS_CACHE)
+    await cache.put(NATIVE_FLAG_KEY, new Response('1', { status: 200 }))
+  } catch {}
+}
+
+// Bootstrap: restore flag before handling any events
+const nativeFlagRestored = restoreNativeFlag()
 
 // ── Install: only cache the offline fallback page ─────────────────────────────
 self.addEventListener('install', (event) => {
@@ -31,12 +49,16 @@ self.addEventListener('install', (event) => {
   self.skipWaiting()
 })
 
-// ── Activate: delete all old caches ───────────────────────────────────────────
+// ── Activate: delete all old caches except flags and current offline ───────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== OFFLINE_CACHE).map((k) => caches.delete(k)))
+        Promise.all(
+          keys
+            .filter((k) => k !== OFFLINE_CACHE && k !== FLAGS_CACHE)
+            .map((k) => caches.delete(k))
+        )
       )
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: 'window' }))
@@ -71,41 +93,45 @@ self.addEventListener('fetch', (event) => {
 })
 
 // ── Web Push Notifications ────────────────────────────────────────────────────
-// Skip entirely when inside Capacitor — native push plugin handles it
+// Skip entirely when inside Capacitor — native push plugin handles delivery.
+// Native mode is set deterministically via SET_NATIVE_MODE postMessage,
+// persisted in cache, and restored on SW restart.
 self.addEventListener('push', (event) => {
-  if (isCapacitorNative()) return
-  if (!event.data) return
-
-  let data = {}
-  try {
-    data = event.data.json()
-  } catch {
-    data = { title: 'VendoorX', body: event.data.text() }
-  }
-
-  const {
-    title = 'VendoorX',
-    body = 'You have a new notification',
-    icon = '/icon-192.png',
-    badge = '/icon-192.png',
-    url = '/',
-  } = data
-
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon,
-      badge,
-      data: { url },
-      vibrate: [100, 50, 100],
-      requireInteraction: false,
+    nativeFlagRestored.then(() => {
+      if (nativeModeActive) return
+      if (!event.data) return
+
+      let data = {}
+      try {
+        data = event.data.json()
+      } catch {
+        data = { title: 'VendoorX', body: event.data.text() }
+      }
+
+      const {
+        title = 'VendoorX',
+        body = 'You have a new notification',
+        icon = '/icon-192.png',
+        badge = '/icon-192.png',
+        url = '/',
+      } = data
+
+      return self.registration.showNotification(title, {
+        body,
+        icon,
+        badge,
+        data: { url },
+        vibrate: [100, 50, 100],
+        requireInteraction: false,
+      })
     })
   )
 })
 
 self.addEventListener('notificationclick', (event) => {
-  if (isCapacitorNative()) return
   event.notification.close()
+  if (nativeModeActive) return
   const url = event.notification.data?.url || '/'
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
@@ -118,7 +144,15 @@ self.addEventListener('notificationclick', (event) => {
 
 // ── Messages ──────────────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return
+
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
+  }
+
+  // Sent by capacitor-init.tsx on native app startup to suppress web push
+  if (event.data.type === 'SET_NATIVE_MODE') {
+    nativeModeActive = true
+    persistNativeFlag()
   }
 })

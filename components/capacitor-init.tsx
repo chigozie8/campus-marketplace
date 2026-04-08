@@ -67,6 +67,13 @@ export function CapacitorInit() {
         })
       } catch {}
 
+      // Signal service worker to suppress web push — native plugin handles delivery
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'SET_NATIVE_MODE' })
+        }
+      } catch {}
+
       try {
         await registerNativePush()
       } catch {}
