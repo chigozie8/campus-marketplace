@@ -1,4 +1,21 @@
+export type PressAsset = {
+  name: string
+  desc: string
+  size: string
+  url: string
+}
+
 export type SiteSettings = {
+  /* ── Press Kit ── */
+  press_company_description: string
+  press_founder_name: string
+  press_founder_title: string
+  press_founder_initials: string
+  press_founder_bio: string
+  press_founder_bio2: string
+  press_founder_quote: string
+  press_contact_email: string
+  press_assets: string
   /* ── Contact & Support ── */
   support_phone: string
   support_whatsapp_url: string
@@ -107,7 +124,30 @@ export const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
   { name: 'Ibrahim Musa', role: 'Tech Repair Service', school: 'BUK', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&h=120&fit=crop&crop=faces&q=80', initials: 'IM', metric: '50+ Repairs', metricLabel: 'per month', quote: 'Running a phone repair business from my hostel room was hard until VendoorX. Now I get consistent bookings daily from students across the campus.', verified: true, accent: '#0891b2' },
 ]
 
+export const DEFAULT_PRESS_ASSETS: PressAsset[] = [
+  { name: 'VendoorX Logo (SVG)', desc: 'Full colour, dark & light variants', size: 'SVG', url: '' },
+  { name: 'VendoorX Logo (PNG)', desc: '512×512px, transparent background', size: '128 KB', url: '' },
+  { name: 'Brand Guidelines', desc: 'Colour palette, typography, usage rules', size: 'PDF', url: '' },
+  { name: 'Founder Photo', desc: 'High-resolution headshot', size: '2.4 MB', url: '' },
+  { name: 'Product Screenshots', desc: 'Marketplace, dashboard, and store pages', size: 'ZIP', url: '' },
+]
+
+export function parsePressAssets(raw: string): PressAsset[] {
+  if (!raw) return DEFAULT_PRESS_ASSETS
+  try { return JSON.parse(raw) as PressAsset[] } catch { return DEFAULT_PRESS_ASSETS }
+}
+
 export const DEFAULT_SETTINGS: SiteSettings = {
+  /* press */
+  press_company_description: "VendoorX is Nigeria's #1 campus marketplace, connecting students across 120+ universities to buy and sell everything from electronics and textbooks to food and services — all powered by WhatsApp and Paystack.",
+  press_founder_name: 'Kenneth Okoronkwo',
+  press_founder_title: 'Founder & CEO',
+  press_founder_initials: 'KO',
+  press_founder_bio: 'Kenneth Okoronkwo is the founder and CEO of VendoorX, Nigeria\'s leading campus commerce platform. A serial entrepreneur and software engineer, Kenneth built VendoorX to solve the informal, unstructured nature of campus trade in Nigeria.',
+  press_founder_bio2: 'Under his leadership, VendoorX has grown to serve 50,000+ vendors across 120+ Nigerian universities, processing over ₦2 billion in verified transactions.',
+  press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
+  press_contact_email: 'press@vendoorx.com',
+  press_assets: '',
   /* contact */
   support_phone: '07082039250',
   support_whatsapp_url: 'https://wa.me/2347082039250',

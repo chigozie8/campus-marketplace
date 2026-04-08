@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { isNative, getPlatform, getSplashScreen, getStatusBar, getNetwork, getApp } from '@/lib/capacitor'
 import { registerNativePush } from '@/lib/native-push'
@@ -10,10 +11,13 @@ const log = (...args: unknown[]) => {
 }
 
 export function CapacitorInit() {
+  const router = useRouter()
+
   useEffect(() => {
     if (!isNative()) return
 
     let networkListenerHandle: { remove: () => void } | null = null
+    let deepLinkHandle: { remove: () => void } | null = null
 
     async function init() {
       const platform = getPlatform()
@@ -75,6 +79,24 @@ export function CapacitorInit() {
 
       try {
         const App = await getApp()
+
+        // Deep linking — handle universal links and custom URL scheme
+        deepLinkHandle = await App.addListener('appUrlOpen', ({ url }) => {
+          log('deep link received', url)
+          try {
+            const parsed = new URL(url)
+            // Extract pathname + search from any domain or vendoorx:// scheme
+            const path = parsed.pathname + (parsed.search || '')
+            if (path && path !== '/') {
+              log('navigating to deep link path', path)
+              router.push(path)
+            }
+          } catch {
+            log('deep link parse failed', url)
+          }
+        })
+        log('deep link handler registered')
+
         await App.addListener('backButton', ({ canGoBack }) => {
           if (!canGoBack) {
             App.minimizeApp()
@@ -84,7 +106,7 @@ export function CapacitorInit() {
         })
         log('back button handler registered')
       } catch (err) {
-        log('back button handler init failed', err)
+        log('App listeners init failed', err)
       }
 
       // Signal service worker to suppress web push — native plugin handles delivery
@@ -109,8 +131,9 @@ export function CapacitorInit() {
 
     return () => {
       networkListenerHandle?.remove()
+      deepLinkHandle?.remove()
     }
-  }, [])
+  }, [router])
 
   return null
 }

@@ -23,6 +23,8 @@ import {
   DollarSign,
   Gift,
   Zap,
+  FileText,
+  Briefcase,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -44,6 +46,8 @@ const NAV_ITEMS = [
   { label: 'Referral',        href: '/admin/referral',          icon: Gift },
   { label: 'Boost Pricing',   href: '/admin/boost',             icon: Zap },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
+  { label: 'Press Kit',       href: '/admin/press',             icon: FileText },
+  { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
   { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]
 

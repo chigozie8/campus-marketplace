@@ -36,6 +36,9 @@ const config: CapacitorConfig = {
     CapacitorHttp: {
       enabled: true,
     },
+    Camera: {
+      permissionType: 'prompt',
+    },
   },
   android: {
     allowMixedContent: false,
