@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { checkAndNotifySellerMilestones } from '@/lib/trust-milestones'
 
 function adminClient() {
   return createAdminClient(
@@ -88,6 +89,9 @@ export async function POST(req: Request) {
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Fire-and-forget: seller rating changed → re-check seller milestones (profile update trigger)
+    checkAndNotifySellerMilestones(sellerId).catch(() => {})
 
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'

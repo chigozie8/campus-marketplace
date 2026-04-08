@@ -61,6 +61,61 @@ async function notifyBuyerMilestones(buyerId: string) {
   }
 }
 
+async function notifySellerMilestones(sellerId: string) {
+  try {
+    const [profileRes, ordersRes, reviewsRes] = await Promise.all([
+      supabaseAdmin.from('profiles').select('id, created_at, seller_verified, total_sales').eq('id', sellerId).single(),
+      supabaseAdmin.from('orders').select('id, status').eq('seller_id', sellerId),
+      supabaseAdmin.from('reviews').select('rating').eq('seller_id', sellerId),
+    ])
+
+    if (!profileRes.data) return
+    const profile = profileRes.data
+    const orders = ordersRes.data ?? []
+    const reviews = reviewsRes.data ?? []
+
+    const completedSales = orders.filter((o: { status: string }) => o.status === 'completed').length
+    const avgRating = reviews.length > 0
+      ? reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0) / reviews.length
+      : 0
+    const sellerVerified = !!profile.seller_verified
+
+    const base = 30
+    const ratingBonus = avgRating >= 4.5 ? 30 : avgRating >= 4 ? 20 : avgRating >= 3 ? 10 : 0
+    const salesBonus = Math.min(completedSales * 2, 20)
+    const verifiedBonus = sellerVerified ? 20 : 0
+    const score = Math.max(0, Math.min(100, base + ratingBonus + salesBonus + verifiedBonus))
+
+    const SELLER_MILESTONES = [
+      { score: 50,  label: 'Rising Seller',    emoji: '🌱' },
+      { score: 70,  label: 'Trusted Seller',   emoji: '✅' },
+      { score: 85,  label: 'Top Seller',       emoji: '⭐' },
+      { score: 100, label: 'VendoorX Champion', emoji: '🏆' },
+    ] as const
+
+    for (const milestone of SELLER_MILESTONES) {
+      if (score < milestone.score) continue
+      const { data: existing } = await supabaseAdmin
+        .from('notifications')
+        .select('id')
+        .eq('user_id', sellerId)
+        .eq('title', `🏅 ${milestone.label} Unlocked!`)
+        .limit(1)
+        .single()
+      if (!existing) {
+        await supabaseAdmin.from('notifications').insert({
+          user_id: sellerId,
+          title: `🏅 ${milestone.label} Unlocked!`,
+          message: `Congratulations! You've reached a seller trust score of ${milestone.score}+ and earned the ${milestone.emoji} ${milestone.label} badge. Keep up the great service!`,
+          type: 'system',
+        })
+      }
+    }
+  } catch {
+    // Non-critical
+  }
+}
+
 const router = Router()
 router.use(authenticate)
 
@@ -122,8 +177,9 @@ router.post('/:id/confirm-delivery', async (req, res, next) => {
     }
 
     const updated = await orderService.updateOrderStatus(order.id, 'completed')
-    // Fire-and-forget milestone notification check
+    // Fire-and-forget milestone notification checks for both buyer and seller
     notifyBuyerMilestones(userId).catch(() => {})
+    notifySellerMilestones(order.seller_id).catch(() => {})
     res.status(200).json({ success: true, data: updated, message: 'Delivery confirmed! Funds released to seller.' })
   } catch (err) {
     next(err)

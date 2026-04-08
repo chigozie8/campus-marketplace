@@ -336,6 +336,8 @@ export default function ProfilePage() {
         }
       } else {
         toast.success('Profile saved successfully!')
+        // Fire-and-forget milestone check after profile update
+        fetch('/api/profile/check-milestones', { method: 'POST' }).catch(() => {})
       }
     })
   }
