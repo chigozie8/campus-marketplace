@@ -10,26 +10,6 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 type Platform = 'android' | 'ios' | 'other'
-const DISMISSED_KEY = 'pwa-dismissed'
-const DISMISS_DURATION_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
-
-function isDismissed(): boolean {
-  try {
-    const raw = localStorage.getItem(DISMISSED_KEY)
-    if (!raw) return false
-    const ts = parseInt(raw, 10)
-    if (isNaN(ts)) return false
-    return Date.now() - ts < DISMISS_DURATION_MS
-  } catch {
-    return false
-  }
-}
-
-function setDismissed() {
-  try {
-    localStorage.setItem(DISMISSED_KEY, String(Date.now()))
-  } catch {}
-}
 
 // Public export — suppresses the prompt inside the Capacitor native shell
 export function PwaInstallPrompt() {
@@ -51,9 +31,6 @@ function PwaInstallPromptCore() {
       ('standalone' in window.navigator &&
         (window.navigator as { standalone?: boolean }).standalone === true)
     if (isStandalone) return
-
-    // User dismissed recently (within 30 days)
-    if (isDismissed()) return
 
     const ua = window.navigator.userAgent
     const isIos =
@@ -90,14 +67,6 @@ function PwaInstallPromptCore() {
     }
   }, [])
 
-  // Dismiss for 30 days
-  const dismiss = useCallback(() => {
-    setModalOpen(false)
-    setTimeout(() => setChipVisible(false), 200)
-    setDismissed()
-  }, [])
-
-  // Close modal but keep chip visible (just cancel the modal)
   const closeModal = useCallback(() => {
     setModalOpen(false)
   }, [])
@@ -111,7 +80,6 @@ function PwaInstallPromptCore() {
       if (outcome === 'accepted') {
         setModalOpen(false)
         setChipVisible(false)
-        setDismissed()
       }
       setDeferredPrompt(null)
     }
@@ -254,12 +222,11 @@ function PwaInstallPromptCore() {
                   </button>
                 )}
 
-                {/* No thanks — permanently dismisses */}
                 <button
-                  onClick={dismiss}
+                  onClick={closeModal}
                   className="w-full py-2.5 text-sm font-semibold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
                 >
-                  No thanks, continue in browser
+                  Maybe later
                 </button>
               </div>
             </div>
