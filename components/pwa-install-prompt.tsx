@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Download, Smartphone, Share, X } from 'lucide-react'
+import { isNative } from '@/lib/capacitor'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -11,7 +12,13 @@ interface BeforeInstallPromptEvent extends Event {
 type Platform = 'android' | 'ios' | 'other'
 const DISMISSED_KEY = 'pwa-dismissed'
 
+// Public export — suppresses the prompt inside the Capacitor native shell
 export function PwaInstallPrompt() {
+  if (isNative()) return null
+  return <PwaInstallPromptCore />
+}
+
+function PwaInstallPromptCore() {
   const [platform, setPlatform] = useState<Platform>('other')
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [chipVisible, setChipVisible] = useState(false)
