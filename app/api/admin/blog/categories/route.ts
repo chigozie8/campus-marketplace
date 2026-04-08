@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  revalidateTag('blog-categories')
+  revalidateTag('blog-categories', 'max')
   return NextResponse.json({ category: data })
 }
 
@@ -72,6 +72,6 @@ export async function DELETE(req: NextRequest) {
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  revalidateTag('blog-categories')
+  revalidateTag('blog-categories', 'max')
   return NextResponse.json({ ok: true })
 }

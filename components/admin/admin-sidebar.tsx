@@ -25,6 +25,7 @@ import {
   Zap,
   FileText,
   Briefcase,
+  AlertTriangle,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { label: 'Users',           href: '/admin/users',             icon: Users },
   { label: 'Listings',        href: '/admin/listings',          icon: ShoppingBag },
   { label: 'Orders',          href: '/admin/orders',            icon: Package },
+  { label: 'Disputes',        href: '/admin/disputes',          icon: AlertTriangle },
   { label: 'Verifications',   href: '/admin/verifications',     icon: BadgeCheck },
   { label: 'Categories',      href: '/admin/categories',        icon: Tag },
   { label: 'Reviews',         href: '/admin/reviews',           icon: Star },

@@ -1,12 +1,14 @@
 import 'dotenv/config'
 import app from './app.js'
 import logger from './utils/logger.js'
+import { startAutoReleaseJob } from './jobs/escrowAutoRelease.js'
 
 const PORT = Number(process.env.PORT) || 3001
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`VendorX API v2 running on port ${PORT} [${process.env.NODE_ENV ?? 'development'}]`)
   logger.info(`API docs: http://localhost:${PORT}/api/docs`)
+  startAutoReleaseJob()
 })
 
 function shutdown(signal: string): void {

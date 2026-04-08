@@ -55,13 +55,25 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   const updates: Record<string, string> = { status, updated_at: now }
   if (status === 'delivered') updates.delivered_at = now
 
-  const { data, error } = await supabaseAdmin
+  let result = await supabaseAdmin
     .from('orders')
     .update(updates)
     .eq('id', id)
     .select()
     .single()
 
+  // delivered_at column may not exist yet — retry without it
+  if (result.error?.message?.includes('delivered_at')) {
+    const { delivered_at: _drop, ...safeUpdates } = updates
+    result = await supabaseAdmin
+      .from('orders')
+      .update(safeUpdates)
+      .eq('id', id)
+      .select()
+      .single()
+  }
+
+  const { data, error } = result
   if (error || !data) throw Object.assign(new Error('Order not found.'), { status: 404 })
 
   // When an order is marked completed/delivered, try to credit referral milestone

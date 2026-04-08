@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield, Flag } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
@@ -141,8 +141,40 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed }: { order: BackendOrd
   const [refundReason, setRefundReason] = useState('')
   const [showRefundForm, setShowRefundForm] = useState(false)
   const [refundDone, setRefundDone] = useState(false)
+  const [showDisputeForm, setShowDisputeForm] = useState(false)
+  const [disputeReason, setDisputeReason] = useState('')
+  const [disputeEvidence, setDisputeEvidence] = useState('')
+  const [submittingDispute, setSubmittingDispute] = useState(false)
+  const [disputeDone, setDisputeDone] = useState(false)
 
   const canRefund = ['paid', 'pending', 'shipped'].includes(order.status) && !refundDone
+  const canDispute = ['paid', 'shipped', 'delivered'].includes(order.status) && !disputeDone
+
+  async function handleDisputeSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!disputeReason.trim()) { toast.error('Please describe the issue'); return }
+    setSubmittingDispute(true)
+    try {
+      const token = await getToken()
+      const res = await fetch(`/api/orders/${order.id}/dispute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ reason: disputeReason.trim(), evidence: disputeEvidence.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Dispute submission failed')
+      toast.success('Dispute submitted — our team will review within 24 hours.')
+      setDisputeDone(true)
+      setShowDisputeForm(false)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setSubmittingDispute(false)
+    }
+  }
 
   async function handleRefundSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -264,6 +296,58 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed }: { order: BackendOrd
 
               {/* Confirm delivery */}
               <ConfirmDeliverySection order={order} onConfirmed={onDeliveryConfirmed} />
+
+              {/* Dispute button — for delivered orders where buyer has a real concern */}
+              {order.status === 'delivered' && !disputeDone && !showDisputeForm && (
+                <button
+                  onClick={() => setShowDisputeForm(true)}
+                  className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors font-semibold"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  Item not received or wrong item? Open a dispute
+                </button>
+              )}
+
+              {showDisputeForm && !disputeDone && (
+                <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 p-4">
+                  <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Open a Dispute</p>
+                  <p className="text-[11px] text-amber-600/80 dark:text-amber-400/70 mb-3 leading-relaxed">
+                    Use this if the item was never delivered or arrived in wrong condition. Admin will mediate within 24 hours. Do not abuse disputes — this affects your trust score.
+                  </p>
+                  <form onSubmit={handleDisputeSubmit} className="space-y-2.5">
+                    <textarea
+                      value={disputeReason}
+                      onChange={e => setDisputeReason(e.target.value)}
+                      placeholder="What's the issue? e.g. Item never arrived, wrong item sent, damaged goods…"
+                      rows={3}
+                      className="w-full px-3 py-2.5 rounded-xl border border-amber-200 dark:border-amber-700/40 bg-white dark:bg-card text-xs resize-none focus:outline-none focus:ring-2 focus:ring-amber-300"
+                    />
+                    <textarea
+                      value={disputeEvidence}
+                      onChange={e => setDisputeEvidence(e.target.value)}
+                      placeholder="Evidence (optional) — e.g. tracking shows not delivered, photo description…"
+                      rows={2}
+                      className="w-full px-3 py-2.5 rounded-xl border border-amber-200 dark:border-amber-700/40 bg-white dark:bg-card text-xs resize-none focus:outline-none focus:ring-2 focus:ring-amber-300"
+                    />
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setShowDisputeForm(false)} className="flex-1 h-8 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors">
+                        Cancel
+                      </button>
+                      <button type="submit" disabled={submittingDispute} className="flex-1 h-8 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+                        {submittingDispute && <Loader2 className="w-3 h-3 animate-spin" />}
+                        Submit Dispute
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {disputeDone && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30">
+                  <Flag className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold">Dispute submitted — admin will review within 24 hours.</span>
+                </div>
+              )}
 
               {/* Refund request */}
               {canRefund && !showRefundForm && (

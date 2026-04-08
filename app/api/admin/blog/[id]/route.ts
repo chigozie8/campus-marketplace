@@ -64,7 +64,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  revalidateTag('blog-posts')
+  revalidateTag('blog-posts', 'max')
   return NextResponse.json({ post: data })
 }
 
@@ -75,6 +75,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const { error } = await adminClient().from('blog_posts').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  revalidateTag('blog-posts')
+  revalidateTag('blog-posts', 'max')
   return NextResponse.json({ ok: true })
 }
