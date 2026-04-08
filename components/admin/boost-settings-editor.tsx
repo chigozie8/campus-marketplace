@@ -73,7 +73,7 @@ export function BoostSettingsEditor({ initialSettings }: Props) {
       const res = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ settings: payload }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')

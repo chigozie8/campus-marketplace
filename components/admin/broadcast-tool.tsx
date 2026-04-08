@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Megaphone, Users, Store, BadgeCheck, Send, CheckCircle2, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Megaphone, Users, Store, BadgeCheck, Send, CheckCircle2, Loader2, Trash2, History } from 'lucide-react'
 
 interface Props {
   totalUsers: number
@@ -10,12 +10,19 @@ interface Props {
 }
 
 const AUDIENCES = [
-  { key: 'all',             label: 'All Users',          icon: Users,      description: 'Everyone on the platform' },
-  { key: 'sellers',         label: 'Sellers Only',        icon: Store,      description: 'Users with seller accounts' },
-  { key: 'verified_sellers', label: 'Verified Sellers',   icon: BadgeCheck, description: 'Sellers who passed ID verification' },
+  { key: 'all',              label: 'All Users',         icon: Users,      description: 'Everyone on the platform' },
+  { key: 'sellers',          label: 'Sellers Only',       icon: Store,      description: 'Users with seller accounts' },
+  { key: 'verified_sellers', label: 'Verified Sellers',  icon: BadgeCheck, description: 'Sellers who passed ID verification' },
 ] as const
 
 type Audience = typeof AUDIENCES[number]['key']
+
+interface BroadcastEntry {
+  title: string
+  body: string
+  created_at: string
+  count: number
+}
 
 export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props) {
   const [audience, setAudience] = useState<Audience>('all')
@@ -25,10 +32,29 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
   const [result, setResult] = useState<{ sent: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const [history, setHistory] = useState<BroadcastEntry[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [deletingKey, setDeletingKey] = useState<string | null>(null)
+
   const audienceCount =
-    audience === 'all'              ? totalUsers :
-    audience === 'sellers'          ? totalSellers :
+    audience === 'all'     ? totalUsers :
+    audience === 'sellers' ? totalSellers :
     totalVerified
+
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true)
+    try {
+      const res = await fetch('/api/admin/broadcast')
+      if (res.ok) {
+        const json = await res.json()
+        setHistory(json.broadcasts ?? [])
+      }
+    } finally {
+      setHistoryLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadHistory() }, [loadHistory])
 
   async function handleSend() {
     if (!title.trim() || !body.trim()) {
@@ -52,10 +78,29 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
       setResult(json)
       setTitle('')
       setBody('')
+      await loadHistory()
     } catch (e: any) {
       setError(e.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleDelete(entry: BroadcastEntry) {
+    const key = `${entry.title}|||${entry.body}`
+    if (!confirm(`Delete this broadcast "${entry.title}"? This will remove it from all ${entry.count.toLocaleString()} recipients' notification feeds.`)) return
+    setDeletingKey(key)
+    try {
+      const res = await fetch('/api/admin/broadcast', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: entry.title, body: entry.body }),
+      })
+      if (res.ok) {
+        setHistory(prev => prev.filter(h => `${h.title}|||${h.body}` !== key))
+      }
+    } finally {
+      setDeletingKey(null)
     }
   }
 
@@ -161,6 +206,50 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
             )}
           </button>
         </div>
+      </div>
+
+      {/* Broadcast history */}
+      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
+          <History className="w-4 h-4 text-primary" />
+          <h3 className="font-black text-sm text-foreground">Broadcast History</h3>
+        </div>
+
+        {historyLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : history.length === 0 ? (
+          <div className="px-5 py-8 text-center text-sm text-muted-foreground">
+            No broadcasts sent yet.
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {history.map((entry) => {
+              const key = `${entry.title}|||${entry.body}`
+              const isDeleting = deletingKey === key
+              return (
+                <div key={key} className="flex items-start gap-3 px-5 py-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{entry.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{entry.body}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      {entry.count.toLocaleString()} {entry.count === 1 ? 'recipient' : 'recipients'} &bull; {new Date(entry.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(entry)}
+                    disabled={isDeleting}
+                    className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all disabled:opacity-40"
+                    title="Delete broadcast"
+                  >
+                    {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )

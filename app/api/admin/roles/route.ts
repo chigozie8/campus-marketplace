@@ -1,5 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+
+function serviceClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
 
 async function assertSuperAdmin(supabase: any) {
   const { data: { user } } = await supabase.auth.getUser()
@@ -20,33 +29,33 @@ export async function POST(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { email, role } = await req.json()
+  if (!email || !role) return NextResponse.json({ error: 'Email and role are required' }, { status: 400 })
 
-  // Look up the user by email in profiles is not enough — we need auth.users
-  // Use service-role would be ideal, but here we match via profiles which store email from trigger
-  // Instead we rely on admin_roles seeding pattern: the user must already exist
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', supabase.auth.admin ? undefined : undefined) // fallback: we'll search by joining
-    .limit(1)
+  const sc = serviceClient()
 
-  // Use RPC or direct approach: find user_id from auth.users via the service client
-  // Since we only have the anon client here we use a workaround via a direct lookup
-  // We'll store pending by email and resolve when they log in — for simplicity insert with a placeholder
-  // A cleaner approach: require the user to already be signed up
-  const { error } = await supabase
+  // Look up the user by email in auth.users using the service role
+  const { data: { users }, error: listError } = await sc.auth.admin.listUsers({ perPage: 1000 })
+  if (listError) return NextResponse.json({ error: 'Failed to look up users' }, { status: 500 })
+
+  const matchedUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase())
+
+  if (!matchedUser) {
+    return NextResponse.json({
+      error: `No account found for ${email}. The user must sign up first before being granted admin access.`
+    }, { status: 404 })
+  }
+
+  // Upsert using real user_id — email unique constraint ensures no duplicates
+  const { error } = await sc
     .from('admin_roles')
-    .upsert({ email, role, user_id: '00000000-0000-0000-0000-000000000000' }, { onConflict: 'email' })
+    .upsert(
+      { user_id: matchedUser.id, email: matchedUser.email!, role },
+      { onConflict: 'user_id' }
+    )
 
-  // Better: look up user_id from existing profiles by matching email from auth trigger
-  // For now, do a two-step: insert then update once we find the user
-  // Try to resolve user_id from profiles where we can match by created metadata
-  // This is a limitation without service_role — we inform the user
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({
-    message: `Admin role for ${email} will be activated when they next log in. If they are already signed up, have them log out and back in.`
-  })
+  return NextResponse.json({ message: `${email} has been granted ${role} access.` })
 }
 
 // DELETE — revoke admin role
@@ -57,7 +66,8 @@ export async function DELETE(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await req.json()
-  const { error } = await supabase.from('admin_roles').delete().eq('id', id)
+  const sc = serviceClient()
+  const { error } = await sc.from('admin_roles').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
