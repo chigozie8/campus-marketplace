@@ -1,8 +1,9 @@
 'use client'
 
-import { ShieldCheck, ShieldAlert, Shield, ShieldOff } from 'lucide-react'
+import { ShieldCheck, ShieldAlert, Shield, ShieldOff, Medal } from 'lucide-react'
 
 export type TrustLevel = 'excellent' | 'good' | 'fair' | 'low'
+export type SellerTier = 'gold' | 'silver' | 'bronze'
 
 export interface TrustScore {
   score: number
@@ -19,6 +20,20 @@ export function getTrustLevel(score: number): TrustLevel {
 
 export function getTrustLabel(level: TrustLevel) {
   return { excellent: 'Excellent', good: 'Good', fair: 'Fair', low: 'Low' }[level]
+}
+
+export function getSellerTier(score: number): SellerTier | null {
+  if (score >= 85) return 'gold'
+  if (score >= 70) return 'silver'
+  if (score >= 50) return 'bronze'
+  return null
+}
+
+export function getMilestoneBadge(score: number): { label: string; emoji: string } | null {
+  if (score >= 100) return { label: 'VendoorX Champion', emoji: '🏆' }
+  if (score >= 85) return { label: 'Verified Member', emoji: '⭐' }
+  if (score >= 70) return { label: 'Trusted Buyer', emoji: '✅' }
+  return null
 }
 
 const LEVEL_STYLES: Record<TrustLevel, { badge: string; text: string; icon: React.ReactNode }> = {
@@ -42,6 +57,12 @@ const LEVEL_STYLES: Record<TrustLevel, { badge: string; text: string; icon: Reac
     text: 'text-red-700 dark:text-red-400',
     icon: <ShieldOff className="w-3.5 h-3.5" />,
   },
+}
+
+const TIER_STYLES: Record<SellerTier, { badge: string; label: string; next: number | null }> = {
+  gold:   { badge: 'bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-950/30 dark:border-amber-700 dark:text-amber-400', label: 'Gold Seller',   next: null },
+  silver: { badge: 'bg-slate-50 border-slate-300 text-slate-600 dark:bg-slate-900/40 dark:border-slate-600 dark:text-slate-300',  label: 'Silver Seller', next: 85 },
+  bronze: { badge: 'bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-950/30 dark:border-orange-700 dark:text-orange-400', label: 'Bronze Seller', next: 70 },
 }
 
 interface Props {
@@ -70,6 +91,31 @@ export function TrustBadge({ score, size = 'md', showScore = true, className = '
       {styles.icon}
       {label}
       {showScore && <span className="opacity-70">· {score}</span>}
+    </span>
+  )
+}
+
+interface TierBadgeProps {
+  score: number
+  size?: 'sm' | 'md'
+  className?: string
+}
+
+export function SellerTierBadge({ score, size = 'md', className = '' }: TierBadgeProps) {
+  const tier = getSellerTier(score)
+  if (!tier) return null
+  const style = TIER_STYLES[tier]
+
+  const sizeClass = size === 'sm'
+    ? 'text-[10px] px-2 py-0.5 gap-1'
+    : 'text-xs px-2.5 py-1 gap-1.5'
+
+  const tierEmoji = { gold: '🥇', silver: '🥈', bronze: '🥉' }[tier]
+
+  return (
+    <span className={`inline-flex items-center border rounded-full font-bold ${sizeClass} ${style.badge} ${className}`}>
+      <Medal className="w-3 h-3" />
+      {tierEmoji} {style.label}
     </span>
   )
 }
@@ -106,5 +152,29 @@ export function TrustScoreBar({ score, showLabel = true }: BarProps) {
         />
       </div>
     </div>
+  )
+}
+
+interface MiniTrustProps {
+  score: number
+  className?: string
+}
+
+export function MiniTrustDot({ score, className = '' }: MiniTrustProps) {
+  const level = getTrustLevel(score)
+  const dotColor = {
+    excellent: 'bg-emerald-500',
+    good: 'bg-blue-500',
+    fair: 'bg-amber-500',
+    low: 'bg-red-500',
+  }[level]
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-bold text-muted-foreground ${className}`}
+      title={`Trust: ${score}/100`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${dotColor} flex-shrink-0`} />
+      {score}
+    </span>
   )
 }

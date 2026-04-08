@@ -7,6 +7,59 @@ import * as paymentService from '../services/paymentService.js'
 import * as orderService from '../services/orderService.js'
 import * as payoutService from '../services/payoutService.js'
 import { AuthRequest } from '../types/index.js'
+import { supabaseAdmin } from '../config/supabaseClient.js'
+
+const MILESTONES = [
+  { score: 70, label: 'Trusted Buyer', emoji: '✅' },
+  { score: 85, label: 'Verified Member', emoji: '⭐' },
+  { score: 100, label: 'VendoorX Champion', emoji: '🏆' },
+] as const
+
+async function notifyBuyerMilestones(buyerId: string) {
+  try {
+    const [profileRes, ordersRes, disputesRes] = await Promise.all([
+      supabaseAdmin.from('profiles').select('id, created_at').eq('id', buyerId).single(),
+      supabaseAdmin.from('orders').select('id, status').eq('buyer_id', buyerId),
+      supabaseAdmin.from('order_disputes').select('id, status').eq('buyer_id', buyerId),
+    ])
+
+    if (!profileRes.data) return
+    const profile = profileRes.data
+    const orders = ordersRes.data ?? []
+    const disputes = (disputesRes.data ?? []) as Array<{ id: string; status: string }>
+    const completedOrders = orders.filter((o: { status: string }) => o.status === 'completed').length
+    const accountAgeDays = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+
+    const base = 60
+    const ordersBonus = Math.min(completedOrders * 2, 20)
+    const noDisputeBonus = disputes.length === 0 ? 10 : 0
+    const disputeLossPenalty = disputes.filter((d) => d.status === 'resolved_seller').length * 20
+    const disputeWinPenalty = disputes.filter((d) => d.status === 'resolved_buyer').length * 5
+    const ageBonus = accountAgeDays >= 180 ? 10 : accountAgeDays >= 90 ? 5 : 0
+    const score = Math.max(0, Math.min(100, base + ordersBonus + noDisputeBonus - disputeLossPenalty - disputeWinPenalty + ageBonus))
+
+    for (const milestone of MILESTONES) {
+      if (score < milestone.score) continue
+      const { data: existing } = await supabaseAdmin
+        .from('notifications')
+        .select('id')
+        .eq('user_id', buyerId)
+        .eq('title', `🏅 ${milestone.label} Unlocked!`)
+        .limit(1)
+        .single()
+      if (!existing) {
+        await supabaseAdmin.from('notifications').insert({
+          user_id: buyerId,
+          title: `🏅 ${milestone.label} Unlocked!`,
+          message: `Congratulations! You've reached a trust score of ${milestone.score}+ and earned the ${milestone.emoji} ${milestone.label} badge. Keep it up!`,
+          type: 'system',
+        })
+      }
+    }
+  } catch {
+    // Non-critical
+  }
+}
 
 const router = Router()
 router.use(authenticate)
@@ -69,6 +122,8 @@ router.post('/:id/confirm-delivery', async (req, res, next) => {
     }
 
     const updated = await orderService.updateOrderStatus(order.id, 'completed')
+    // Fire-and-forget milestone notification check
+    notifyBuyerMilestones(userId).catch(() => {})
     res.status(200).json({ success: true, data: updated, message: 'Delivery confirmed! Funds released to seller.' })
   } catch (err) {
     next(err)

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { m, LazyMotion, domAnimation } from 'framer-motion'
+import { quickSellerScore } from '@/lib/trust'
 
 interface ProductCardProps {
   product: Product
@@ -44,6 +45,16 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
   const discount = product.original_price && product.original_price > product.price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0
+
+  const trustScore = quickSellerScore({
+    rating: sellerRating,
+    totalSales: product.profiles?.total_sales ?? 0,
+    sellerVerified: isVerified,
+  })
+  const trustDotColor =
+    trustScore >= 85 ? 'bg-emerald-500' :
+    trustScore >= 70 ? 'bg-blue-500' :
+    trustScore >= 50 ? 'bg-amber-500' : 'bg-red-400'
 
   return (
     <LazyMotion features={domAnimation}>
@@ -132,6 +143,10 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
           <span className="truncate max-w-[80px] sm:max-w-none">{sellerName}</span>
           {isVerified && <BadgeCheck className="w-3 h-3 text-primary flex-shrink-0" />}
           {isStudentVerified && <GraduationCap className="w-3 h-3 text-blue-500 flex-shrink-0" title="Verified student" />}
+          <span
+            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${trustDotColor}`}
+            title={`Trust: ${trustScore}/100`}
+          />
           {sellerRating > 0 && (
             <div className="flex items-center gap-0.5 ml-auto">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />

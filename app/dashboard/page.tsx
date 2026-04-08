@@ -11,6 +11,7 @@ import { DashboardActions } from '@/components/dashboard-actions'
 import { ProfileCompletion } from '@/components/dashboard/profile-completion'
 import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
 import { ReferralCard } from '@/components/dashboard/referral-card'
+import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
 import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
 import { BoostStoreButton } from '@/components/dashboard/boost-store-button'
 import { BoostCallbackToast } from '@/components/dashboard/boost-callback-toast'
@@ -172,6 +173,9 @@ export default async function DashboardPage() {
 
         {/* ── Referral Card ── */}
         <ReferralCard />
+
+        {/* ── Trust Score Panel ── */}
+        <DashboardTrustPanel userId={user.id} isSeller={profile?.is_seller ?? false} />
 
         {/* ── Profile Completion ── */}
         <ProfileCompletion

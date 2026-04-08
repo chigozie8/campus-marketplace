@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { TrustBadge } from '@/components/TrustBadge'
+import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
 
 async function getToken() {
   const supabase = createClient()
@@ -244,8 +245,14 @@ const STATUS_FILTERS: Array<{ value: OrderStatus | 'all'; label: string }> = [
 export default function SellerOrdersPage() {
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
+  const [sellerId, setSellerId] = useState<string | null>(null)
   const qc = useQueryClient()
   const { data, isLoading, isError, refetch } = useVendorOrders(page)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => setSellerId(data.user?.id ?? null))
+  }, [])
 
   const orders = ((data?.data ?? []) as ExtendedOrder[]).filter(o =>
     filter === 'all' ? true : o.status === filter,
@@ -350,7 +357,13 @@ export default function SellerOrdersPage() {
           </div>
         )}
 
-        <div className="mt-8 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-4">
+        {sellerId && (
+          <div className="mt-8">
+            <DashboardTrustPanel userId={sellerId} isSeller={true} />
+          </div>
+        )}
+
+        <div className="mt-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-4">
           <div className="flex items-start gap-3">
             <ShieldCheck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
             <div>

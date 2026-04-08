@@ -9,6 +9,8 @@ import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
+import { SellerTierBadge, TrustBadge, TrustScoreBar, getMilestoneBadge } from '@/components/TrustBadge'
+import { quickSellerScore } from '@/lib/trust'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -44,6 +46,13 @@ export default async function SellerProfilePage({ params }: Props) {
   const avgRating = reviews && reviews.length
     ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
     : 0
+
+  const sellerTrustScore = quickSellerScore({
+    rating: profile.rating ?? 0,
+    totalSales: profile.total_sales ?? 0,
+    sellerVerified: profile.seller_verified ?? false,
+  })
+  const sellerMilestone = getMilestoneBadge(sellerTrustScore)
 
   function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime()
@@ -94,6 +103,13 @@ export default async function SellerProfilePage({ params }: Props) {
                 <h1 className="text-white font-black text-xl tracking-tight">{profile.full_name}</h1>
                 {profile.seller_verified && <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" />}
               </div>
+              <div className="flex items-center gap-1.5 flex-wrap mt-1.5 mb-1">
+                <TrustBadge score={sellerTrustScore} size="sm" showScore={false} />
+                <SellerTierBadge score={sellerTrustScore} size="sm" />
+                {sellerMilestone && (
+                  <span className="text-[10px] text-white/60 font-semibold">{sellerMilestone.emoji} {sellerMilestone.label}</span>
+                )}
+              </div>
               {profile.university && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <GraduationCap className="w-3.5 h-3.5 text-white/50" />
@@ -125,6 +141,24 @@ export default async function SellerProfilePage({ params }: Props) {
                 <span className="text-white/40 text-[11px] uppercase tracking-wide">{label}</span>
               </div>
             ))}
+          </div>
+
+          {/* Trust bar */}
+          <div className="relative z-10 mt-4 pt-4 border-t border-white/10 space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-white/50 font-semibold">Trust Score</span>
+              <span className="text-white font-black">{sellerTrustScore}/100</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-700 ${
+                  sellerTrustScore >= 85 ? 'bg-emerald-400' :
+                  sellerTrustScore >= 70 ? 'bg-blue-400' :
+                  sellerTrustScore >= 50 ? 'bg-amber-400' : 'bg-red-400'
+                }`}
+                style={{ width: `${sellerTrustScore}%` }}
+              />
+            </div>
           </div>
         </div>
 

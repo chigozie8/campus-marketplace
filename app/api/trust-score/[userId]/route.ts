@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { computeBuyerScore, computeSellerScore } from '@/lib/trust'
 
 function svc() {
   return createAdmin(
@@ -9,18 +10,7 @@ function svc() {
   )
 }
 
-export type TrustScoreBreakdown = {
-  base: number
-  ordersBonus: number
-  noDisputeBonus: number
-  disputeLossPenalty: number
-  disputeWinPenalty: number
-  ageBonus: number
-  ratingBonus: number
-  salesBonus: number
-  verifiedBonus: number
-  sellerDisputePenalty: number
-}
+export type { TrustScoreBreakdown } from '@/lib/trust'
 
 export async function GET(
   _req: Request,
@@ -37,8 +27,8 @@ export async function GET(
   const [profileRes, ordersRes, buyerDisputesRes, sellerDisputesRes] = await Promise.all([
     db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at').eq('id', userId).single(),
     db.from('orders').select('id, status').eq('buyer_id', userId),
-    db.from('order_disputes').select('id, status').eq('buyer_id', userId).catch(() => ({ data: [], error: null })),
-    db.from('order_disputes').select('id, status').eq('seller_id', userId).catch(() => ({ data: [], error: null })),
+    db.from('order_disputes').select('id, status').eq('buyer_id', userId).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }>, error: null })),
+    db.from('order_disputes').select('id, status').eq('seller_id', userId).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }>, error: null })),
   ])
 
   if (profileRes.error || !profileRes.data) {
@@ -75,79 +65,4 @@ export async function GET(
     buyer: buyerScore,
     seller: sellerScore,
   })
-}
-
-function computeBuyerScore({
-  completedOrders,
-  buyerDisputes,
-  accountAgeDays,
-}: {
-  completedOrders: number
-  buyerDisputes: Array<{ id: string; status: string }>
-  accountAgeDays: number
-}) {
-  const base = 60
-  const ordersBonus = Math.min(completedOrders * 2, 20)
-  const noDisputeBonus = buyerDisputes.length === 0 ? 10 : 0
-  const disputeLossPenalty = buyerDisputes.filter(d => d.status === 'resolved_seller').length * 20
-  const disputeWinPenalty = buyerDisputes.filter(d => d.status === 'resolved_buyer').length * 5
-  const ageBonus = (accountAgeDays >= 180 ? 10 : accountAgeDays >= 90 ? 5 : 0)
-
-  const score = Math.max(0, Math.min(100, base + ordersBonus + noDisputeBonus - disputeLossPenalty - disputeWinPenalty + ageBonus))
-
-  const breakdown: Partial<TrustScoreBreakdown> = {
-    base,
-    ordersBonus,
-    noDisputeBonus,
-    disputeLossPenalty: -disputeLossPenalty,
-    disputeWinPenalty: -disputeWinPenalty,
-    ageBonus,
-  }
-
-  return { score, level: levelFor(score), label: labelFor(levelFor(score)), breakdown, totalDisputes: buyerDisputes.length, completedOrders }
-}
-
-function computeSellerScore({
-  rating,
-  totalSales,
-  sellerVerified,
-  sellerDisputes,
-  accountAgeDays,
-}: {
-  rating: number
-  totalSales: number
-  sellerVerified: boolean
-  sellerDisputes: Array<{ id: string; status: string }>
-  accountAgeDays: number
-}) {
-  const base = 50
-  const ratingBonus = Math.round((rating / 5) * 25)
-  const salesBonus = Math.round(Math.min(totalSales, 20) / 20 * 15)
-  const verifiedBonus = sellerVerified ? 10 : 0
-  const sellerDisputePenalty = sellerDisputes.filter(d => d.status === 'resolved_buyer').length * 10
-  const ageBonus = accountAgeDays >= 180 ? 10 : accountAgeDays >= 90 ? 5 : 0
-
-  const score = Math.max(0, Math.min(100, base + ratingBonus + salesBonus + verifiedBonus - sellerDisputePenalty + ageBonus))
-
-  const breakdown: Partial<TrustScoreBreakdown> = {
-    base,
-    ratingBonus,
-    salesBonus,
-    verifiedBonus,
-    sellerDisputePenalty: -sellerDisputePenalty,
-    ageBonus,
-  }
-
-  return { score, level: levelFor(score), label: labelFor(levelFor(score)), breakdown, totalSales, rating }
-}
-
-function levelFor(score: number): 'excellent' | 'good' | 'fair' | 'low' {
-  if (score >= 85) return 'excellent'
-  if (score >= 70) return 'good'
-  if (score >= 50) return 'fair'
-  return 'low'
-}
-
-function labelFor(level: string) {
-  return { excellent: 'Excellent', good: 'Good', fair: 'Fair', low: 'Low' }[level] ?? 'Unknown'
 }

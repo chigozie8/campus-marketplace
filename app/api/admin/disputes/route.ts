@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { checkAndNotifyBuyerMilestones, checkAndNotifySellerMilestones } from '@/lib/trust-milestones'
 
 function svc() {
   return createAdmin(
@@ -117,6 +118,10 @@ export async function PATCH(req: Request) {
       { user_id: order.seller_id, title: 'Dispute Resolved', message: `Admin reviewed the dispute for order #${order.id.split('-')[0]}. Decision: refund to buyer.`, type: 'system' },
     ]).catch(() => {})
   }
+
+  // Fire-and-forget milestone checks after dispute resolution
+  checkAndNotifyBuyerMilestones(order.buyer_id).catch(() => {})
+  checkAndNotifySellerMilestones(order.seller_id).catch(() => {})
 
   return NextResponse.json({ ok: true, resolution })
 }
