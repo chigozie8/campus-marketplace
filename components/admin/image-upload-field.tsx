@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import Image from 'next/image'
-import { Upload, Loader2, ImageIcon, X } from 'lucide-react'
+import { Upload, Loader2, ImageIcon, X, FileText } from 'lucide-react'
 
 interface ImageUploadFieldProps {
   value: string
@@ -17,6 +17,11 @@ interface ImageUploadFieldProps {
 
 function isValidImageUrl(url: string): boolean {
   return /^https?:\/\/.{4,}/.test(url.trim())
+}
+
+function isImageMimeUrl(url: string): boolean {
+  const trimmed = url.trim().toLowerCase().split('?')[0]
+  return /\.(jpe?g|png|webp|gif|svg)$/.test(trimmed)
 }
 
 export function ImageUploadField({
@@ -35,6 +40,7 @@ export function ImageUploadField({
 
   const roundedClass = shape === 'circle' ? 'rounded-full' : 'rounded-xl'
   const showPreview = isValidImageUrl(value)
+  const isImage = showPreview && isImageMimeUrl(value)
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -72,12 +78,12 @@ export function ImageUploadField({
       )}
 
       <div className="flex items-start gap-3">
-        {/* Thumbnail preview — only rendered for valid http(s) URLs */}
+        {/* Thumbnail preview — image for http(s) image URLs, doc icon for other files */}
         <div
           className={`shrink-0 bg-muted border border-border overflow-hidden flex items-center justify-center ${roundedClass}`}
           style={{ width: previewSize, height: previewSize }}
         >
-          {showPreview ? (
+          {isImage ? (
             <Image
               src={value}
               alt="preview"
@@ -86,6 +92,8 @@ export function ImageUploadField({
               className="w-full h-full object-cover"
               unoptimized
             />
+          ) : showPreview ? (
+            <FileText className="w-4 h-4 text-muted-foreground/60" />
           ) : (
             <ImageIcon className="w-4 h-4 text-muted-foreground/40" />
           )}

@@ -22,6 +22,8 @@ async function ensureBucket(admin: Awaited<ReturnType<typeof getAdminClient>>) {
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+  'image/svg+xml',
+  'application/pdf',
   'video/mp4', 'video/webm', 'video/quicktime',
 ]
 
