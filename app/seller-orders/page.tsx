@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Package, Truck, CheckCircle2, Clock, AlertCircle,
@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
+import { TrustBadge } from '@/components/TrustBadge'
 
 async function getToken() {
   const supabase = createClient()
@@ -31,7 +32,10 @@ const STATUS_META: Record<OrderStatus, { label: string; color: string; icon: Rea
 
 type ExtendedOrder = BackendOrder & {
   profiles?: { full_name: string }
+  buyer_id?: string
 }
+
+type BuyerTrust = { score: number; level: string; totalDisputes: number; completedOrders: number }
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const meta = STATUS_META[status]
@@ -46,6 +50,20 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [buyerTrust, setBuyerTrust] = useState<BuyerTrust | null>(null)
+  const [trustLoading, setTrustLoading] = useState(false)
+
+  useEffect(() => {
+    if (!expanded || buyerTrust || !order.buyer_id) return
+    setTrustLoading(true)
+    fetch(`/api/trust-score/${order.buyer_id}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.buyer) setBuyerTrust(d.buyer)
+      })
+      .catch(() => {})
+      .finally(() => setTrustLoading(false))
+  }, [expanded, order.buyer_id, buyerTrust])
 
   async function markStatus(newStatus: OrderStatus) {
     if (loading) return
@@ -117,6 +135,31 @@ function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => 
             className="overflow-hidden"
           >
             <div className="px-4 sm:px-5 pb-5 space-y-4 border-t border-border/50 pt-4">
+
+              {(buyerTrust || trustLoading) && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/60">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground font-semibold mb-0.5">Buyer Trust Score</p>
+                    {trustLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                    ) : buyerTrust ? (
+                      <div className="flex items-center gap-2">
+                        <TrustBadge score={buyerTrust.score} size="sm" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {buyerTrust.completedOrders} orders · {buyerTrust.totalDisputes} dispute{buyerTrust.totalDisputes !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                  {buyerTrust && buyerTrust.score < 50 && (
+                    <div className="flex items-center gap-1 text-[10px] text-red-600 dark:text-red-400 font-bold bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-2 py-1 rounded-lg">
+                      <AlertCircle className="w-3 h-3" />
+                      Proceed with caution
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="p-3 rounded-xl bg-muted/50">
                   <p className="text-[11px] text-muted-foreground mb-0.5">Order ID</p>
