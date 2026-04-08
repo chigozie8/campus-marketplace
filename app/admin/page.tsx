@@ -26,6 +26,7 @@ export default async function AdminOverviewPage() {
     { data: recentUsers },
     { data: topProducts },
     { count: deliveredOrders },
+    { data: recentWebhookOrders },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('products').select('*', { count: 'exact', head: true }),
@@ -49,6 +50,12 @@ export default async function AdminOverviewPage() {
       .order('views', { ascending: false })
       .limit(5),
     supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'delivered'),
+    supabase.from('orders')
+      .select('id, payment_ref, total_amount, payment_status, updated_at')
+      .eq('payment_status', 'paid')
+      .not('payment_ref', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(5),
   ])
 
   const paystackConfigured = !!process.env.PAYSTACK_SECRET_KEY
@@ -155,6 +162,33 @@ export default async function AdminOverviewPage() {
               </p>
             </div>
           </div>
+        </div>
+        {/* Recent webhook-confirmed payments */}
+        <div className="px-5 pb-5">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Recent Webhook Events (Paystack charge.success)</p>
+          {(recentWebhookOrders ?? []).length === 0 ? (
+            <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-muted/30 border border-border">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <p className="text-[11px] text-muted-foreground">No webhook-confirmed payments yet — send a test transaction to verify the pipeline.</p>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {(recentWebhookOrders as any[]).map((o) => (
+                <div key={o.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-muted/30 border border-border">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="text-[11px] font-mono text-muted-foreground truncate">{o.payment_ref ?? '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[11px] font-bold text-foreground">₦{Number(o.total_amount ?? 0).toLocaleString()}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {o.updated_at ? new Date(o.updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {!paystackConfigured && (
           <div className="px-5 pb-4">
