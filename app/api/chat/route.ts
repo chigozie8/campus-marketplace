@@ -228,13 +228,13 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Talk to a Human / Agent / Admin ──
   {
     patterns: ['talk.*human', 'speak.*human', 'real.*person', 'human.*agent', 'talk.*agent', 'speak.*agent', 'talk.*rep', 'speak.*rep', 'customer.*care.*rep', 'care.*rep', 'talk.*admin', 'speak.*admin', 'contact.*admin', 'reach.*admin', 'talk.*customer.*care', 'speak.*customer.*care', 'i want.*human', 'i need.*human', 'connect.*human', 'connect.*agent', 'live.*agent', 'live.*chat.*human', 'talk.*person', 'speak.*person', 'real.*agent', 'actual.*person'],
-    answer: "Of course! Let me connect you with our team right away. 🙋‍♀️\n\nHere's how to reach a real VendoorX agent:\n\n📱 **WhatsApp (Fastest — recommended)**\nTap the **WhatsApp icon** in the top-right corner of this chat window. A pre-filled message with your conversation summary will be sent — our team typically replies within **5–10 minutes**!\n\n📧 **Email**\nSend us a message at **support@vendoorx.com** — we reply within a few hours.\n\n⏰ **Our working hours:**\n• Monday – Friday: 8:00am – 8:00pm\n• Saturday: 10:00am – 5:00pm\n• Sunday: Urgent issues only\n\nWhatsApp is always the fastest way to get help. Our agents are friendly and will sort out any issue quickly! 💚",
+    answer: "Of course! Let me connect you with our team right away. 🙋‍♀️\n\nHere's how to reach a real VendoorX agent:\n\n📱 **WhatsApp (Fastest — recommended)**\nTap the **WhatsApp icon** in the top-right corner of this chat window — or message us directly at **+1 (579) 258-3013**. A pre-filled message with your conversation summary will be sent and our team typically replies within **5–10 minutes**!\n\n📱 **Direct WhatsApp**\n**+1 (579) 258-3013** — save this number and chat with us anytime!\n\n⏰ **Our working hours:**\n• Monday – Friday: 8:00am – 8:00pm\n• Saturday: 10:00am – 5:00pm\n• Sunday: Urgent issues only\n\nOur agents are friendly and will sort out any issue quickly! 💚",
   },
 
   // ── WhatsApp for Support ──
   {
     patterns: ['contact.*support', 'customer.*service', 'customer.*care', 'reach.*team', 'contact.*vendoorx', 'help.*team', 'support.*team', 'need.*help', 'i need.*support'],
-    answer: "Our support team is always ready to help! 💪\n\n**Ways to reach us:**\n• 💬 **WhatsApp** — Tap the WhatsApp button in the chat header (fastest!)\n• 📧 **Email** — support@vendoorx.com\n• 🌐 **Website** — vendoorx.com/contact\n\n**Support hours:**\n• Monday–Friday: 8am–8pm\n• Saturday: 10am–5pm\n• Sunday: Limited (urgent issues only)\n\nFor urgent issues (payment problems, account locked, disputes), **WhatsApp is fastest** — we typically reply within minutes!",
+    answer: "Our support team is always ready to help! 💪\n\n**Ways to reach us:**\n• 💬 **WhatsApp** — Tap the WhatsApp button in the chat header, or message **+1 (579) 258-3013** directly (fastest!)\n• 🌐 **Website** — vendoorx.com/contact\n\n**Support hours:**\n• Monday–Friday: 8am–8pm\n• Saturday: 10am–5pm\n• Sunday: Limited (urgent issues only)\n\nFor urgent issues (payment problems, account locked, disputes), **WhatsApp is fastest** — we typically reply within minutes!",
   },
 
   // ── Complaints ──
