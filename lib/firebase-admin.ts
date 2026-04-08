@@ -47,7 +47,6 @@ export async function sendFcmNotification(
         notification: {
           icon: 'ic_notification',
           color: '#6D28D9',
-          clickAction: 'FLUTTER_NOTIFICATION_CLICK',
         },
         priority: 'high',
       },
