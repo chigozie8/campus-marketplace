@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { MessageCircle, X } from 'lucide-react'
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '2349000000000'
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || '15792583013'
 const DEFAULT_MESSAGE = encodeURIComponent(
   "Hi! I found VendoorX and I'd like to get some help 👋"
 )
@@ -40,7 +40,7 @@ export function WhatsAppChatButton() {
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3">
       {/* Tooltip bubble */}
       {tooltipVisible && (
         <div className="relative flex items-start gap-2 bg-white rounded-2xl rounded-br-sm shadow-xl border border-gray-100 px-4 py-3 max-w-[220px] animate-in slide-in-from-bottom-2 fade-in duration-300">
