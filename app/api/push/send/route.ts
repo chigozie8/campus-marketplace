@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import webpush from 'web-push'
+import { sendFcmNotification } from '@/lib/firebase-admin'
 
 webpush.setVapidDetails(
   process.env.VAPID_SUBJECT!,
@@ -8,8 +9,20 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 )
 
-function isNativeSubscription(endpoint: string) {
+interface PushSubscription {
+  endpoint: string
+  p256dh: string
+  auth: string
+}
+
+function isNativeEndpoint(endpoint: string): boolean {
   return endpoint.startsWith('native:')
+}
+
+function extractFcmToken(endpoint: string): string {
+  // Format: native:{platform}:{fcmToken}  — token may itself contain colons
+  const parts = endpoint.split(':')
+  return parts.slice(2).join(':')
 }
 
 export async function POST(req: Request) {
@@ -19,7 +32,6 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { userId, title, body, url, icon } = await req.json()
-
     const targetId = userId || user.id
 
     const { data: subs } = await supabase
@@ -28,21 +40,26 @@ export async function POST(req: Request) {
       .eq('user_id', targetId)
 
     if (!subs || subs.length === 0) {
-      return NextResponse.json({ sent: 0 })
+      return NextResponse.json({ sent: 0, native_sent: 0, failed: 0 })
     }
 
-    const webSubs = subs.filter((s) => !isNativeSubscription(s.endpoint))
-    const nativeCount = subs.length - webSubs.length
+    const webSubs = (subs as PushSubscription[]).filter((s) => !isNativeEndpoint(s.endpoint))
+    const nativeSubs = (subs as PushSubscription[]).filter((s) => isNativeEndpoint(s.endpoint))
 
-    const payload = JSON.stringify({
+    const notifPayload = {
       title: title || 'VendoorX',
       body: body || 'You have a new notification',
       icon: icon || '/icon-192.png',
-      badge: '/icon-192.png',
       url: url || '/',
+    }
+
+    // --- Web push delivery ---
+    const webPayload = JSON.stringify({
+      ...notifPayload,
+      badge: '/icon-192.png',
     })
 
-    let sent = 0
+    let webSent = 0
     const expiredEndpoints: string[] = []
 
     if (webSubs.length > 0) {
@@ -50,15 +67,15 @@ export async function POST(req: Request) {
         webSubs.map((sub) =>
           webpush.sendNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            payload
+            webPayload
           )
         )
       )
 
-      sent = results.filter((r) => r.status === 'fulfilled').length
-
       webSubs.forEach((sub, i) => {
-        if (results[i].status === 'rejected') {
+        if (results[i].status === 'fulfilled') {
+          webSent++
+        } else {
           expiredEndpoints.push(sub.endpoint)
         }
       })
@@ -71,10 +88,41 @@ export async function POST(req: Request) {
       }
     }
 
+    // --- Native push delivery via FCM ---
+    let nativeSent = 0
+    const invalidNativeEndpoints: string[] = []
+
+    if (nativeSubs.length > 0) {
+      const fcmResults = await Promise.allSettled(
+        nativeSubs.map(async (sub) => {
+          const fcmToken = extractFcmToken(sub.endpoint)
+          const result = await sendFcmNotification(fcmToken, notifPayload)
+          return { endpoint: sub.endpoint, result }
+        })
+      )
+
+      fcmResults.forEach((r) => {
+        if (r.status === 'fulfilled') {
+          if (r.value.result === 'sent') {
+            nativeSent++
+          } else if (r.value.result === 'invalid') {
+            invalidNativeEndpoints.push(r.value.endpoint)
+          }
+        }
+      })
+
+      if (invalidNativeEndpoints.length > 0) {
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .in('endpoint', invalidNativeEndpoints)
+      }
+    }
+
     return NextResponse.json({
-      sent,
-      failed: expiredEndpoints.length,
-      native_skipped: nativeCount,
+      sent: webSent,
+      native_sent: nativeSent,
+      failed: expiredEndpoints.length + invalidNativeEndpoints.length,
     })
   } catch (err) {
     console.error('[push/send]', err)

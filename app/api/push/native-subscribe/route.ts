@@ -12,16 +12,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing device token' }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from('push_subscriptions')
-      .upsert({
-        user_id: user.id,
-        endpoint: `native:${platform}:${token}`,
-        p256dh: token,
-        auth: platform,
-      }, { onConflict: 'user_id,endpoint' })
+    const validPlatforms = ['android', 'ios']
+    const normalizedPlatform = validPlatforms.includes(platform) ? platform : 'android'
+    const endpoint = `native:${normalizedPlatform}:${token}`
 
-    if (error) throw error
+    // Try with new schema columns first (migration 021)
+    const { error: newSchemaError } = await supabase
+      .from('push_subscriptions')
+      .upsert(
+        {
+          user_id: user.id,
+          endpoint,
+          p256dh: '',
+          auth: '',
+          token_type: 'native',
+          platform: normalizedPlatform,
+        },
+        { onConflict: 'user_id,endpoint' }
+      )
+
+    if (newSchemaError) {
+      // Fall back to legacy schema (pre-021 migration) — works if token_type/platform columns don't exist yet
+      const { error: legacyError } = await supabase
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: user.id,
+            endpoint,
+            p256dh: token,
+            auth: normalizedPlatform,
+          },
+          { onConflict: 'user_id,endpoint' }
+        )
+
+      if (legacyError) throw legacyError
+      console.warn('[push/native-subscribe] Using legacy schema — run scripts/021_push_subscriptions_native.sql')
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {
