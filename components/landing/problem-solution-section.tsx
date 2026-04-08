@@ -3,21 +3,21 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 const BEFORE = [
-  '47 unread WhatsApp chats you forgot to reply to',
-  'Customers asking "is this available?" every day',
-  'Forgot who paid and who still owes you',
-  'No record of what sold, when, or to whom',
-  'Screenshots of orders scattered across your phone',
-  'Lost repeat customers because you lost their contact',
+  'Buried under 60+ unread chats you\'ll never catch up on',
+  'Buyers keep asking "is this still available?" every hour',
+  'No idea who has paid and who is just wasting your time',
+  'Zero record of what sold, when, or how much you made',
+  'Order details scattered across screenshots and voice notes',
+  'Lost repeat buyers because you forgot to follow up',
 ]
 
 const AFTER = [
-  'One clean inbox — every order tracked automatically',
-  'Your store link answers availability 24/7',
-  'Instant payment confirmation via Paystack webhook',
-  'Full order history, revenue, and top products at a glance',
-  'Structured orders with buyer info stored forever',
-  'Built-in customer records so you never forget a buyer',
+  'One clean dashboard — every order tracked, nothing slips',
+  'Your store page answers buyers 24/7, even while you sleep',
+  'Instant payment alert the moment money lands — no guessing',
+  'Full sales history, total revenue, and top products at a glance',
+  'Every order logged with buyer details, item, price, and date',
+  'Your customer list grows automatically — every buyer saved forever',
 ]
 
 export function ProblemSolutionSection() {
@@ -27,14 +27,14 @@ export function ProblemSolutionSection() {
         {/* Header */}
         <div className="text-center mb-14">
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-            Why VendoorX Exists
+            Sound Familiar?
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mt-4 mb-5">
-            Running a business in your DMs{' '}
-            <span className="text-primary">is chaos.</span>
+            Running your business in DMs{' '}
+            <span className="text-primary">is slowly killing it.</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-pretty">
-            You built a customer base. Your products sell. But managing it all through WhatsApp alone is costing you money and sleep.
+            You have the hustle. You have the customers. But managing everything through chat alone is costing you real money — and you might not even realise it.
           </p>
         </div>
 
@@ -53,7 +53,7 @@ export function ProblemSolutionSection() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-red-500/80 mb-1">Before VendoorX</p>
-                <h3 className="text-xl font-bold text-foreground">Managing it all in your chats</h3>
+                <h3 className="text-xl font-bold text-foreground">Selling through chat</h3>
               </div>
             </div>
 
@@ -69,7 +69,9 @@ export function ProblemSolutionSection() {
             </ul>
 
             <div className="mt-auto pt-6 border-t border-border">
-              <p className="text-sm font-semibold text-red-500/80">Result: Revenue leaking. Buyers moving on. Burnout.</p>
+              <p className="text-sm font-semibold text-red-500/80">
+                Result: Missed sales, burnout, and a business that can&apos;t grow past your DMs.
+              </p>
             </div>
           </div>
 
@@ -93,7 +95,7 @@ export function ProblemSolutionSection() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">With VendoorX</p>
-                <h3 className="text-xl font-bold text-foreground">A real store that runs itself</h3>
+                <h3 className="text-xl font-bold text-foreground">A real store that works for you</h3>
               </div>
             </div>
 
@@ -109,14 +111,16 @@ export function ProblemSolutionSection() {
             </ul>
 
             <div className="mt-auto pt-6 border-t border-primary/20 relative z-10">
-              <p className="text-sm font-semibold text-primary mb-4">Result: More sales, less stress, real business records.</p>
+              <p className="text-sm font-semibold text-primary mb-4">
+                Result: More sales, less stress, and a business that actually grows.
+              </p>
               <Button
                 size="sm"
                 className="group rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02]"
                 asChild
               >
                 <Link href="/auth/sign-up">
-                  Start for free
+                  Start for free — takes 2 minutes
                   <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
