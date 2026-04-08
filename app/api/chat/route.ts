@@ -261,6 +261,196 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
     answer: "VendoorX notifies you about orders via multiple channels! 🔔\n\nYou'll receive:\n• **In-app notifications** on VendoorX\n• **Email notifications** to your registered email\n• **WhatsApp messages** if your WhatsApp Business is connected\n• **Push notifications** if you've enabled them on your device\n\nNever miss an order again! Connect WhatsApp Business in **Dashboard → Integrations** for real-time order alerts on your phone.",
   },
 
+  // ── Technical Issues ──
+  {
+    patterns: ['not.*loading', 'page.*not.*load', 'app.*slow', 'app.*crash', 'site.*down', 'website.*down', 'not.*working', 'broken', 'error.*page', 'blank.*page', 'white.*page', '404', '500', 'server.*error'],
+    answer: "Sorry you're having technical trouble! 🔧 Let's fix it:\n\n**Try these first:**\n• 🔄 Refresh the page (pull down on mobile)\n• 🌐 Check your internet connection\n• 🧹 Clear your browser cache (Settings → Clear data)\n• 🔁 Try a different browser (Chrome works best)\n• 📱 Try on your phone if on desktop, or vice versa\n\nIf the issue continues, our team needs to investigate urgently. Please message us on WhatsApp at **+1 (579) 258-3013** with a screenshot of the error — we'll fix it ASAP! 🚀",
+  },
+  {
+    patterns: ['image.*not.*show', 'photo.*not.*load', 'picture.*broken', 'image.*upload.*fail', 'photo.*upload.*fail', 'cant.*upload.*image', 'cannot.*upload.*photo'],
+    answer: "Image issues? Here's what to check 📸\n\n**Can't upload photos:**\n• File must be JPG, PNG, or WEBP format\n• Max file size is 5MB per image\n• Try compressing the photo first (use Squoosh.app — free!)\n\n**Photos not displaying:**\n• Refresh the page\n• Check your internet speed\n• Clear browser cache\n\nStill having trouble? WhatsApp us at **+1 (579) 258-3013** with the details and we'll sort it out right away! 📞",
+  },
+  {
+    patterns: ['notification.*not.*work', 'push.*not.*work', 'not.*getting.*notification', 'notification.*stop', 'no.*notification'],
+    answer: "Not getting notifications? Let's fix that! 🔔\n\n1. Make sure you allowed notifications when prompted\n2. Go to your browser/phone **Settings → Notifications → VendoorX** and ensure it's set to **Allow**\n3. Check **Dashboard → Settings → Notifications** to make sure all alerts are turned on\n4. On iPhone, notifications only work when added to home screen (install the app!)\n\nStill not working? Message us on WhatsApp **+1 (579) 258-3013** and we'll help you get it configured! 💚",
+  },
+  {
+    patterns: ['slow.*website', 'website.*slow', 'taking.*long', 'loading.*slow', 'too.*slow'],
+    answer: "Sorry VendoorX is feeling sluggish! 😓\n\n**Quick fixes:**\n• Check your internet speed (try fast.com)\n• Close other tabs eating up your data\n• Use Wi-Fi instead of mobile data if possible\n• Clear your browser cache\n• Try the app in Chrome for best performance\n\nIf the site is slow for everyone (not just you), our team is probably already on it! Message us on WhatsApp **+1 (579) 258-3013** to confirm — we monitor performance 24/7. 🛠️",
+  },
+
+  // ── Account Security ──
+  {
+    patterns: ['hack', 'hacked', 'account.*compromised', 'someone.*access', 'unauthorised.*access', 'suspicious.*login', 'account.*stolen', 'my.*account.*stolen'],
+    answer: "🚨 This is urgent — act immediately!\n\n**If your account was hacked:**\n1. Try to **reset your password** right now at the login page\n2. If you can't get in, message us on WhatsApp **+1 (579) 258-3013** immediately\n3. Tell us your registered email and we'll lock the account to protect you\n\n**To secure your account going forward:**\n• Use a strong, unique password\n• Never share your login details with anyone\n• Watch for suspicious emails claiming to be VendoorX\n\nWe treat account security as our highest priority. Contact us NOW on WhatsApp! 🔐",
+  },
+  {
+    patterns: ['two.*factor', '2fa', 'two.*step', 'otp', 'verification.*code', 'authenticat'],
+    answer: "VendoorX uses OTP verification to keep your account safe! 🔐\n\nWhen you log in from a new device:\n• An OTP is sent to your registered email or phone\n• Enter it within 5 minutes to verify it's you\n• OTPs expire after 5 minutes — request a new one if needed\n\nHaving trouble with OTP verification? Message our team on WhatsApp **+1 (579) 258-3013** — we'll verify you manually and get you back in! 💚",
+  },
+  {
+    patterns: ['change.*email', 'update.*email', 'new.*email', 'email.*change'],
+    answer: "To change your registered email:\n\n1. Go to **Dashboard → Settings → Account**\n2. Click **Change Email**\n3. Enter your new email and confirm with your password\n4. Verify the new email via the link sent to it\n\nIf you no longer have access to your old email and need help updating it, message us on WhatsApp **+1 (579) 258-3013** with proof of identity and we'll update it manually! 🔧",
+  },
+  {
+    patterns: ['change.*phone', 'update.*phone', 'phone.*number.*change', 'new.*phone.*number'],
+    answer: "To update your phone number:\n\nGo to **Dashboard → Settings → Profile → Phone Number**.\n\nIf you're locked out or no longer have access to the old number, message our team on WhatsApp **+1 (579) 258-3013** and we'll help you update it securely! 📱",
+  },
+  {
+    patterns: ['block.*account', 'account.*block', 'suspended.*account', 'account.*suspend', 'account.*banned', 'banned.*account', 'account.*disable', 'disable.*account'],
+    answer: "Account suspended or blocked? 😟\n\nThis usually happens due to:\n• Suspected fraudulent activity\n• Listing prohibited items\n• Multiple policy violations\n• Payment issues\n\n**To appeal or get more info:**\nMessage us immediately on WhatsApp **+1 (579) 258-3013** with your registered email and we'll investigate and explain what happened. Most suspension cases are resolved quickly if there's been an error! 🙏",
+  },
+
+  // ── Seller-Specific Issues ──
+  {
+    patterns: ['seller.*not.*respond', 'seller.*not.*reply', 'seller.*ignor', 'no.*reply.*seller', 'seller.*offline', 'seller.*ghost'],
+    answer: "Seller not responding? 😤 Here's what to do:\n\n1. Wait at least **24 hours** — they may be busy with classes!\n2. Try messaging them on **WhatsApp or Instagram** directly\n3. Check if their store shows as **Active**\n4. If you've already paid and they're unresponsive for 48+ hours — **open a dispute immediately**\n\n**To open a dispute:** Dashboard → Orders → Report Issue\n\nOr message our team on WhatsApp **+1 (579) 258-3013** and we'll contact the seller on your behalf! 💪",
+  },
+  {
+    patterns: ['seller.*cheat', 'seller.*lie', 'seller.*fraud', 'seller.*scam', 'fake.*seller', 'dishonest.*seller'],
+    answer: "We take seller fraud very seriously! 🚨\n\n**If a seller has cheated you:**\n1. **Do not send any more money**\n2. Open a dispute: **Dashboard → Orders → Report Issue**\n3. Gather evidence — screenshots, photos, order records\n4. Message us on WhatsApp **+1 (579) 258-3013** immediately\n\nWe will:\n• Investigate the seller's account\n• Freeze their payouts pending investigation\n• Process your refund if the dispute is valid\n• Ban fraudulent sellers from the platform\n\nYour money and safety come first. Contact us NOW! 💚",
+  },
+  {
+    patterns: ['how.*earn.*more', 'increase.*sale', 'more.*customer', 'grow.*store', 'tips.*selling', 'sell.*faster', 'sell.*more'],
+    answer: "Want to grow your VendoorX store? Here are proven tips! 📈\n\n🌟 **Top seller tips:**\n• 📸 Use bright, clear photos (huge difference in clicks!)\n• ✍️ Write detailed, honest descriptions with keywords\n• 💬 Reply to customers fast — within 1 hour if possible\n• 🚀 **Boost** your top products for more visibility\n• ⭐ Deliver quality — good reviews bring repeat buyers\n• 📱 Share your store link on WhatsApp Status daily\n• 🎁 Offer bundle deals or free delivery for bigger orders\n• 🔖 Price competitively — check what others charge\n\nWant personalised growth advice? Message our team on WhatsApp **+1 (579) 258-3013** — we love helping sellers succeed! 💚",
+  },
+  {
+    patterns: ['bulk.*order', 'wholesale', 'large.*order', 'group.*order', 'multiple.*order', 'bulk.*buy'],
+    answer: "Need to place a bulk or wholesale order? 📦\n\nFor large orders:\n1. **Message the seller directly** to discuss bulk pricing and availability\n2. Most VendoorX sellers offer discounts for bulk purchases — just ask!\n3. Confirm delivery arrangements for large quantities\n\nFor corporate or institutional bulk orders, our team can help match you with the right suppliers. Message us on WhatsApp **+1 (579) 258-3013** with your requirements and we'll connect you! 💼",
+  },
+  {
+    patterns: ['gift', 'gift.*order', 'send.*gift', 'order.*gift', 'surprise.*gift', 'gift.*someone'],
+    answer: "Sending a gift through VendoorX is sweet! 🎁\n\n**How to send a gift:**\n1. Order the item normally\n2. In the order notes or seller chat, mention:\n   - The recipient's name\n   - Delivery address (if different from yours)\n   - Any special gift message you want included\n3. The seller will arrange delivery directly to your recipient\n\nFor special gift wrapping or customisation, message the seller directly — many are happy to help! 🎀\n\nNeed help with a special gift order? Message us on WhatsApp **+1 (579) 258-3013**! 💚",
+  },
+  {
+    patterns: ['seller.*rating', 'my.*rating', 'trust.*score', 'seller.*score', 'reputation', 'low.*rating', 'bad.*rating'],
+    answer: "Your seller rating matters a lot on VendoorX! ⭐\n\n**How ratings work:**\n• Buyers rate you 1–5 stars after each completed order\n• Your average is shown on your store and products\n• Higher ratings = more buyer trust = more sales!\n\n**How to improve your rating:**\n• Ship quickly and communicate proactively\n• Make sure your product matches the description\n• Respond to issues professionally before they become disputes\n• Ask happy customers to leave a review!\n\nIf you believe a rating is unfair, message us on WhatsApp **+1 (579) 258-3013** and we'll review it! 💚",
+  },
+
+  // ── Privacy & Data ──
+  {
+    patterns: ['privacy', 'data.*protection', 'my.*data', 'personal.*information', 'gdpr', 'ndpr', 'data.*policy', 'privacy.*policy'],
+    answer: "VendoorX takes your privacy seriously! 🔒\n\n**What we collect:**\n• Name, email, phone (for your account)\n• Payment info (processed securely by Paystack — we never store card details)\n• Order history and communications\n\n**What we never do:**\n• Sell your data to third parties\n• Share your info without consent\n• Store sensitive payment data\n\nYou can request a copy of your data or ask for deletion anytime. Read our full Privacy Policy at **vendoorx.com/privacy**\n\nFor data-related requests, message us on WhatsApp **+1 (579) 258-3013**! 🛡️",
+  },
+
+  // ── Prohibited Items ──
+  {
+    patterns: ['prohibited', 'banned.*item', 'not.*allowed.*sell', 'can.*sell.*drug', 'illegal.*item', 'what.*not.*sell', 'forbidden.*item'],
+    answer: "VendoorX has a strict policy on what can be listed! 🚫\n\n**You CANNOT sell:**\n• Illegal drugs or substances\n• Weapons or dangerous items\n• Counterfeit/pirated goods\n• Explicit or adult content\n• Stolen property\n• Alcohol (to minors)\n• Prescription medicines without license\n• Exam papers or academic fraud materials\n\n**If you're unsure** whether your item is allowed, message us on WhatsApp **+1 (579) 258-3013** before listing — we'll give you a quick answer! ✅",
+  },
+
+  // ── Partnerships & Collaborations ──
+  {
+    patterns: ['partner', 'partnership', 'collaborate', 'collab', 'work.*together', 'business.*proposal', 'invest', 'investor', 'sponsor', 'sponsorship'],
+    answer: "Interested in partnering with VendoorX? We love collaborations! 🤝\n\nWe're open to:\n• Campus brand ambassadors\n• Student organization partnerships\n• Sponsor placements\n• Business-to-business integrations\n• Media and press inquiries\n\nPlease reach our team directly on WhatsApp **+1 (579) 258-3013** with your proposal and we'll get back to you! We're always open to ideas that help Nigerian students thrive. 🚀",
+  },
+  {
+    patterns: ['ambassador', 'campus.*rep', 'campus.*ambassador', 'brand.*rep', 'become.*rep', 'represent.*vendoorx'],
+    answer: "Become a VendoorX Campus Ambassador! 🌟\n\nAs an ambassador you'll:\n• Represent VendoorX at your university\n• Earn commissions for every seller/buyer you bring in\n• Get exclusive perks and rewards\n• Build your CV and leadership experience\n• Be part of a growing student-first movement!\n\nTo apply, message us on WhatsApp **+1 (579) 258-3013** with your name, university, and why you'd make a great ambassador. We'd love to have you on the team! 💚🎓",
+  },
+
+  // ── Feedback & Suggestions ──
+  {
+    patterns: ['suggest', 'suggestion', 'feedback', 'feature.*request', 'idea', 'improve', 'recommendation', 'wish.*vendoorx'],
+    answer: "We love hearing from our community! 💡\n\nYour ideas help us build a better VendoorX for everyone. Share your suggestion directly with our team on WhatsApp **+1 (579) 258-3013** — every message is read and considered!\n\nYou can also rate and review your experience on our website. The features most requested by users are the ones we build next. Your voice matters! 🙏",
+  },
+
+  // ── Terms & Legal ──
+  {
+    patterns: ['terms', 'terms.*service', 'terms.*condition', 'legal', 'policy', 'rules', 'guidelines', 'community.*standard'],
+    answer: "VendoorX's full legal documents are available on our website!\n\n📄 **Key policies:**\n• **Terms of Service** — vendoorx.com/terms\n• **Privacy Policy** — vendoorx.com/privacy\n• **Seller Guidelines** — vendoorx.com/seller-guidelines\n• **Refund Policy** — vendoorx.com/refunds\n\nIf you have specific legal questions or need clarification on any policy, message us on WhatsApp **+1 (579) 258-3013** and our team will explain everything clearly! ⚖️",
+  },
+
+  // ── Store Customisation ──
+  {
+    patterns: ['custom.*store', 'store.*design', 'store.*logo', 'store.*banner', 'personalise.*store', 'store.*colour', 'store.*theme'],
+    answer: "Make your VendoorX store uniquely yours! 🎨\n\nYou can customise:\n• 🖼️ **Store banner** — a cover image at the top of your store\n• 📸 **Store logo** — your brand profile picture\n• 📝 **Store description** — tell buyers your story\n• 🏷️ **Store name** — your unique store URL\n• 📱 **Social links** — link your WhatsApp, Instagram, Twitter\n\nGo to **Dashboard → Store → Edit Store** to update everything.\n\nFor advanced customisation options (Pro plan), message us on WhatsApp **+1 (579) 258-3013**! 💚",
+  },
+
+  // ── Multiple Accounts ──
+  {
+    patterns: ['multiple.*account', 'two.*account', 'second.*account', 'another.*account', 'more than one.*account'],
+    answer: "VendoorX allows **one account per person** 👤\n\nIf you need to manage multiple stores (e.g. for different product categories), you can do this from one account — just create separate store sections for each.\n\nHaving multiple accounts is against our Terms of Service and can lead to suspension. If you have a specific business reason for needing separate accounts, please message us on WhatsApp **+1 (579) 258-3013** and we'll find the best solution for you! 🙏",
+  },
+
+  // ── Wallet & Credits ──
+  {
+    patterns: ['wallet', 'credit', 'balance', 'vendoorx.*credit', 'platform.*credit', 'wallet.*balance', 'my.*balance'],
+    answer: "Your VendoorX Wallet holds your earnings and credits! 💰\n\n**In your wallet:**\n• 💵 **Earnings** — money from completed sales\n• 🎁 **Credits** — earned from referrals, promotions, or compensations\n• 📊 **Transaction history** — every payment in and out\n\nAccess it at **Dashboard → Wallet**. You can use credits to pay for Boost, subscriptions, or withdraw cash to your bank.\n\nFor wallet discrepancies or missing funds, message us on WhatsApp **+1 (579) 258-3013** immediately! 🏦",
+  },
+
+  // ── Late / Missing Delivery ──
+  {
+    patterns: ['late.*delivery', 'delayed.*delivery', 'delivery.*late', 'order.*late', 'not.*delivered', 'missing.*package', 'lost.*package', 'package.*missing', 'where.*my.*order'],
+    answer: "Order late or missing? Let's investigate! 🔍\n\n**First steps:**\n1. Check your order status at **Dashboard → Orders**\n2. Message the seller directly from the order page\n3. Confirm the delivery address was correct\n4. Check if a neighbour signed for it (for campus deliveries)\n\n**If the seller isn't responding or it's been way too long:**\n→ Open a dispute at **Dashboard → Orders → Report Issue**\n→ Or message our team on WhatsApp **+1 (579) 258-3013** — we'll mediate and ensure you get your item or a full refund! 💪",
+  },
+
+  // ── Wrong / Damaged Item ──
+  {
+    patterns: ['wrong.*item', 'different.*item', 'not.*what.*order', 'received.*wrong', 'damaged.*item', 'broken.*item', 'item.*damaged', 'item.*broken', 'defective.*product'],
+    answer: "Received the wrong or damaged item? That's unacceptable and we'll fix it! 😤\n\n**Act quickly — within 48 hours of delivery:**\n1. Take clear photos of what you received\n2. Go to **Dashboard → Orders → Report Issue**\n3. Describe the problem and upload your photos\n4. Our team reviews within 24 hours\n\nYou're entitled to either:\n• ✅ The correct item sent to you\n• 💰 A full refund\n\nFor urgent cases, message us directly on WhatsApp **+1 (579) 258-3013** with photos — we'll fast-track your case! 🚀",
+  },
+
+  // ── Price Change After Order ──
+  {
+    patterns: ['price.*change.*after', 'seller.*change.*price', 'different.*price', 'price.*higher.*than'],
+    answer: "Sellers cannot change the price after you've placed an order! ❌\n\nThe price you pay is the price shown at checkout — locked in. If a seller is demanding more money after your order:\n\n1. **Do not pay any extra** outside the platform\n2. Screenshot the conversation as evidence\n3. Message us on WhatsApp **+1 (579) 258-3013** immediately\n\nThis is a policy violation and we'll take action against the seller. Your order should be fulfilled at the agreed price or cancelled with a full refund! 🛡️",
+  },
+
+  // ── Tax / Invoice ──
+  {
+    patterns: ['receipt', 'invoice', 'tax.*invoice', 'proof.*payment', 'payment.*receipt', 'vat', 'tax'],
+    answer: "Need a receipt or invoice? 🧾\n\nYour payment receipt is automatically generated for every order:\n1. Go to **Dashboard → Orders**\n2. Click on the order\n3. Click **Download Receipt / View Invoice**\n\nFor formal tax invoices or VAT-compliant documents for business purposes, message us on WhatsApp **+1 (579) 258-3013** with your order details and company info — we'll generate one for you! 📊",
+  },
+
+  // ── Inter-City / National Orders ──
+  {
+    patterns: ['different.*city', 'another.*city', 'interstate', 'inter.*state', 'outside.*campus', 'lagos.*abuja', 'ship.*nationwide', 'national.*delivery', 'far.*delivery'],
+    answer: "VendoorX supports nationwide orders across Nigeria! 🇳🇬\n\n**For orders outside the seller's city:**\n• Discuss with the seller their preferred courier service\n• Popular options: **GIG Logistics, Sendbox, DHL, FedEx, GIGL**\n• Courier fees are typically paid by the buyer\n• Delivery takes 2–5 business days nationwide\n\nAlways confirm interstate delivery arrangements and costs with the seller **before** paying to avoid surprises.\n\nNeed help finding a seller who ships to your city? Message us on WhatsApp **+1 (579) 258-3013**! 🚚",
+  },
+
+  // ── How to Get Verified ──
+  {
+    patterns: ['get.*verified', 'how.*verified', 'apply.*verification', 'verification.*process', 'verified.*badge.*how', 'become.*verified'],
+    answer: "Getting verified on VendoorX builds massive trust with buyers! ✅\n\n**Student Verified badge (automatic):**\n• Just sign up with your **.edu.ng university email**\n• Badge is applied automatically — no application needed!\n\n**Verified Seller badge (manual review):**\n1. Go to **Dashboard → Profile → Get Verified**\n2. Submit your: government ID, proof of business, and a selfie\n3. Our team reviews within 48 hours\n4. Once approved, ✅ badge appears on all your listings!\n\nVerified sellers get significantly more sales. Message us on WhatsApp **+1 (579) 258-3013** if you need help with the process! 🎓",
+  },
+
+  // ── Counterfeit / Authenticity ──
+  {
+    patterns: ['original', 'authentic', 'genuine', 'fake.*product', 'counterfeit', 'real.*product', 'is.*original', 'is.*authentic', 'replica'],
+    answer: "Authenticity is a serious issue we fight hard on VendoorX! 💯\n\n**How to spot genuine sellers:**\n• Look for the ✅ **Verified Seller** badge\n• Check reviews from past buyers\n• Ask the seller for proof of authenticity or purchase receipts\n• Verified sellers have been vetted by our team\n\n**If you receive a fake item:**\n• Take photos immediately\n• Open a dispute: **Dashboard → Orders → Report Issue**\n• Message us on WhatsApp **+1 (579) 258-3013** — counterfeit sellers are permanently banned!\n\nNever accept fake goods. You're entitled to a full refund. 🛡️",
+  },
+
+  // ── How to Increase Sales ──
+  {
+    patterns: ['no.*sale', 'not.*getting.*sale', 'nobody.*buying', 'low.*sale', 'why.*no.*order', 'product.*not.*selling'],
+    answer: "Don't worry — slow starts are normal! Here's how to turn it around 🔥\n\n**Action plan for more sales:**\n1. 📸 **Upgrade your photos** — bright, clean, multiple angles\n2. ✍️ **Rewrite your description** — include size, colour, condition, uses\n3. 💰 **Price check** — are you competitive with similar sellers?\n4. 🚀 **Boost your listings** — even ₦500 makes a huge difference\n5. 📲 **Share your store link** on WhatsApp Status every day\n6. 🏷️ **Add a sale price** — 'Was ₦5,000, Now ₦3,500' attracts clicks\n7. ⭐ **Ask friends to leave reviews** to build social proof\n\nFor a personalised store review and advice, message our team on WhatsApp **+1 (579) 258-3013** — we love helping sellers grow! 💚",
+  },
+
+  // ── New Features ──
+  {
+    patterns: ['new.*feature', 'update', 'what.*new', 'latest.*feature', 'coming.*soon', 'roadmap', 'future.*feature'],
+    answer: "VendoorX is constantly improving! 🚀✨\n\nRecent updates include:\n• 📱 Real-time inbox (WhatsApp, Instagram, Facebook all in one)\n• 🔔 Web push notifications\n• 🎨 Enhanced store customisation\n• 🤖 AI support assistant (that's me, Vee! 👋)\n• 📊 Improved analytics dashboard\n\nWant to know what's coming next or suggest a feature? Message our team on WhatsApp **+1 (579) 258-3013** — community suggestions directly shape our roadmap! 💡",
+  },
+
+  // ── Student Groups / Organisations ──
+  {
+    patterns: ['student.*union', 'association', 'club', 'group.*order', 'organization', 'department.*store', 'faculty'],
+    answer: "VendoorX works great for student organizations! 🎓🤝\n\nStudent clubs, associations, and departments use VendoorX to:\n• Sell branded merchandise (hoodies, bags, notebooks)\n• Sell event tickets and conference materials\n• Run departmental stores for course materials\n• Raise funds for association activities\n\nWe offer **special partnership packages** for registered student organizations. Message us on WhatsApp **+1 (579) 258-3013** with your organization details and we'll set you up with a great deal! 💚",
+  },
+
+  // ── How VendoorX Makes Money ──
+  {
+    patterns: ['how.*vendoorx.*make.*money', 'vendoorx.*revenue', 'business.*model', 'how.*make.*profit'],
+    answer: "Great question! VendoorX makes money through:\n\n• 📋 **Subscription plans** — Growth and Pro monthly plans\n• 🚀 **Boost fees** — Sellers pay to promote listings\n• 🎯 **Featured placements** — Premium homepage spots\n\nWe charge **0% commission** on sales — you keep everything you earn! Our goal is to grow with our sellers, not take from them. 💚\n\nQuestions about our business? Message us on WhatsApp **+1 (579) 258-3013**!",
+  },
+
+  // ── VendoorX vs Competitors ──
+  {
+    patterns: ['vs.*jiji', 'vs.*konga', 'vs.*jumia', 'better.*than', 'compare.*vendoorx', 'why.*vendoorx', 'why.*not.*jiji', 'why.*choose.*vendoorx'],
+    answer: "Great question! Here's what makes VendoorX different 🏆\n\n**VendoorX vs other platforms:**\n• 🎓 **Built for students** — designed for campus buying & selling\n• 📱 **Social selling hub** — WhatsApp, Instagram, Facebook all in one dashboard\n• 💳 **0% commission** — you keep 100% of your earnings\n• 🔒 **Escrow payments** — money held safely until delivery confirmed\n• 🏪 **Your own store link** — shareable, branded storefront\n• 🤖 **AI support** — instant help 24/7\n• 🚀 **Student verified** — trust badges for campus sellers\n\nNo other platform is built specifically for Nigerian student sellers. We're your home! 💚",
+  },
+
   // ── Closings ──
   {
     patterns: ['thank', 'thanks', 'thank you', 'helpful', 'great', 'awesome', 'perfect', 'nice', 'cool', 'wonderful', 'excellent', 'brilliant'],
