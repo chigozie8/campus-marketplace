@@ -28,6 +28,15 @@ function VerifyPageInner() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.replace('/dashboard')
+      }
+    })
+  }, [router])
+
+  useEffect(() => {
     inputRefs.current[0]?.focus()
   }, [])
 

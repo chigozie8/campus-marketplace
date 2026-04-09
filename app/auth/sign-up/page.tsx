@@ -86,39 +86,41 @@ function SignUpPageInner() {
     if (!agreedToTerms) { toast.error('Please agree to the Terms & Privacy Policy'); return }
     setLoading(true)
     const toastId = toast.loading('Creating your account...')
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          whatsapp_number: whatsapp,
-          university: university || detectedUniversity || '',
-          role,
-          referred_by: referralCode || null,
-          is_student_verified: !!detectedUniversity,
-        },
-      },
+
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        full_name: fullName,
+        whatsapp_number: whatsapp,
+        university: university || detectedUniversity || '',
+        role,
+        referred_by: referralCode || null,
+        is_student_verified: !!detectedUniversity,
+      }),
     })
+    const result = await res.json()
+    if (!res.ok) {
+      toast.dismiss(toastId)
+      toast.error(result.error || 'Registration failed. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     toast.dismiss(toastId)
-    if (error) {
-      toast.error(error.message)
-      setLoading(false)
+    if (signInError) {
+      toast.error('Account created! Please sign in.')
+      router.push('/auth/login')
       return
     }
-    // Supabase silently returns success when email is already registered
-    // but identities will be empty — prompt them to sign in instead
-    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-      toast.error('This email is already registered.', {
-        description: 'Please sign in or use "Forgot password" to reset your password.',
-        duration: 8000,
-      })
-      setLoading(false)
-      return
-    }
-    toast.success('Account created!', { description: 'A 6-digit code is on its way to your inbox.' })
-    router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
+
+    toast.success('Welcome to VendoorX! 🎉', { description: 'Your account is ready.' })
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
