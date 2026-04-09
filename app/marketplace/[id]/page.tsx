@@ -6,7 +6,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/lib/types'
 import { TrustBadge, SellerTierBadge } from '@/components/TrustBadge'
-import { quickSellerScore } from '@/lib/trust'
+import { computeSellerScore } from '@/lib/trust'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
@@ -89,9 +89,11 @@ export default async function ProductDetailPage({ params }: Props) {
   const userId = sessionResult.data.user?.id ?? null
   const initialReviews = (reviewsData ?? []) as import('@/lib/types').Review[]
 
-  // Get likes count and whether the current user liked it
-  const { count: likesCount } = await supabase
-    .from('favorites').select('*', { count: 'exact', head: true }).eq('product_id', id)
+  // Get likes count, current user's favorite status, and seller disputes — all post-product fetch
+  const [{ count: likesCount }, { data: sellerDisputesData }] = await Promise.all([
+    supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('product_id', id),
+    supabase.from('order_disputes').select('id, status').eq('seller_id', p.seller_id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
+  ])
 
   let initialLiked = false
   if (userId) {
@@ -111,10 +113,15 @@ export default async function ProductDetailPage({ params }: Props) {
   const isVerified = p.profiles?.seller_verified || false
   const cond = conditionConfig[p.condition] || conditionConfig.good
 
-  const listingTrustScore = quickSellerScore({
+  const sellerAccountAgeDays = p.profiles?.created_at
+    ? Math.floor((Date.now() - new Date(p.profiles.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : 0
+  const { score: listingTrustScore } = computeSellerScore({
     rating: sellerRating,
     totalSales: p.profiles?.total_sales ?? 0,
     sellerVerified: isVerified,
+    sellerDisputes: (sellerDisputesData ?? []) as Array<{ id: string; status: string }>,
+    accountAgeDays: sellerAccountAgeDays,
   })
 
   return (

@@ -47,10 +47,14 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0
 
+  const accountAgeDays = product.profiles?.created_at
+    ? Math.floor((Date.now() - new Date(product.profiles.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : 0
   const trustScore = quickSellerScore({
     rating: sellerRating,
     totalSales: product.profiles?.total_sales ?? 0,
     sellerVerified: isVerified,
+    accountAgeDays,
   })
 
   return (

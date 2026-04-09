@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { computeBuyerScore, computeSellerScore } from '@/lib/trust'
 
 function svc() {
@@ -13,7 +14,7 @@ function svc() {
 export type { TrustScoreBreakdown } from '@/lib/trust'
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ userId: string }> },
 ) {
   const { userId } = await params
@@ -23,6 +24,25 @@ export async function GET(
   }
 
   const db = svc()
+
+  // Determine the requesting user so we can decide what to return
+  const supabase = await createClient()
+  const requestingUser = supabase
+    ? (await supabase.auth.getUser()).data.user
+    : null
+
+  const isSelf = requestingUser?.id === userId
+
+  // Check if the requesting user is an admin (only needed when not self)
+  let isAdmin = false
+  if (!isSelf && requestingUser) {
+    const { data: reqProfile } = await db
+      .from('profiles')
+      .select('role')
+      .eq('id', requestingUser.id)
+      .maybeSingle()
+    isAdmin = reqProfile?.role === 'admin'
+  }
 
   const [profileRes, ordersRes, buyerDisputesRes, sellerDisputesRes] = await Promise.all([
     db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at').eq('id', userId).single(),
@@ -54,6 +74,22 @@ export async function GET(
       })
     : null
 
+  // Full breakdown is only returned to the user themselves or an admin
+  if (isSelf || isAdmin) {
+    return NextResponse.json({
+      userId,
+      profile: {
+        full_name: profile.full_name,
+        avatar_url: profile.avatar_url,
+        is_seller: profile.is_seller,
+        seller_verified: profile.seller_verified,
+      },
+      buyer: buyerScore,
+      seller: sellerScore,
+    })
+  }
+
+  // Public-safe response: score + tier only, no dispute/order counts
   return NextResponse.json({
     userId,
     profile: {
@@ -62,7 +98,7 @@ export async function GET(
       is_seller: profile.is_seller,
       seller_verified: profile.seller_verified,
     },
-    buyer: buyerScore,
-    seller: sellerScore,
+    buyer: { score: buyerScore.score, level: buyerScore.level, label: buyerScore.label },
+    seller: sellerScore ? { score: sellerScore.score, level: sellerScore.level, label: sellerScore.label } : null,
   })
 }

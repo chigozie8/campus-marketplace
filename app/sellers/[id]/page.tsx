@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { SellerTierBadge, TrustBadge, getMilestoneBadge, getSellerTier } from '@/components/TrustBadge'
-import { quickSellerScore } from '@/lib/trust'
+import { computeSellerScore } from '@/lib/trust'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -35,10 +35,11 @@ export default async function SellerProfilePage({ params }: Props) {
   const supabase = await createClient()
   if (!supabase) notFound()
 
-  const [{ data: profile }, { data: products }, { data: reviews }] = await Promise.all([
+  const [{ data: profile }, { data: products }, { data: reviews }, { data: sellerDisputes }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', id).single(),
     supabase.from('products').select('*, categories(*)').eq('seller_id', id).eq('is_available', true).order('created_at', { ascending: false }),
     supabase.from('reviews').select('id, rating, comment, created_at, profiles!reviewer_id(full_name, avatar_url)').eq('seller_id', id).order('created_at', { ascending: false }),
+    supabase.from('order_disputes').select('id, status').eq('seller_id', id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
   ])
 
   if (!profile) notFound()
@@ -47,10 +48,13 @@ export default async function SellerProfilePage({ params }: Props) {
     ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
     : 0
 
-  const sellerTrustScore = quickSellerScore({
+  const accountAgeDays = Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
+  const { score: sellerTrustScore } = computeSellerScore({
     rating: profile.rating ?? 0,
     totalSales: profile.total_sales ?? 0,
     sellerVerified: profile.seller_verified ?? false,
+    sellerDisputes: (sellerDisputes ?? []) as Array<{ id: string; status: string }>,
+    accountAgeDays,
   })
   const sellerMilestone = getMilestoneBadge(sellerTrustScore)
   const sellerTier = getSellerTier(sellerTrustScore)

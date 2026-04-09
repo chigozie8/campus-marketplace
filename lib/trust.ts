@@ -111,20 +111,29 @@ export function computeSellerScore({
   }
 }
 
+/**
+ * List-view approximation of seller trust score.
+ * Uses rating, sales, verified status, and optionally accountAgeDays (from profiles.created_at).
+ * Dispute penalties are omitted — too expensive to compute per-card in a list context.
+ * For accurate single-seller displays use computeSellerScore with full dispute data.
+ */
 export function quickSellerScore({
   rating,
   totalSales,
   sellerVerified,
+  accountAgeDays = 0,
 }: {
   rating: number
   totalSales: number
   sellerVerified: boolean
+  accountAgeDays?: number
 }): number {
   const base = 50
   const ratingBonus = Math.round((rating / 5) * 25)
   const salesBonus = Math.round(Math.min(totalSales, 20) / 20 * 15)
   const verifiedBonus = sellerVerified ? 10 : 0
-  return Math.max(0, Math.min(100, base + ratingBonus + salesBonus + verifiedBonus))
+  const ageBonus = accountAgeDays >= 180 ? 10 : accountAgeDays >= 90 ? 5 : 0
+  return Math.max(0, Math.min(100, base + ratingBonus + salesBonus + verifiedBonus + ageBonus))
 }
 
 export const MILESTONES = [

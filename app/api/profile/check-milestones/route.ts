@@ -12,13 +12,11 @@ export async function POST() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('is_seller')
       .eq('id', user.id)
       .maybeSingle()
 
-    const role = profile?.role ?? 'buyer'
-
-    if (role === 'vendor') {
+    if (profile?.is_seller === true) {
       await checkAndNotifySellerMilestones(user.id).catch(() => {})
     }
     await checkAndNotifyBuyerMilestones(user.id).catch(() => {})
