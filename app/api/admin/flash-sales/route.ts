@@ -28,7 +28,16 @@ export async function GET() {
     .select('*, products(id, title, price, images)')
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    // Table doesn't exist yet — return empty list so the page still renders
+    const missingTable =
+      error.code === 'PGRST200' ||
+      error.code === 'PGRST205' ||
+      error.message?.toLowerCase().includes('does not exist') ||
+      error.message?.toLowerCase().includes('schema cache')
+    if (missingTable) return NextResponse.json({ sales: [], setup_needed: true })
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   return NextResponse.json({ sales: data ?? [] })
 }
 

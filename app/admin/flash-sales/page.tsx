@@ -47,6 +47,7 @@ export default function FlashSalesPage() {
   const [sales, setSales] = useState<FlashSale[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [setupNeeded, setSetupNeeded] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
@@ -63,10 +64,12 @@ export default function FlashSalesPage() {
   async function load() {
     setLoading(true)
     setError('')
+    setSetupNeeded(false)
     const res = await fetch('/api/admin/flash-sales')
     if (!res.ok) { setError('Failed to load flash sales'); setLoading(false); return }
-    const { sales: data } = await res.json()
-    setSales(data ?? [])
+    const json = await res.json()
+    if (json.setup_needed) setSetupNeeded(true)
+    setSales(json.sales ?? [])
     setLoading(false)
   }
 
@@ -214,6 +217,31 @@ export default function FlashSalesPage() {
             </button>
           </div>
         </form>
+      )}
+
+      {setupNeeded && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 space-y-2">
+          <p className="text-sm font-bold text-amber-800 dark:text-amber-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" /> One-time database setup required
+          </p>
+          <p className="text-xs text-amber-700 dark:text-amber-500">
+            The <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">flash_sales</code> table doesn&apos;t exist in your Supabase database yet.
+            Go to your <strong>Supabase dashboard → SQL Editor</strong> and run the following:
+          </p>
+          <pre className="text-[11px] bg-amber-100 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg p-3 overflow-x-auto text-amber-900 dark:text-amber-300 select-all whitespace-pre-wrap">{`CREATE TABLE IF NOT EXISTS flash_sales (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL UNIQUE,
+  sale_price NUMERIC(12,2) NOT NULL,
+  start_at   TIMESTAMPTZ NOT NULL,
+  end_at     TIMESTAMPTZ NOT NULL,
+  is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+  created_by UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS flash_sales_product_idx ON flash_sales (product_id);
+CREATE INDEX IF NOT EXISTS flash_sales_active_idx  ON flash_sales (is_active, end_at);`}</pre>
+          <p className="text-xs text-amber-700 dark:text-amber-500">After running it, refresh this page.</p>
+        </div>
       )}
 
       {loading && <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
