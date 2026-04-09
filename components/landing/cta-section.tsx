@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Users, Building2, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,94 +17,22 @@ const PERKS = [
 ]
 
 const STATS = [
-  { endValue: 50000, suffix: '+', label: 'Active Vendors', icon: Users },
-  { endValue: 120, suffix: '+', label: 'Campuses', icon: Building2 },
-  { endValue: 2, prefix: '₦', suffix: 'B+', label: 'Sales Made', icon: TrendingUp },
-  { endValue: 4.9, suffix: '/5', label: 'Avg Rating', icon: Star, isDecimal: true },
+  { value: '50,000', suffix: '+', label: 'Active Vendors', icon: Users },
+  { value: '120',    suffix: '+', label: 'Campuses',       icon: Building2 },
+  { value: '2',  prefix: '₦', suffix: 'B+', label: 'Sales Made', icon: TrendingUp },
+  { value: '4.9',    suffix: '/5', label: 'Avg Rating',    icon: Star },
 ]
 
-function useCountUp(end: number, duration = 2000, isDecimal = false) {
-  const [count, setCount] = useState(0)
-  const ref = useRef<HTMLDivElement>(null)
-  const startedRef = useRef(false)
-  const rafRef = useRef<number | null>(null)
-  const mountedRef = useRef(false)
-
-  useEffect(() => {
-    mountedRef.current = true
-    return () => {
-      mountedRef.current = false
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    function startAnimation() {
-      if (startedRef.current) return
-      startedRef.current = true
-
-      // Use Date.now() — immune to RAF pausing when tab is hidden/loading
-      const startTime = Date.now()
-
-      function tick() {
-        const elapsed = Date.now() - startTime
-        const progress = Math.min(elapsed / duration, 1)
-        const ease = 1 - Math.pow(1 - progress, 4)
-        if (mountedRef.current) {
-          setCount(isDecimal ? Math.round(ease * end * 10) / 10 : Math.floor(ease * end))
-        }
-        if (progress < 1) {
-          rafRef.current = requestAnimationFrame(tick)
-        } else if (mountedRef.current) {
-          setCount(end)
-        }
-      }
-
-      rafRef.current = requestAnimationFrame(tick)
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) startAnimation() },
-      { threshold: 0, rootMargin: '0px 0px 200px 0px' },
-    )
-    observer.observe(el)
-
-    // Fallback for elements already visible on page load
-    const timer = setTimeout(() => {
-      const rect = el.getBoundingClientRect()
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        startAnimation()
-      }
-    }, 200)
-
-    return () => {
-      observer.disconnect()
-      clearTimeout(timer)
-    }
-  }, [end, duration, isDecimal])
-
-  return { count, ref }
-}
-
 function StatCard({
-  endValue, prefix = '', suffix = '', label, icon: Icon, isDecimal = false,
-}: { endValue: number; prefix?: string; suffix?: string; label: string; icon: React.ElementType; isDecimal?: boolean }) {
-  const { count, ref } = useCountUp(endValue, 2000, isDecimal)
-  const display = isDecimal ? count.toFixed(1) : endValue >= 1000 ? `${Math.floor(count / 1000)}K` : count
-
+  prefix = '', value, suffix = '', label, icon: Icon,
+}: { prefix?: string; value: string; suffix?: string; label: string; icon: React.ElementType }) {
   return (
-    <div
-      ref={ref}
-      className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1"
-    >
+    <div className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
       <div className="w-10 h-10 rounded-xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         <Icon className="w-5 h-5 text-[#16a34a]" />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
-        {prefix}{display}{suffix}
+        {prefix}{value}{suffix}
       </p>
       <p className="text-xs text-white/50 font-medium text-center leading-tight">{label}</p>
     </div>
@@ -169,7 +96,7 @@ export function CtaSection({ user }: CtaSectionProps) {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mb-12">
           {STATS.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
+            <StatCard key={stat.label} value={stat.value} prefix={stat.prefix} suffix={stat.suffix} label={stat.label} icon={stat.icon} />
           ))}
         </div>
 
