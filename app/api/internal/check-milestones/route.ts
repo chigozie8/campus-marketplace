@@ -20,6 +20,9 @@ export async function POST(req: Request) {
     if (!userId || typeof userId !== 'string') {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
     }
+    if (!['buyer', 'seller', 'both'].includes(role)) {
+      return NextResponse.json({ error: 'role must be buyer, seller, or both' }, { status: 400 })
+    }
 
     // Await both checks inside the endpoint for durability —
     // the HTTP caller (backend) is fire-and-forget, but the work completes here.

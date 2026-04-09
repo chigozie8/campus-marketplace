@@ -36,7 +36,7 @@ type ExtendedOrder = BackendOrder & {
   buyer_id?: string
 }
 
-type BuyerTrust = { score: number; level: string; totalDisputes: number; completedOrders: number }
+type BuyerTrust = { score: number; level: string; totalDisputes?: number; completedOrders?: number }
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const meta = STATUS_META[status]
@@ -146,9 +146,11 @@ function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => 
                     ) : buyerTrust ? (
                       <div className="flex items-center gap-2">
                         <TrustBadge score={buyerTrust.score} size="sm" />
-                        <span className="text-[10px] text-muted-foreground">
-                          {buyerTrust.completedOrders} orders · {buyerTrust.totalDisputes} dispute{buyerTrust.totalDisputes !== 1 ? 's' : ''}
-                        </span>
+                        {(buyerTrust.completedOrders !== undefined || buyerTrust.totalDisputes !== undefined) && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {buyerTrust.completedOrders ?? 0} orders · {buyerTrust.totalDisputes ?? 0} dispute{(buyerTrust.totalDisputes ?? 0) !== 1 ? 's' : ''}
+                          </span>
+                        )}
                       </div>
                     ) : null}
                   </div>
