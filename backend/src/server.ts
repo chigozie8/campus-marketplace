@@ -5,6 +5,14 @@ import { startAutoReleaseJob } from './jobs/escrowAutoRelease.js'
 
 const PORT = Number(process.env.PORT) || 3001
 
+// Startup env-var validation — warn early so issues are visible in logs
+const REQUIRED_FOR_MILESTONES = ['INTERNAL_API_KEY', 'FRONTEND_URL']
+for (const key of REQUIRED_FOR_MILESTONES) {
+  if (!process.env[key]) {
+    logger.warn(`[startup] ${key} is not set — milestone trigger calls to Next.js will fail`)
+  }
+}
+
 const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`VendorX API v2 running on port ${PORT} [${process.env.NODE_ENV ?? 'development'}]`)
   logger.info(`API docs: http://localhost:${PORT}/api/docs`)

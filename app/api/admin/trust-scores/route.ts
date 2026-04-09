@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { computeBuyerScore, computeSellerScore } from '@/lib/trust'
 
 function svc() {
   return createAdmin(
@@ -19,13 +20,6 @@ async function requireAdmin() {
   return data ? user : null
 }
 
-function levelFor(score: number) {
-  if (score >= 85) return 'excellent'
-  if (score >= 70) return 'good'
-  if (score >= 50) return 'fair'
-  return 'low'
-}
-
 export async function GET() {
   const admin = await requireAdmin()
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -35,7 +29,7 @@ export async function GET() {
   const [profilesRes, ordersRes, disputesRes] = await Promise.all([
     db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at').order('created_at', { ascending: false }),
     db.from('orders').select('id, buyer_id, status'),
-    db.from('order_disputes').select('id, buyer_id, seller_id, status').catch(() => ({ data: [], error: null })),
+    db.from('order_disputes').select('id, buyer_id, seller_id, status').then(r => r, () => ({ data: [] as Array<{ id: string; buyer_id: string; seller_id: string; status: string }> | null, error: null })),
   ])
 
   const profiles = profilesRes.data ?? []
@@ -61,26 +55,27 @@ export async function GET() {
     const userOrders = ordersByBuyer[p.id] ?? []
     const buyerDisputes = disputesByBuyer[p.id] ?? []
     const sellerDisputes = disputesBySeller[p.id] ?? []
-    const accountAgeDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24))
     const completedOrders = userOrders.filter(o => o.status === 'completed').length
+    const accountAgeDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
-    const base = 60
-    const ordersBonus = Math.min(completedOrders * 2, 20)
-    const noDisputeBonus = buyerDisputes.length === 0 ? 10 : 0
-    const disputeLossPenalty = buyerDisputes.filter(d => d.status === 'resolved_seller').length * 20
-    const disputeWinPenalty = buyerDisputes.filter(d => d.status === 'resolved_buyer').length * 5
-    const ageBonus = accountAgeDays >= 180 ? 10 : accountAgeDays >= 90 ? 5 : 0
-    const buyerScore = Math.max(0, Math.min(100, base + ordersBonus + noDisputeBonus - disputeLossPenalty - disputeWinPenalty + ageBonus))
+    const { score: buyerScore, level: buyerLevel } = computeBuyerScore({
+      completedOrders,
+      buyerDisputes,
+      accountAgeDays,
+    })
 
     let sellerScore: number | null = null
+    let sellerLevel: string | null = null
     if (p.is_seller) {
-      const sBase = 50
-      const ratingBonus = Math.round(((p.rating ?? 0) / 5) * 25)
-      const salesBonus = Math.round(Math.min(p.total_sales ?? 0, 20) / 20 * 15)
-      const verifiedBonus = p.seller_verified ? 10 : 0
-      const sellerDisputePenalty = sellerDisputes.filter(d => d.status === 'resolved_buyer').length * 10
-      const sAgeBonus = ageBonus
-      sellerScore = Math.max(0, Math.min(100, sBase + ratingBonus + salesBonus + verifiedBonus - sellerDisputePenalty + sAgeBonus))
+      const s = computeSellerScore({
+        rating: p.rating ?? 0,
+        totalSales: p.total_sales ?? 0,
+        sellerVerified: p.seller_verified ?? false,
+        sellerDisputes,
+        accountAgeDays,
+      })
+      sellerScore = s.score
+      sellerLevel = s.level
     }
 
     return {
@@ -93,9 +88,9 @@ export async function GET() {
       total_sales: p.total_sales,
       created_at: p.created_at,
       buyerScore,
-      buyerLevel: levelFor(buyerScore),
+      buyerLevel,
       sellerScore,
-      sellerLevel: sellerScore !== null ? levelFor(sellerScore) : null,
+      sellerLevel,
       completedOrders,
       totalBuyerDisputes: buyerDisputes.length,
       totalSellerDisputes: sellerDisputes.length,

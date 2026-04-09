@@ -7,6 +7,7 @@ import * as paymentService from '../services/paymentService.js'
 import * as orderService from '../services/orderService.js'
 import * as payoutService from '../services/payoutService.js'
 import { AuthRequest } from '../types/index.js'
+import logger from '../utils/logger.js'
 
 /**
  * Delegate milestone checking to the canonical Next.js internal endpoint.
@@ -15,7 +16,7 @@ import { AuthRequest } from '../types/index.js'
 async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 'both') {
   try {
     const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
-    await fetch(`${appUrl}/api/internal/check-milestones`, {
+    const res = await fetch(`${appUrl}/api/internal/check-milestones`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -24,8 +25,11 @@ async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 
       body: JSON.stringify({ userId, role }),
       signal: AbortSignal.timeout(4000),
     })
-  } catch {
-    // Non-critical — milestone notifications are best-effort
+    if (!res.ok) {
+      logger.warn(`[milestones] trigger failed for ${userId} (${role}): HTTP ${res.status}`)
+    }
+  } catch (err) {
+    logger.warn(`[milestones] trigger error for ${userId} (${role}): ${err}`)
   }
 }
 

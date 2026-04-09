@@ -7,7 +7,7 @@ const RELEASE_AFTER_HOURS = 48
 async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 'both') {
   try {
     const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
-    await fetch(`${appUrl}/api/internal/check-milestones`, {
+    const res = await fetch(`${appUrl}/api/internal/check-milestones`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -16,8 +16,11 @@ async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 
       body: JSON.stringify({ userId, role }),
       signal: AbortSignal.timeout(4000),
     })
-  } catch {
-    // Non-critical — milestone notifications are best-effort
+    if (!res.ok) {
+      logger.warn(`[milestones] auto-release trigger failed for ${userId} (${role}): HTTP ${res.status}`)
+    }
+  } catch (err) {
+    logger.warn(`[milestones] auto-release trigger error for ${userId} (${role}): ${err}`)
   }
 }
 
