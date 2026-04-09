@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils'
 import { m, LazyMotion, domAnimation } from 'framer-motion'
 import { quickSellerScore } from '@/lib/trust'
 import { TrustBadge } from '@/components/TrustBadge'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface ProductCardProps {
   product: Product
@@ -32,11 +34,27 @@ const conditionColors = {
 }
 
 export function ProductCard({ product, isFavorited = false, onToggleFavorite, index = 0 }: ProductCardProps) {
+  const router = useRouter()
   const whatsappNumber = product.profiles?.whatsapp_number?.replace(/\D/g, '') || ''
   const whatsappMessage = `Hi! I'm interested in "${product.title}" listed on VendoorX for ₦${product.price.toLocaleString()}. Is it still available?`
   const whatsappUrl = whatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
-    : '#'
+    : ''
+
+  function handleWhatsApp(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!whatsappUrl) {
+      toast.info('View the listing to contact this seller', {
+        action: {
+          label: 'View listing',
+          onClick: () => router.push(`/marketplace/${product.id}`),
+        },
+      })
+      return
+    }
+    fetch(`/api/products/${product.id}/whatsapp`, { method: 'POST' }).catch(() => {})
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+  }
 
   const imageUrl = product.images?.[0] || `/placeholder.svg?height=240&width=320`
   const sellerName = product.profiles?.full_name || 'Unknown Seller'
@@ -154,17 +172,15 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
         </div>
 
         {/* WhatsApp CTA */}
-        <m.a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <m.button
+          onClick={handleWhatsApp}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           className="mt-auto flex items-center justify-center gap-1.5 w-full h-8 sm:h-9 rounded-xl bg-[#25D366] text-white text-[10px] sm:text-xs font-bold hover:bg-[#20BA5C] transition-colors shadow-sm shadow-[#25D366]/20"
         >
           <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span className="hidden xs:inline">Chat on </span>WhatsApp
-        </m.a>
+        </m.button>
       </div>
     </m.div>
     </LazyMotion>
