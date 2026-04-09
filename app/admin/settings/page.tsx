@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import { AdminRolesManager } from '@/components/admin/admin-roles-manager'
 import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
 import { getSiteSettings } from '@/lib/site-settings'
+
+export const dynamic = 'force-dynamic'
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient()
@@ -21,10 +24,12 @@ export default async function AdminSettingsPage() {
 
   const isSuperAdmin = currentAdmin?.role === 'super_admin'
 
-  const { data: admins } = await supabase
-    .from('admin_roles')
-    .select('id, user_id, email, role, created_at')
-    .order('created_at')
+  // Use service role client to bypass RLS — the policy only lets each admin
+  // see their own row, so the regular client would never return other admins.
+  const sc = createServiceClient()
+  const { data: admins } = sc
+    ? await sc.from('admin_roles').select('id, user_id, email, role, created_at').order('created_at')
+    : { data: null }
 
   const settings = await getSiteSettings()
 
