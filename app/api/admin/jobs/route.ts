@@ -24,8 +24,8 @@ export async function GET() {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const supabase = serviceClient()
-  const { data, error } = await supabase
+  const supabase = await createClient()
+  const { data, error } = await supabase!
     .from('job_listings')
     .select('*')
     .order('sort_order', { ascending: true })
