@@ -42,7 +42,7 @@ export async function PUT(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  revalidateTag('site-settings')
+  revalidateTag('site-settings', 'max')
   revalidatePath('/')
   revalidatePath('/press')
   revalidatePath('/pricing')
