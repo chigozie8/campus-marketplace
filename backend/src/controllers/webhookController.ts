@@ -4,39 +4,36 @@ import { addMessageJob } from '../queues/messageQueue.js'
 import { AuthRequest } from '../types/index.js'
 import logger from '../utils/logger.js'
 
-// ─── WhatsApp (Meta Cloud API) ───────────────────────────────────────────────
+// ─── WhatsApp (Gupshup) ──────────────────────────────────────────────────────
 
+// Gupshup does not use a GET verification handshake — this just confirms the
+// endpoint is alive for health checks from the Gupshup dashboard.
 export function verifyWhatsApp(req: Request, res: Response): void {
-  const mode      = req.query['hub.mode']
-  const token     = req.query['hub.verify_token']
-  const challenge = req.query['hub.challenge']
-
-  if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
-    logger.info('[WhatsApp] Webhook verified.')
-    res.status(200).send(challenge)
-    return
-  }
-
-  res.status(403).json({ success: false, message: 'Verification failed.' })
+  res.status(200).json({ ok: true, provider: 'gupshup' })
 }
 
 export async function whatsAppWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const body = req.body
 
-    if (body?.object === 'whatsapp_business_account') {
-      const messages = body.entry?.[0]?.changes?.[0]?.value?.messages
-      if (messages?.length > 0) {
-        const message  = messages[0]
-        const from: string = message.from ?? ''
-        const text: string = message.text?.body ?? ''
-        if (from && text) {
-          logger.info(`[WhatsApp] Inbound from ${from}: "${text}"`)
-          await addMessageJob({ from, text, platform: 'whatsapp' })
-        }
+    // Gupshup sends type="message" for inbound messages
+    if (body?.type === 'message') {
+      const payload  = body.payload
+      const from: string = payload?.sender?.phone ?? payload?.source ?? ''
+      const text: string =
+        payload?.type === 'text'
+          ? (payload?.payload?.text ?? '')
+          : payload?.type === 'button_response'
+            ? (payload?.payload?.title ?? '')
+            : ''
+
+      if (from && text) {
+        logger.info(`[WhatsApp] Inbound from ${from}: "${text}"`)
+        await addMessageJob({ from, text, platform: 'whatsapp' })
       }
     }
 
+    // Always respond 200 immediately — Gupshup retries if it doesn't get 200
     res.sendStatus(200)
   } catch (err) {
     next(err)

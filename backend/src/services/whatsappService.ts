@@ -1,79 +1,83 @@
 import axios from 'axios'
 import logger from '../utils/logger.js'
 
-const BASE_URL = 'https://graph.facebook.com/v19.0'
+const GUPSHUP_BASE = 'https://api.gupshup.io/wa/api/v1'
 
-// ─── Send a plain text message ────────────────────────────────────────────────
+// ─── Send a plain text message via Gupshup ───────────────────────────────────
 export async function sendMessage(to: string, text: string): Promise<void> {
-  const token         = process.env.WHATSAPP_TOKEN
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
+  const apiKey  = process.env.GUPSHUP_API_KEY
+  const appName = process.env.GUPSHUP_APP_NAME
+  const from    = process.env.GUPSHUP_PHONE_NUMBER
 
-  if (!token || !phoneNumberId) {
-    logger.warn('[WhatsApp] WHATSAPP_TOKEN or WHATSAPP_PHONE_NUMBER_ID not set — message skipped.')
+  if (!apiKey || !appName || !from) {
+    logger.warn('[WhatsApp] Gupshup credentials not configured — message skipped.')
     return
   }
 
+  // Gupshup requires E.164 without the + sign (e.g. 2348012345678)
+  const cleanTo = to.replace(/^\+/, '')
+
   try {
     await axios.post(
-      `${BASE_URL}/${phoneNumberId}/messages`,
-      {
-        messaging_product: 'whatsapp',
-        to,
-        type: 'text',
-        text: { body: text },
-      },
+      `${GUPSHUP_BASE}/msg`,
+      new URLSearchParams({
+        channel:     'whatsapp',
+        source:      from,
+        destination: cleanTo,
+        message:     JSON.stringify({ isHSM: 'false', type: 'text', text: { body: text } }),
+        'src.name':  appName,
+      }),
       {
         headers: {
-          Authorization:  `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          apikey:         apiKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
     )
-    logger.info(`[WhatsApp] Message sent to ${to}`)
+    logger.info(`[WhatsApp] Message sent to ${cleanTo}`)
   } catch (err: any) {
-    logger.error(`[WhatsApp] Failed to send to ${to}: ${err?.response?.data?.error?.message ?? err.message}`)
+    logger.error(`[WhatsApp] Failed to send to ${cleanTo}: ${err?.response?.data?.message ?? err.message}`)
     throw err
   }
 }
 
-// ─── Send a WhatsApp template message ────────────────────────────────────────
+// ─── Send a Gupshup template (HSM) message ───────────────────────────────────
 export async function sendTemplate(
   to: string,
-  templateName: string,
-  languageCode = 'en',
-  components: object[] = [],
+  templateId: string,
+  params: string[] = [],
 ): Promise<void> {
-  const token         = process.env.WHATSAPP_TOKEN
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID
+  const apiKey  = process.env.GUPSHUP_API_KEY
+  const appName = process.env.GUPSHUP_APP_NAME
+  const from    = process.env.GUPSHUP_PHONE_NUMBER
 
-  if (!token || !phoneNumberId) {
-    logger.warn('[WhatsApp] Credentials not set — template skipped.')
+  if (!apiKey || !appName || !from) {
+    logger.warn('[WhatsApp] Gupshup credentials not configured — template skipped.')
     return
   }
 
+  const cleanTo = to.replace(/^\+/, '')
+
   try {
     await axios.post(
-      `${BASE_URL}/${phoneNumberId}/messages`,
-      {
-        messaging_product: 'whatsapp',
-        to,
-        type: 'template',
-        template: {
-          name:     templateName,
-          language: { code: languageCode },
-          components,
-        },
-      },
+      `${GUPSHUP_BASE}/template/msg`,
+      new URLSearchParams({
+        channel:     'whatsapp',
+        source:      from,
+        destination: cleanTo,
+        template:    JSON.stringify({ id: templateId, params }),
+        'src.name':  appName,
+      }),
       {
         headers: {
-          Authorization:  `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          apikey:         apiKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
     )
-    logger.info(`[WhatsApp] Template "${templateName}" sent to ${to}`)
+    logger.info(`[WhatsApp] Template "${templateId}" sent to ${cleanTo}`)
   } catch (err: any) {
-    logger.error(`[WhatsApp] Template failed for ${to}: ${err?.response?.data?.error?.message ?? err.message}`)
+    logger.error(`[WhatsApp] Template failed for ${cleanTo}: ${err?.response?.data?.message ?? err.message}`)
     throw err
   }
 }
