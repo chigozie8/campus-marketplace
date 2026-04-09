@@ -4,6 +4,7 @@ import { AuthRequest } from '../types/index.js'
 import * as orderService from '../services/orderService.js'
 import * as otpService from '../services/otpService.js'
 import * as appwriteEmail from '../services/appwriteEmailService.js'
+import * as smsService from '../services/smsService.js'
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
@@ -22,22 +23,34 @@ async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller'): 
       body: JSON.stringify({ userId, role }),
       signal: AbortSignal.timeout(4000),
     })
-    if (!res.ok) {
-      logger.warn(`[milestones] trigger failed for ${userId} (${role}): HTTP ${res.status}`)
-    }
+    if (!res.ok) logger.warn(`[milestones] trigger failed for ${userId} (${role}): HTTP ${res.status}`)
   } catch (err) {
     logger.warn(`[milestones] trigger error for ${userId}: ${err}`)
   }
 }
 
-/**
- * POST /api/delivery-otp/:orderId/request
- * Vendor marks item delivered → Appwrite sends a 6-digit OTP to the buyer's email.
- */
+/** Fetch buyer email + phone from Supabase in one go */
+async function getBuyerContact(buyerId: string): Promise<{ email: string | null; phone: string | null }> {
+  const [profileResult, authResult] = await Promise.all([
+    supabaseAdmin.from('profiles').select('email, phone_number').eq('id', buyerId).single(),
+    supabaseAdmin.auth.admin.getUserById(buyerId),
+  ])
+  const email = profileResult.data?.email ?? authResult.data?.user?.email ?? null
+  const phone = profileResult.data?.phone_number ?? null
+  return { email, phone }
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/delivery-otp/:orderId/request?channel=email|sms|both
+// Vendor marks item delivered and chooses how to notify the buyer.
+// ---------------------------------------------------------------------------
 router.post('/:orderId/request', requireRole('vendor', 'admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
     const vendorId = (req as AuthRequest).user.id
+    const channel = (['email', 'sms', 'both'].includes(req.query.channel as string)
+      ? req.query.channel as otpService.OtpChannel
+      : 'both')
 
     const order = await orderService.getOrderById(orderId)
 
@@ -54,55 +67,95 @@ router.post('/:orderId/request', requireRole('vendor', 'admin'), async (req, res
       return
     }
 
-    const { data: buyerProfile, error } = await supabaseAdmin
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', order.buyer_id)
-      .single()
+    const { email, phone } = await getBuyerContact(order.buyer_id)
 
-    const buyerEmail = buyerProfile?.email
-      ?? (await supabaseAdmin.auth.admin.getUserById(order.buyer_id))?.data?.user?.email
-
-    if (error || !buyerEmail) {
-      res.status(400).json({
-        success: false,
-        message: 'Buyer email not found. Cannot send OTP.',
-      })
+    // Validate required contacts per channel
+    if ((channel === 'email' || channel === 'both') && !email) {
+      res.status(400).json({ success: false, message: 'Buyer has no email on file. Use SMS channel instead.' })
+      return
+    }
+    if ((channel === 'sms' || channel === 'both') && !phone) {
+      res.status(400).json({ success: false, message: 'Buyer has no phone number on file. Use Email channel instead.' })
       return
     }
 
-    // Use orderId as the deterministic Appwrite userId — isolated per order
-    const appwriteUserId = orderId
+    const appwriteUserId = orderId  // deterministic, isolated per order
+    let smsSent = false
+    let emailSent = false
+    let rawOtp: string | null = null
+    let otpHash: string | null = null
 
-    const sent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, buyerEmail, orderId)
+    // --- SMS: generate local OTP, send via Termii ---
+    if (channel === 'sms' || channel === 'both') {
+      rawOtp = otpService.generateRawOtp()
+      otpHash = otpService.hashRawOtp(rawOtp)
+      smsSent = await smsService.sendOtpSms(phone!, rawOtp, orderId, 'generic')
+      if (!smsSent) {
+        if (channel === 'sms') {
+          res.status(502).json({ success: false, message: 'Failed to send SMS OTP. Please retry.' })
+          return
+        }
+        logger.warn(`[deliveryOtp] SMS failed for order ${orderId}, continuing with email-only`)
+      }
+    }
 
-    if (!sent) {
-      res.status(502).json({
-        success: false,
-        message: 'Failed to send delivery OTP email. Please retry.',
-      })
+    // --- Email: send via Appwrite ---
+    if (channel === 'email' || channel === 'both') {
+      emailSent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, email!, orderId)
+      if (!emailSent) {
+        if (channel === 'email') {
+          res.status(502).json({ success: false, message: 'Failed to send email OTP via Appwrite. Please retry.' })
+          return
+        }
+        logger.warn(`[deliveryOtp] Email failed for order ${orderId}, continuing with SMS-only`)
+      }
+    }
+
+    // At least one must have succeeded for 'both'
+    if (channel === 'both' && !smsSent && !emailSent) {
+      res.status(502).json({ success: false, message: 'Failed to send delivery OTP via both channels. Please retry.' })
       return
     }
 
-    await otpService.createAppwriteOtpRecord(orderId, appwriteUserId)
+    // Determine effective channel to store (handles partial failures in 'both' mode)
+    const effectiveChannel: otpService.OtpChannel =
+      channel === 'both'
+        ? smsSent && emailSent ? 'both' : smsSent ? 'sms' : 'email'
+        : channel
+
+    await otpService.createOtpRecord({
+      orderId,
+      channel: effectiveChannel,
+      phone: phone ?? undefined,
+      otpHash: otpHash ?? undefined,
+      appwriteUserId: (effectiveChannel === 'email' || effectiveChannel === 'both') ? appwriteUserId : undefined,
+    })
+
     await orderService.updateOrderStatus(orderId, 'delivered')
 
-    const maskedEmail = buyerEmail.replace(/(.{2})(.*)(@.*)/, '$1***$3')
-    logger.info(`[deliveryOtp] Appwrite email OTP sent to buyer ${order.buyer_id} for order ${orderId}`)
+    const maskedEmail = email ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') : null
+    const maskedPhone = phone ? `${phone.slice(0, 4)}****${phone.slice(-3)}` : null
+
+    const destinations: string[] = []
+    if ((effectiveChannel === 'email' || effectiveChannel === 'both') && maskedEmail) destinations.push(`email (${maskedEmail})`)
+    if ((effectiveChannel === 'sms' || effectiveChannel === 'both') && maskedPhone) destinations.push(`SMS (${maskedPhone})`)
+
+    logger.info(`[deliveryOtp] OTP sent to buyer ${order.buyer_id} via ${effectiveChannel} for order ${orderId}`)
 
     res.status(200).json({
       success: true,
-      message: `Delivery OTP sent to buyer's email (${maskedEmail}).`,
+      channel: effectiveChannel,
+      message: `Delivery OTP sent to buyer via ${destinations.join(' and ')}.`,
     })
   } catch (err) {
     next(err)
   }
 })
 
-/**
- * POST /api/delivery-otp/:orderId/verify
- * Buyer submits the 6-digit code from their email → Appwrite verifies → escrow released.
- */
+// ---------------------------------------------------------------------------
+// POST /api/delivery-otp/:orderId/verify
+// Buyer submits their 6-digit code. Verification method depends on channel.
+// ---------------------------------------------------------------------------
 router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
@@ -129,21 +182,16 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
       return
     }
 
-    const record = await otpService.getAppwriteOtpRecord(orderId)
+    const record = await otpService.getOtpRecord(orderId)
 
     if (!record) {
-      res.status(400).json({
-        success: false,
-        message: 'No delivery OTP found for this order. Ask the vendor to resend.',
-      })
+      res.status(400).json({ success: false, message: 'No delivery OTP found for this order. Ask the vendor to resend.' })
       return
     }
-
     if (record.used) {
       res.status(400).json({ success: false, message: 'This OTP has already been used.' })
       return
     }
-
     if (new Date() > new Date(record.expires_at)) {
       res.status(400).json({
         success: false,
@@ -153,28 +201,78 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
       return
     }
 
-    if (!record.appwrite_user_id) {
-      res.status(500).json({ success: false, message: 'OTP record corrupted. Please ask the vendor to resend.' })
-      return
-    }
+    let verified = false
 
-    const result = await appwriteEmail.verifyDeliveryOtpEmail(record.appwrite_user_id, otp.trim())
-
-    if (!result.success) {
-      const messages: Record<string, string> = {
-        invalid: 'Invalid code — please check your email and try again.',
-        used: 'This code has already been used.',
-        error: 'Verification failed. Please ask the vendor to resend the OTP.',
+    if (record.channel === 'email') {
+      // --- Email-only: verify via Appwrite ---
+      if (!record.appwrite_user_id) {
+        res.status(500).json({ success: false, message: 'OTP record corrupted. Ask the vendor to resend.' })
+        return
       }
-      res.status(400).json({
-        success: false,
-        message: messages[result.reason ?? 'error'] ?? 'OTP verification failed.',
-        reason: result.reason,
-      })
+      const result = await appwriteEmail.verifyDeliveryOtpEmail(record.appwrite_user_id, otp.trim())
+      if (!result.success) {
+        const messages: Record<string, string> = {
+          invalid: 'Invalid code. Check your email and try again.',
+          used: 'This code has already been used.',
+          error: 'Verification failed. Ask the vendor to resend.',
+        }
+        res.status(400).json({
+          success: false,
+          message: messages[result.reason ?? 'error'] ?? 'OTP verification failed.',
+          reason: result.reason,
+        })
+        return
+      }
+      verified = true
+
+    } else if (record.channel === 'sms') {
+      // --- SMS-only: verify by hash ---
+      const result = await otpService.verifyHashOtp(record, otp.trim())
+      if (!result.success) {
+        const messages: Record<string, string> = {
+          not_found: 'No OTP found. Ask the vendor to resend.',
+          expired: 'OTP has expired. Ask the vendor to generate a new one.',
+          used: 'This OTP has already been used.',
+          invalid: 'Invalid code. Check your SMS and try again.',
+          max_attempts: 'Too many failed attempts. Ask the vendor to generate a new OTP.',
+        }
+        res.status(400).json({
+          success: false,
+          message: messages[result.reason] ?? 'OTP verification failed.',
+          reason: result.reason,
+        })
+        return
+      }
+      verified = true
+
+    } else if (record.channel === 'both') {
+      // --- Both channels: accept whichever code is entered ---
+      // Try email (Appwrite) first if available
+      if (record.appwrite_user_id) {
+        const emailResult = await appwriteEmail.verifyDeliveryOtpEmail(record.appwrite_user_id, otp.trim())
+        if (emailResult.success) verified = true
+      }
+      // Try SMS hash if email didn't match (or wasn't used)
+      if (!verified && record.otp_hash) {
+        const smsResult = await otpService.verifyHashOtp(record, otp.trim())
+        if (smsResult.success) verified = true
+      }
+      if (!verified) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid code. Check your email or SMS and try again.',
+          reason: 'invalid',
+        })
+        return
+      }
+    }
+
+    if (!verified) {
+      res.status(400).json({ success: false, message: 'OTP verification failed.' })
       return
     }
 
-    await otpService.markAppwriteOtpUsed(orderId)
+    await otpService.markOtpUsed(orderId)
     const updated = await orderService.updateOrderStatus(orderId, 'completed')
 
     triggerMilestoneCheck(buyerId, 'buyer').catch(() => {})
@@ -192,10 +290,10 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
   }
 })
 
-/**
- * POST /api/delivery-otp/:orderId/resend
- * Vendor requests a new OTP email for the buyer.
- */
+// ---------------------------------------------------------------------------
+// POST /api/delivery-otp/:orderId/resend?channel=email|sms|both
+// Vendor resends OTP (optionally changing channel).
+// ---------------------------------------------------------------------------
 router.post('/:orderId/resend', requireRole('vendor', 'admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
@@ -209,33 +307,65 @@ router.post('/:orderId/resend', requireRole('vendor', 'admin'), async (req, res,
     }
 
     if (order.status !== 'delivered') {
-      res.status(400).json({
-        success: false,
-        message: `Cannot resend OTP — order status is "${order.status}".`,
-      })
+      res.status(400).json({ success: false, message: `Cannot resend OTP — order status is "${order.status}".` })
       return
     }
 
-    const buyerEmail =
-      (await supabaseAdmin.from('profiles').select('email').eq('id', order.buyer_id).single())?.data?.email
-      ?? (await supabaseAdmin.auth.admin.getUserById(order.buyer_id))?.data?.user?.email
+    // Fall back to previously used channel if none specified
+    const existingRecord = await otpService.getOtpRecord(orderId)
+    const channel = (['email', 'sms', 'both'].includes(req.query.channel as string)
+      ? req.query.channel as otpService.OtpChannel
+      : existingRecord?.channel ?? 'both')
 
-    if (!buyerEmail) {
-      res.status(400).json({ success: false, message: 'Buyer email not found.' })
+    const { email, phone } = await getBuyerContact(order.buyer_id)
+
+    if ((channel === 'email' || channel === 'both') && !email) {
+      res.status(400).json({ success: false, message: 'Buyer has no email on file.' })
+      return
+    }
+    if ((channel === 'sms' || channel === 'both') && !phone) {
+      res.status(400).json({ success: false, message: 'Buyer has no phone number on file.' })
       return
     }
 
     const appwriteUserId = orderId
-    const sent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, buyerEmail, orderId)
+    let smsSent = false
+    let emailSent = false
+    let otpHash: string | null = null
 
-    if (!sent) {
-      res.status(502).json({ success: false, message: 'Failed to resend OTP email. Please retry.' })
+    if (channel === 'sms' || channel === 'both') {
+      const rawOtp = otpService.generateRawOtp()
+      otpHash = otpService.hashRawOtp(rawOtp)
+      smsSent = await smsService.sendOtpSms(phone!, rawOtp, orderId, 'generic')
+    }
+
+    if (channel === 'email' || channel === 'both') {
+      emailSent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, email!, orderId)
+    }
+
+    if (!smsSent && !emailSent) {
+      res.status(502).json({ success: false, message: 'Failed to resend OTP. Please retry.' })
       return
     }
 
-    await otpService.createAppwriteOtpRecord(orderId, appwriteUserId)
+    const effectiveChannel: otpService.OtpChannel =
+      channel === 'both'
+        ? smsSent && emailSent ? 'both' : smsSent ? 'sms' : 'email'
+        : channel
 
-    res.status(200).json({ success: true, message: 'Delivery OTP resent to buyer\'s email.' })
+    await otpService.createOtpRecord({
+      orderId,
+      channel: effectiveChannel,
+      phone: phone ?? undefined,
+      otpHash: otpHash ?? undefined,
+      appwriteUserId: (effectiveChannel === 'email' || effectiveChannel === 'both') ? appwriteUserId : undefined,
+    })
+
+    res.status(200).json({
+      success: true,
+      channel: effectiveChannel,
+      message: `Delivery OTP resent to buyer via ${effectiveChannel}.`,
+    })
   } catch (err) {
     next(err)
   }

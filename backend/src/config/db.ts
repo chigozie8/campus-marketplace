@@ -45,6 +45,7 @@ export async function initDb(): Promise<void> {
     )
   `)
   await query(`ALTER TABLE delivery_otps ADD COLUMN IF NOT EXISTS appwrite_user_id TEXT`)
+  await query(`ALTER TABLE delivery_otps ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'email'`)
   await query(`ALTER TABLE delivery_otps ALTER COLUMN phone DROP NOT NULL`)
   await query(`ALTER TABLE delivery_otps ALTER COLUMN otp_hash DROP NOT NULL`)
   await query(`

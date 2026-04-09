@@ -152,12 +152,12 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-          Enter the delivery code sent to your email
+          Enter the delivery code sent to your email or SMS
         </p>
       </div>
 
       <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/70 leading-relaxed">
-        The vendor sent a 6-digit code to your email. Enter it below to confirm receipt and release{' '}
+        The vendor sent a 6-digit code to your <span className="font-semibold">email and/or SMS</span>. Enter it below to confirm receipt and release{' '}
         <span className="font-bold">₦{order.total_amount.toLocaleString()}</span> to the seller.
       </p>
 

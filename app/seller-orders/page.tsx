@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   Package, Truck, CheckCircle2, Clock, AlertCircle,
   ArrowLeft, Loader2, Store, ChevronRight, MessageCircle,
-  ShieldCheck, Banknote, RefreshCw,
+  ShieldCheck, Banknote, RefreshCw, Mail, Smartphone, Layers, Send,
 } from 'lucide-react'
 import { useVendorOrders } from '@/hooks/use-orders'
 import { type BackendOrder, type OrderStatus } from '@/lib/api'
@@ -48,11 +48,22 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   )
 }
 
+type OtpChannel = 'email' | 'sms' | 'both'
+
+const CHANNEL_OPTIONS: Array<{ value: OtpChannel; label: string; icon: React.ReactNode; desc: string }> = [
+  { value: 'email', label: 'Email',    icon: <Mail className="w-4 h-4" />,       desc: 'Via Appwrite' },
+  { value: 'sms',   label: 'SMS',      icon: <Smartphone className="w-4 h-4" />, desc: 'Via Termii' },
+  { value: 'both',  label: 'Both',     icon: <Layers className="w-4 h-4" />,     desc: 'Email + SMS' },
+]
+
 function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyerTrust, setBuyerTrust] = useState<BuyerTrust | null>(null)
   const [trustLoading, setTrustLoading] = useState(false)
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>('both')
+  const [sendingOtp, setSendingOtp] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
 
   useEffect(() => {
     if (!expanded || buyerTrust || !order.buyer_id) return
@@ -87,6 +98,29 @@ function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => 
       toast.error(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function sendDeliveryOtp(isResend = false) {
+    setSendingOtp(true)
+    try {
+      const token = await getToken()
+      const endpoint = isResend
+        ? `/api/backend/delivery-otp/${order.id}/resend?channel=${otpChannel}`
+        : `/api/backend/delivery-otp/${order.id}/request?channel=${otpChannel}`
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to send OTP')
+      toast.success(data.message ?? `Delivery OTP sent to buyer!`)
+      setOtpSent(true)
+      if (!isResend) onUpdate()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setSendingOtp(false)
     }
   }
 
@@ -195,27 +229,86 @@ function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => 
               )}
 
               {order.status === 'shipped' && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 p-3">
-                    <p className="text-xs text-violet-800 dark:text-violet-300 font-semibold">Once the item reaches the buyer, mark it as delivered. The buyer will then confirm receipt to release your payment.</p>
+                    <p className="text-xs text-violet-800 dark:text-violet-300 font-semibold">
+                      Item delivered to buyer? Choose how to send them the delivery confirmation code.
+                    </p>
                   </div>
+
+                  {/* Channel picker */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {CHANNEL_OPTIONS.map(ch => (
+                      <button
+                        key={ch.value}
+                        onClick={() => setOtpChannel(ch.value)}
+                        className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                          otpChannel === ch.value
+                            ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300'
+                            : 'border-border bg-muted/40 text-muted-foreground hover:border-border/80'
+                        }`}
+                      >
+                        {ch.icon}
+                        <span>{ch.label}</span>
+                        <span className={`text-[10px] font-normal ${otpChannel === ch.value ? 'text-teal-600/80 dark:text-teal-400/80' : 'text-muted-foreground/60'}`}>
+                          {ch.desc}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
                   <button
-                    onClick={() => markStatus('delivered')}
-                    disabled={loading}
-                    className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold transition-all disabled:opacity-60"
+                    onClick={() => sendDeliveryOtp(false)}
+                    disabled={sendingOtp}
+                    className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold transition-all disabled:opacity-60 shadow-md shadow-teal-500/20"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                    Mark as Delivered
+                    {sendingOtp
+                      ? <><Loader2 className="w-4 h-4 animate-spin" />Sending…</>
+                      : <><Send className="w-4 h-4" />Mark Delivered & Send OTP</>
+                    }
                   </button>
                 </div>
               )}
 
               {order.status === 'delivered' && (
-                <div className="rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800 p-3 flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-teal-800 dark:text-teal-300 leading-relaxed">
-                    Waiting for buyer confirmation. Funds auto-release in 48 hours if buyer doesn't confirm.
-                  </p>
+                <div className="space-y-2.5">
+                  <div className="rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800 p-3 flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-teal-800 dark:text-teal-300 leading-relaxed">
+                      Waiting for buyer to enter their delivery code. Funds auto-release in 48 hours if buyer doesn&apos;t confirm.
+                    </p>
+                  </div>
+
+                  {/* Resend section */}
+                  <div className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-2.5">
+                    <p className="text-[11px] font-semibold text-muted-foreground">Buyer didn&apos;t receive the code?</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {CHANNEL_OPTIONS.map(ch => (
+                        <button
+                          key={ch.value}
+                          onClick={() => setOtpChannel(ch.value)}
+                          className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
+                            otpChannel === ch.value
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/50'
+                          }`}
+                        >
+                          {ch.icon}
+                          {ch.label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => sendDeliveryOtp(true)}
+                      disabled={sendingOtp}
+                      className="flex items-center justify-center gap-1.5 w-full h-8 rounded-xl border-2 border-primary/30 text-primary text-xs font-bold hover:bg-primary/10 transition-colors disabled:opacity-60"
+                    >
+                      {sendingOtp
+                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Resending…</>
+                        : <><Send className="w-3.5 h-3.5" />Resend OTP</>
+                      }
+                    </button>
+                  </div>
                 </div>
               )}
 
