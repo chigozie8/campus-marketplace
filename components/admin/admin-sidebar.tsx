@@ -62,6 +62,7 @@ const NAV_ITEMS = [
   { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
   { label: 'Contact Us',      href: '/admin/contact',           icon: Phone },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
+  { label: 'Integrations',    href: '/admin/integrations',      icon: MessageCircle },
   { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]
 
