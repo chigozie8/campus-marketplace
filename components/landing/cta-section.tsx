@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Users, Building2, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,22 +18,48 @@ const PERKS = [
 ]
 
 const STATS = [
-  { value: '50,000', suffix: '+', label: 'Active Vendors', icon: Users },
-  { value: '120',    suffix: '+', label: 'Campuses',       icon: Building2 },
-  { value: '2',  prefix: '₦', suffix: 'B+', label: 'Sales Made', icon: TrendingUp },
-  { value: '4.9',    suffix: '/5', label: 'Avg Rating',    icon: Star },
+  { end: 50000, fmt: (n: number) => n >= 1000 ? `${Math.floor(n / 1000)}K+` : `${n}+`, label: 'Active Vendors', icon: Users },
+  { end: 120,   fmt: (n: number) => `${n}+`,   label: 'Campuses',       icon: Building2 },
+  { end: 2,     fmt: (n: number) => `₦${n}B+`, label: 'Sales Made',     icon: TrendingUp },
+  { end: 4.9,   fmt: (n: number) => `${n.toFixed(1)}/5`, label: 'Avg Rating', icon: Star, decimal: true },
 ]
 
+function useCountUp(end: number, duration = 1800, decimal = false) {
+  const [val, setVal] = useState(0)
+  const done = useRef(false)
+  const raf  = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (done.current) return
+    done.current = true
+    const start = Date.now()
+
+    const tick = () => {
+      const p = Math.min((Date.now() - start) / duration, 1)
+      const e = 1 - Math.pow(1 - p, 4)
+      setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
+      if (p < 1) raf.current = requestAnimationFrame(tick)
+      else        setVal(end)
+    }
+
+    raf.current = requestAnimationFrame(tick)
+    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+  }, [end, duration, decimal])
+
+  return val
+}
+
 function StatCard({
-  prefix = '', value, suffix = '', label, icon: Icon,
-}: { prefix?: string; value: string; suffix?: string; label: string; icon: React.ElementType }) {
+  end, fmt, label, icon: Icon, decimal = false,
+}: { end: number; fmt: (n: number) => string; label: string; icon: React.ElementType; decimal?: boolean }) {
+  const count = useCountUp(end, 1800, decimal)
   return (
     <div className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
       <div className="w-10 h-10 rounded-xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         <Icon className="w-5 h-5 text-[#16a34a]" />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
-        {prefix}{value}{suffix}
+        {fmt(count)}
       </p>
       <p className="text-xs text-white/50 font-medium text-center leading-tight">{label}</p>
     </div>
@@ -96,7 +123,7 @@ export function CtaSection({ user }: CtaSectionProps) {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mb-12">
           {STATS.map((stat) => (
-            <StatCard key={stat.label} value={stat.value} prefix={stat.prefix} suffix={stat.suffix} label={stat.label} icon={stat.icon} />
+            <StatCard key={stat.label} end={stat.end} fmt={stat.fmt} label={stat.label} icon={stat.icon} decimal={stat.decimal} />
           ))}
         </div>
 
