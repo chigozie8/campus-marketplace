@@ -4,6 +4,7 @@ import {
   ArrowLeft, MapPin, BadgeCheck, Star,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Product } from '@/lib/types'
 import { TrustBadge, SellerTierBadge } from '@/components/TrustBadge'
 import { computeSellerScore } from '@/lib/trust'
@@ -89,10 +90,17 @@ export default async function ProductDetailPage({ params }: Props) {
   const userId = sessionResult.data.user?.id ?? null
   const initialReviews = (reviewsData ?? []) as import('@/lib/types').Review[]
 
+  // Use service-role client for disputes to bypass RLS on public page — avoids inflated trust scores
+  const adminDb = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
+
   // Get likes count, current user's favorite status, and seller disputes — all post-product fetch
   const [{ count: likesCount }, { data: sellerDisputesData }] = await Promise.all([
     supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('product_id', id),
-    supabase.from('order_disputes').select('id, status').eq('seller_id', p.seller_id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
+    adminDb.from('order_disputes').select('id, status').eq('seller_id', p.seller_id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
   ])
 
   let initialLiked = false

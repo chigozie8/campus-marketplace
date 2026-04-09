@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { SellerTierBadge, TrustBadge } from '@/components/TrustBadge'
@@ -35,11 +36,18 @@ export default async function SellerProfilePage({ params }: Props) {
   const supabase = await createClient()
   if (!supabase) notFound()
 
+  // Use service-role client for disputes to bypass RLS on public page — avoids inflated trust scores
+  const adminDb = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
+
   const [{ data: profile }, { data: products }, { data: reviews }, { data: sellerDisputes }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', id).single(),
     supabase.from('products').select('*, categories(*)').eq('seller_id', id).eq('is_available', true).order('created_at', { ascending: false }),
     supabase.from('reviews').select('id, rating, comment, created_at, profiles!reviewer_id(full_name, avatar_url)').eq('seller_id', id).order('created_at', { ascending: false }),
-    supabase.from('order_disputes').select('id, status').eq('seller_id', id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
+    adminDb.from('order_disputes').select('id, status').eq('seller_id', id).then(r => r, () => ({ data: [] as Array<{ id: string; status: string }> | null })),
   ])
 
   if (!profile) notFound()
