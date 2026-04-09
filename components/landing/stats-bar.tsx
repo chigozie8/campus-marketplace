@@ -19,67 +19,70 @@ const DEFAULT_STATS: StatItem[] = [
 ]
 
 function parseNumber(str: string) {
-  const cleaned = str.replace(/[₦,\s]/g, '')
-  const m = cleaned.match(/^(\d+\.?\d*)/)
+  const m = str.replace(/[₦,\s]/g, '').match(/^(\d+\.?\d*)/)
   return m ? parseFloat(m[1]) : 0
 }
-
-function isDecimalStr(str: string) {
+function isDecimal(str: string) {
   return /^\d+\.\d+/.test(str.replace(/[₦,\s]/g, ''))
 }
 
-function useCountUp(end: number, duration = 1600, decimal = false) {
-  const [val, setVal] = useState(0)
-  const elRef  = useRef<HTMLDivElement>(null)
-  const done   = useRef(false)
-  const raf    = useRef<number | null>(null)
+function StatCard({
+  stat, Icon, delay, triggered,
+}: {
+  stat: StatItem
+  Icon: typeof Users
+  delay: number
+  triggered: boolean
+}) {
+  const end       = parseNumber(stat.value)
+  const decimal   = isDecimal(stat.value)
+  const suffix    = stat.value.replace(/[₦]?\d[\d,.]*/, '')
+  const prefix    = stat.value.startsWith('₦') ? '₦' : ''
+
+  const [val, setVal]         = useState(0)
+  const [visible, setVisible] = useState(false)
+  const done = useRef(false)
+  const raf  = useRef<number | null>(null)
 
   useEffect(() => {
-    if (end === 0) return
-    const el = elRef.current
-    if (!el) return
+    if (!triggered || done.current) return
+    done.current = true
 
-    const start = () => {
-      if (done.current) return
-      done.current = true
-      const t0 = Date.now()
+    const timer = setTimeout(() => {
+      setVisible(true)
+      if (end === 0) return
+
+      const t0       = Date.now()
+      const DURATION = 1500
       const tick = () => {
-        const p = Math.min((Date.now() - t0) / duration, 1)
-        const e = 1 - Math.pow(1 - p, 3)
+        const p = Math.min((Date.now() - t0) / DURATION, 1)
+        const e = 1 - Math.pow(1 - p, 3)   // ease-out cubic
         setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
         if (p < 1) raf.current = requestAnimationFrame(tick)
         else        setVal(end)
       }
       raf.current = requestAnimationFrame(tick)
-    }
+    }, delay)
 
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) start() },
-      { threshold: 0.2, rootMargin: '0px 0px 80px 0px' },
-    )
-    observer.observe(el)
     return () => {
-      observer.disconnect()
+      clearTimeout(timer)
       if (raf.current) cancelAnimationFrame(raf.current)
     }
-  }, [end, duration, decimal])
+  }, [triggered]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { val, elRef }
-}
-
-function StatCard({ stat, Icon }: { stat: StatItem; Icon: typeof Users }) {
-  const num     = parseNumber(stat.value)
-  const decimal = isDecimalStr(stat.value)
-  const { val, elRef } = useCountUp(num, 1600, decimal)
-
-  const suffix  = stat.value.replace(/[₦]?\d[\d,.]*/, '')
-  const prefix  = stat.value.startsWith('₦') ? '₦' : ''
-  const display = val === num
+  const display = visible && val === end
     ? stat.value
     : `${prefix}${decimal ? val.toFixed(1) : val.toLocaleString()}${suffix}`
 
   return (
-    <div ref={elRef} className="flex flex-col items-center justify-center gap-1 py-7 px-4 group">
+    <div
+      className="flex flex-col items-center justify-center gap-1 py-7 px-4 group"
+      style={{
+        opacity:    visible ? 1 : 0,
+        transform:  visible ? 'translateY(0px)' : 'translateY(18px)',
+        transition: 'opacity 0.55s ease, transform 0.55s ease',
+      }}
+    >
       <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-2 transition-transform duration-300 group-hover:scale-110">
         <Icon className="w-4.5 h-4.5 text-primary" />
       </div>
@@ -95,13 +98,33 @@ function StatCard({ stat, Icon }: { stat: StatItem; Icon: typeof Users }) {
 interface Props { stats?: StatItem[] }
 
 export function StatsBar({ stats }: Props) {
-  const items = stats ?? DEFAULT_STATS
+  const items      = stats ?? DEFAULT_STATS
+  const sectionRef = useRef<HTMLElement>(null)
+  const [triggered, setTriggered] = useState(false)
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setTriggered(true) },
+      { threshold: 0.15, rootMargin: '0px 0px 80px 0px' },
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
   return (
-    <section className="border-y border-border bg-muted/30 dark:bg-muted/10">
+    <section ref={sectionRef} className="border-y border-border bg-muted/30 dark:bg-muted/10">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
           {items.map((stat, i) => (
-            <StatCard key={stat.label} stat={stat} Icon={ICONS[i]} />
+            <StatCard
+              key={stat.label}
+              stat={stat}
+              Icon={ICONS[i]}
+              delay={i * 150}
+              triggered={triggered}
+            />
           ))}
         </div>
       </div>
