@@ -8,6 +8,7 @@ import {
   Shield, ClipboardList, AlertTriangle,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface User {
   id: string
@@ -162,6 +163,7 @@ export function AdminUsersTable({ users }: Props) {
 
   const [banningId, setBanningId] = useState<string | null>(null)
   const [bannedIds, setBannedIds] = useState<Set<string>>(new Set())
+  const [confirmDialog, confirm] = useConfirm()
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<SectionKey>('profile')
@@ -195,7 +197,14 @@ export function AdminUsersTable({ users }: Props) {
   }
 
   async function deleteUser(user_id: string) {
-    if (!confirm('Permanently delete this user and all their data? This cannot be undone.')) return
+    const ok = await confirm({
+      title: 'Delete user?',
+      message: 'This user and all their data will be permanently deleted. This cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Keep account',
+      variant: 'danger',
+    })
+    if (!ok) return
     setLoadingId(user_id)
     await fetch('/api/admin/users', {
       method: 'DELETE',
@@ -209,7 +218,16 @@ export function AdminUsersTable({ users }: Props) {
   async function toggleBan(user: User) {
     const isBanned = bannedIds.has(user.id)
     const action = isBanned ? 'unban' : 'ban'
-    if (!confirm(`Are you sure you want to ${action} ${user.full_name ?? 'this user'}?`)) return
+    const ok = await confirm({
+      title: `${isBanned ? 'Unban' : 'Ban'} ${user.full_name ?? 'this user'}?`,
+      message: isBanned
+        ? 'This user will regain full access to the platform.'
+        : 'This user will be blocked from accessing the platform.',
+      confirmText: isBanned ? 'Unban' : 'Ban user',
+      cancelText: 'Cancel',
+      variant: isBanned ? 'default' : 'danger',
+    })
+    if (!ok) return
     setBanningId(user.id)
     const res = await fetch(`/api/admin/users/${user.id}/ban`, {
       method: 'POST',
@@ -329,6 +347,7 @@ export function AdminUsersTable({ users }: Props) {
 
   return (
     <>
+      {confirmDialog}
       <div className="flex gap-4">
         <div className={`bg-card border border-border rounded-2xl overflow-hidden flex-1 min-w-0 transition-all ${detailUser ? 'lg:max-w-[calc(100%-380px)]' : ''}`}>
           {/* Toolbar */}

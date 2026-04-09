@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Plus, Pencil, Trash2, Loader2, Check, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface Category {
   id: string
@@ -25,6 +26,7 @@ export function AdminCategoriesManager({ categories }: Props) {
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY)
+  const [confirmDialog, confirm] = useConfirm()
 
   function startAdd() {
     setAdding(true)
@@ -71,7 +73,14 @@ export function AdminCategoriesManager({ categories }: Props) {
   }
 
   async function deleteCategory(category_id: string, name: string) {
-    if (!confirm(`Delete category "${name}"? Listings in this category will become uncategorized.`)) return
+    const ok = await confirm({
+      title: `Delete "${name}"?`,
+      message: 'Listings in this category will become uncategorized.',
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setLoadingId(category_id)
     await fetch('/api/admin/categories', {
       method: 'DELETE',
@@ -145,82 +154,85 @@ export function AdminCategoriesManager({ categories }: Props) {
   )
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-4 border-b border-border">
-        <p className="text-sm text-muted-foreground">{categories.length} categories</p>
-        <button
-          onClick={startAdd}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Add Category
-        </button>
-      </div>
+    <>
+      {confirmDialog}
+      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+          <p className="text-sm text-muted-foreground">{categories.length} categories</p>
+          <button
+            onClick={startAdd}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Category
+          </button>
+        </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider w-16">Icon</th>
-              <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Name</th>
-              <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Slug</th>
-              <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Description</th>
-              <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {adding && (
-              <FormRow onSave={saveAdd} saveId="new" />
-            )}
-            {categories.length === 0 && !adding ? (
-              <tr>
-                <td colSpan={5} className="text-center py-12 text-sm text-muted-foreground">
-                  No categories yet. Add one above.
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider w-16">Icon</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Name</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Slug</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Description</th>
+                <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
-            ) : categories.map(c => (
-              editingId === c.id ? (
-                <FormRow key={c.id} onSave={() => saveEdit(c.id)} saveId={c.id} />
-              ) : (
-                <tr key={c.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-xl text-center">{c.icon ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-foreground">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(c.products?.[0] as any)?.count ?? 0} listings
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono text-muted-foreground">{c.slug}</code>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <span className="text-xs text-muted-foreground">{c.description ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => startEdit(c)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-                        title="Edit"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => deleteCategory(c.id, c.name)}
-                        disabled={loadingId === c.id}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all disabled:opacity-40"
-                        title="Delete"
-                      >
-                        {loadingId === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {adding && (
+                <FormRow onSave={saveAdd} saveId="new" />
+              )}
+              {categories.length === 0 && !adding ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-12 text-sm text-muted-foreground">
+                    No categories yet. Add one above.
                   </td>
                 </tr>
-              )
-            ))}
-          </tbody>
-        </table>
+              ) : categories.map(c => (
+                editingId === c.id ? (
+                  <FormRow key={c.id} onSave={() => saveEdit(c.id)} saveId={c.id} />
+                ) : (
+                  <tr key={c.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 text-xl text-center">{c.icon ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-foreground">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(c.products?.[0] as any)?.count ?? 0} listings
+                      </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <code className="text-xs bg-muted px-2 py-0.5 rounded font-mono text-muted-foreground">{c.slug}</code>
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      <span className="text-xs text-muted-foreground">{c.description ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => startEdit(c)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                          title="Edit"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => deleteCategory(c.id, c.name)}
+                          disabled={loadingId === c.id}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all disabled:opacity-40"
+                          title="Delete"
+                        >
+                          {loadingId === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

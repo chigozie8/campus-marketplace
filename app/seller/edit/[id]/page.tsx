@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { uploadToCloudinary } from '@/lib/cloudinary'
 import type { Category } from '@/lib/types'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 const CONDITIONS = [
   { value: 'new', label: 'Brand New', color: 'bg-green-50 border-green-200 text-green-700' },
@@ -27,6 +28,7 @@ export default function EditListingPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [confirmDialog, confirm] = useConfirm()
   const [categories, setCategories] = useState<Category[]>([])
   const [images, setImages] = useState<string[]>([])
   const [uploadingImages, setUploadingImages] = useState(false)
@@ -134,7 +136,14 @@ export default function EditListingPage() {
   }
 
   async function handleDelete() {
-    if (!confirm('Are you sure you want to delete this listing? This cannot be undone.')) return
+    const ok = await confirm({
+      title: 'Delete listing?',
+      message: 'This listing will be permanently deleted and cannot be recovered.',
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeleting(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -158,6 +167,8 @@ export default function EditListingPage() {
   ].filter(Boolean).length
 
   return (
+    <>
+    {confirmDialog}
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
       <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
@@ -385,5 +396,6 @@ export default function EditListingPage() {
         </form>
       </main>
     </div>
+    </>
   )
 }

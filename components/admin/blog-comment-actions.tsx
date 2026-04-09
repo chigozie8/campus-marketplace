@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, XCircle, Trash2, Loader2 } from 'lucide-react'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 export function BlogCommentActions({ commentId, isApproved }: { commentId: string; isApproved: boolean }) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const [confirmDialog, confirm] = useConfirm()
 
   async function toggle() {
     setLoading(true)
@@ -21,7 +23,14 @@ export function BlogCommentActions({ commentId, isApproved }: { commentId: strin
   }
 
   async function remove() {
-    if (!confirm('Delete this comment?')) return
+    const ok = await confirm({
+      title: 'Delete comment?',
+      message: 'This comment will be permanently removed.',
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setLoading(true)
     try {
       await fetch('/api/admin/blog/comments', {
@@ -34,29 +43,32 @@ export function BlogCommentActions({ commentId, isApproved }: { commentId: strin
   }
 
   return (
-    <div className="flex items-center gap-1.5 shrink-0">
-      <button
-        onClick={toggle}
-        disabled={loading}
-        title={isApproved ? 'Unapprove' : 'Approve'}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60 ${
-          isApproved
-            ? 'bg-muted hover:bg-muted/80 text-muted-foreground'
-            : 'bg-primary/10 hover:bg-primary/20 text-primary'
-        }`}
-      >
-        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
-          isApproved ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-        {isApproved ? 'Unapprove' : 'Approve'}
-      </button>
-      <button
-        onClick={remove}
-        disabled={loading}
-        title="Delete comment"
-        className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-60"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-    </div>
+    <>
+      {confirmDialog}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={toggle}
+          disabled={loading}
+          title={isApproved ? 'Unapprove' : 'Approve'}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60 ${
+            isApproved
+              ? 'bg-muted hover:bg-muted/80 text-muted-foreground'
+              : 'bg-primary/10 hover:bg-primary/20 text-primary'
+          }`}
+        >
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
+            isApproved ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+          {isApproved ? 'Unapprove' : 'Approve'}
+        </button>
+        <button
+          onClick={remove}
+          disabled={loading}
+          title="Delete comment"
+          className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-60"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </>
   )
 }

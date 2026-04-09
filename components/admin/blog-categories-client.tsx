@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Loader2, Tag } from 'lucide-react'
 import { toast } from 'sonner'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface Category {
   id: string
@@ -42,6 +43,7 @@ export function BlogCategoriesClient({ initialCategories }: { initialCategories:
   const [saving, setSaving]   = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
+  const [confirmDialog, confirm] = useConfirm()
 
   function handleNameChange(v: string) {
     setName(v)
@@ -77,7 +79,14 @@ export function BlogCategoriesClient({ initialCategories }: { initialCategories:
   }
 
   async function handleDelete(cat: Category) {
-    if (!confirm(`Delete category "${cat.name}"? Blog posts in this category will lose their category assignment.`)) return
+    const ok = await confirm({
+      title: `Delete "${cat.name}"?`,
+      message: 'Blog posts in this category will lose their category assignment.',
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeletingId(cat.id)
     try {
       const res = await fetch('/api/admin/blog/categories', {
@@ -101,104 +110,107 @@ export function BlogCategoriesClient({ initialCategories }: { initialCategories:
   }
 
   return (
-    <div className="space-y-6">
-      {/* Add form */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-sm font-black text-foreground uppercase tracking-wide mb-4">Add new category</h2>
-        <form onSubmit={handleAdd} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-muted-foreground block mb-1.5">Name *</label>
-              <input
-                value={name}
-                onChange={e => handleNameChange(e.target.value)}
-                placeholder="e.g. Seller Tips"
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-muted-foreground block mb-1.5">Slug (auto-generated)</label>
-              <input
-                value={slug}
-                onChange={e => setSlug(e.target.value)}
-                placeholder="seller-tips"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-mono"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-muted-foreground block mb-2">Color</label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {COLOR_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setColor(opt.value)}
-                  title={opt.label}
-                  className={`w-7 h-7 rounded-full transition-all ${
-                    color === opt.value ? 'ring-2 ring-offset-2 ring-foreground scale-110' : 'hover:scale-110'
-                  }`}
-                  style={{ backgroundColor: opt.value }}
+    <>
+      {confirmDialog}
+      <div className="space-y-6">
+        {/* Add form */}
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <h2 className="text-sm font-black text-foreground uppercase tracking-wide mb-4">Add new category</h2>
+          <form onSubmit={handleAdd} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1.5">Name *</label>
+                <input
+                  value={name}
+                  onChange={e => handleNameChange(e.target.value)}
+                  placeholder="e.g. Seller Tips"
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                 />
-              ))}
+              </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1.5">Slug (auto-generated)</label>
+                <input
+                  value={slug}
+                  onChange={e => setSlug(e.target.value)}
+                  placeholder="seller-tips"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-mono"
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={saving || !name.trim()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-primary/20"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            {saving ? 'Creating…' : 'Create Category'}
-          </button>
-        </form>
-      </div>
+            <div>
+              <label className="text-xs font-bold text-muted-foreground block mb-2">Color</label>
+              <div className="flex items-center gap-2 flex-wrap">
+                {COLOR_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setColor(opt.value)}
+                    title={opt.label}
+                    className={`w-7 h-7 rounded-full transition-all ${
+                      color === opt.value ? 'ring-2 ring-offset-2 ring-foreground scale-110' : 'hover:scale-110'
+                    }`}
+                    style={{ backgroundColor: opt.value }}
+                  />
+                ))}
+              </div>
+            </div>
 
-      {/* Category list */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border bg-muted/30">
-          <h2 className="text-sm font-black text-foreground uppercase tracking-wide">
-            All categories ({categories.length})
-          </h2>
+            <button
+              type="submit"
+              disabled={saving || !name.trim()}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-primary/20"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              {saving ? 'Creating…' : 'Create Category'}
+            </button>
+          </form>
         </div>
 
-        {categories.length === 0 ? (
-          <div className="py-14 text-center">
-            <Tag className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-foreground">No categories yet</p>
-            <p className="text-xs text-muted-foreground mt-1">Add your first category using the form above.</p>
+        {/* Category list */}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-border bg-muted/30">
+            <h2 className="text-sm font-black text-foreground uppercase tracking-wide">
+              All categories ({categories.length})
+            </h2>
           </div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {categories.map(cat => (
-              <li key={cat.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-muted/20 transition-colors">
-                <div
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: cat.color ?? '#6b7280' }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground">{cat.name}</p>
-                  <p className="text-xs text-muted-foreground font-mono">{cat.slug}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(cat)}
-                  disabled={deletingId === cat.id}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
-                  title="Delete category"
-                >
-                  {deletingId === cat.id
-                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : <Trash2 className="w-3.5 h-3.5" />
-                  }
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+
+          {categories.length === 0 ? (
+            <div className="py-14 text-center">
+              <Tag className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm font-semibold text-foreground">No categories yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Add your first category using the form above.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {categories.map(cat => (
+                <li key={cat.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-muted/20 transition-colors">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: cat.color ?? '#6b7280' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground">{cat.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{cat.slug}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(cat)}
+                    disabled={deletingId === cat.id}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                    title="Delete category"
+                  >
+                    {deletingId === cat.id
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Trash2 className="w-3.5 h-3.5" />
+                    }
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

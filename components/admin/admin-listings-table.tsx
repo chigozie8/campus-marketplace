@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface Product {
   id: string
@@ -33,6 +34,7 @@ export function AdminListingsTable({ products }: Props) {
   const [, startTransition] = useTransition()
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'active' | 'sold' | 'featured'>('all')
+  const [confirmDialog, confirm] = useConfirm()
 
   const filtered = products.filter(p => {
     const q = search.toLowerCase()
@@ -63,7 +65,14 @@ export function AdminListingsTable({ products }: Props) {
   }
 
   async function deleteProduct(product_id: string, title: string) {
-    if (!confirm(`Permanently delete "${title}"? This cannot be undone.`)) return
+    const ok = await confirm({
+      title: `Delete "${title}"?`,
+      message: 'This listing will be permanently removed and cannot be recovered.',
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setLoadingId(product_id)
     await fetch('/api/admin/listings', {
       method: 'DELETE',
@@ -117,6 +126,8 @@ export function AdminListingsTable({ products }: Props) {
   }
 
   return (
+    <>
+    {confirmDialog}
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 p-4 border-b border-border">
@@ -280,5 +291,6 @@ export function AdminListingsTable({ products }: Props) {
         </p>
       </div>
     </div>
+    </>
   )
 }

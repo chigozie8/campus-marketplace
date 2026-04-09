@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, MapPin, Briefcase, X, GripVertical } from 'lucide-react'
+import { useConfirm } from '@/components/ui/confirm-dialog'
 
 export type JobListing = {
   id: string
@@ -44,6 +45,7 @@ export function JobListingsManager({ initialJobs }: Props) {
   const [editing, setEditing] = useState<(Omit<JobListing, 'id' | 'created_at'> & { id?: string }) | null>(null)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmDialog, confirm] = useConfirm()
 
   function openNew() {
     setEditing({ ...BLANK })
@@ -88,8 +90,15 @@ export function JobListingsManager({ initialJobs }: Props) {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Delete this job listing? This cannot be undone.')) return
+  async function handleDelete(id: string, title: string) {
+    const ok = await confirm({
+      title: 'Delete job listing?',
+      message: `"${title}" will be permanently removed and cannot be recovered.`,
+      confirmText: 'Delete',
+      cancelText: 'Keep it',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeleting(id)
     try {
       const res = await fetch(`/api/admin/jobs/${id}`, { method: 'DELETE' })
@@ -107,6 +116,8 @@ export function JobListingsManager({ initialJobs }: Props) {
 
   return (
     <>
+      {confirmDialog}
+
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{jobs.length} listing{jobs.length !== 1 ? 's' : ''}</p>
@@ -162,7 +173,7 @@ export function JobListingsManager({ initialJobs }: Props) {
                 <Pencil className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => handleDelete(job.id)}
+                onClick={() => handleDelete(job.id, job.title)}
                 disabled={deleting === job.id}
                 className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-muted-foreground hover:text-red-500 disabled:opacity-40"
                 title="Delete"
@@ -174,7 +185,7 @@ export function JobListingsManager({ initialJobs }: Props) {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* Edit / New Modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
