@@ -54,10 +54,10 @@ export async function POST(req: Request) {
     try {
       await supabase.from('notifications').insert({
         user_id: product.seller_id,
-        title: 'New Offer Received 💰',
+        title: 'New Offer Received',
         body: notifBody,
         type: 'offer',
-        data: { productId, offerPrice, buyerId: user.id },
+        data: { url: '/dashboard', productId, offerPrice, buyerId: user.id },
       })
     } catch { /* non-critical */ }
 

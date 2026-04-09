@@ -6,6 +6,9 @@ import Link from 'next/link'
 import {
   Bell, BadgeCheck, XCircle, ShoppingBag, MessageCircle,
   Tag, Star, Loader2, CheckCheck, X, ArrowRight, Info,
+  Package, Truck, CheckCircle2, RefreshCcw, Shield,
+  AlertTriangle, Wallet, Crown, MapPin, Zap, Flag,
+  Award, ThumbsUp, Gift,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useNotificationSound } from '@/hooks/use-notification-sound'
@@ -17,13 +20,49 @@ interface Notification {
 }
 
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; dot: string }> = {
-  verification_approved: { icon: BadgeCheck,   color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-950/50', dot: 'bg-emerald-500' },
-  verification_rejected: { icon: XCircle,       color: 'text-red-500 dark:text-red-400',         bg: 'bg-red-100 dark:bg-red-950/50',         dot: 'bg-red-500' },
-  new_order:             { icon: ShoppingBag,   color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
-  new_message:           { icon: MessageCircle, color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
-  new_listing:           { icon: Tag,           color: 'text-sky-600 dark:text-sky-400',          bg: 'bg-sky-100 dark:bg-sky-950/50',          dot: 'bg-sky-500' },
-  review:                { icon: Star,          color: 'text-amber-500 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
-  info:                  { icon: Info,          color: 'text-gray-500 dark:text-gray-400',        bg: 'bg-gray-100 dark:bg-muted',              dot: 'bg-gray-400' },
+  /* ── Verification ── */
+  verification_approved:  { icon: BadgeCheck,    color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-950/50', dot: 'bg-emerald-500' },
+  verification_rejected:  { icon: XCircle,        color: 'text-red-500 dark:text-red-400',         bg: 'bg-red-100 dark:bg-red-950/50',         dot: 'bg-red-500' },
+  /* ── Orders ── */
+  new_order:              { icon: ShoppingBag,    color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
+  order_paid:             { icon: CheckCircle2,   color: 'text-emerald-600 dark:text-emerald-400',  bg: 'bg-emerald-100 dark:bg-emerald-950/50',  dot: 'bg-emerald-500' },
+  order_shipped:          { icon: Truck,          color: 'text-sky-600 dark:text-sky-400',          bg: 'bg-sky-100 dark:bg-sky-950/50',          dot: 'bg-sky-500' },
+  order_delivered:        { icon: Package,        color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
+  order_completed:        { icon: CheckCircle2,   color: 'text-emerald-600 dark:text-emerald-400',  bg: 'bg-emerald-100 dark:bg-emerald-950/50',  dot: 'bg-emerald-500' },
+  order_cancelled:        { icon: XCircle,        color: 'text-red-500 dark:text-red-400',          bg: 'bg-red-100 dark:bg-red-950/50',          dot: 'bg-red-500' },
+  /* ── Messages ── */
+  new_message:            { icon: MessageCircle,  color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
+  new_chat_message:       { icon: MessageCircle,  color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
+  /* ── Disputes ── */
+  dispute_opened:         { icon: AlertTriangle,  color: 'text-amber-600 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  dispute_resolved:       { icon: Shield,         color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
+  /* ── Financial ── */
+  refund_processed:       { icon: RefreshCcw,     color: 'text-teal-600 dark:text-teal-400',        bg: 'bg-teal-100 dark:bg-teal-950/50',        dot: 'bg-teal-500' },
+  wallet_credit:          { icon: Wallet,         color: 'text-emerald-600 dark:text-emerald-400',  bg: 'bg-emerald-100 dark:bg-emerald-950/50',  dot: 'bg-emerald-500' },
+  wallet_debit:           { icon: Wallet,         color: 'text-orange-600 dark:text-orange-400',    bg: 'bg-orange-100 dark:bg-orange-950/50',    dot: 'bg-orange-500' },
+  /* ── Trust & Badges ── */
+  system:                 { icon: Flag,           color: 'text-red-500 dark:text-red-400',          bg: 'bg-red-100 dark:bg-red-950/50',          dot: 'bg-red-500' },
+  badge_assigned:         { icon: Award,          color: 'text-amber-600 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  /* ── Offers ── */
+  offer:                  { icon: ThumbsUp,       color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
+  new_offer:              { icon: ThumbsUp,       color: 'text-blue-600 dark:text-blue-400',        bg: 'bg-blue-100 dark:bg-blue-950/50',        dot: 'bg-blue-500' },
+  offer_accepted:         { icon: CheckCircle2,   color: 'text-emerald-600 dark:text-emerald-400',  bg: 'bg-emerald-100 dark:bg-emerald-950/50',  dot: 'bg-emerald-500' },
+  offer_declined:         { icon: XCircle,        color: 'text-red-500 dark:text-red-400',          bg: 'bg-red-100 dark:bg-red-950/50',          dot: 'bg-red-500' },
+  /* ── Listings & Promotions ── */
+  new_listing:            { icon: Tag,            color: 'text-sky-600 dark:text-sky-400',          bg: 'bg-sky-100 dark:bg-sky-950/50',          dot: 'bg-sky-500' },
+  flash_sale:             { icon: Zap,            color: 'text-amber-600 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  /* ── Loyalty & Rewards ── */
+  loyalty:                { icon: Gift,           color: 'text-purple-600 dark:text-purple-400',    bg: 'bg-purple-100 dark:bg-purple-950/50',    dot: 'bg-purple-500' },
+  loyalty_points:         { icon: Gift,           color: 'text-purple-600 dark:text-purple-400',    bg: 'bg-purple-100 dark:bg-purple-950/50',    dot: 'bg-purple-500' },
+  /* ── Reviews ── */
+  review:                 { icon: Star,           color: 'text-amber-500 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  /* ── Delivery ── */
+  delivery_otp_sent:      { icon: Package,        color: 'text-violet-600 dark:text-violet-400',    bg: 'bg-violet-100 dark:bg-violet-950/50',    dot: 'bg-violet-500' },
+  location_update:        { icon: MapPin,         color: 'text-sky-600 dark:text-sky-400',          bg: 'bg-sky-100 dark:bg-sky-950/50',          dot: 'bg-sky-500' },
+  /* ── VIP & Admin ── */
+  vip:                    { icon: Crown,          color: 'text-amber-600 dark:text-amber-400',      bg: 'bg-amber-100 dark:bg-amber-950/50',      dot: 'bg-amber-500' },
+  /* ── Generic ── */
+  info:                   { icon: Info,           color: 'text-gray-500 dark:text-gray-400',        bg: 'bg-gray-100 dark:bg-muted',              dot: 'bg-gray-400' },
 }
 
 function getConfig(type: string) { return TYPE_CONFIG[type] ?? TYPE_CONFIG.info }
@@ -36,7 +75,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading]             = useState(true)
   const [markingAll, setMarkingAll]       = useState(false)
-  const [mounted, setMounted]             = useState(false)   // portal guard
+  const [mounted, setMounted]             = useState(false)
   const [dropTop, setDropTop]             = useState(0)
   const [dropRight, setDropRight]         = useState(16)
   const [dropWidth, setDropWidth]         = useState(368)
@@ -46,10 +85,8 @@ export function NotificationBell() {
 
   const unread = notifications.filter(n => !n.read).length
 
-  /* portal guard — only runs on client */
   useEffect(() => setMounted(true), [])
 
-  /* ── Calculate desktop dropdown position ── */
   const calcPos = useCallback(() => {
     if (!buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
@@ -59,7 +96,6 @@ export function NotificationBell() {
     setDropWidth(Math.min(368, vw - 32))
   }, [])
 
-  /* ── Data fetch ── */
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/notifications')
@@ -93,7 +129,6 @@ export function NotificationBell() {
     return () => { active = false; clearInterval(iv); if (channelRef) supabase.removeChannel(channelRef) }
   }, [fetchNotifications])
 
-  /* ── Close on outside click ── */
   useEffect(() => {
     if (!open) return
     function onDown(e: MouseEvent) {
@@ -107,7 +142,6 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', onDown)
   }, [open])
 
-  /* ── Recalc pos on resize / scroll ── */
   useEffect(() => {
     if (!open) return
     calcPos()
@@ -116,7 +150,6 @@ export function NotificationBell() {
     return () => { window.removeEventListener('resize', calcPos); window.removeEventListener('scroll', calcPos) }
   }, [open, calcPos])
 
-  /* ── Body scroll lock on mobile ── */
   useEffect(() => {
     if (open && window.innerWidth < 640) {
       document.body.style.overflow = 'hidden'
@@ -146,7 +179,6 @@ export function NotificationBell() {
   return (
     <div data-notif-root="" className="relative">
 
-      {/* Bell */}
       <button
         ref={buttonRef}
         onClick={() => { calcPos(); setOpen(o => !o) }}
@@ -161,37 +193,25 @@ export function NotificationBell() {
         )}
       </button>
 
-      {/* ── Portal overlay — rendered directly in <body> ── */}
       {mounted && open && createPortal(
         <div id="notif-overlay">
-
-          {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              MOBILE  (< 640 px) — bottom sheet
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
           <div className="sm:hidden">
-            {/* Dim backdrop */}
             <div
               className="fixed inset-0 bg-black/50"
               style={{ zIndex: 99998 }}
               onClick={() => setOpen(false)}
             />
-            {/* Sheet — flex column, max-height limits it, overflow-hidden clips corners */}
             <div
               className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
               style={{ maxHeight: '85svh', zIndex: 99999 }}
             >
-              {/* Drag handle */}
               <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
               </div>
-              {/* Panel content — header + scrollable list + footer */}
               <PanelContent {...sharedProps} />
             </div>
           </div>
 
-          {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-              DESKTOP (≥ 640 px) — fixed dropdown
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
           <div className="hidden sm:block">
             <div
               className="fixed flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
@@ -200,7 +220,6 @@ export function NotificationBell() {
               <PanelContent {...sharedProps} />
             </div>
           </div>
-
         </div>,
         document.body
       )}
@@ -209,7 +228,6 @@ export function NotificationBell() {
   )
 }
 
-/* ─── Panel body ─────────────────────────────────────────────────────────── */
 interface PanelProps {
   notifications: Notification[]; loading: boolean; unread: number; markingAll: boolean
   markAllRead: () => void; markOneRead: (id: string) => void; onClose: () => void
@@ -218,7 +236,6 @@ interface PanelProps {
 function PanelContent({ notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose }: PanelProps) {
   return (
     <>
-      {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-border">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-gray-700 dark:text-white" />
@@ -244,7 +261,6 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
         </div>
       </div>
 
-      {/* Scrollable list — flex-1 + min-h-0 so it shrinks & scrolls correctly */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center py-14">
@@ -256,17 +272,21 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
               <Bell className="w-6 h-6 text-gray-400" />
             </div>
             <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">All caught up!</p>
-            <p className="text-xs text-gray-400">No notifications yet.</p>
+            <p className="text-xs text-gray-400">You have no notifications yet.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-border">
             {notifications.map(n => {
-              const cfg = getConfig(n.type); const Icon = cfg.icon
-              return (
-                <div key={n.id} onClick={() => { if (!n.read) markOneRead(n.id) }}
-                  className={`flex gap-3 px-4 py-3.5 cursor-pointer transition-colors ${
-                    n.read ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
-                           : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
+              const cfg = getConfig(n.type)
+              const Icon = cfg.icon
+              const href = typeof n.data?.url === 'string' ? n.data.url : null
+
+              const inner = (
+                <div
+                  className={`flex gap-3 px-4 py-3.5 transition-colors ${
+                    n.read
+                      ? 'hover:bg-gray-50 dark:hover:bg-muted/20'
+                      : 'bg-[#16a34a]/5 dark:bg-[#16a34a]/10 hover:bg-[#16a34a]/8 dark:hover:bg-[#16a34a]/15'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${cfg.bg}`}>
@@ -288,12 +308,30 @@ function PanelContent({ notifications, loading, unread, markingAll, markAllRead,
                   </div>
                 </div>
               )
+
+              return href ? (
+                <Link
+                  key={n.id}
+                  href={href}
+                  onClick={() => { if (!n.read) markOneRead(n.id); onClose() }}
+                  className="block cursor-pointer"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div
+                  key={n.id}
+                  onClick={() => { if (!n.read) markOneRead(n.id) }}
+                  className="cursor-default"
+                >
+                  {inner}
+                </div>
+              )
             })}
           </div>
         )}
       </div>
 
-      {/* Footer */}
       {notifications.length > 0 && (
         <div className="flex-shrink-0 px-4 py-3 border-t border-gray-100 dark:border-border">
           <Link href="/notifications" onClick={onClose}

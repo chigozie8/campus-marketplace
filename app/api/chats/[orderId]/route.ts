@@ -117,12 +117,14 @@ export async function POST(
 
   const senderName = senderProfile?.full_name ?? 'Someone'
 
+  const chatUrl = receiverId === order.buyer_id ? '/dashboard/orders' : '/seller-orders'
+
   await sendNotification({
     userId: receiverId,
     type: 'new_chat_message',
     title: `New message from ${senderName}`,
     body: message.trim().slice(0, 80) + (message.trim().length > 80 ? '…' : ''),
-    data: { orderId, senderId: user.id },
+    data: { url: chatUrl, orderId, senderId: user.id },
   })
 
   return NextResponse.json({ message: inserted })

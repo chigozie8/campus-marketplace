@@ -9,7 +9,7 @@ async function assertAdmin() {
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('admin_roles').select('role').eq('user_id', user.id).single()
+  const { data } = await getServiceClient().from('admin_roles').select('role').eq('user_id', user.id).single()
   return data ? user : null
 }
 
@@ -68,9 +68,9 @@ export async function PATCH(
         ? {
             user_id: vendorId,
             type: 'verification_approved',
-            title: 'Verification Approved! 🎉',
+            title: 'Verification Approved!',
             body: 'Congratulations! Your business is now verified. The verified badge is live on your profile.',
-            data: { verification_id: id },
+            data: { url: '/dashboard', verification_id: id },
           }
         : {
             user_id: vendorId,
@@ -79,7 +79,7 @@ export async function PATCH(
             body: rejection_reason
               ? `Reason: ${rejection_reason}. You can correct and resubmit from your profile.`
               : 'Your verification was not approved. You can correct your details and resubmit.',
-            data: { verification_id: id, rejection_reason },
+            data: { url: '/profile', verification_id: id, rejection_reason },
           }
 
     await supabase.from('notifications').insert(notifPayload)

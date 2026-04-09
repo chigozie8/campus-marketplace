@@ -39,9 +39,10 @@ export async function POST(req: Request) {
     try {
       await supabase.from('notifications').insert({
         user_id: user.id,
-        title: 'Report Received',
-        message: `Your report for "${product.title}" has been received. Our team will review it within 24 hours.`,
-        type: 'system',
+        title: 'Dispute Submitted',
+        body: `Your dispute for "${product.title}" has been received. Our team will review it within 24 hours.`,
+        type: 'dispute_opened',
+        data: { url: '/dashboard/orders', productId },
       })
     } catch { /* non-critical */ }
 
