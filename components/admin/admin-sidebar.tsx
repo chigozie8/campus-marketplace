@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   TrendingUp,
+  Phone,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -53,6 +54,7 @@ const NAV_ITEMS = [
   { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
   { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
+  { label: 'Contact Us',      href: '/admin/contact',           icon: Phone },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
   { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]

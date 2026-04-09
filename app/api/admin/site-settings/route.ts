@@ -47,5 +47,6 @@ export async function PUT(req: Request) {
   revalidatePath('/press')
   revalidatePath('/pricing')
   revalidatePath('/about')
+  revalidatePath('/contact')
   return NextResponse.json({ ok: true })
 }

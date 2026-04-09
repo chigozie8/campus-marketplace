@@ -20,6 +20,13 @@ export type SiteSettings = {
   /* ── Contact & Support ── */
   support_phone: string
   support_whatsapp_url: string
+  contact_email: string
+  contact_hero_subtitle: string
+  contact_response_time: string
+  contact_hours: string
+  contact_office_name: string
+  contact_office_address: string
+  contact_subjects: string
   /* ── Social URLs ── */
   social_whatsapp_url: string
   social_instagram_url: string
@@ -157,6 +164,21 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   /* contact */
   support_phone: '07082039250',
   support_whatsapp_url: 'https://wa.me/2347082039250',
+  contact_email: 'support@vendoorx.com',
+  contact_hero_subtitle: "Got a question, bug report, or partnership idea? We're all ears. Our team usually responds within 2 hours.",
+  contact_response_time: '2 hours',
+  contact_hours: 'Mon – Sat: 8am – 10pm WAT\nSunday: 10am – 6pm WAT',
+  contact_office_name: 'VendoorX Technologies Ltd',
+  contact_office_address: 'Victoria Island, Lagos\nLagos State, Nigeria',
+  contact_subjects: JSON.stringify([
+    'General Enquiry',
+    'Account Issue',
+    'Payment Problem',
+    'Report a Seller',
+    'Bug Report',
+    'Partnership / Press',
+    'Other',
+  ]),
   /* social */
   social_whatsapp_url: 'https://wa.me/15792583013',
   social_instagram_url: 'https://instagram.com/vendoorx',
@@ -208,4 +230,14 @@ export function parseFaqs(raw: string): FaqItem[] {
 export function parseTestimonials(raw: string): TestimonialItem[] {
   if (!raw) return DEFAULT_TESTIMONIALS
   try { return JSON.parse(raw) as TestimonialItem[] } catch { return DEFAULT_TESTIMONIALS }
+}
+
+const DEFAULT_CONTACT_SUBJECTS = [
+  'General Enquiry', 'Account Issue', 'Payment Problem',
+  'Report a Seller', 'Bug Report', 'Partnership / Press', 'Other',
+]
+
+export function parseContactSubjects(raw: string): string[] {
+  if (!raw) return DEFAULT_CONTACT_SUBJECTS
+  try { return JSON.parse(raw) as string[] } catch { return DEFAULT_CONTACT_SUBJECTS }
 }
