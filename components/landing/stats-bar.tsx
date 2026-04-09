@@ -22,59 +22,78 @@ function isDecimalStr(str: string): boolean {
 }
 
 function useCountUp(end: number, duration = 1400, decimal = false) {
-  const [count, setCount] = useState(end)   // start at final value — no "0" flash
-  const [done, setDone] = useState(true)    // start as done so full value shows immediately
+  // null = not yet animating → show static value
+  // number = animating → show count
+  const [animating, setAnimating] = useState<number | null>(null)
   const rafRef = useRef<number | null>(null)
   const startedRef = useRef(false)
   const elRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = elRef.current
-    if (!el) return
+    if (!el || end === 0) return
+
+    function startAnimation() {
+      if (startedRef.current) return
+      startedRef.current = true
+
+      // Use Date.now() so paused RAF frames don't freeze the counter
+      const startTime = Date.now()
+
+      function tick() {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        const ease = 1 - Math.pow(1 - progress, 3)
+        const current = ease * end
+
+        setAnimating(decimal ? Math.round(current * 10) / 10 : Math.floor(current))
+
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick)
+        } else {
+          // Done — go back to showing the raw static string
+          setAnimating(null)
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !startedRef.current) {
-          startedRef.current = true
-          setDone(false)
-
-          let startTime: number
-          const animate = (ts: number) => {
-            if (!startTime) startTime = ts
-            const progress = Math.min((ts - startTime) / duration, 1)
-            const ease = 1 - Math.pow(1 - progress, 3)
-            const current = ease * end
-            setCount(decimal ? Math.round(current * 10) / 10 : Math.floor(current))
-            if (progress < 1) {
-              rafRef.current = requestAnimationFrame(animate)
-            } else {
-              setDone(true)
-            }
-          }
-          rafRef.current = requestAnimationFrame(animate)
-        }
-      },
-      { threshold: 0.3 },
+      ([entry]) => { if (entry.isIntersecting) startAnimation() },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
     )
-
     observer.observe(el)
+
+    // Fallback: if element is already visible on mount (above the fold)
+    const timer = setTimeout(() => {
+      const rect = el.getBoundingClientRect()
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        startAnimation()
+      }
+    }, 200)
+
     return () => {
       observer.disconnect()
+      clearTimeout(timer)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [end, duration, decimal])
 
-  return { count, done, elRef }
+  return { animating, elRef }
 }
 
 function StatCard({ stat, Icon }: { stat: StatItem; Icon: typeof Users }) {
   const num = parseNumber(stat.value)
   const decimal = isDecimalStr(stat.value)
-  const { count, done, elRef } = useCountUp(num, 1400, decimal)
+  const { animating, elRef } = useCountUp(num, 1400, decimal)
 
-  const displayCount = decimal ? count.toFixed(1) : count.toLocaleString()
   const suffix = num > 0 ? stat.value.replace(/[₦]?\d[\d,.]*/, '') : ''
   const prefix = stat.value.startsWith('₦') ? '₦' : ''
+
+  const displayValue = animating !== null
+    ? `${prefix}${decimal ? animating.toFixed(1) : animating.toLocaleString()}${suffix}`
+    : stat.value
 
   return (
     <div
@@ -85,7 +104,7 @@ function StatCard({ stat, Icon }: { stat: StatItem; Icon: typeof Users }) {
         <Icon className="w-4.5 h-4.5 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight tabular-nums">
-        {done || num === 0 ? stat.value : `${prefix}${displayCount}${suffix}`}
+        {displayValue}
       </p>
       <p className="text-xs sm:text-sm text-foreground font-semibold text-center">{stat.label}</p>
       <p className="text-[11px] text-muted-foreground text-center leading-tight">{stat.sublabel}</p>

@@ -26,42 +26,66 @@ const STATS = [
 
 function useCountUp(end: number, duration = 2000, isDecimal = false) {
   const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const startedRef = useRef(false)
+  const rafRef = useRef<number | null>(null)
   const mountedRef = useRef(false)
 
   useEffect(() => {
     mountedRef.current = true
-    return () => { mountedRef.current = false }
+    return () => {
+      mountedRef.current = false
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
   }, [])
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+
+    function startAnimation() {
+      if (startedRef.current) return
+      startedRef.current = true
+
+      // Use Date.now() — immune to RAF pausing when tab is hidden/loading
+      const startTime = Date.now()
+
+      function tick() {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        const ease = 1 - Math.pow(1 - progress, 4)
+        if (mountedRef.current) {
+          setCount(isDecimal ? Math.round(ease * end * 10) / 10 : Math.floor(ease * end))
+        }
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick)
+        } else if (mountedRef.current) {
+          setCount(end)
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true) },
-      { threshold: 0.3 },
+      ([entry]) => { if (entry.isIntersecting) startAnimation() },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
     )
     observer.observe(el)
-    return () => observer.disconnect()
-  }, [started])
 
-  useEffect(() => {
-    if (!started) return
-    let startTime: number
-    let raf: number
-    const animate = (ts: number) => {
-      if (!startTime) startTime = ts
-      const progress = Math.min((ts - startTime) / duration, 1)
-      const ease = 1 - Math.pow(1 - progress, 4)
-      if (mountedRef.current) {
-        setCount(isDecimal ? Math.round(ease * end * 10) / 10 : Math.floor(ease * end))
+    // Fallback for elements already visible on page load
+    const timer = setTimeout(() => {
+      const rect = el.getBoundingClientRect()
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        startAnimation()
       }
-      if (progress < 1) raf = requestAnimationFrame(animate)
+    }, 200)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timer)
     }
-    raf = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(raf)
-  }, [started, end, duration, isDecimal])
+  }, [end, duration, isDecimal])
 
   return { count, ref }
 }
