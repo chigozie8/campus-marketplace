@@ -19,6 +19,8 @@ import { TrustSection } from '@/components/landing/trust-section'
 import { LandingNav } from '@/components/landing/landing-nav'
 import { LandingFooter } from '@/components/landing/landing-footer'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = buildMetadata({
   title: "VendoorX — Nigeria's #1 Campus Marketplace | Buy & Sell on Campus",
   description:

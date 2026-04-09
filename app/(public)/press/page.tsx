@@ -5,6 +5,8 @@ import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Quote } from '
 import { getSiteSettings } from '@/lib/site-settings'
 import { parsePressAssets } from '@/lib/site-settings-defaults'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Press Kit | VendoorX',
   description: 'Download VendoorX brand assets, logos, and media kit for press coverage. Contact our CEO Kenneth Okoronkwo for interview requests.',
