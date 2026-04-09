@@ -4,16 +4,33 @@ import logger from '../utils/logger.js'
 
 const RELEASE_AFTER_HOURS = 48
 
+async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 'both') {
+  try {
+    const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
+    await fetch(`${appUrl}/api/internal/check-milestones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': process.env.INTERNAL_API_KEY ?? '',
+      },
+      body: JSON.stringify({ userId, role }),
+      signal: AbortSignal.timeout(4000),
+    })
+  } catch {
+    // Non-critical — milestone notifications are best-effort
+  }
+}
+
 export async function runAutoRelease() {
   try {
     const cutoff = new Date(Date.now() - RELEASE_AFTER_HOURS * 60 * 60 * 1000).toISOString()
 
     // Try delivered_at first, fall back to updated_at if column doesn't exist
-    let data: Array<{ id: string; seller_id: string; total_amount: number }> | null = null
+    let data: Array<{ id: string; buyer_id: string; seller_id: string; total_amount: number }> | null = null
 
     const byDeliveredAt = await supabaseAdmin
       .from('orders')
-      .select('id, seller_id, total_amount')
+      .select('id, buyer_id, seller_id, total_amount')
       .eq('status', 'delivered')
       .lt('delivered_at', cutoff)
 
@@ -21,7 +38,7 @@ export async function runAutoRelease() {
       // delivered_at column missing — fall back to updated_at
       const byUpdatedAt = await supabaseAdmin
         .from('orders')
-        .select('id, seller_id, total_amount')
+        .select('id, buyer_id, seller_id, total_amount')
         .eq('status', 'delivered')
         .lt('updated_at', cutoff)
       if (byUpdatedAt.error) {
@@ -60,6 +77,10 @@ export async function runAutoRelease() {
           message: `Your payment for order #${order.id.split('-')[0]} has been automatically released after 48 hours.`,
           type: 'system',
         }).catch(() => {})
+
+        // Fire-and-forget milestone checks for buyer and seller on auto-release completion
+        if (order.buyer_id) triggerMilestoneCheck(order.buyer_id, 'buyer')
+        triggerMilestoneCheck(order.seller_id, 'seller')
 
         logger.info(`[escrowAutoRelease] Released order ${order.id} for seller ${order.seller_id}`)
       } catch (err) {

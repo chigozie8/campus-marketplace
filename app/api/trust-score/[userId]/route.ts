@@ -33,15 +33,15 @@ export async function GET(
 
   const isSelf = requestingUser?.id === userId
 
-  // Check if the requesting user is an admin (only needed when not self)
+  // Check if the requesting user is an admin via canonical admin_roles table
   let isAdmin = false
   if (!isSelf && requestingUser) {
-    const { data: reqProfile } = await db
-      .from('profiles')
+    const { data: adminRow } = await db
+      .from('admin_roles')
       .select('role')
-      .eq('id', requestingUser.id)
+      .eq('user_id', requestingUser.id)
       .maybeSingle()
-    isAdmin = reqProfile?.role === 'admin'
+    isAdmin = !!adminRow
   }
 
   const [profileRes, ordersRes, buyerDisputesRes, sellerDisputesRes] = await Promise.all([
