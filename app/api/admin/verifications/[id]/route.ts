@@ -84,13 +84,16 @@ export async function PATCH(
 
     await supabase.from('notifications').insert(notifPayload)
 
+    // Milestone check runs unconditionally on approval — not gated on email availability
+    if (status === 'approved') {
+      checkAndNotifySellerMilestones(vendorId).catch(() => {})
+    }
+
     const { data: { user: vendorUser } } = await supabase.auth.admin.getUserById(vendorId)
     const email = vendorUser?.email
     if (email) {
       if (status === 'approved') {
         sendVerificationApprovedEmail(email, vendorName).catch(() => {})
-        // Verification approval boosts seller trust score — check for new milestones
-        checkAndNotifySellerMilestones(vendorId).catch(() => {})
       } else {
         sendVerificationRejectedEmail(email, vendorName, rejection_reason).catch(() => {})
       }
