@@ -3,12 +3,21 @@ import { revalidateTag, revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
+function svcClient() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
+}
+
 async function requireAdmin() {
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('admin_roles').select('role').eq('user_id', user.id).single()
+  // Use service role to bypass RLS on admin_roles
+  const { data } = await svcClient().from('admin_roles').select('role').eq('user_id', user.id).single()
   if (!data) return null
   return user
 }

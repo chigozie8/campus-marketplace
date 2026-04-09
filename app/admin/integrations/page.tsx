@@ -32,6 +32,8 @@ export default async function IntegrationsPage() {
     (rows ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
   )
 
+  const webhookUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus-marketplace.replit.app'}/api/webhook/whatsapp`
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <div>
@@ -41,7 +43,7 @@ export default async function IntegrationsPage() {
         </p>
       </div>
 
-      <WhatsAppSettingsForm initialValues={saved} />
+      <WhatsAppSettingsForm initialValues={saved} webhookUrl={webhookUrl} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, EyeOff, CheckCircle2, Loader2, MessageCircle, AlertCircle } from 'lucide-react'
 
 interface Field {
@@ -35,14 +35,20 @@ const FIELDS: Field[] = [
 
 interface Props {
   initialValues: Record<string, string>
+  webhookUrl:    string
 }
 
-export function WhatsAppSettingsForm({ initialValues }: Props) {
-  const [values,  setValues]  = useState<Record<string, string>>(initialValues)
-  const [visible, setVisible] = useState<Record<string, boolean>>({})
-  const [saving,  setSaving]  = useState(false)
-  const [saved,   setSaved]   = useState(false)
-  const [error,   setError]   = useState<string | null>(null)
+export function WhatsAppSettingsForm({ initialValues, webhookUrl }: Props) {
+  const [values,        setValues]        = useState<Record<string, string>>(initialValues)
+  const [visible,       setVisible]       = useState<Record<string, boolean>>({})
+  const [saving,        setSaving]        = useState(false)
+  const [saved,         setSaved]         = useState(false)
+  const [error,         setError]         = useState<string | null>(null)
+  const [displayedUrl,  setDisplayedUrl]  = useState(webhookUrl)
+
+  useEffect(() => {
+    setDisplayedUrl(`${window.location.origin}/api/webhook/whatsapp`)
+  }, [])
 
   function toggleVisible(key: string) {
     setVisible(v => ({ ...v, [key]: !v[key] }))
@@ -132,7 +138,7 @@ export function WhatsAppSettingsForm({ initialValues }: Props) {
         <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 space-y-1">
           <p className="text-xs font-bold text-foreground">Webhook URL (paste this in Gupshup)</p>
           <p className="text-xs text-muted-foreground font-mono break-all select-all">
-            {typeof window !== 'undefined' ? `${window.location.origin}/api/webhook/whatsapp` : 'https://your-domain/api/webhook/whatsapp'}
+            {displayedUrl}
           </p>
           <p className="text-[11px] text-muted-foreground">
             Gupshup → your app → Webhooks → Add Webhook → Callback URL. Select <strong>Gupshup format (v2)</strong> and tick <strong>Message</strong>.

@@ -56,7 +56,10 @@ export default async function AdminSettingsPage() {
 
       <div>
         <h3 className="text-sm font-black text-foreground mb-4">WhatsApp Integration</h3>
-        <WhatsAppSettingsForm initialValues={waValues} />
+        <WhatsAppSettingsForm
+          initialValues={waValues}
+          webhookUrl={`${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus-marketplace.replit.app'}/api/webhook/whatsapp`}
+        />
       </div>
 
       <div>
