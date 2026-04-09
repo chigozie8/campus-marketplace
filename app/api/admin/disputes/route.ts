@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 import { checkAndNotifyBuyerMilestones, checkAndNotifySellerMilestones } from '@/lib/trust-milestones'
+import { releaseSellerEarnings, reversePendingCredit } from '@/lib/wallet-service'
 
 function svc() {
   return createAdmin(
@@ -90,10 +91,7 @@ export async function PATCH(req: Request) {
       .eq('id', order.id)
       .catch(() => {})
 
-    const { releaseSellerEarnings } = await import('@/../backend/src/services/walletService.js').catch(() => ({ releaseSellerEarnings: null }))
-    if (releaseSellerEarnings) {
-      await releaseSellerEarnings(order.seller_id, order.id).catch(() => {})
-    }
+    await releaseSellerEarnings(order.seller_id, order.id).catch(() => {})
 
     await svc().from('notifications').insert([
       { user_id: order.seller_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed the dispute for order #${order.id.split('-')[0]} and released payment to you.`, type: 'system' },
@@ -108,10 +106,7 @@ export async function PATCH(req: Request) {
       .eq('id', order.id)
       .catch(() => {})
 
-    const { reversePendingCredit } = await import('@/../backend/src/services/walletService.js').catch(() => ({ reversePendingCredit: null }))
-    if (reversePendingCredit) {
-      await reversePendingCredit(order.seller_id, order.id).catch(() => {})
-    }
+    await reversePendingCredit(order.seller_id, order.id).catch(() => {})
 
     await svc().from('notifications').insert([
       { user_id: order.buyer_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed your dispute for order #${order.id.split('-')[0]}. Refund has been processed.`, type: 'system' },
