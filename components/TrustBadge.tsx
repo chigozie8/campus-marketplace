@@ -1,9 +1,11 @@
 'use client'
 
 import { ShieldCheck, ShieldAlert, Shield, ShieldOff, Medal } from 'lucide-react'
+import { levelFor, labelFor, getSellerTier, getMilestoneBadge } from '@/lib/trust'
+import type { TrustLevel, SellerTier } from '@/lib/trust'
 
-export type TrustLevel = 'excellent' | 'good' | 'fair' | 'low'
-export type SellerTier = 'gold' | 'silver' | 'bronze'
+export type { TrustLevel, SellerTier }
+export { getSellerTier, getMilestoneBadge }
 
 export interface TrustScore {
   score: number
@@ -12,28 +14,11 @@ export interface TrustScore {
 }
 
 export function getTrustLevel(score: number): TrustLevel {
-  if (score >= 85) return 'excellent'
-  if (score >= 70) return 'good'
-  if (score >= 50) return 'fair'
-  return 'low'
+  return levelFor(score)
 }
 
 export function getTrustLabel(level: TrustLevel) {
-  return { excellent: 'Excellent', good: 'Good', fair: 'Fair', low: 'Low' }[level]
-}
-
-export function getSellerTier(score: number): SellerTier | null {
-  if (score >= 85) return 'gold'
-  if (score >= 70) return 'silver'
-  if (score >= 50) return 'bronze'
-  return null
-}
-
-export function getMilestoneBadge(score: number): { label: string; emoji: string } | null {
-  if (score >= 100) return { label: 'VendoorX Champion', emoji: '🏆' }
-  if (score >= 85) return { label: 'Verified Member', emoji: '⭐' }
-  if (score >= 70) return { label: 'Trusted Buyer', emoji: '✅' }
-  return null
+  return labelFor(level)
 }
 
 const LEVEL_STYLES: Record<TrustLevel, { badge: string; text: string; icon: React.ReactNode }> = {

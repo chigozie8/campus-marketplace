@@ -141,3 +141,21 @@ export const MILESTONES = [
   { score: 85, label: 'Verified Member', emoji: '⭐' },
   { score: 100, label: 'VendoorX Champion', emoji: '🏆' },
 ] as const
+
+export type SellerTier = 'gold' | 'silver' | 'bronze'
+
+/** Pure utility — safe to import in both Server and Client components. */
+export function getSellerTier(score: number): SellerTier | null {
+  if (score >= 85) return 'gold'
+  if (score >= 70) return 'silver'
+  if (score >= 50) return 'bronze'
+  return null
+}
+
+/** Pure utility — safe to import in both Server and Client components. */
+export function getMilestoneBadge(score: number): { label: string; emoji: string } | null {
+  if (score >= 100) return { label: 'VendoorX Champion', emoji: '🏆' }
+  if (score >= 85) return { label: 'Verified Member', emoji: '⭐' }
+  if (score >= 70) return { label: 'Trusted Buyer', emoji: '✅' }
+  return null
+}

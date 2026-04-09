@@ -9,8 +9,8 @@ import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
-import { SellerTierBadge, TrustBadge, getMilestoneBadge, getSellerTier } from '@/components/TrustBadge'
-import { computeSellerScore } from '@/lib/trust'
+import { SellerTierBadge, TrustBadge } from '@/components/TrustBadge'
+import { computeSellerScore, getMilestoneBadge, getSellerTier } from '@/lib/trust'
 
 type Props = { params: Promise<{ id: string }> }
 
