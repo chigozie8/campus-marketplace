@@ -22,8 +22,8 @@ function isDecimalStr(str: string): boolean {
 }
 
 function useCountUp(end: number, duration = 1400, decimal = false) {
-  const [count, setCount] = useState(0)
-  const [done, setDone] = useState(false)
+  const [count, setCount] = useState(end)   // start at final value — no "0" flash
+  const [done, setDone] = useState(true)    // start as done so full value shows immediately
   const rafRef = useRef<number | null>(null)
   const startedRef = useRef(false)
   const elRef = useRef<HTMLDivElement>(null)
@@ -31,10 +31,13 @@ function useCountUp(end: number, duration = 1400, decimal = false) {
   useEffect(() => {
     const el = elRef.current
     if (!el) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !startedRef.current) {
           startedRef.current = true
+          setDone(false)
+
           let startTime: number
           const animate = (ts: number) => {
             if (!startTime) startTime = ts
@@ -53,6 +56,7 @@ function useCountUp(end: number, duration = 1400, decimal = false) {
       },
       { threshold: 0.3 },
     )
+
     observer.observe(el)
     return () => {
       observer.disconnect()
