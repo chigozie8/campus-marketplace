@@ -30,42 +30,56 @@ function isDecimalStr(str: string) {
 
 function useCountUp(end: number, duration = 1600, decimal = false) {
   const [val, setVal] = useState(0)
-  const done = useRef(false)
-  const raf  = useRef<number | null>(null)
+  const elRef  = useRef<HTMLDivElement>(null)
+  const done   = useRef(false)
+  const raf    = useRef<number | null>(null)
 
   useEffect(() => {
-    if (end === 0 || done.current) return
-    done.current = true
-    const start = Date.now()
+    if (end === 0) return
+    const el = elRef.current
+    if (!el) return
 
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / duration, 1)
-      const e = 1 - Math.pow(1 - p, 3)
-      setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
-      if (p < 1) raf.current = requestAnimationFrame(tick)
-      else        setVal(end)
+    const start = () => {
+      if (done.current) return
+      done.current = true
+      const t0 = Date.now()
+      const tick = () => {
+        const p = Math.min((Date.now() - t0) / duration, 1)
+        const e = 1 - Math.pow(1 - p, 3)
+        setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
+        if (p < 1) raf.current = requestAnimationFrame(tick)
+        else        setVal(end)
+      }
+      raf.current = requestAnimationFrame(tick)
     }
 
-    raf.current = requestAnimationFrame(tick)
-    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) start() },
+      { threshold: 0.2, rootMargin: '0px 0px 80px 0px' },
+    )
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      if (raf.current) cancelAnimationFrame(raf.current)
+    }
   }, [end, duration, decimal])
 
-  return val
+  return { val, elRef }
 }
 
 function StatCard({ stat, Icon }: { stat: StatItem; Icon: typeof Users }) {
   const num     = parseNumber(stat.value)
   const decimal = isDecimalStr(stat.value)
-  const count   = useCountUp(num, 1600, decimal)
+  const { val, elRef } = useCountUp(num, 1600, decimal)
 
-  const suffix = stat.value.replace(/[₦]?\d[\d,.]*/, '')
-  const prefix = stat.value.startsWith('₦') ? '₦' : ''
-  const display = count === num
+  const suffix  = stat.value.replace(/[₦]?\d[\d,.]*/, '')
+  const prefix  = stat.value.startsWith('₦') ? '₦' : ''
+  const display = val === num
     ? stat.value
-    : `${prefix}${decimal ? count.toFixed(1) : count.toLocaleString()}${suffix}`
+    : `${prefix}${decimal ? val.toFixed(1) : val.toLocaleString()}${suffix}`
 
   return (
-    <div className="flex flex-col items-center justify-center gap-1 py-7 px-4 group">
+    <div ref={elRef} className="flex flex-col items-center justify-center gap-1 py-7 px-4 group">
       <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-2 transition-transform duration-300 group-hover:scale-110">
         <Icon className="w-4.5 h-4.5 text-primary" />
       </div>

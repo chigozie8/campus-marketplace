@@ -26,40 +26,53 @@ const STATS = [
 
 function useCountUp(end: number, duration = 1800, decimal = false) {
   const [val, setVal] = useState(0)
-  const done = useRef(false)
-  const raf  = useRef<number | null>(null)
+  const elRef  = useRef<HTMLDivElement>(null)
+  const done   = useRef(false)
+  const raf    = useRef<number | null>(null)
 
   useEffect(() => {
-    if (done.current) return
-    done.current = true
-    const start = Date.now()
+    const el = elRef.current
+    if (!el) return
 
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / duration, 1)
-      const e = 1 - Math.pow(1 - p, 4)
-      setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
-      if (p < 1) raf.current = requestAnimationFrame(tick)
-      else        setVal(end)
+    const start = () => {
+      if (done.current) return
+      done.current = true
+      const t0 = Date.now()
+      const tick = () => {
+        const p = Math.min((Date.now() - t0) / duration, 1)
+        const e = 1 - Math.pow(1 - p, 4)
+        setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
+        if (p < 1) raf.current = requestAnimationFrame(tick)
+        else        setVal(end)
+      }
+      raf.current = requestAnimationFrame(tick)
     }
 
-    raf.current = requestAnimationFrame(tick)
-    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) start() },
+      { threshold: 0.2, rootMargin: '0px 0px 80px 0px' },
+    )
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      if (raf.current) cancelAnimationFrame(raf.current)
+    }
   }, [end, duration, decimal])
 
-  return val
+  return { val, elRef }
 }
 
 function StatCard({
   end, fmt, label, icon: Icon, decimal = false,
 }: { end: number; fmt: (n: number) => string; label: string; icon: React.ElementType; decimal?: boolean }) {
-  const count = useCountUp(end, 1800, decimal)
+  const { val, elRef } = useCountUp(end, 1800, decimal)
   return (
-    <div className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+    <div ref={elRef} className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
       <div className="w-10 h-10 rounded-xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         <Icon className="w-5 h-5 text-[#16a34a]" />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
-        {fmt(count)}
+        {fmt(val)}
       </p>
       <p className="text-xs text-white/50 font-medium text-center leading-tight">{label}</p>
     </div>
