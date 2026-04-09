@@ -14,8 +14,8 @@ interface Dispute {
   admin_note: string | null
   created_at: string
   resolved_at: string | null
-  buyer?: { id: string; full_name: string; email: string }
-  seller?: { id: string; full_name: string; email: string }
+  buyer?: { id: string; full_name: string }
+  seller?: { id: string; full_name: string }
   orders?: { total_amount: number; status: string; delivery_address: string }
 }
 
@@ -79,13 +79,13 @@ function DisputeCard({ dispute, onResolved }: { dispute: Dispute; onResolved: ()
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-muted/50">
               <p className="text-muted-foreground mb-0.5 font-medium">Buyer</p>
-              <p className="font-semibold">{dispute.buyer?.full_name}</p>
-              <p className="text-muted-foreground">{dispute.buyer?.email}</p>
+              <p className="font-semibold">{dispute.buyer?.full_name ?? '—'}</p>
+              <p className="text-muted-foreground font-mono text-[10px]">{dispute.buyer?.id?.slice(0, 8)}…</p>
             </div>
             <div className="p-3 rounded-xl bg-muted/50">
               <p className="text-muted-foreground mb-0.5 font-medium">Seller</p>
-              <p className="font-semibold">{dispute.seller?.full_name}</p>
-              <p className="text-muted-foreground">{dispute.seller?.email}</p>
+              <p className="font-semibold">{dispute.seller?.full_name ?? '—'}</p>
+              <p className="text-muted-foreground font-mono text-[10px]">{dispute.seller?.id?.slice(0, 8)}…</p>
             </div>
             <div className="p-3 rounded-xl bg-muted/50 sm:col-span-2">
               <p className="text-muted-foreground mb-1 font-medium">Dispute Reason</p>

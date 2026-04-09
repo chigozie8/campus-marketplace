@@ -16,7 +16,7 @@ async function requireAdmin() {
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('admin_roles').select('role').eq('user_id', user.id).single()
+  const { data } = await svc().from('admin_roles').select('role').eq('user_id', user.id).single()
   return data ? user : null
 }
 
@@ -27,12 +27,23 @@ export async function GET() {
   const db = svc()
 
   const [profilesRes, ordersRes, disputesRes] = await Promise.all([
-    db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at, is_flagged, flag_reason, flagged_at, admin_badges, trust_score_override, score_override_note').order('created_at', { ascending: false }),
+    db.from('profiles')
+      .select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at, is_flagged, flag_reason, flagged_at, admin_badges, trust_score_override, score_override_note')
+      .order('created_at', { ascending: false }),
     db.from('orders').select('id, buyer_id, status'),
     db.from('order_disputes').select('id, buyer_id, seller_id, status').then(r => r, () => ({ data: [] as Array<{ id: string; buyer_id: string; seller_id: string; status: string }> | null, error: null })),
   ])
 
-  const profiles = profilesRes.data ?? []
+  let profiles = profilesRes.data ?? []
+  const columnsSetupNeeded = !!profilesRes.error && profilesRes.error.message?.includes('does not exist')
+
+  if (columnsSetupNeeded) {
+    const fallback = await db.from('profiles')
+      .select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at')
+      .order('created_at', { ascending: false })
+    profiles = fallback.data ?? []
+  }
+
   const orders = ordersRes.data ?? []
   const disputes = (disputesRes as { data: Array<{ id: string; buyer_id: string; seller_id: string; status: string }> | null }).data ?? []
 
@@ -103,5 +114,5 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ users: result })
+  return NextResponse.json({ users: result, setup_needed: columnsSetupNeeded })
 }

@@ -56,6 +56,7 @@ export default function TrustScoresPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [tab, setTab] = useState<'buyers' | 'sellers'>('buyers')
   const [managing, setManaging] = useState<UserTrust | null>(null)
+  const [setupNeeded, setSetupNeeded] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -65,6 +66,7 @@ export default function TrustScoresPage() {
       if (!res.ok) throw new Error('Failed to load')
       const json = await res.json()
       setUsers(json.users ?? [])
+      setSetupNeeded(!!json.setup_needed)
     } catch {
       setError('Could not load trust scores. Please try again.')
     } finally {
@@ -131,6 +133,25 @@ export default function TrustScoresPage() {
           <RefreshCw className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
+
+      {setupNeeded && (
+        <div className="rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-3">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Database columns missing — badge &amp; score override won't save</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Run this SQL in your Supabase SQL Editor to enable trust management features:</p>
+            </div>
+          </div>
+          <pre className="text-[11px] bg-amber-100/60 dark:bg-amber-900/30 rounded-lg p-3 overflow-x-auto text-amber-900 dark:text-amber-300 whitespace-pre-wrap border border-amber-200 dark:border-amber-800">{`ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_flagged         BOOLEAN   DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS flag_reason        TEXT,
+  ADD COLUMN IF NOT EXISTS flagged_at         TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS admin_badges       TEXT[]    DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS trust_score_override NUMERIC,
+  ADD COLUMN IF NOT EXISTS score_override_note  TEXT;`}</pre>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <StatCard icon={<Users className="w-4 h-4" />}      label="Total Users"  value={stats.total}    color="text-foreground" />

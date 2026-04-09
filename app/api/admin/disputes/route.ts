@@ -17,7 +17,7 @@ async function requireAdmin() {
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('admin_roles').select('role').eq('user_id', user.id).single()
+  const { data } = await svc().from('admin_roles').select('role').eq('user_id', user.id).single()
   return data ? user : null
 }
 
@@ -33,8 +33,8 @@ export async function GET(req: Request) {
     .select(`
       *,
       orders(id, total_amount, status, delivery_address),
-      buyer:profiles!order_disputes_buyer_id_fkey(id, full_name, email),
-      seller:profiles!order_disputes_seller_id_fkey(id, full_name, email)
+      buyer:profiles!order_disputes_buyer_id_fkey(id, full_name),
+      seller:profiles!order_disputes_seller_id_fkey(id, full_name)
     `)
     .order('created_at', { ascending: false })
 
