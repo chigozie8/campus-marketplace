@@ -9,6 +9,11 @@ function svc() {
   )
 }
 
+// Stable dedup key — independent of notification title copy
+function milestoneType(role: 'buyer' | 'seller', score: number) {
+  return `milestone_${role}_${score}`
+}
+
 export async function checkAndNotifyBuyerMilestones(buyerId: string) {
   try {
     const db = svc()
@@ -32,11 +37,12 @@ export async function checkAndNotifyBuyerMilestones(buyerId: string) {
     const reachedMilestones = MILESTONES.filter(m => score >= m.score)
 
     for (const milestone of reachedMilestones) {
+      const stableType = milestoneType('buyer', milestone.score)
       const { data: existing } = await db
         .from('notifications')
         .select('id')
         .eq('user_id', buyerId)
-        .eq('title', `🏅 ${milestone.label} Unlocked!`)
+        .eq('type', stableType)
         .limit(1)
         .maybeSingle()
 
@@ -45,7 +51,7 @@ export async function checkAndNotifyBuyerMilestones(buyerId: string) {
           user_id: buyerId,
           title: `🏅 ${milestone.label} Unlocked!`,
           message: `Congratulations! You've reached a trust score of ${milestone.score}+ and earned the ${milestone.emoji} ${milestone.label} badge. Keep it up!`,
-          type: 'system',
+          type: stableType,
         })
       }
     }
@@ -80,11 +86,12 @@ export async function checkAndNotifySellerMilestones(sellerId: string) {
     const reachedMilestones = MILESTONES.filter(m => score >= m.score)
 
     for (const milestone of reachedMilestones) {
+      const stableType = milestoneType('seller', milestone.score)
       const { data: existing } = await db
         .from('notifications')
         .select('id')
         .eq('user_id', sellerId)
-        .eq('title', `🏅 ${milestone.label} Unlocked!`)
+        .eq('type', stableType)
         .limit(1)
         .maybeSingle()
 
@@ -93,7 +100,7 @@ export async function checkAndNotifySellerMilestones(sellerId: string) {
           user_id: sellerId,
           title: `🏅 ${milestone.label} Unlocked!`,
           message: `Congratulations! Your seller trust score has reached ${milestone.score}+ — you've earned the ${milestone.emoji} ${milestone.label} badge!`,
-          type: 'system',
+          type: stableType,
         })
       }
     }
