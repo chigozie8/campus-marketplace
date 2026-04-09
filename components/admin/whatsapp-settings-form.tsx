@@ -132,10 +132,10 @@ export function WhatsAppSettingsForm({ initialValues }: Props) {
         <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 space-y-1">
           <p className="text-xs font-bold text-foreground">Webhook URL (paste this in Gupshup)</p>
           <p className="text-xs text-muted-foreground font-mono break-all select-all">
-            {typeof window !== 'undefined' ? `${window.location.origin.replace('5000', '3001')}/webhook/whatsapp` : 'https://your-domain/webhook/whatsapp'}
+            {typeof window !== 'undefined' ? `${window.location.origin}/api/webhook/whatsapp` : 'https://your-domain/api/webhook/whatsapp'}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            Go to Gupshup → your app → Settings → Callback URL and paste this.
+            Gupshup → your app → Webhooks → Add Webhook → Callback URL. Select <strong>Gupshup format (v2)</strong> and tick <strong>Message</strong>.
           </p>
         </div>
 
