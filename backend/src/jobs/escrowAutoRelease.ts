@@ -77,7 +77,7 @@ export async function runAutoRelease() {
         await supabaseAdmin.from('notifications').insert({
           user_id: order.seller_id,
           title: 'Payment Released',
-          message: `Your payment for order #${order.id.split('-')[0]} has been automatically released after 48 hours.`,
+          body: `Your payment for order #${order.id.split('-')[0]} has been automatically released after 48 hours.`,
           type: 'system',
         }).catch(() => {})
 

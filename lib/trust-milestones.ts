@@ -50,7 +50,7 @@ export async function checkAndNotifyBuyerMilestones(buyerId: string) {
         await db.from('notifications').insert({
           user_id: buyerId,
           title: `🏅 ${milestone.label} Unlocked!`,
-          message: `Congratulations! You've reached a trust score of ${milestone.score}+ and earned the ${milestone.emoji} ${milestone.label} badge. Keep it up!`,
+          body: `Congratulations! You've reached a trust score of ${milestone.score}+ and earned the ${milestone.emoji} ${milestone.label} badge. Keep it up!`,
           type: stableType,
         })
       }
@@ -99,7 +99,7 @@ export async function checkAndNotifySellerMilestones(sellerId: string) {
         await db.from('notifications').insert({
           user_id: sellerId,
           title: `🏅 ${milestone.label} Unlocked!`,
-          message: `Congratulations! Your seller trust score has reached ${milestone.score}+ — you've earned the ${milestone.emoji} ${milestone.label} badge!`,
+          body: `Congratulations! Your seller trust score has reached ${milestone.score}+ — you've earned the ${milestone.emoji} ${milestone.label} badge!`,
           type: stableType,
         })
       }
