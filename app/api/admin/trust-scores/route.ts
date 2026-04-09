@@ -27,7 +27,7 @@ export async function GET() {
   const db = svc()
 
   const [profilesRes, ordersRes, disputesRes] = await Promise.all([
-    db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at').order('created_at', { ascending: false }),
+    db.from('profiles').select('id, full_name, avatar_url, is_seller, seller_verified, rating, total_sales, created_at, is_flagged, flag_reason, flagged_at, admin_badges, trust_score_override, score_override_note').order('created_at', { ascending: false }),
     db.from('orders').select('id, buyer_id, status'),
     db.from('order_disputes').select('id, buyer_id, seller_id, status').then(r => r, () => ({ data: [] as Array<{ id: string; buyer_id: string; seller_id: string; status: string }> | null, error: null })),
   ])
@@ -94,6 +94,12 @@ export async function GET() {
       completedOrders,
       totalBuyerDisputes: buyerDisputes.length,
       totalSellerDisputes: sellerDisputes.length,
+      is_flagged: (p as Record<string, unknown>).is_flagged ?? false,
+      flag_reason: (p as Record<string, unknown>).flag_reason ?? null,
+      flagged_at: (p as Record<string, unknown>).flagged_at ?? null,
+      admin_badges: (p as Record<string, unknown>).admin_badges ?? [],
+      trust_score_override: (p as Record<string, unknown>).trust_score_override ?? null,
+      score_override_note: (p as Record<string, unknown>).score_override_note ?? null,
     }
   })
 
