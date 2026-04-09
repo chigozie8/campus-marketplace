@@ -53,6 +53,8 @@ const NAV_ITEMS = [
   { label: 'Blog',            href: '/admin/blog',              icon: BookOpen },
   { label: 'Blog Categories', href: '/admin/blog/categories',   icon: Tag },
   { label: 'Pricing',         href: '/admin/pricing',           icon: DollarSign },
+  { label: 'Coupon Codes',    href: '/admin/coupons',           icon: Tag },
+  { label: 'Flash Sales',     href: '/admin/flash-sales',       icon: Zap },
   { label: 'Referral',        href: '/admin/referral',          icon: Gift },
   { label: 'Boost Pricing',   href: '/admin/boost',             icon: Zap },
   { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },

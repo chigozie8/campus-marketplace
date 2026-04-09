@@ -96,6 +96,16 @@ export async function POST(req: NextRequest) {
   } else if (audience === 'verified_sellers') {
     const { data } = await sc.from('profiles').select('id').eq('seller_verified', true)
     profiles = data ?? []
+  } else if (audience === 'buyers') {
+    const { data } = await sc.from('profiles').select('id').eq('is_seller', false)
+    profiles = data ?? []
+  } else if (audience === 'flagged') {
+    const { data } = await sc.from('profiles').select('id').eq('is_flagged', true)
+    profiles = data ?? []
+  } else if (audience === 'inactive') {
+    const inactiveCutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const { data } = await sc.from('profiles').select('id').lt('updated_at', inactiveCutoff)
+    profiles = data ?? []
   } else {
     const { data } = await sc.from('profiles').select('id')
     profiles = data ?? []

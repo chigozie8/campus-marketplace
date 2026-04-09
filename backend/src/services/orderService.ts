@@ -129,6 +129,34 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         body: `Order #${shortId} is complete. Hope you love your purchase!`,
         data: { url: '/dashboard/orders', orderId: id },
       }).catch(() => {})
+      // Review request — ask buyer to rate 24h after completion
+      setTimeout(() => {
+        notify({
+          userId: order.buyer_id,
+          type: 'review_request',
+          title: '⭐ How was your order?',
+          body: `You received "${productTitle}". Take a moment to leave a review — it helps other buyers!`,
+          data: { url: `/dashboard/orders`, orderId: id },
+        }).catch(() => {})
+      }, 24 * 60 * 60 * 1000)
+      // Award loyalty points — 1 point per ₦100 spent
+      ;(async () => {
+        try {
+          const totalAmount = Number((order as any).total_amount ?? 0)
+          const points = Math.max(1, Math.floor(totalAmount / 100))
+          const frontendUrl = process.env.FRONTEND_URL ?? ''
+          const internalKey = process.env.INTERNAL_API_KEY ?? ''
+          if (frontendUrl && internalKey) {
+            await fetch(`${frontendUrl}/api/loyalty/earn`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-internal-key': internalKey },
+              body: JSON.stringify({ user_id: order.buyer_id, points, description: `Order #${shortId} completed`, order_id: id }),
+            })
+          }
+        } catch (err: unknown) {
+          logger.warn(`[orderService] Loyalty points failed: ${err instanceof Error ? err.message : String(err)}`)
+        }
+      })()
       addTrustScoreJob({ type: 'order_completed', vendorId: order.seller_id })
         .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
       import('../services/walletService.js')

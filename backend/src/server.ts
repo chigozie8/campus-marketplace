@@ -4,6 +4,9 @@ import logger from './utils/logger.js'
 import { startAutoReleaseJob } from './jobs/escrowAutoRelease.js'
 import { startAutoCancelJob } from './jobs/autoCancelOrders.js'
 import { startLocationCleanupJob } from './jobs/locationCleanup.js'
+import { startCartAbandonmentJob } from './jobs/cartAbandonmentJob.js'
+import { startInactivityJob } from './jobs/inactivityJob.js'
+import { startWeeklySellerDigestJob } from './jobs/weeklySellerDigest.js'
 import { initDb } from './config/db.js'
 
 const PORT = Number(process.env.PORT) || 3001
@@ -23,6 +26,9 @@ initDb()
       startAutoReleaseJob()
       startAutoCancelJob()
       startLocationCleanupJob()
+      startCartAbandonmentJob()
+      startInactivityJob()
+      startWeeklySellerDigestJob()
     })
 
     function shutdown(signal: string): void {

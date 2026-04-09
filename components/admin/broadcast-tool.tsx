@@ -1,19 +1,25 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Megaphone, Users, Store, BadgeCheck, Send, CheckCircle2, Loader2, Trash2, History } from 'lucide-react'
+import { Megaphone, Users, Store, BadgeCheck, Send, CheckCircle2, Loader2, Trash2, History, ShoppingBag, AlertTriangle, Clock } from 'lucide-react'
 import { useConfirm } from '@/components/ui/confirm-dialog'
 
 interface Props {
   totalUsers: number
   totalSellers: number
   totalVerified: number
+  totalBuyers: number
+  totalFlagged: number
+  totalInactive: number
 }
 
 const AUDIENCES = [
-  { key: 'all',              label: 'All Users',         icon: Users,      description: 'Everyone on the platform' },
-  { key: 'sellers',          label: 'Sellers Only',       icon: Store,      description: 'Users with seller accounts' },
-  { key: 'verified_sellers', label: 'Verified Sellers',  icon: BadgeCheck, description: 'Sellers who passed ID verification' },
+  { key: 'all',              label: 'All Users',         icon: Users,       description: 'Everyone on the platform' },
+  { key: 'sellers',          label: 'Sellers Only',      icon: Store,       description: 'Users with seller accounts' },
+  { key: 'verified_sellers', label: 'Verified Sellers',  icon: BadgeCheck,  description: 'Sellers who passed ID verification' },
+  { key: 'buyers',           label: 'Buyers Only',       icon: ShoppingBag, description: 'Users who are not sellers' },
+  { key: 'flagged',          label: 'Flagged Accounts',  icon: AlertTriangle, description: 'Accounts flagged by admins' },
+  { key: 'inactive',         label: 'Inactive (7d+)',    icon: Clock,       description: 'Users not active in 7+ days' },
 ] as const
 
 type Audience = typeof AUDIENCES[number]['key']
@@ -25,7 +31,7 @@ interface BroadcastEntry {
   count: number
 }
 
-export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props) {
+export function BroadcastTool({ totalUsers, totalSellers, totalVerified, totalBuyers, totalFlagged, totalInactive }: Props) {
   const [audience, setAudience] = useState<Audience>('all')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -40,9 +46,12 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
   const [confirmDialog, confirm] = useConfirm()
 
   const audienceCount =
-    audience === 'all'     ? totalUsers :
-    audience === 'sellers' ? totalSellers :
-    totalVerified
+    audience === 'all'              ? totalUsers :
+    audience === 'sellers'          ? totalSellers :
+    audience === 'verified_sellers' ? totalVerified :
+    audience === 'buyers'           ? totalBuyers :
+    audience === 'flagged'          ? totalFlagged :
+    totalInactive
 
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true)
@@ -64,7 +73,7 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
       setError('Please fill in both title and message.')
       return
     }
-    const audienceLabel = audience === 'all' ? 'users' : 'sellers'
+    const audienceLabel = AUDIENCES.find(a => a.key === audience)?.label ?? 'users'
     const ok = await confirm({
       title: 'Send broadcast?',
       message: `"${title}" will be sent to ${audienceCount.toLocaleString()} ${audienceLabel}. This action cannot be undone.`,
@@ -230,7 +239,7 @@ export function BroadcastTool({ totalUsers, totalSellers, totalVerified }: Props
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
               ) : (
-                <><Send className="w-4 h-4" /> Send to {audienceCount.toLocaleString()} {audience === 'all' ? 'users' : 'sellers'}</>
+                <><Send className="w-4 h-4" /> Send to {audienceCount.toLocaleString()} {AUDIENCES.find(a => a.key === audience)?.label ?? 'users'}</>
               )}
             </button>
           </div>

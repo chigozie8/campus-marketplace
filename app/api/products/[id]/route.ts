@@ -8,6 +8,8 @@ function serviceClient() {
   )
 }
 
+const LOW_STOCK_THRESHOLD = 5
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -56,17 +58,17 @@ export async function PATCH(
 
   const supabase = serviceClient()
 
-  const { data: product, error: fetchError } = await supabase
+  const { data: oldProduct, error: fetchError } = await supabase
     .from('products')
-    .select('id, seller_id')
+    .select('id, seller_id, price, stock_quantity, title')
     .eq('id', id)
     .single()
 
-  if (fetchError || !product) {
+  if (fetchError || !oldProduct) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 })
   }
 
-  if (product.seller_id !== userId) {
+  if (oldProduct.seller_id !== userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -79,6 +81,77 @@ export async function PATCH(
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // ── Price drop alert ──────────────────────────────────────────
+  const newPrice = updates.price !== undefined ? Number(updates.price) : null
+  const oldPrice = Number(oldProduct.price)
+  if (newPrice !== null && newPrice < oldPrice) {
+    const { data: wishers } = await supabase
+      .from('favorites')
+      .select('user_id, last_seen_price')
+      .eq('product_id', id)
+
+    for (const w of wishers ?? []) {
+      const userLastPrice = w.last_seen_price ?? oldPrice
+      if (newPrice < userLastPrice) {
+        await supabase.from('notifications').insert({
+          user_id: w.user_id,
+          type: 'price_drop',
+          title: '📉 Price Drop on Your Wishlist!',
+          body: `"${oldProduct.title}" dropped from ₦${userLastPrice.toLocaleString()} to ₦${newPrice.toLocaleString()}!`,
+          read: false,
+        }).catch(() => {})
+
+        // Update last seen price
+        await supabase
+          .from('favorites')
+          .update({ last_seen_price: newPrice })
+          .eq('user_id', w.user_id)
+          .eq('product_id', id)
+          .catch(() => {})
+      }
+    }
+  }
+
+  // ── Low stock alert to seller ─────────────────────────────────
+  const newStock = updates.stock_quantity !== undefined ? Number(updates.stock_quantity) : null
+  const oldStock = oldProduct.stock_quantity !== null ? Number(oldProduct.stock_quantity) : null
+  if (newStock !== null && newStock <= LOW_STOCK_THRESHOLD && (oldStock === null || oldStock > LOW_STOCK_THRESHOLD)) {
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      type: 'low_stock',
+      title: '⚠️ Low Stock Alert',
+      body: `"${oldProduct.title}" only has ${newStock} unit${newStock !== 1 ? 's' : ''} left. Restock soon to avoid missing sales!`,
+      read: false,
+    }).catch(() => {})
+  }
+
+  // ── Restock notifications to waitlist ─────────────────────────
+  if (newStock !== null && newStock > 0 && (oldStock !== null && oldStock <= 0)) {
+    const { data: waitlist } = await supabase
+      .from('restock_waitlist')
+      .select('user_id')
+      .eq('product_id', id)
+      .eq('notified', false)
+
+    for (const w of waitlist ?? []) {
+      await supabase.from('notifications').insert({
+        user_id: w.user_id,
+        type: 'restock',
+        title: '🔔 Back in Stock!',
+        body: `"${oldProduct.title}" is back in stock. Grab it before it sells out again!`,
+        read: false,
+      }).catch(() => {})
+    }
+
+    if (waitlist && waitlist.length > 0) {
+      await supabase
+        .from('restock_waitlist')
+        .update({ notified: true })
+        .eq('product_id', id)
+        .catch(() => {})
+    }
   }
 
   return NextResponse.json({ product: data })
