@@ -60,13 +60,10 @@ export default function LoginPage() {
         error.message.toLowerCase().includes('email not confirmed') ||
         (error as { code?: string }).code === 'email_not_confirmed'
       if (isUnconfirmed) {
-        toast.error('Email not confirmed', {
-          description: 'Please check your inbox (and spam folder) and click the confirmation link.',
-          duration: 8000,
-        })
-        // Resend confirmation silently
         await supabase.auth.resend({ type: 'signup', email })
-        toast.info('We\'ve resent your confirmation email.', { duration: 5000 })
+        router.push(`/auth/verify?email=${encodeURIComponent(email)}&resent=1`)
+        setLoading(false)
+        return
       } else {
         toast.error(error.message, { description: 'Check your email and password and try again.' })
       }

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   CheckCircle2, ShieldCheck, Sparkles, Lock,
-  Mail, ShoppingBag, Store, GraduationCap, Phone
+  ShoppingBag, Store, GraduationCap, Phone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,11 +71,7 @@ function SignUpPageInner() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const [resending, setResending] = useState(false)
-  const [resentAt, setResentAt] = useState<number | null>(null)
-
   function handleEmailChange(val: string) {
     setEmail(val)
     const uni = detectUniversity(val)
@@ -95,7 +91,6 @@ function SignUpPageInner() {
       email,
       password,
       options: {
-        emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
         data: {
           full_name: fullName,
           whatsapp_number: whatsapp,
@@ -112,83 +107,8 @@ function SignUpPageInner() {
       setLoading(false)
       return
     }
-    toast.success('Account created!', { description: 'Check your email to confirm.' })
-    setSuccess(true)
-    setLoading(false)
-  }
-
-  async function handleResend() {
-    const now = Date.now()
-    if (resentAt && now - resentAt < 60000) {
-      toast.error('Please wait a minute before resending.')
-      return
-    }
-    setResending(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.resend({ type: 'signup', email })
-    setResending(false)
-    if (error) {
-      toast.error(error.message)
-    } else {
-      setResentAt(now)
-      toast.success('Confirmation email resent!', { description: 'Check your inbox and spam folder.' })
-    }
-  }
-
-  // ── Success state ──
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background px-6">
-        <div className="text-center max-w-md">
-          <div className="relative w-24 h-24 mx-auto mb-8">
-            <div className="absolute inset-0 bg-[#16a34a]/20 rounded-full animate-ping" />
-            <div className="absolute inset-2 bg-[#16a34a]/10 rounded-full animate-ping [animation-delay:150ms]" />
-            <div className="relative w-24 h-24 bg-[#0a0a0a] rounded-full flex items-center justify-center shadow-2xl">
-              <Mail className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-3">Check your inbox</h2>
-          <p className="text-gray-500 dark:text-muted-foreground leading-relaxed mb-2 text-sm max-w-sm mx-auto">
-            We sent a confirmation link to{' '}
-            <span className="font-semibold text-gray-900 dark:text-white">{email}</span>.
-            Click it to activate your VendoorX account.
-          </p>
-          <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-6 text-left">
-            ⚠️ <strong>Check your spam/junk folder</strong> — confirmation emails sometimes land there. If you still don&apos;t see it, click Resend below.
-          </p>
-          <div className="bg-gray-50 dark:bg-muted rounded-2xl p-4 mb-6 text-left space-y-2">
-            {[
-              "Open the email and click the confirmation link",
-              "The link expires in 24 hours",
-              "After confirming, return here to sign in",
-            ].map((tip) => (
-              <div key={tip} className="flex items-start gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                <CheckCircle2 className="w-4 h-4 text-[#16a34a] mt-0.5 flex-shrink-0" />
-                {tip}
-              </div>
-            ))}
-          </div>
-          <div className="space-y-3">
-            <Button asChild className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold rounded-xl">
-              <Link href="/auth/login">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Sign In
-              </Link>
-            </Button>
-            <button
-              onClick={handleResend}
-              disabled={resending}
-              className="w-full h-11 rounded-xl border-2 border-gray-200 dark:border-border text-sm font-semibold text-gray-700 dark:text-foreground hover:border-[#16a34a] hover:text-[#16a34a] transition-all disabled:opacity-50"
-            >
-              {resending ? 'Resending…' : 'Resend confirmation email'}
-            </button>
-            <button onClick={() => setSuccess(false)} className="text-sm text-[#16a34a] hover:underline font-medium">
-              Try a different email
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    toast.success('Account created!', { description: 'Check your email for a 6-digit code.' })
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
   }
 
   return (
