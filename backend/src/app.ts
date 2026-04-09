@@ -16,6 +16,7 @@ import webhookRoutes from './routes/webhookRoutes.js'
 import verificationRoutes from './routes/verificationRoutes.js'
 import payoutRoutes from './routes/payoutRoutes.js'
 import walletRoutes from './routes/walletRoutes.js'
+import deliveryOtpRoutes from './routes/deliveryOtpRoutes.js'
 
 const app = express()
 
@@ -52,6 +53,7 @@ app.use('/api/webhooks', webhookRoutes)
 app.use('/api/v1/verification', verificationRoutes)
 app.use('/api/payouts', payoutRoutes)
 app.use('/api/wallets', walletRoutes)
+app.use('/api/delivery-otp', deliveryOtpRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
