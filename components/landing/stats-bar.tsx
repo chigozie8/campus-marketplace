@@ -61,7 +61,7 @@ function useCountUp(end: number, duration = 1400, decimal = false) {
 
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) startAnimation() },
-      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
+      { threshold: 0, rootMargin: '0px 0px 200px 0px' },
     )
     observer.observe(el)
 
