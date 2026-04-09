@@ -27,6 +27,7 @@ import {
   Briefcase,
   AlertTriangle,
   ShieldCheck,
+  TrendingUp,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -49,8 +50,9 @@ const NAV_ITEMS = [
   { label: 'Pricing',         href: '/admin/pricing',           icon: DollarSign },
   { label: 'Referral',        href: '/admin/referral',          icon: Gift },
   { label: 'Boost Pricing',   href: '/admin/boost',             icon: Zap },
+  { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
-  { label: 'Press Kit',       href: '/admin/press',             icon: FileText },
+  { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
   { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]

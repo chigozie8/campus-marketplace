@@ -28,9 +28,13 @@ export type SiteSettings = {
   social_tiktok_url: string
   /* ── Platform Stats ── */
   stat_active_vendors: string
+  stat_active_vendors_sub: string
   stat_campuses: string
+  stat_campuses_sub: string
   stat_transactions: string
+  stat_transactions_sub: string
   stat_rating: string
+  stat_rating_sub: string
   /* ── Hero Avatars ── */
   hero_avatar_1: string
   hero_avatar_2: string
@@ -161,9 +165,13 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   social_tiktok_url: 'https://tiktok.com/@vendoorx',
   /* stats */
   stat_active_vendors: '50,000+',
+  stat_active_vendors_sub: 'Selling right now',
   stat_campuses: '120+',
+  stat_campuses_sub: 'From UNILAG to BUK',
   stat_transactions: '₦2B+',
+  stat_transactions_sub: 'And growing daily',
   stat_rating: '4.9/5',
+  stat_rating_sub: 'From 12,500+ reviews',
   /* avatars */
   hero_avatar_1: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=80&h=80&fit=crop&crop=faces&q=80',
   hero_avatar_2: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=80&h=80&fit=crop&crop=faces&q=80',

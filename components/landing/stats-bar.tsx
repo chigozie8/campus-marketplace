@@ -3,44 +3,21 @@
 import { useEffect, useState, useRef } from 'react'
 import { Users, Building2, TrendingUp, Star } from 'lucide-react'
 
-const STATS = [
-  {
-    endValue: 50,
-    prefix: '',
-    suffix: 'K+',
-    label: 'Active Vendors',
-    sublabel: 'Selling right now',
-    icon: Users,
-    isDecimal: false,
-  },
-  {
-    endValue: 120,
-    prefix: '',
-    suffix: '+',
-    label: 'Nigerian Campuses',
-    sublabel: 'From UNILAG to BUK',
-    icon: Building2,
-    isDecimal: false,
-  },
-  {
-    endValue: 2.4,
-    prefix: '₦',
-    suffix: 'B+',
-    label: 'Sales Processed',
-    sublabel: 'And growing daily',
-    icon: TrendingUp,
-    isDecimal: true,
-  },
-  {
-    endValue: 4.9,
-    prefix: '',
-    suffix: '/5',
-    label: 'Average Rating',
-    sublabel: 'From 12,500+ reviews',
-    icon: Star,
-    isDecimal: true,
-  },
-]
+export interface StatItem {
+  value: string
+  label: string
+  sublabel: string
+}
+
+const ICONS = [Users, Building2, TrendingUp, Star]
+
+function parseNumber(str: string): { num: number; isDecimal: boolean } {
+  const cleaned = str.replace(/[₦,\s]/g, '')
+  const match = cleaned.match(/^(\d+\.?\d*)/)
+  if (!match) return { num: 0, isDecimal: false }
+  const num = parseFloat(match[1])
+  return { num, isDecimal: num % 1 !== 0 }
+}
 
 function useCountUp(end: number, duration = 1800, isDecimal = false) {
   const [count, setCount] = useState(0)
@@ -51,9 +28,7 @@ function useCountUp(end: number, duration = 1800, isDecimal = false) {
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started) setStarted(true)
-      },
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true) },
       { threshold: 0.4 },
     )
     observer.observe(el)
@@ -79,16 +54,14 @@ function useCountUp(end: number, duration = 1800, isDecimal = false) {
   return { count, ref }
 }
 
-function Stat({
-  endValue,
-  prefix,
-  suffix,
-  label,
-  sublabel,
-  icon: Icon,
-  isDecimal,
-}: (typeof STATS)[number]) {
-  const { count, ref } = useCountUp(endValue, 1800, isDecimal)
+function StatCard({ stat, Icon, index }: { stat: StatItem; Icon: typeof Users; index: number }) {
+  const { num, isDecimal } = parseNumber(stat.value)
+  const { count, ref } = useCountUp(num, 1800, isDecimal)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    if (count >= num && num > 0) setDone(true)
+  }, [count, num])
 
   return (
     <div
@@ -99,23 +72,33 @@ function Stat({
         <Icon className="w-4.5 h-4.5 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-extrabold text-foreground tabular-nums tracking-tight">
-        {prefix}
-        {isDecimal ? count.toFixed(1) : count}
-        {suffix}
+        {done || num === 0 ? stat.value : (isDecimal ? count.toFixed(1) : count.toLocaleString())}
       </p>
-      <p className="text-xs sm:text-sm text-foreground font-semibold text-center">{label}</p>
-      <p className="text-[11px] text-muted-foreground text-center leading-tight">{sublabel}</p>
+      <p className="text-xs sm:text-sm text-foreground font-semibold text-center">{stat.label}</p>
+      <p className="text-[11px] text-muted-foreground text-center leading-tight">{stat.sublabel}</p>
     </div>
   )
 }
 
-export function StatsBar() {
+interface Props {
+  stats?: StatItem[]
+}
+
+const DEFAULT_STATS: StatItem[] = [
+  { value: '50,000+', label: 'Active Vendors',      sublabel: 'Selling right now' },
+  { value: '120+',    label: 'Nigerian Campuses',    sublabel: 'From UNILAG to BUK' },
+  { value: '₦2.4B+',  label: 'Sales Processed',     sublabel: 'And growing daily' },
+  { value: '4.9/5',   label: 'Average Rating',       sublabel: 'From 12,500+ reviews' },
+]
+
+export function StatsBar({ stats }: Props) {
+  const items = stats ?? DEFAULT_STATS
   return (
     <section className="border-y border-border bg-muted/30 dark:bg-muted/10">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
-          {STATS.map((stat) => (
-            <Stat key={stat.label} {...stat} />
+          {items.map((stat, i) => (
+            <StatCard key={stat.label} stat={stat} Icon={ICONS[i]} index={i} />
           ))}
         </div>
       </div>

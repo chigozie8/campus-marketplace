@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Target, Heart, Zap, Shield, Users, Globe, TrendingUp, CheckCircle2 } from 'lucide-react'
+import { getSiteSettings } from '@/lib/site-settings'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'About VendoorX — Nigeria\'s #1 Campus Marketplace',
@@ -46,14 +49,18 @@ const MILESTONES = [
   { year: '2026', event: 'Expanding to West Africa — Ghana, Kenya, and beyond 🌍' },
 ]
 
-const STATS = [
-  { value: '50K+', label: 'Active Vendors', icon: Users },
-  { value: '120+', label: 'Campuses', icon: Globe },
-  { value: '₦2B+', label: 'Transactions', icon: TrendingUp },
-  { value: '4.9/5', label: 'Avg Rating', icon: Target },
-]
+const STAT_ICONS = [Users, Globe, TrendingUp, Target]
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const settings = await getSiteSettings()
+
+  const STATS = [
+    { value: settings.stat_active_vendors, label: 'Active Vendors',    icon: Users },
+    { value: settings.stat_campuses,        label: 'Campuses',           icon: Globe },
+    { value: settings.stat_transactions,    label: 'Transactions',       icon: TrendingUp },
+    { value: settings.stat_rating,          label: 'Avg Rating',         icon: Target },
+  ]
+
   return (
     <div className="bg-background">
 
@@ -181,7 +188,7 @@ export default function AboutPage() {
             <span className="text-primary">the movement?</span>
           </h2>
           <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-            Join 50,000+ students already building their campus businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
+            Join {settings.stat_active_vendors} students already building their campus businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
           </p>
           <Link
             href="/auth/sign-up"

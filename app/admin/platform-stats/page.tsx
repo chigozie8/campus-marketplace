@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getSiteSettings } from '@/lib/site-settings'
-import { PressKitEditor } from '@/components/admin/press-kit-editor'
+import { PlatformStatsEditor } from '@/components/admin/platform-stats-editor'
 
-export default async function AdminPressPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function AdminPlatformStatsPage() {
   const supabase = await createClient()
   if (!supabase) redirect('/auth/login')
 
@@ -19,12 +21,12 @@ export default async function AdminPressPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
       <div>
-        <h2 className="text-lg font-black text-foreground tracking-tight">Newsroom</h2>
+        <h2 className="text-lg font-black text-foreground tracking-tight">Platform Stats</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Edit the content shown on your public newsroom page at <span className="font-mono text-xs">/press</span>
+          Control the figures displayed on the homepage, About page, and Newsroom. Changes appear instantly with no cache.
         </p>
       </div>
-      <PressKitEditor initialSettings={settings} />
+      <PlatformStatsEditor initialSettings={settings} />
     </div>
   )
 }

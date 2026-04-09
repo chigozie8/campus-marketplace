@@ -181,7 +181,12 @@ export default async function Home() {
       />
       <LandingNav user={user} />
       <HeroSection user={user} settings={settings} />
-      <StatsBar />
+      <StatsBar stats={[
+        { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
+        { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
+        { value: settings.stat_transactions,    label: 'Sales Processed',   sublabel: settings.stat_transactions_sub },
+        { value: settings.stat_rating,          label: 'Average Rating',    sublabel: settings.stat_rating_sub },
+      ]} />
       <TrustedBySection />
       <ProblemSolutionSection />
       <WhatsappMockupSection />

@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Quote } from 'lucide-react'
+import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Sparkles, Award, TrendingUp } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { parsePressAssets } from '@/lib/site-settings-defaults'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Press Kit | VendoorX',
-  description: 'Download VendoorX brand assets, logos, and media kit for press coverage. Contact our CEO Kenneth Okoronkwo for interview requests.',
+  title: 'Newsroom | VendoorX',
+  description: 'VendoorX brand assets, company story, founder details, and media contact information. Everything journalists and partners need in one place.',
 }
 
 export default async function PressPage() {
@@ -33,7 +33,7 @@ export default async function PressPage() {
             <FileText className="w-3.5 h-3.5" />
             Media &amp; Press
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-4">Press Kit</h1>
+          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-4">Newsroom</h1>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
             Writing about VendoorX? We&apos;ve got everything you need — brand assets, key statistics, company background, founder details, and media contact information.
           </p>
@@ -59,72 +59,132 @@ export default async function PressPage() {
             </p>
           </div>
 
-          {/* ── Founder section ── */}
+          {/* ── Founder section — REDESIGNED ── */}
           <div>
             <h2 className="text-xl font-black text-foreground mb-6">Founder &amp; Leadership</h2>
-            <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl border border-border bg-card">
-              {/* Avatar */}
-              <div className="shrink-0 flex flex-col items-center sm:items-start gap-3">
-                {settings.press_founder_photo ? (
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
-                    <Image
-                      src={settings.press_founder_photo}
-                      alt={settings.press_founder_name}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #16a34a 0%, #0d9488 100%)' }}
-                  >
-                    {settings.press_founder_initials}
-                  </div>
-                )}
-                <div className="flex flex-col gap-1">
-                  <a
-                    href="tel:+15792583013"
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Phone className="w-3 h-3" /> +1 (579) 258-3013
-                  </a>
-                  <a
-                    href={`mailto:${settings.press_contact_email}`}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Mail className="w-3 h-3" /> {settings.press_contact_email}
-                  </a>
-                </div>
-              </div>
 
-              {/* Bio */}
-              <div className="flex-1 min-w-0">
-                <div className="mb-1">
-                  <h3 className="text-xl font-black text-foreground">{settings.press_founder_name}</h3>
-                  <p className="text-sm font-bold text-primary">{settings.press_founder_title}</p>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mt-3">
-                  {settings.press_founder_bio}
-                </p>
-                {settings.press_founder_bio2 && (
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">
-                    {settings.press_founder_bio2}
-                  </p>
-                )}
+            {/* Main card — dark & dramatic */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-[#0f1a0f] to-gray-900 border border-gray-800 shadow-2xl">
 
-                {/* Quote */}
-                {settings.press_founder_quote && (
-                  <div className="mt-5 pl-4 border-l-2 border-primary">
-                    <Quote className="w-4 h-4 text-primary/50 mb-1" />
-                    <p className="text-sm italic text-foreground leading-relaxed">
-                      &ldquo;{settings.press_founder_quote}&rdquo;
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2 font-semibold">— {settings.press_founder_name}, {settings.press_founder_title}</p>
+              {/* Decorative circles */}
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+
+              <div className="relative flex flex-col lg:flex-row gap-0">
+
+                {/* Left column — avatar + name + contact */}
+                <div className="flex flex-col items-center lg:items-start gap-5 p-8 lg:p-10 lg:w-72 lg:border-r lg:border-white/5 lg:shrink-0">
+                  {/* Avatar */}
+                  <div className="relative">
+                    <div className="absolute inset-0 scale-110 rounded-3xl bg-primary/30 blur-xl" />
+                    <div className="relative w-28 h-28 lg:w-36 lg:h-36 rounded-3xl overflow-hidden ring-2 ring-primary/40 shadow-2xl shadow-primary/20">
+                      {settings.press_founder_photo ? (
+                        <Image
+                          src={settings.press_founder_photo}
+                          alt={settings.press_founder_name}
+                          width={144}
+                          height={144}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex items-center justify-center text-white text-4xl font-black"
+                          style={{ background: 'linear-gradient(135deg, #16a34a 0%, #0d9488 60%, #0891b2 100%)' }}
+                        >
+                          {settings.press_founder_initials}
+                        </div>
+                      )}
+                    </div>
+                    {/* Verified badge */}
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg ring-2 ring-gray-900">
+                      <Award className="w-4 h-4 text-white" />
+                    </div>
                   </div>
-                )}
+
+                  {/* Name & title */}
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-2xl font-black text-white leading-tight">{settings.press_founder_name}</h3>
+                    <p className="text-sm font-bold text-primary mt-1">{settings.press_founder_title}</p>
+                  </div>
+
+                  {/* Achievement chips */}
+                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
+                      <TrendingUp className="w-3 h-3" />
+                      {settings.stat_active_vendors} Vendors
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-xs font-bold">
+                      {settings.stat_campuses} Campuses
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-bold">
+                      {settings.stat_transactions} GMV
+                    </span>
+                  </div>
+
+                  {/* Contact */}
+                  <div className="flex flex-col gap-2 w-full">
+                    <a
+                      href={`mailto:${settings.press_contact_email}`}
+                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/40 text-white/70 hover:text-white text-xs font-semibold transition-all"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="truncate">{settings.press_contact_email}</span>
+                    </a>
+                    <a
+                      href="tel:+15792583013"
+                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/40 text-white/70 hover:text-white text-xs font-semibold transition-all"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
+                      +1 (579) 258-3013
+                    </a>
+                  </div>
+                </div>
+
+                {/* Right column — quote + bio */}
+                <div className="flex-1 flex flex-col justify-center p-8 lg:p-10 min-w-0">
+
+                  {/* Big quote */}
+                  {settings.press_founder_quote && (
+                    <div className="mb-8">
+                      <div className="text-7xl font-black leading-none text-primary/25 select-none mb-3">&ldquo;</div>
+                      <p className="text-xl sm:text-2xl font-bold text-white leading-relaxed italic">
+                        {settings.press_founder_quote}
+                      </p>
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="w-8 h-0.5 bg-primary rounded-full" />
+                        <p className="text-primary text-xs font-bold">{settings.press_founder_name}, {settings.press_founder_title}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Divider */}
+                  {settings.press_founder_quote && (
+                    <div className="w-full h-px bg-white/5 mb-8" />
+                  )}
+
+                  {/* Bio */}
+                  <div className="space-y-4">
+                    {settings.press_founder_bio && (
+                      <p className="text-white/60 text-sm leading-relaxed">{settings.press_founder_bio}</p>
+                    )}
+                    {settings.press_founder_bio2 && (
+                      <p className="text-white/60 text-sm leading-relaxed">{settings.press_founder_bio2}</p>
+                    )}
+                  </div>
+
+                  {/* CTA */}
+                  <div className="mt-8">
+                    <Link
+                      href={`/contact?subject=Press Enquiry — Interview Request`}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/25"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Request an Interview
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
