@@ -17,19 +17,70 @@ function hashOtp(otp: string): string {
 export interface OtpRecord {
   id: string
   order_id: string
-  phone: string
-  otp_hash: string
+  phone: string | null
+  otp_hash: string | null
+  appwrite_user_id: string | null
   expires_at: Date
   attempts: number
   used: boolean
   created_at: Date
 }
 
-export async function createOtp(orderId: string, phone: string): Promise<string> {
+// ---------------------------------------------------------------------------
+// Appwrite-based OTP (email) — no local hash needed; Appwrite verifies the code
+// ---------------------------------------------------------------------------
+
+/**
+ * Store a record that links orderId → appwrite_user_id.
+ * Appwrite itself holds the actual OTP secret.
+ */
+export async function createAppwriteOtpRecord(
+  orderId: string,
+  appwriteUserId: string,
+): Promise<void> {
+  await query(`DELETE FROM delivery_otps WHERE order_id = $1`, [orderId])
+
+  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000)
+
   await query(
-    `DELETE FROM delivery_otps WHERE order_id = $1`,
-    [orderId]
+    `INSERT INTO delivery_otps (order_id, appwrite_user_id, expires_at)
+     VALUES ($1, $2, $3)`,
+    [orderId, appwriteUserId, expiresAt],
   )
+
+  logger.info(`[otpService] Appwrite OTP record created for order ${orderId}`)
+}
+
+/**
+ * Retrieve the Appwrite userId linked to an order's pending OTP.
+ * Returns null if none found / already used / expired.
+ */
+export async function getAppwriteOtpRecord(orderId: string): Promise<OtpRecord | null> {
+  const result = await query<OtpRecord>(
+    `SELECT * FROM delivery_otps WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1`,
+    [orderId],
+  )
+  if (result.rowCount === 0) return null
+  return result.rows[0]
+}
+
+/**
+ * Mark the Appwrite OTP record as used (after successful Appwrite verification).
+ */
+export async function markAppwriteOtpUsed(orderId: string): Promise<void> {
+  await query(
+    `UPDATE delivery_otps SET used = TRUE WHERE order_id = $1`,
+    [orderId],
+  )
+  logger.info(`[otpService] Appwrite OTP marked used for order ${orderId}`)
+}
+
+// ---------------------------------------------------------------------------
+// Legacy Termii/hash-based OTP — kept for backward compatibility
+// ---------------------------------------------------------------------------
+
+export async function createOtp(orderId: string, phone: string): Promise<string> {
+  await query(`DELETE FROM delivery_otps WHERE order_id = $1`, [orderId])
 
   const otp = generateOtp()
   const hash = hashOtp(otp)
@@ -38,7 +89,7 @@ export async function createOtp(orderId: string, phone: string): Promise<string>
   await query(
     `INSERT INTO delivery_otps (order_id, phone, otp_hash, expires_at)
      VALUES ($1, $2, $3, $4)`,
-    [orderId, phone, hash, expiresAt]
+    [orderId, phone, hash, expiresAt],
   )
 
   logger.info(`[otpService] OTP created for order ${orderId}`)
@@ -52,31 +103,18 @@ export type VerifyResult =
 export async function verifyOtp(orderId: string, otp: string): Promise<VerifyResult> {
   const result = await query<OtpRecord>(
     `SELECT * FROM delivery_otps WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1`,
-    [orderId]
+    [orderId],
   )
 
-  if (result.rowCount === 0) {
-    return { success: false, reason: 'not_found' }
-  }
+  if (result.rowCount === 0) return { success: false, reason: 'not_found' }
 
   const record = result.rows[0]
 
-  if (record.used) {
-    return { success: false, reason: 'used' }
-  }
+  if (record.used) return { success: false, reason: 'used' }
+  if (new Date() > new Date(record.expires_at)) return { success: false, reason: 'expired' }
+  if (record.attempts >= MAX_ATTEMPTS) return { success: false, reason: 'max_attempts' }
 
-  if (new Date() > new Date(record.expires_at)) {
-    return { success: false, reason: 'expired' }
-  }
-
-  if (record.attempts >= MAX_ATTEMPTS) {
-    return { success: false, reason: 'max_attempts' }
-  }
-
-  await query(
-    `UPDATE delivery_otps SET attempts = attempts + 1 WHERE id = $1`,
-    [record.id]
-  )
+  await query(`UPDATE delivery_otps SET attempts = attempts + 1 WHERE id = $1`, [record.id])
 
   const inputHash = hashOtp(otp)
   if (inputHash !== record.otp_hash) {
@@ -84,18 +122,14 @@ export async function verifyOtp(orderId: string, otp: string): Promise<VerifyRes
     return { success: false, reason: 'invalid' }
   }
 
-  await query(
-    `UPDATE delivery_otps SET used = TRUE WHERE id = $1`,
-    [record.id]
-  )
-
+  await query(`UPDATE delivery_otps SET used = TRUE WHERE id = $1`, [record.id])
   logger.info(`[otpService] OTP verified successfully for order ${orderId}`)
   return { success: true }
 }
 
 export async function cleanupExpiredOtps(): Promise<void> {
   const result = await query(
-    `DELETE FROM delivery_otps WHERE expires_at < NOW() AND used = FALSE`
+    `DELETE FROM delivery_otps WHERE expires_at < NOW() AND used = FALSE`,
   )
   if ((result.rowCount ?? 0) > 0) {
     logger.info(`[otpService] Cleaned up ${result.rowCount} expired OTPs`)

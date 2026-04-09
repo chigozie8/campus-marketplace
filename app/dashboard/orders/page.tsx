@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield, Flag } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
@@ -47,33 +47,101 @@ function formatCountdown(ms: number) {
   return `${seconds}s remaining`
 }
 
+function OtpDigitInput({ value, onChange, onKeyDown, setRef }: {
+  value: string
+  onChange: (v: string) => void
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  setRef: (el: HTMLInputElement | null) => void
+}) {
+  return (
+    <input
+      ref={setRef}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      value={value}
+      onChange={e => onChange(e.target.value.replace(/\D/g, '').slice(-1))}
+      onKeyDown={onKeyDown}
+      className="w-10 h-12 text-center text-lg font-black rounded-xl border-2 border-border focus:border-emerald-500 bg-background text-foreground outline-none transition-colors caret-transparent"
+    />
+  )
+}
+
 function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; onConfirmed: () => void }) {
-  const [showDialog, setShowDialog] = useState(false)
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [error, setError] = useState('')
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null, null, null, null])
   const remaining = useCountdown(order.delivered_at ?? order.updated_at)
 
   if (confirmed || order.status !== 'delivered') return null
 
-  async function handleConfirm() {
+  const otp = digits.join('')
+
+  function handleChange(idx: number, val: string) {
+    if (!val) return
+    const next = [...digits]
+    next[idx] = val
+    setDigits(next)
+    setError('')
+    if (idx < 5) inputRefs.current[idx + 1]?.focus()
+  }
+
+  function handleKeyDown(idx: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace') {
+      const next = [...digits]
+      if (digits[idx]) {
+        next[idx] = ''
+        setDigits(next)
+      } else if (idx > 0) {
+        next[idx - 1] = ''
+        setDigits(next)
+        inputRefs.current[idx - 1]?.focus()
+      }
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      inputRefs.current[idx - 1]?.focus()
+    } else if (e.key === 'ArrowRight' && idx < 5) {
+      inputRefs.current[idx + 1]?.focus()
+    }
+  }
+
+  function handlePaste(e: React.ClipboardEvent) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (pasted.length === 6) {
+      setDigits(pasted.split(''))
+      setError('')
+      inputRefs.current[5]?.focus()
+    }
+    e.preventDefault()
+  }
+
+  async function handleVerify() {
+    if (otp.length !== 6) { setError('Please enter all 6 digits'); return }
     setConfirming(true)
+    setError('')
     try {
       const token = await getToken()
-      const res = await fetch(`/api/backend/orders/${order.id}/confirm-delivery`, {
+      const res = await fetch(`/api/backend/delivery-otp/${order.id}/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        body: JSON.stringify({ otp }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Confirmation failed')
+      if (!res.ok) {
+        setError(data.message || 'Verification failed')
+        setDigits(['', '', '', '', '', ''])
+        inputRefs.current[0]?.focus()
+        return
+      }
       toast.success('Delivery confirmed! Funds released to the seller.')
       setConfirmed(true)
-      setShowDialog(false)
       onConfirmed()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+    } catch {
+      setError('Something went wrong. Please try again.')
     } finally {
       setConfirming(false)
     }
@@ -84,53 +152,48 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
       <div className="flex items-center gap-2">
         <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-          Received your order? Release payment to the seller.
+          Enter the delivery code sent to your email
         </p>
       </div>
+
+      <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/70 leading-relaxed">
+        The vendor sent a 6-digit code to your email. Enter it below to confirm receipt and release{' '}
+        <span className="font-bold">₦{order.total_amount.toLocaleString()}</span> to the seller.
+      </p>
 
       {remaining !== null && remaining > 0 && (
         <div className="flex items-center gap-1.5 text-[11px] text-amber-700 dark:text-amber-400">
           <Timer className="w-3.5 h-3.5 shrink-0" />
-          <span>Auto-release in <span className="font-bold tabular-nums">{formatCountdown(remaining)}</span> if you don&apos;t confirm</span>
+          <span>Auto-release in <span className="font-bold tabular-nums">{formatCountdown(remaining)}</span></span>
         </div>
-      )}
-      {remaining === 0 && (
-        <p className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold">
-          Auto-release period has ended — funds have been automatically released to the seller.
-        </p>
       )}
 
-      {!showDialog ? (
-        <button
-          onClick={() => setShowDialog(true)}
-          className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-bold transition-all shadow-md shadow-emerald-500/20"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          Confirm Delivery
-        </button>
-      ) : (
-        <div className="space-y-2.5">
-          <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
-            By confirming, you release <span className="font-bold">₦{order.total_amount.toLocaleString()}</span> to the seller. Only confirm if you&apos;ve received your item in good condition.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowDialog(false)}
-              className="flex-1 h-9 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleConfirm}
-              disabled={confirming}
-              className="flex-1 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
-            >
-              {confirming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-              Yes, I got it!
-            </button>
-          </div>
-        </div>
+      <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+        {digits.map((d, i) => (
+          <OtpDigitInput
+            key={i}
+            value={d}
+            onChange={v => handleChange(i, v)}
+            onKeyDown={e => handleKeyDown(i, e)}
+            setRef={el => { inputRefs.current[i] = el }}
+          />
+        ))}
+      </div>
+
+      {error && (
+        <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold text-center">{error}</p>
       )}
+
+      <button
+        onClick={handleVerify}
+        disabled={confirming || otp.length !== 6}
+        className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-sm font-bold transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {confirming
+          ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Verifying…</>
+          : <><CheckCircle2 className="w-4 h-4" />Confirm Delivery</>
+        }
+      </button>
     </div>
   )
 }

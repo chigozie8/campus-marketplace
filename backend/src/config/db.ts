@@ -33,16 +33,20 @@ export async function query<T = unknown>(
 export async function initDb(): Promise<void> {
   await query(`
     CREATE TABLE IF NOT EXISTS delivery_otps (
-      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      order_id    TEXT NOT NULL,
-      phone       TEXT NOT NULL,
-      otp_hash    TEXT NOT NULL,
-      expires_at  TIMESTAMPTZ NOT NULL,
-      attempts    INT NOT NULL DEFAULT 0,
-      used        BOOLEAN NOT NULL DEFAULT FALSE,
-      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      order_id          TEXT NOT NULL,
+      phone             TEXT,
+      otp_hash          TEXT,
+      appwrite_user_id  TEXT,
+      expires_at        TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '10 minutes'),
+      attempts          INT NOT NULL DEFAULT 0,
+      used              BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `)
+  await query(`ALTER TABLE delivery_otps ADD COLUMN IF NOT EXISTS appwrite_user_id TEXT`)
+  await query(`ALTER TABLE delivery_otps ALTER COLUMN phone DROP NOT NULL`)
+  await query(`ALTER TABLE delivery_otps ALTER COLUMN otp_hash DROP NOT NULL`)
   await query(`
     CREATE INDEX IF NOT EXISTS delivery_otps_order_id_idx ON delivery_otps (order_id)
   `)
