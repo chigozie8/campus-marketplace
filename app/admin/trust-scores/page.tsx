@@ -273,7 +273,8 @@ export default function TrustScoresPage() {
                 {displayed.map(user => (
                   <tr
                     key={user.id}
-                    className={`hover:bg-muted/30 transition-colors ${user.is_flagged ? 'bg-red-50/40 dark:bg-red-950/10' : ''}`}
+                    onClick={() => setManaging(user)}
+                    className={`hover:bg-primary/5 transition-colors cursor-pointer ${user.is_flagged ? 'bg-red-50/40 dark:bg-red-950/10' : ''}`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -384,11 +385,11 @@ export default function TrustScoresPage() {
 
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => setManaging(user)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-bold text-foreground transition-colors"
+                        onClick={e => { e.stopPropagation(); setManaging(user) }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-bold transition-opacity whitespace-nowrap"
                       >
-                        <Sliders className="w-3.5 h-3.5" />
-                        Manage
+                        <Award className="w-3.5 h-3.5" />
+                        Badges &amp; Score
                       </button>
                     </td>
                   </tr>
@@ -466,6 +467,7 @@ function TrustManageModal({
   onClose: () => void
   onSaved: (patch: Partial<UserTrust>) => void
 }) {
+  const [activeTab, setActiveTab] = useState<'badges' | 'score' | 'flag'>('badges')
   const [isFlagged, setIsFlagged] = useState(user.is_flagged ?? false)
   const [flagReason, setFlagReason] = useState(user.flag_reason ?? '')
   const [badges, setBadges] = useState<string[]>(user.admin_badges ?? [])
@@ -474,14 +476,17 @@ function TrustManageModal({
   const [overrideNote, setOverrideNote] = useState(user.score_override_note ?? '')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [saved, setSaved] = useState(false)
 
   function toggleBadge(id: string) {
     setBadges(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id])
+    setSaved(false)
   }
 
   async function handleSave() {
     setSaving(true)
     setSaveError('')
+    setSaved(false)
     try {
       const body: Record<string, unknown> = {
         is_flagged: isFlagged,
@@ -502,6 +507,7 @@ function TrustManageModal({
         throw new Error(json.error ?? 'Save failed')
       }
 
+      setSaved(true)
       onSaved({
         is_flagged: isFlagged,
         flag_reason: isFlagged ? flagReason : null,
@@ -516,10 +522,18 @@ function TrustManageModal({
     }
   }
 
+  const TABS = [
+    { id: 'badges' as const, label: 'Assign Badges', icon: Award, color: 'text-amber-600' },
+    { id: 'score' as const, label: 'Score Override', icon: Sliders, color: 'text-violet-600' },
+    { id: 'flag' as const, label: 'Flag Account', icon: Flag, color: 'text-red-500' },
+  ]
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-card z-10">
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-muted overflow-hidden flex-shrink-0">
               {user.avatar_url ? (
@@ -540,97 +554,106 @@ function TrustManageModal({
           </button>
         </div>
 
-        <div className="p-5 space-y-6">
-
-          {/* FLAG SECTION */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Flag className="w-4 h-4 text-red-500" />
-              <h3 className="text-sm font-black text-foreground">Account Flag</h3>
-            </div>
-            <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors">
-              <div
-                onClick={() => setIsFlagged(f => !f)}
-                className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${isFlagged ? 'bg-red-500' : 'bg-muted-foreground/30'}`}
+        {/* Tabs */}
+        <div className="flex border-b border-border flex-shrink-0 px-2">
+          {TABS.map(tab => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-3 text-xs font-bold border-b-2 transition-all -mb-px ${
+                  isActive
+                    ? `border-primary text-primary`
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${isFlagged ? 'left-5' : 'left-1'}`} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground">{isFlagged ? '🚩 Account is flagged' : 'Flag this account'}</p>
-                <p className="text-xs text-muted-foreground">Flagged accounts will be notified and marked for review</p>
-              </div>
-            </label>
-            {isFlagged && (
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Reason (shown to user)</label>
-                <input
-                  value={flagReason}
-                  onChange={e => setFlagReason(e.target.value)}
-                  placeholder="e.g. Suspected fraudulent activity, policy violation…"
-                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30"
-                />
-              </div>
-            )}
-          </div>
+                <Icon className={`w-3.5 h-3.5 ${isActive ? '' : tab.color}`} />
+                {tab.label}
+                {tab.id === 'badges' && badges.length > 0 && (
+                  <span className="ml-1 bg-primary text-primary-foreground text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                    {badges.length}
+                  </span>
+                )}
+                {tab.id === 'flag' && isFlagged && (
+                  <span className="ml-1 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">!</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
 
-          {/* BADGES SECTION */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-500" />
-              <h3 className="text-sm font-black text-foreground">Assign Badges</h3>
+        {/* Tab Content */}
+        <div className="flex-1 overflow-y-auto p-5">
+
+          {/* ── BADGES TAB ── */}
+          {activeTab === 'badges' && (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">Select badges to assign to this user. Click a badge to toggle it on or off.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {ADMIN_BADGES.map(badge => {
+                  const active = badges.includes(badge.id)
+                  return (
+                    <button
+                      key={badge.id}
+                      onClick={() => toggleBadge(badge.id)}
+                      className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-left transition-all ${
+                        active
+                          ? `${badge.color} border-current`
+                          : 'border-border bg-card hover:bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      <span className="text-lg leading-none">{badge.emoji}</span>
+                      <span className="text-xs font-bold flex-1">{badge.label}</span>
+                      {active && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                    </button>
+                  )
+                })}
+              </div>
+              {badges.length === 0 && (
+                <p className="text-center text-xs text-muted-foreground py-2">No badges assigned yet. Click any badge above to assign it.</p>
+              )}
               {badges.length > 0 && (
-                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  {badges.length} assigned
-                </span>
+                <div className="rounded-xl bg-muted/40 px-4 py-3 flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-semibold text-muted-foreground">Assigned:</span>
+                  {badges.map(bid => {
+                    const b = ADMIN_BADGES.find(x => x.id === bid)
+                    return b ? <span key={bid} className="text-base">{b.emoji}</span> : null
+                  })}
+                </div>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {ADMIN_BADGES.map(badge => {
-                const active = badges.includes(badge.id)
-                return (
-                  <button
-                    key={badge.id}
-                    onClick={() => toggleBadge(badge.id)}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all ${
-                      active
-                        ? `${badge.color} border-current`
-                        : 'border-border bg-card hover:bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    <span className="text-base leading-none">{badge.emoji}</span>
-                    <span className="text-xs font-bold flex-1">{badge.label}</span>
-                    {active && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          )}
 
-          {/* SCORE OVERRIDE SECTION */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-violet-500" />
-              <h3 className="text-sm font-black text-foreground">Score Override</h3>
-            </div>
-            <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-foreground">Manual override</p>
-                  <p className="text-xs text-muted-foreground">Computed score: {user.buyerScore}</p>
-                </div>
+          {/* ── SCORE TAB ── */}
+          {activeTab === 'score' && (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground">Current computed score</p>
+                <p className="text-2xl font-black text-foreground">{user.buyerScore}<span className="text-sm font-semibold text-muted-foreground">/100</span></p>
+                <TrustBadge score={user.buyerScore} size="sm" />
+              </div>
+
+              <label className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card cursor-pointer hover:bg-muted/40 transition-colors">
                 <button
-                  onClick={() => setUseOverride(v => !v)}
+                  onClick={() => { setUseOverride(v => !v); setSaved(false) }}
                   className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${useOverride ? 'bg-violet-500' : 'bg-muted-foreground/30'}`}
                 >
                   <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${useOverride ? 'left-5' : 'left-1'}`} />
                 </button>
-              </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Enable manual override</p>
+                  <p className="text-xs text-muted-foreground">Overrides the computed score for this user</p>
+                </div>
+              </label>
+
               {useOverride && (
-                <div className="space-y-3">
-                  <div className="space-y-1">
+                <div className="space-y-4 rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20 p-4">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-muted-foreground">New score (0–100)</label>
-                      <span className={`text-sm font-black ${scoreBarColor(overrideScore).replace('bg-', 'text-').replace('-500', '-600')}`}>
+                      <label className="text-xs font-bold text-foreground">Override score</label>
+                      <span className={`text-xl font-black ${scoreBarColor(overrideScore).replace('bg-', 'text-').replace('-500', '-600')}`}>
                         {overrideScore}
                       </span>
                     </div>
@@ -639,52 +662,93 @@ function TrustManageModal({
                       min={0}
                       max={100}
                       value={overrideScore}
-                      onChange={e => setOverrideScore(Number(e.target.value))}
+                      onChange={e => { setOverrideScore(Number(e.target.value)); setSaved(false) }}
                       className="w-full accent-violet-500"
                     />
-                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-muted overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${scoreBarColor(overrideScore)}`}
                         style={{ width: `${overrideScore}%` }}
                       />
                     </div>
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border mt-1 ${
+                      overrideScore >= 85 ? 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' :
+                      overrideScore >= 70 ? 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' :
+                      overrideScore >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800' :
+                      'text-red-700 bg-red-50 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800'
+                    }`}>
+                      <ShieldCheck className="w-3 h-3" />
+                      Will display as: {overrideScore >= 85 ? 'Excellent' : overrideScore >= 70 ? 'Good' : overrideScore >= 50 ? 'Fair' : 'Low'}
+                    </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground">Internal note (not shown to user)</label>
+                    <label className="text-xs font-bold text-foreground">Internal note <span className="font-normal text-muted-foreground">(not shown to user)</span></label>
                     <input
                       value={overrideNote}
-                      onChange={e => setOverrideNote(e.target.value)}
-                      placeholder="e.g. Manually boosted after appeal review"
+                      onChange={e => { setOverrideNote(e.target.value); setSaved(false) }}
+                      placeholder="e.g. Boosted after appeal review…"
                       className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
                     />
-                  </div>
-                  <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold border ${
-                    overrideScore >= 85 ? 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' :
-                    overrideScore >= 70 ? 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' :
-                    overrideScore >= 50 ? 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800' :
-                    'text-red-700 bg-red-50 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800'
-                  }`}>
-                    <ShieldCheck className="w-3 h-3" />
-                    Will show as: {overrideScore >= 85 ? 'Excellent' : overrideScore >= 70 ? 'Good' : overrideScore >= 50 ? 'Fair' : 'Low'}
                   </div>
                 </div>
               )}
             </div>
-          </div>
+          )}
 
+          {/* ── FLAG TAB ── */}
+          {activeTab === 'flag' && (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">Flagging an account marks it for review and notifies the user.</p>
+
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card cursor-pointer hover:bg-muted/40 transition-colors">
+                <button
+                  onClick={() => { setIsFlagged(f => !f); setSaved(false) }}
+                  className={`w-10 h-6 rounded-full transition-colors relative flex-shrink-0 ${isFlagged ? 'bg-red-500' : 'bg-muted-foreground/30'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${isFlagged ? 'left-5' : 'left-1'}`} />
+                </button>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{isFlagged ? '🚩 Account is flagged' : 'Flag this account'}</p>
+                  <p className="text-xs text-muted-foreground">Toggle to flag or unflag the account</p>
+                </div>
+              </label>
+
+              {isFlagged && (
+                <div className="space-y-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50/40 dark:bg-red-950/10 p-4">
+                  <label className="text-xs font-bold text-foreground">Flag reason <span className="font-normal text-muted-foreground">(shown to user)</span></label>
+                  <input
+                    value={flagReason}
+                    onChange={e => { setFlagReason(e.target.value); setSaved(false) }}
+                    placeholder="e.g. Suspected fraudulent activity, policy violation…"
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                  />
+                  <p className="text-[11px] text-muted-foreground">The user will receive a notification with this reason.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 pb-5 pt-3 border-t border-border flex-shrink-0 space-y-3">
           {saveError && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               {saveError}
             </div>
           )}
-
-          <div className="flex gap-3 pt-1">
+          {saved && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-400">
+              <Check className="w-4 h-4 flex-shrink-0" />
+              Changes saved successfully
+            </div>
+          )}
+          <div className="flex gap-3">
             <button
               onClick={onClose}
               className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-sm font-bold transition-colors"
             >
-              Cancel
+              Close
             </button>
             <button
               onClick={handleSave}
