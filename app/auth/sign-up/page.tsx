@@ -87,7 +87,7 @@ function SignUpPageInner() {
     setLoading(true)
     const toastId = toast.loading('Creating your account...')
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -107,7 +107,17 @@ function SignUpPageInner() {
       setLoading(false)
       return
     }
-    toast.success('Account created!', { description: 'Check your email for a 6-digit code.' })
+    // Supabase silently returns success when email is already registered
+    // but identities will be empty — prompt them to sign in instead
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      toast.error('This email is already registered.', {
+        description: 'Please sign in or use "Forgot password" to reset your password.',
+        duration: 8000,
+      })
+      setLoading(false)
+      return
+    }
+    toast.success('Account created!', { description: 'A 6-digit code is on its way to your inbox.' })
     router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
   }
 

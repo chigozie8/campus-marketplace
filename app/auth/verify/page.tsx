@@ -22,7 +22,7 @@ function VerifyPageInner() {
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
   const [loading, setLoading] = useState(false)
   const [verified, setVerified] = useState(false)
-  const [countdown, setCountdown] = useState(60)
+  const [countdown, setCountdown] = useState(30)
   const [canResend, setCanResend] = useState(false)
   const [resending, setResending] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -205,9 +205,12 @@ function VerifyPageInner() {
               ))}
             </div>
 
-            <div className="mt-12 bg-white/5 border border-white/10 rounded-2xl p-4">
+            <div className="mt-12 bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
               <p className="text-white/50 text-xs leading-relaxed">
-                The code expires in <strong className="text-white/80">10 minutes</strong>. If you don&apos;t see the email, click <strong className="text-[#4ade80]">Resend Code</strong> after 60 seconds.
+                The code expires in <strong className="text-white/80">10 minutes</strong>. Emails can take <strong className="text-white/80">1–2 minutes</strong> to arrive.
+              </p>
+              <p className="text-white/40 text-xs leading-relaxed">
+                Some emails arrive as a <strong className="text-[#4ade80]">clickable link</strong> instead of a code — clicking it also verifies your account.
               </p>
             </div>
           </div>
@@ -335,9 +338,14 @@ function VerifyPageInner() {
                 </p>
               )}
 
-              <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-xl px-4 py-2.5 text-left">
-                ⚠️ <strong>Check your spam/junk folder</strong> if you don&apos;t see the email within 1 minute.
-              </p>
+              <div className="space-y-2 text-left">
+                <p className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-xl px-4 py-2.5">
+                  ⚠️ <strong>Check your spam/junk folder</strong> — codes sometimes land there. Emails can take <strong>1–2 minutes</strong> to arrive.
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 rounded-xl px-4 py-2.5">
+                  💡 <strong>Got a link instead of a code?</strong> Just click it — it works the same way and will verify your account automatically.
+                </p>
+              </div>
             </div>
 
             {/* Divider */}
