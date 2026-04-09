@@ -68,15 +68,19 @@ export async function PATCH(
 
   // Notify the user if they've been flagged
   if (typeof is_flagged === 'boolean' && is_flagged) {
-    await db.from('notifications').insert({
-      user_id: userId,
-      type: 'system',
-      title: 'Account Flagged',
-      body: flag_reason
-        ? `Your account has been flagged: ${flag_reason}. Please contact support.`
-        : 'Your account has been flagged for review. Please contact support.',
-      read: false,
-    }).catch(() => {})
+    try {
+      await db.from('notifications').insert({
+        user_id: userId,
+        type: 'system',
+        title: 'Account Flagged',
+        body: flag_reason
+          ? `Your account has been flagged: ${flag_reason}. Please contact support.`
+          : 'Your account has been flagged for review. Please contact support.',
+        read: false,
+      })
+    } catch {
+      // notification failure is non-fatal
+    }
   }
 
   return NextResponse.json({ success: true, data })
