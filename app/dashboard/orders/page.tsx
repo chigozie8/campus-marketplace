@@ -10,6 +10,7 @@ import type { BackendOrder } from '@/lib/api'
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { OrderChat } from '@/components/features/order-chat'
 
 async function getToken() {
   const supabase = createClient()
@@ -198,7 +199,7 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
   )
 }
 
-function OrderCard({ order, onRefund, onDeliveryConfirmed }: { order: BackendOrder; onRefund: (id: string) => void; onDeliveryConfirmed: () => void }) {
+function OrderCard({ order, onRefund, onDeliveryConfirmed, currentUserId }: { order: BackendOrder; onRefund: (id: string) => void; onDeliveryConfirmed: () => void; currentUserId?: string }) {
   const [expanded, setExpanded] = useState(false)
   const [requestingRefund, setRequestingRefund] = useState(false)
   const [refundReason, setRefundReason] = useState('')
@@ -455,6 +456,18 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed }: { order: BackendOrd
                   <span className="text-xs text-green-700 dark:text-green-400 font-semibold">Refund request submitted — we&apos;ll be in touch within 3–5 business days.</span>
                 </div>
               )}
+
+              {/* Chat with seller */}
+              {currentUserId && order.seller_id && (
+                <div className="flex items-center gap-2 pt-1">
+                  <OrderChat
+                    orderId={order.id}
+                    currentUserId={currentUserId}
+                    otherUserName={(order as BackendOrder & { profiles?: { full_name: string } }).profiles?.full_name ?? 'Seller'}
+                    orderRef={order.id.slice(0, 8).toUpperCase()}
+                  />
+                </div>
+              )}
             </div>
           </m.div>
         )}
@@ -485,6 +498,12 @@ function OrdersSkeleton() {
 export default function OrdersPage() {
   const { data, isLoading, isError, refetch, isFetching } = useMyOrders()
   const orders = data?.data ?? []
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? undefined))
+  }, [])
 
   function handleRefund(_id: string) {
     refetch()
@@ -566,6 +585,7 @@ export default function OrdersPage() {
                   order={order}
                   onRefund={handleRefund}
                   onDeliveryConfirmed={handleDeliveryConfirmed}
+                  currentUserId={currentUserId}
                 />
               ))}
 

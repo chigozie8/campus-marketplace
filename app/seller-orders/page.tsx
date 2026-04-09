@@ -15,6 +15,8 @@ import { createClient } from '@/lib/supabase/client'
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { TrustBadge } from '@/components/TrustBadge'
 import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
+import { OrderChat } from '@/components/features/order-chat'
+import { LocationTracker } from '@/components/features/location-tracker'
 
 async function getToken() {
   const supabase = createClient()
@@ -56,7 +58,7 @@ const CHANNEL_OPTIONS: Array<{ value: OtpChannel; label: string; icon: React.Rea
   { value: 'both',  label: 'Both',     icon: <Layers className="w-4 h-4" />,     desc: 'Email + SMS' },
 ]
 
-function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => void }) {
+function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; onUpdate: () => void; currentUserId?: string }) {
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyerTrust, setBuyerTrust] = useState<BuyerTrust | null>(null)
@@ -320,6 +322,18 @@ function OrderCard({ order, onUpdate }: { order: ExtendedOrder; onUpdate: () => 
                   </p>
                 </div>
               )}
+
+              {/* Chat with buyer */}
+              {currentUserId && order.buyer_id && (
+                <div className="flex items-center gap-2 pt-1">
+                  <OrderChat
+                    orderId={order.id}
+                    currentUserId={currentUserId}
+                    otherUserName={buyerName}
+                    orderRef={order.id.slice(0, 8).toUpperCase()}
+                  />
+                </div>
+              )}
             </div>
           </m.div>
         )}
@@ -373,12 +387,15 @@ export default function SellerOrdersPage() {
             <h1 className="text-xl font-black text-foreground">Seller Orders</h1>
             <p className="text-xs text-muted-foreground">Manage orders for your listings</p>
           </div>
-          <button
-            onClick={() => refetch()}
-            className="ml-auto p-2 rounded-xl hover:bg-muted transition-colors"
-          >
-            <RefreshCw className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <LocationTracker showBadge />
+            <button
+              onClick={() => refetch()}
+              className="p-2 rounded-xl hover:bg-muted transition-colors"
+            >
+              <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-5 scrollbar-hide">
@@ -426,7 +443,7 @@ export default function SellerOrdersPage() {
 
         <div className="space-y-3">
           {orders.map(order => (
-            <OrderCard key={order.id} order={order} onUpdate={handleUpdate} />
+            <OrderCard key={order.id} order={order} onUpdate={handleUpdate} currentUserId={sellerId ?? undefined} />
           ))}
         </div>
 

@@ -29,6 +29,8 @@ import {
   ShieldCheck,
   TrendingUp,
   Phone,
+  MessageCircle,
+  MapPin,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -45,6 +47,8 @@ const NAV_ITEMS = [
   { label: 'Categories',      href: '/admin/categories',        icon: Tag },
   { label: 'Reviews',         href: '/admin/reviews',           icon: Star },
   { label: 'Messages',        href: '/admin/messages',          icon: MessageSquare },
+  { label: 'Chat Monitor',    href: '/admin/chats',             icon: MessageCircle },
+  { label: 'Live Locations',  href: '/admin/locations',         icon: MapPin },
   { label: 'Analytics',       href: '/admin/analytics',         icon: BarChart3 },
   { label: 'Blog',            href: '/admin/blog',              icon: BookOpen },
   { label: 'Blog Categories', href: '/admin/blog/categories',   icon: Tag },

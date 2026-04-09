@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Search, Package, Eye, X, Loader2, Download, CheckCircle2 } from 'lucide-react'
+import { Search, Package, Eye, X, Loader2, Download, CheckCircle2, RotateCcw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface Order {
   id: string
@@ -45,6 +46,10 @@ export function AdminOrdersTable({ orders }: Props) {
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [selected, setSelected] = useState<Order | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [showRefundForm, setShowRefundForm] = useState(false)
+  const [refundTo, setRefundTo] = useState<'buyer' | 'seller'>('buyer')
+  const [refundReason, setRefundReason] = useState('')
+  const [refunding, setRefunding] = useState(false)
 
   const filtered = orders.filter(o => {
     const q = search.toLowerCase()
@@ -59,6 +64,29 @@ export function AdminOrdersTable({ orders }: Props) {
     const matchPayment = paymentFilter === 'all' || o.payment_status === paymentFilter
     return matchSearch && matchStatus && matchPayment
   })
+
+  async function handleDirectRefund(orderId: string) {
+    if (!refundReason.trim()) { toast.error('Please provide a reason for the refund'); return }
+    setRefunding(true)
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refund_to: refundTo, reason: refundReason.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Refund failed')
+      toast.success(data.message ?? 'Refund processed')
+      setShowRefundForm(false)
+      setRefundReason('')
+      if (selected) setSelected(prev => prev ? { ...prev, status: 'cancelled' } : null)
+      startTransition(() => router.refresh())
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Refund failed')
+    } finally {
+      setRefunding(false)
+    }
+  }
 
   async function updateStatus(orderId: string, status: string) {
     setUpdatingId(orderId)
@@ -307,6 +335,67 @@ export function AdminOrdersTable({ orders }: Props) {
                     : <><CheckCircle2 className="w-3.5 h-3.5" /> Mark as Completed & Release Funds</>
                   }
                 </button>
+              </div>
+            )}
+
+            {/* Direct Admin Refund */}
+            {!showRefundForm ? (
+              <div>
+                <div className="h-px bg-border" />
+                <button
+                  onClick={() => setShowRefundForm(true)}
+                  className="flex items-center gap-2 w-full py-2 px-3 rounded-xl border border-red-200 dark:border-red-800/40 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Direct Admin Refund
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-red-200 dark:border-red-800/40 bg-red-50 dark:bg-red-950/10 p-3 space-y-2.5">
+                <p className="text-[10px] font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">Direct Refund</p>
+                <div className="flex gap-1.5">
+                  {(['buyer', 'seller'] as const).map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setRefundTo(t)}
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold capitalize transition-all border ${
+                        refundTo === t
+                          ? 'bg-red-500 text-white border-red-500'
+                          : 'border-border text-muted-foreground hover:border-red-300'
+                      }`}
+                    >
+                      Refund {t}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={refundReason}
+                  onChange={e => setRefundReason(e.target.value)}
+                  placeholder="Reason for refund (required)…"
+                  rows={2}
+                  className="w-full px-2.5 py-2 rounded-xl border border-red-200 dark:border-red-700/40 bg-white dark:bg-card text-xs resize-none outline-none focus:ring-2 focus:ring-red-300"
+                />
+                <p className="text-[10px] text-red-500/70 leading-relaxed">
+                  This will credit ₦{Number(selected?.total_amount ?? 0).toLocaleString()} to the {refundTo}&apos;s wallet and cancel the order.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setShowRefundForm(false); setRefundReason('') }}
+                    className="flex-1 py-1.5 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => selected && handleDirectRefund(selected.id)}
+                    disabled={refunding || !refundReason.trim()}
+                    className="flex-1 py-1.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  >
+                    {refunding
+                      ? <><Loader2 className="w-3 h-3 animate-spin" /> Processing…</>
+                      : <><RotateCcw className="w-3 h-3" /> Issue Refund</>
+                    }
+                  </button>
+                </div>
               </div>
             )}
 

@@ -51,5 +51,34 @@ export async function initDb(): Promise<void> {
   await query(`
     CREATE INDEX IF NOT EXISTS delivery_otps_order_id_idx ON delivery_otps (order_id)
   `)
-  logger.info('[db] delivery_otps table ready.')
+
+  // Buyer-Seller in-app chat per order
+  await query(`
+    CREATE TABLE IF NOT EXISTS order_chats (
+      id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      order_id    UUID NOT NULL,
+      sender_id   UUID NOT NULL,
+      receiver_id UUID NOT NULL,
+      message     TEXT NOT NULL,
+      read        BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+  await query(`CREATE INDEX IF NOT EXISTS order_chats_order_idx ON order_chats (order_id)`)
+  await query(`CREATE INDEX IF NOT EXISTS order_chats_receiver_idx ON order_chats (receiver_id, read)`)
+
+  // Vendor live location tracking
+  await query(`
+    CREATE TABLE IF NOT EXISTS vendor_locations (
+      vendor_id   UUID PRIMARY KEY,
+      lat         DOUBLE PRECISION NOT NULL,
+      lng         DOUBLE PRECISION NOT NULL,
+      accuracy    DOUBLE PRECISION,
+      heading     DOUBLE PRECISION,
+      is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+      updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `)
+
+  logger.info('[db] All tables ready.')
 }
