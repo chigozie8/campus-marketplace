@@ -27,7 +27,16 @@ export async function POST(req: Request) {
     .eq('is_active', true)
     .single()
 
-  if (error || !coupon) {
+  if (error) {
+    const missingTable =
+      error.code === 'PGRST200' ||
+      error.code === 'PGRST205' ||
+      error.message?.toLowerCase().includes('does not exist') ||
+      error.message?.toLowerCase().includes('schema cache')
+    if (missingTable) return NextResponse.json({ error: 'Invalid or expired coupon code' }, { status: 404 })
+    return NextResponse.json({ error: 'Invalid or expired coupon code' }, { status: 404 })
+  }
+  if (!coupon) {
     return NextResponse.json({ error: 'Invalid or expired coupon code' }, { status: 404 })
   }
 

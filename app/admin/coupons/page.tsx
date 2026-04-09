@@ -36,6 +36,7 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [setupNeeded, setSetupNeeded] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
@@ -46,10 +47,12 @@ export default function CouponsPage() {
   async function load() {
     setLoading(true)
     setError('')
+    setSetupNeeded(false)
     const res = await fetch('/api/admin/coupons')
     if (!res.ok) { setError('Failed to load coupons'); setLoading(false); return }
-    const { coupons: data } = await res.json()
-    setCoupons(data ?? [])
+    const json = await res.json()
+    if (json.setup_needed) setSetupNeeded(true)
+    setCoupons(json.coupons ?? [])
     setLoading(false)
   }
 
@@ -233,6 +236,34 @@ export default function CouponsPage() {
             </button>
           </div>
         </form>
+      )}
+
+      {setupNeeded && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 p-4 space-y-2">
+          <p className="text-sm font-bold text-amber-800 dark:text-amber-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" /> One-time database setup required
+          </p>
+          <p className="text-xs text-amber-700 dark:text-amber-500">
+            The <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">coupon_codes</code> table doesn&apos;t exist in your Supabase database yet.
+            Go to your <strong>Supabase dashboard → SQL Editor</strong> and run the following:
+          </p>
+          <pre className="text-[11px] bg-amber-100 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg p-3 overflow-x-auto text-amber-900 dark:text-amber-300 select-all whitespace-pre-wrap">{`CREATE TABLE IF NOT EXISTS coupon_codes (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code           TEXT NOT NULL UNIQUE,
+  description    TEXT,
+  discount_type  TEXT NOT NULL CHECK (discount_type IN ('percent', 'fixed')),
+  discount_value NUMERIC(12,2) NOT NULL,
+  min_order      NUMERIC(12,2) NOT NULL DEFAULT 0,
+  max_uses       INT,
+  uses_count     INT NOT NULL DEFAULT 0,
+  valid_from     TIMESTAMPTZ,
+  valid_until    TIMESTAMPTZ,
+  is_active      BOOLEAN NOT NULL DEFAULT TRUE,
+  created_by     UUID,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);`}</pre>
+          <p className="text-xs text-amber-700 dark:text-amber-500">After running it, refresh this page.</p>
+        </div>
       )}
 
       {loading && <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}
