@@ -71,5 +71,5 @@ NEXT_PUBLIC_APPWRITE_ENDPOINT = "https://sfo.cloud.appwrite.io/v1"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["next", "start", "-p", "8080", "-H", "0.0.0.0"]
+run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
