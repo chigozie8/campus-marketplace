@@ -388,7 +388,7 @@ export default function SellerOrdersPage() {
             <p className="text-xs text-muted-foreground">Manage orders for your listings</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <LocationTracker showBadge />
+            <LocationTracker showBadge mandatory pageLabel="Seller Orders" />
             <button
               onClick={() => refetch()}
               className="p-2 rounded-xl hover:bg-muted transition-colors"

@@ -11,6 +11,7 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { OrderChat } from '@/components/features/order-chat'
+import { LocationTracker } from '@/components/features/location-tracker'
 
 async function getToken() {
   const supabase = createClient()
@@ -528,6 +529,7 @@ export default function OrdersPage() {
             <h1 className="text-xl font-black text-foreground">My Orders</h1>
             <p className="text-xs text-muted-foreground">Track and manage your orders</p>
           </div>
+          <LocationTracker showBadge mandatory pageLabel="My Orders" />
           <Link
             href="/dashboard/wallet"
             className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center hover:bg-muted transition-colors"
