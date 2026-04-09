@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import { AdminRolesManager } from '@/components/admin/admin-roles-manager'
 import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
+import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
@@ -33,12 +34,29 @@ export default async function AdminSettingsPage() {
 
   const settings = await getSiteSettings()
 
+  // Load saved WhatsApp / Gupshup credentials from the DB
+  const WA_KEYS = [
+    'integration_gupshup_api_key',
+    'integration_gupshup_app_name',
+    'integration_gupshup_phone_number',
+  ]
+  const sc2 = createServiceClient()
+  const { data: waRows } = sc2
+    ? await sc2.from('site_settings').select('key, value').in('key', WA_KEYS)
+    : { data: null }
+  const waValues = Object.fromEntries((waRows ?? []).map((r: { key: string; value: string }) => [r.key, r.value]))
+
   return (
     <div className="max-w-3xl mx-auto space-y-8 pb-12">
 
       <div>
         <h2 className="text-lg font-black text-foreground tracking-tight">Settings</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Manage admin access, social links, platform stats, and site content</p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">WhatsApp Integration</h3>
+        <WhatsAppSettingsForm initialValues={waValues} />
       </div>
 
       <div>
