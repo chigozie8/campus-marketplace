@@ -8,7 +8,7 @@ import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { m, LazyMotion, domAnimation } from 'framer-motion'
 import { quickSellerScore } from '@/lib/trust'
-import { MiniTrustDot } from '@/components/TrustBadge'
+import { TrustBadge } from '@/components/TrustBadge'
 
 interface ProductCardProps {
   product: Product
@@ -144,7 +144,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
           <span className="truncate max-w-[80px] sm:max-w-none">{sellerName}</span>
           {isVerified && <BadgeCheck className="w-3 h-3 text-primary flex-shrink-0" />}
           {isStudentVerified && <GraduationCap className="w-3 h-3 text-blue-500 flex-shrink-0" title="Verified student" />}
-          <span title="Approximate trust score (list view)"><MiniTrustDot score={trustScore} /></span>
+          <TrustBadge score={trustScore} size="sm" showScore={false} />
           {sellerRating > 0 && (
             <div className="flex items-center gap-0.5 ml-auto">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
