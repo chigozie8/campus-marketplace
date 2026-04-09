@@ -171,6 +171,12 @@ export default function WalletPage() {
             <h1 className="text-xl font-black text-foreground">My Wallet</h1>
             <p className="text-xs text-muted-foreground">Earnings, refunds &amp; withdrawals</p>
           </div>
+          <Link
+            href="/dashboard/wallet/payouts"
+            className="px-3 py-1.5 rounded-xl border border-border/60 text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
+          >
+            Payout History
+          </Link>
           <button onClick={loadAll} className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center hover:bg-muted transition-colors">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>

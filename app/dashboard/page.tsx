@@ -8,6 +8,7 @@ import {
   Heart, Wallet, Trophy, ArrowUpRight, AlertCircle, Inbox,
 } from 'lucide-react'
 import { DashboardActions } from '@/components/dashboard-actions'
+import { OnboardingBanner } from '@/components/dashboard/onboarding-banner'
 import { ProfileCompletion } from '@/components/dashboard/profile-completion'
 import { CopyStoreLink } from '@/components/dashboard/copy-store-link'
 import { ReferralCard } from '@/components/dashboard/referral-card'
@@ -40,6 +41,12 @@ export default async function DashboardPage() {
   const totalClicks   = allProducts.reduce((s, p) => s + (p.whatsapp_clicks || 0), 0)
   const activeCount   = allProducts.filter(p => p.is_available).length
   const totalEarnings = (ordersData || []).reduce((s, o) => s + (o.amount || 0), 0)
+
+  // Onboarding checks
+  const hasListings   = allProducts.length > 0
+  const isVerified    = !!profile?.is_verified
+  const hasOrders     = (ordersData?.length ?? 0) > 0
+  const profileComplete = !!(profile?.full_name && profile?.phone && profile?.university)
   const overallCTR    = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) : '0.0'
 
   // Top performer = most views (products are already sorted by views desc)
@@ -85,6 +92,14 @@ export default async function DashboardPage() {
           </div>
           <div className="hidden sm:block">{newListingBtn}</div>
         </div>
+
+        {/* ── Onboarding (first-time users) ── */}
+        <OnboardingBanner
+          hasListings={hasListings}
+          isVerified={isVerified}
+          hasOrders={hasOrders}
+          profileComplete={profileComplete}
+        />
 
         {/* ── 4 Stat Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

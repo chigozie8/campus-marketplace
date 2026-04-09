@@ -2,7 +2,58 @@
 
 ## Recently Completed Features (Latest Session)
 
-### T001–T013 Build Pass — All Features Verified & Gaps Fixed
+### 10-Platform-Improvement Build Pass
+
+**#1 — Order status push notifications:**
+- Created `backend/src/services/notificationService.ts` — inserts into `notifications` table via Supabase admin + fire-and-forget push to `/api/push/send`
+- Updated `backend/src/services/orderService.ts` — `updateOrderStatus()` now sends targeted notifications:
+  - `paid` → seller gets "New Order — Action Required"
+  - `shipped` → buyer gets "Your Order is on the Way!"
+  - `delivered` → buyer gets "Order Marked as Delivered"
+  - `completed` → both parties notified; seller's wallet released
+  - `cancelled` → both parties notified
+
+**#2 — Fix admin chat page profiles showing "Unknown":**
+- Updated `app/api/admin/chats/route.ts` to fetch profiles from `profiles` table using service-role client and include them in the API response as `profiles: Record<string, string>`
+- Updated `app/admin/chats/page.tsx` to remove the anon-key Supabase client entirely; uses profile names directly from API response
+
+**#3 — Supabase Realtime on order_chats:**
+- Created `scripts/013_realtime_order_chats.sql` — run in Supabase SQL Editor to enable Realtime for `order_chats` and `vendor_locations` tables
+
+**#4 — Location data expiry/cleanup:**
+- Created `backend/src/jobs/locationCleanup.ts` — deletes `vendor_locations` rows older than 30 minutes; runs every 30 min
+- Registered in `backend/src/server.ts`
+
+**#5 — New user onboarding flow:**
+- Created `components/dashboard/onboarding-banner.tsx` — dismissible progress banner with 3 steps (complete profile, add listing, get verified); uses localStorage to remember dismissal
+- Integrated into `app/dashboard/page.tsx` — shown to new users who haven't completed all steps
+
+**#6 — Seller analytics dashboard:**
+- Created `app/dashboard/analytics/page.tsx` — full analytics with:
+  - 7 stat cards (revenue, orders, listings, completion rate, views, clicks, CTR)
+  - Revenue over time area chart (Recharts)
+  - Orders by status bar chart
+  - Top listings table by views
+- Added "Analytics" link to vendor sidebar (`components/vendor/vendor-sidebar.tsx`)
+
+**#7 — Account deletion + data export:**
+- Created `app/api/account/delete/route.ts` — anonymises profile, cancels pending orders, deactivates listings, removes push subscriptions, deletes auth user
+- Created `app/api/account/export/route.ts` — downloads user's profile, listings, orders, reviews, notifications as JSON (NDPR-compliant)
+- Added "Danger Zone" section to Security tab in `app/profile/page.tsx` — Export Data button + typed DELETE confirmation for account deletion
+
+**#8 — Auto-cancel unshipped orders:**
+- Created `backend/src/jobs/autoCancelOrders.ts` — cancels `paid` orders older than 5 days with no ship update; notifies both buyer (refund notice) and seller; runs every 6 hours
+- Registered in `backend/src/server.ts`
+
+**#9 — Stock quantity enforcement:**
+- Updated `backend/src/services/orderService.ts` — after order is inserted, stock is decremented atomically: `stock_quantity = max(0, stock_quantity - quantity)`
+- Stock check already existed; decrement was the missing piece
+
+**#10 — Payout history page:**
+- Created `app/dashboard/wallet/payouts/page.tsx` — lists all withdrawal requests with status badges (pending/paid/failed/rejected), bank name, masked account number, total paid/pending summary
+- Added "Payout History" link to wallet page header
+
+### Previous Session — T001–T013 Build Pass — All Features Verified & Gaps Fixed
 
 **T001 — Next.js 16 proxy convention:** Confirmed `proxy.ts` is correctly set up (exports `proxy` function). Removed a conflicting `middleware.ts` that was causing a startup error. Logs confirm `proxy.ts: 504ms` running cleanly.
 

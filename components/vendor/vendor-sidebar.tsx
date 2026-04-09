@@ -4,20 +4,21 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Inbox, Package, ShoppingBag,
-  Settings, LogOut, Bell, Store, BookOpen, ClipboardList,
+  Settings, LogOut, Bell, Store, BookOpen, ClipboardList, BarChart2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
-  { href: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/inbox',          icon: Inbox,           label: 'Inbox',          badge: true },
-  { href: '/products',       icon: Package,         label: 'My Listings' },
-  { href: '/orders',         icon: ShoppingBag,     label: 'My Orders' },
-  { href: '/seller-orders',  icon: ClipboardList,   label: 'Seller Orders' },
-  { href: '/notifications',  icon: Bell,            label: 'Notifications' },
-  { href: '/seller',         icon: Store,           label: 'My Store' },
-  { href: '/blog',           icon: BookOpen,        label: 'Blog' },
-  { href: '/profile',        icon: Settings,        label: 'Settings' },
+  { href: '/dashboard',           icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/inbox',               icon: Inbox,           label: 'Inbox',     badge: true },
+  { href: '/products',            icon: Package,         label: 'My Listings' },
+  { href: '/orders',              icon: ShoppingBag,     label: 'My Orders' },
+  { href: '/seller-orders',       icon: ClipboardList,   label: 'Seller Orders' },
+  { href: '/dashboard/analytics', icon: BarChart2,       label: 'Analytics' },
+  { href: '/notifications',       icon: Bell,            label: 'Notifications' },
+  { href: '/seller',              icon: Store,           label: 'My Store' },
+  { href: '/blog',                icon: BookOpen,        label: 'Blog' },
+  { href: '/profile',             icon: Settings,        label: 'Settings' },
 ]
 
 interface Props {

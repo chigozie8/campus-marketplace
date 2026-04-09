@@ -103,6 +103,9 @@ export default function ProfilePage() {
   const [idBackUploading, setIdBackUploading] = useState(false)
   const [selfieUploading, setSelfieUploading] = useState(false)
   const [idFrontUrl, setIdFrontUrl] = useState('')
+  const [deletingAccount, setDeletingAccount] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [exportingData, setExportingData] = useState(false)
   const [idBackUrl, setIdBackUrl] = useState('')
   const [selfieUrl, setSelfieUrl] = useState('')
   const idFrontRef = useRef<HTMLInputElement>(null)
@@ -489,6 +492,45 @@ export default function ProfilePage() {
     router.push('/')
   }
 
+  async function handleExportData() {
+    setExportingData(true)
+    try {
+      const res = await fetch('/api/account/export')
+      if (!res.ok) throw new Error('Export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `vendoorx-data-export.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Your data has been downloaded')
+    } catch {
+      toast.error('Export failed. Please try again.')
+    } finally {
+      setExportingData(false)
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== 'DELETE') return
+    setDeletingAccount(true)
+    try {
+      const res = await fetch('/api/account/delete', { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Delete failed')
+      }
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      toast.success('Your account has been permanently deleted')
+      router.push('/')
+    } catch (err: any) {
+      toast.error(err.message ?? 'Delete failed. Contact support.')
+      setDeletingAccount(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -802,6 +844,56 @@ export default function ProfilePage() {
               </div>
               <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-0.5 transition-transform" />
             </button>
+
+            {/* Danger Zone */}
+            <div className="rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/10 p-4 space-y-3">
+              <p className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Danger Zone</p>
+
+              {/* Export Data */}
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-red-100 dark:border-red-900/30 bg-white dark:bg-card">
+                <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center flex-shrink-0">
+                  <FileImage className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground">Export My Data</p>
+                  <p className="text-[11px] text-muted-foreground">Download all your listings, orders, and profile data as JSON.</p>
+                </div>
+                <button
+                  onClick={handleExportData}
+                  disabled={exportingData}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50"
+                >
+                  {exportingData ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Export'}
+                </button>
+              </div>
+
+              {/* Delete Account */}
+              <div className="p-3 rounded-xl border border-red-200 dark:border-red-900/40 bg-white dark:bg-card space-y-2.5">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <XCircle className="w-4 h-4 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-red-600 dark:text-red-400">Delete Account</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">Permanently delete your account and all data. This cannot be undone. Type <span className="font-mono font-bold text-foreground">DELETE</span> to confirm.</p>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder='Type "DELETE" to confirm'
+                  className="w-full px-3 py-2 rounded-xl border border-red-200 dark:border-red-900/40 bg-background text-xs outline-none focus:ring-2 focus:ring-red-500/30 placeholder-muted-foreground"
+                />
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deletingAccount || deleteConfirmText !== 'DELETE'}
+                  className="w-full py-2.5 rounded-xl text-xs font-black bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {deletingAccount ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : 'Permanently Delete Account'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

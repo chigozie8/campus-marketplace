@@ -26,8 +26,27 @@ export async function GET() {
     .order('created_at', { ascending: true })
 
   if (error) {
-    // Table may not exist yet
-    return NextResponse.json({ conversations: [] })
+    return NextResponse.json({ conversations: [], profiles: {} })
+  }
+
+  // Collect all unique user IDs to resolve profiles
+  const userIds = new Set<string>()
+  for (const msg of messages ?? []) {
+    if (msg.sender_id) userIds.add(msg.sender_id)
+    if (msg.receiver_id) userIds.add(msg.receiver_id)
+  }
+
+  // Fetch profiles with service-role client (bypasses RLS)
+  const profileMap: Record<string, string> = {}
+  if (userIds.size > 0) {
+    const { data: profileRows } = await adminDb
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', [...userIds])
+
+    for (const p of profileRows ?? []) {
+      profileMap[p.id] = p.full_name ?? 'Unknown User'
+    }
   }
 
   // Group by order_id
@@ -46,5 +65,5 @@ export async function GET() {
     }))
     .sort((a, b) => new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime())
 
-  return NextResponse.json({ conversations })
+  return NextResponse.json({ conversations, profiles: profileMap })
 }

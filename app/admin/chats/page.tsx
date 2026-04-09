@@ -2,12 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { MessageCircle, Search, RefreshCw, Loader2, ChevronDown, ChevronUp, Users } from 'lucide-react'
-import { createClient as createAdmin } from '@supabase/supabase-js'
-
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
 
 interface ChatMessage {
   id: string
@@ -40,25 +34,8 @@ export default function AdminChatsPage() {
       const data = await res.json()
       if (res.ok) {
         setConversations(data.conversations ?? [])
-        // Collect all user IDs
-        const ids = new Set<string>()
-        data.conversations?.forEach((c: Conversation) => {
-          c.messages.forEach((m: ChatMessage) => {
-            ids.add(m.sender_id)
-            ids.add(m.receiver_id)
-          })
-        })
-        if (ids.size > 0) {
-          const { data: profileData } = await adminDb
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', [...ids])
-          if (profileData) {
-            const map: Record<string, string> = {}
-            profileData.forEach(p => { map[p.id] = p.full_name ?? 'Unknown' })
-            setProfiles(map)
-          }
-        }
+        // Profiles are resolved server-side with service-role client — use directly
+        setProfiles(data.profiles ?? {})
       }
     } finally {
       setLoading(false)

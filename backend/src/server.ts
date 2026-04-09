@@ -2,6 +2,8 @@ import 'dotenv/config'
 import app from './app.js'
 import logger from './utils/logger.js'
 import { startAutoReleaseJob } from './jobs/escrowAutoRelease.js'
+import { startAutoCancelJob } from './jobs/autoCancelOrders.js'
+import { startLocationCleanupJob } from './jobs/locationCleanup.js'
 import { initDb } from './config/db.js'
 
 const PORT = Number(process.env.PORT) || 3001
@@ -19,6 +21,8 @@ initDb()
       logger.info(`VendorX API v2 running on port ${PORT} [${process.env.NODE_ENV ?? 'development'}]`)
       logger.info(`API docs: http://localhost:${PORT}/api/docs`)
       startAutoReleaseJob()
+      startAutoCancelJob()
+      startLocationCleanupJob()
     })
 
     function shutdown(signal: string): void {
