@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { unstable_cache } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   BookOpen, Clock, Eye, Heart, ArrowRight,
@@ -32,10 +31,6 @@ interface Props {
   page: number
 }
 
-function makePostGridCacheKey(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
-  return ['blog-post-grid', catFilter ?? '__all__', searchQuery ?? '', String(page)]
-}
-
 async function fetchPostGrid(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
   const supabase = createServiceClient()
   if (!supabase) return { posts: [], count: 0, totalPages: 0 }
@@ -63,16 +58,8 @@ async function fetchPostGrid(catFilter: string | undefined, searchQuery: string 
   return { posts: data ?? [], count: count ?? 0, totalPages: Math.ceil((count ?? 0) / PAGE_SIZE) }
 }
 
-function getCachedPostGrid(catFilter: string | undefined, searchQuery: string | undefined, page: number) {
-  return unstable_cache(
-    () => fetchPostGrid(catFilter, searchQuery, page),
-    makePostGridCacheKey(catFilter, searchQuery, page),
-    { revalidate: 60, tags: ['blog-posts'] },
-  )()
-}
-
 export async function BlogPostGrid({ catFilter, searchQuery, page }: Props) {
-  const { posts, count, totalPages } = await getCachedPostGrid(catFilter, searchQuery, page)
+  const { posts, count, totalPages } = await fetchPostGrid(catFilter, searchQuery, page)
 
   return (
     <>

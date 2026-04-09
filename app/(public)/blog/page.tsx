@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
+import { cache, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { unstable_cache } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   BookOpen, Clock, Eye, ArrowRight, TrendingUp,
@@ -11,7 +10,7 @@ import {
 import { BlogPostGrid } from '@/components/blog/blog-post-grid'
 import { BlogPostGridSkeleton } from '@/components/ui/skeletons'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Blog | VendoorX — Campus Commerce Insights & Seller Tips',
@@ -27,7 +26,7 @@ const CAT_STYLES: Record<string, string> = {
   'seller-tips':      'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
   'platform-updates': 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
   'campus-life':      'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
-  'success-stories':  'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
+  'success-stories':  'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-violet-400',
   'guides':           'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-400',
   'market-trends':    'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400',
 }
@@ -43,50 +42,38 @@ const FEATURED_SELECT = `id, title, slug, excerpt, cover_image, read_time, publi
   blog_categories(name, slug),
   blog_likes(count), blog_comments(count)`
 
-const getCategories = unstable_cache(
-  async () => {
-    const supabase = createServiceClient()
-    if (!supabase) return []
-    const { data } = await supabase.from('blog_categories').select('id, name, slug, color').order('name')
-    return data ?? []
-  },
-  ['blog-categories'],
-  { revalidate: 300, tags: ['blog-categories'] },
-)
+const getCategories = cache(async () => {
+  const supabase = createServiceClient()
+  if (!supabase) return []
+  const { data } = await supabase.from('blog_categories').select('id, name, slug, color').order('name')
+  return data ?? []
+})
 
-const getFeaturedPost = unstable_cache(
-  async () => {
-    const supabase = createServiceClient()
-    if (!supabase) return null
-    const { data } = await supabase
-      .from('blog_posts')
-      .select(FEATURED_SELECT)
-      .eq('status', 'published')
-      .eq('is_featured', true)
-      .order('published_at', { ascending: false })
-      .limit(1)
-      .single()
-    return data ?? null
-  },
-  ['blog-featured-post'],
-  { revalidate: 60, tags: ['blog-posts'] },
-)
+const getFeaturedPost = cache(async () => {
+  const supabase = createServiceClient()
+  if (!supabase) return null
+  const { data } = await supabase
+    .from('blog_posts')
+    .select(FEATURED_SELECT)
+    .eq('status', 'published')
+    .eq('is_featured', true)
+    .order('published_at', { ascending: false })
+    .limit(1)
+    .single()
+  return data ?? null
+})
 
-const getTrending = unstable_cache(
-  async () => {
-    const supabase = createServiceClient()
-    if (!supabase) return []
-    const { data } = await supabase
-      .from('blog_posts')
-      .select('id, title, slug, cover_image, views, read_time, published_at, blog_categories(name, slug)')
-      .eq('status', 'published')
-      .order('views', { ascending: false })
-      .limit(5)
-    return data ?? []
-  },
-  ['blog-trending'],
-  { revalidate: 60, tags: ['blog-posts'] },
-)
+const getTrending = cache(async () => {
+  const supabase = createServiceClient()
+  if (!supabase) return []
+  const { data } = await supabase
+    .from('blog_posts')
+    .select('id, title, slug, cover_image, views, read_time, published_at, blog_categories(name, slug)')
+    .eq('status', 'published')
+    .order('views', { ascending: false })
+    .limit(5)
+  return data ?? []
+})
 
 async function FeaturedSection() {
   const featured = await getFeaturedPost()
@@ -273,7 +260,7 @@ export default async function BlogPage({
   return (
     <div className="min-h-screen bg-background">
 
-      {/* ── HERO BANNER — static, renders immediately ── */}
+      {/* ── HERO BANNER ── */}
       <div className="relative bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 overflow-hidden">
         <div className="absolute inset-0 opacity-20"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #16a34a 0%, transparent 50%), radial-gradient(circle at 80% 20%, #0ea5e9 0%, transparent 40%)' }} />
@@ -308,7 +295,7 @@ export default async function BlogPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* ── FEATURED — streams in independently ── */}
+        {/* ── FEATURED ── */}
         {!catFilter && !searchQuery && (
           <Suspense fallback={null}>
             <FeaturedSection />
@@ -319,18 +306,16 @@ export default async function BlogPage({
 
           {/* ── MAIN CONTENT ── */}
           <div className="flex-1 min-w-0">
-            {/* Category tabs — streams in */}
             <Suspense fallback={<div className="flex gap-2 pb-2 mb-8"><div className="h-8 w-20 rounded-full bg-muted animate-pulse" /><div className="h-8 w-24 rounded-full bg-muted animate-pulse" /><div className="h-8 w-20 rounded-full bg-muted animate-pulse" /></div>}>
               <CategoryTabs catFilter={catFilter} />
             </Suspense>
 
-            {/* Post grid — streams in */}
             <Suspense fallback={<BlogPostGridSkeleton />}>
               <BlogPostGrid catFilter={catFilter} searchQuery={searchQuery} page={page} />
             </Suspense>
           </div>
 
-          {/* ── SIDEBAR — streams in ── */}
+          {/* ── SIDEBAR ── */}
           <Suspense fallback={
             <aside className="w-full lg:w-72 shrink-0 flex flex-col gap-6">
               <div className="rounded-2xl border border-border bg-card p-5 h-52 animate-pulse" />

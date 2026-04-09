@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { unstable_cache } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   ArrowLeft, Calendar, Clock, Eye, Tag, BookOpen,
@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { BlogPostClient } from '@/components/blog/blog-post-client'
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 const CAT_STYLES: Record<string, string> = {
   'seller-tips':      'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
@@ -29,87 +29,64 @@ function fmtNum(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
 }
 
-export async function generateStaticParams() {
+const getPost = cache(async (slug: string) => {
+  const supabase = createServiceClient()
+  if (!supabase) return { data: null, error: null }
+  return supabase
+    .from('blog_posts')
+    .select(`*, blog_categories(name, slug, color), blog_likes(count), blog_comments(count)`)
+    .eq('slug', slug)
+    .single()
+})
+
+const getRelated = cache(async (slug: string) => {
   const supabase = createServiceClient()
   if (!supabase) return []
-  const { data } = await supabase.from('blog_posts').select('slug').eq('status', 'published')
-  return (data ?? []).map(p => ({ slug: p.slug as string }))
-}
+  const { data } = await supabase
+    .from('blog_posts')
+    .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
+    .eq('status', 'published')
+    .neq('slug', slug)
+    .order('published_at', { ascending: false })
+    .limit(3)
+  return data ?? []
+})
 
-const getPost = unstable_cache(
-  async (slug: string) => {
-    const supabase = createServiceClient()
-    if (!supabase) return { data: null, error: null }
-    return supabase
-      .from('blog_posts')
-      .select(`*, blog_categories(name, slug, color), blog_likes(count), blog_comments(count)`)
-      .eq('slug', slug)
-      .single()
-  },
-  ['blog-post'],
-  { revalidate: 300, tags: ['blog-posts'] },
-)
+const getAuthor = cache(async (authorId: string) => {
+  const supabase = createServiceClient()
+  if (!supabase) return null
+  const { data } = await supabase
+    .from('profiles')
+    .select('full_name, avatar_url')
+    .eq('id', authorId)
+    .single()
+  return data ?? null
+})
 
-const getRelated = unstable_cache(
-  async (slug: string) => {
-    const supabase = createServiceClient()
-    if (!supabase) return []
-    const { data } = await supabase
-      .from('blog_posts')
-      .select('id, title, slug, cover_image, excerpt, read_time, published_at, views, blog_categories(name, slug)')
-      .eq('status', 'published')
-      .neq('slug', slug)
-      .order('published_at', { ascending: false })
-      .limit(3)
-    return data ?? []
-  },
-  ['blog-related'],
-  { revalidate: 300, tags: ['blog-posts'] },
-)
-
-const getAuthor = unstable_cache(
-  async (authorId: string) => {
-    const supabase = createServiceClient()
-    if (!supabase) return null
-    const { data } = await supabase
-      .from('profiles')
-      .select('full_name, avatar_url')
-      .eq('id', authorId)
-      .single()
-    return data ?? null
-  },
-  ['blog-author'],
-  { revalidate: 300, tags: ['profiles'] },
-)
-
-const getComments = unstable_cache(
-  async (postId: string) => {
-    const supabase = createServiceClient()
-    if (!supabase) return []
-    const { data: rawComments } = await supabase
-      .from('blog_comments')
-      .select('*')
-      .eq('post_id', postId)
-      .eq('is_approved', true)
-      .order('created_at', { ascending: true })
-    const commenterIds = [...new Set(
-      (rawComments ?? [])
-        .map((c: { user_id: string | null }) => c.user_id)
-        .filter((id): id is string => !!id),
-    )]
-    let profileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null }> = {}
-    if (commenterIds.length > 0) {
-      const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', commenterIds)
-      profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
-    }
-    return (rawComments ?? []).map((c: { user_id: string | null; [key: string]: unknown }) => ({
-      ...c,
-      profiles: c.user_id ? (profileMap[c.user_id] ?? null) : null,
-    }))
-  },
-  ['blog-comments'],
-  { revalidate: 60, tags: ['blog-comments'] },
-)
+const getComments = cache(async (postId: string) => {
+  const supabase = createServiceClient()
+  if (!supabase) return []
+  const { data: rawComments } = await supabase
+    .from('blog_comments')
+    .select('*')
+    .eq('post_id', postId)
+    .eq('is_approved', true)
+    .order('created_at', { ascending: true })
+  const commenterIds = [...new Set(
+    (rawComments ?? [])
+      .map((c: { user_id: string | null }) => c.user_id)
+      .filter((id): id is string => !!id),
+  )]
+  let profileMap: Record<string, { id: string; full_name: string | null; avatar_url: string | null }> = {}
+  if (commenterIds.length > 0) {
+    const { data: profiles } = await supabase.from('profiles').select('id, full_name, avatar_url').in('id', commenterIds)
+    profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+  }
+  return (rawComments ?? []).map((c: { user_id: string | null; [key: string]: unknown }) => ({
+    ...c,
+    profiles: c.user_id ? (profileMap[c.user_id] ?? null) : null,
+  }))
+})
 
 export async function generateMetadata({
   params,
@@ -177,7 +154,6 @@ export default async function BlogPostPage({
 
   if (!post) notFound()
 
-  // All data fetched from unstable_cache — no cookies() calls, ISR-compatible.
   const [related, authorProfile, commentsData] = await Promise.all([
     getRelated(slug),
     post.author_id ? getAuthor(post.author_id) : null,
