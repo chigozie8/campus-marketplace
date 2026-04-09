@@ -57,14 +57,29 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const pathname = request.nextUrl.pathname
   const protectedRoutes = ['/dashboard', '/seller', '/profile', '/assistant', '/protected', '/admin']
-  const isProtected = protectedRoutes.some(route =>
-    request.nextUrl.pathname.startsWith(route)
-  )
+  const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
 
+  // Not logged in trying to access protected route → login
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Logged in but email not verified → verify page
+  if (isProtected && user && !user.email_confirmed_at) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/auth/verify'
+    if (user.email) url.searchParams.set('email', user.email)
+    return NextResponse.redirect(url)
+  }
+
+  // Already verified trying to visit /auth/verify → dashboard
+  if (pathname === '/auth/verify' && user?.email_confirmed_at) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 

@@ -63,22 +63,20 @@ export default async function PressPage() {
           <div>
             <h2 className="text-xl font-black text-foreground mb-6">Founder &amp; Leadership</h2>
 
-            {/* Main card — dark & dramatic */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-[#0f1a0f] to-gray-900 border border-gray-800 shadow-2xl">
+            {/* Main card — clean white */}
+            <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-card border border-border shadow-xl">
 
-              {/* Decorative circles */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+              {/* Subtle top accent line */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-emerald-400 to-primary/60 rounded-t-3xl" />
 
               <div className="relative flex flex-col lg:flex-row gap-0">
 
                 {/* Left column — avatar + name + contact */}
-                <div className="flex flex-col items-center lg:items-start gap-5 p-8 lg:p-10 lg:w-72 lg:border-r lg:border-white/5 lg:shrink-0">
+                <div className="flex flex-col items-center lg:items-start gap-5 p-8 lg:p-10 lg:w-72 lg:border-r lg:border-border lg:shrink-0 bg-gray-50 dark:bg-muted/30 rounded-tl-3xl rounded-bl-none lg:rounded-bl-3xl rounded-tr-none lg:rounded-tr-none">
                   {/* Avatar */}
                   <div className="relative">
-                    <div className="absolute inset-0 scale-110 rounded-3xl bg-primary/30 blur-xl" />
-                    <div className="relative w-28 h-28 lg:w-36 lg:h-36 rounded-3xl overflow-hidden ring-2 ring-primary/40 shadow-2xl shadow-primary/20">
+                    <div className="absolute inset-0 scale-110 rounded-3xl bg-primary/20 blur-xl" />
+                    <div className="relative w-28 h-28 lg:w-36 lg:h-36 rounded-3xl overflow-hidden ring-2 ring-primary/30 shadow-lg">
                       {settings.press_founder_photo ? (
                         <Image
                           src={settings.press_founder_photo}
@@ -98,27 +96,27 @@ export default async function PressPage() {
                       )}
                     </div>
                     {/* Verified badge */}
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg ring-2 ring-gray-900">
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-md ring-2 ring-white dark:ring-card">
                       <Award className="w-4 h-4 text-white" />
                     </div>
                   </div>
 
                   {/* Name & title */}
                   <div className="text-center lg:text-left">
-                    <h3 className="text-2xl font-black text-white leading-tight">{settings.press_founder_name}</h3>
+                    <h3 className="text-2xl font-black text-foreground leading-tight">{settings.press_founder_name}</h3>
                     <p className="text-sm font-bold text-primary mt-1">{settings.press_founder_title}</p>
                   </div>
 
                   {/* Achievement chips */}
                   <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
                       <TrendingUp className="w-3 h-3" />
                       {settings.stat_active_vendors} Vendors
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-xs font-bold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
                       {settings.stat_campuses} Campuses
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-bold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold">
                       {settings.stat_transactions} GMV
                     </span>
                   </div>
@@ -127,14 +125,14 @@ export default async function PressPage() {
                   <div className="flex flex-col gap-2 w-full">
                     <a
                       href={`mailto:${settings.press_contact_email}`}
-                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/40 text-white/70 hover:text-white text-xs font-semibold transition-all"
+                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-muted hover:bg-primary/5 border border-border hover:border-primary/40 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all"
                     >
                       <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
                       <span className="truncate">{settings.press_contact_email}</span>
                     </a>
                     <a
                       href="tel:+15792583013"
-                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/40 text-white/70 hover:text-white text-xs font-semibold transition-all"
+                      className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-muted hover:bg-primary/5 border border-border hover:border-primary/40 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all"
                     >
                       <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
                       +1 (579) 258-3013
@@ -148,8 +146,8 @@ export default async function PressPage() {
                   {/* Big quote */}
                   {settings.press_founder_quote && (
                     <div className="mb-8">
-                      <div className="text-7xl font-black leading-none text-primary/25 select-none mb-3">&ldquo;</div>
-                      <p className="text-xl sm:text-2xl font-bold text-white leading-relaxed italic">
+                      <div className="text-7xl font-black leading-none text-primary/20 select-none mb-3">&ldquo;</div>
+                      <p className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed italic">
                         {settings.press_founder_quote}
                       </p>
                       <div className="flex items-center gap-2 mt-4">
@@ -161,16 +159,16 @@ export default async function PressPage() {
 
                   {/* Divider */}
                   {settings.press_founder_quote && (
-                    <div className="w-full h-px bg-white/5 mb-8" />
+                    <div className="w-full h-px bg-border mb-8" />
                   )}
 
                   {/* Bio */}
                   <div className="space-y-4">
                     {settings.press_founder_bio && (
-                      <p className="text-white/60 text-sm leading-relaxed">{settings.press_founder_bio}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{settings.press_founder_bio}</p>
                     )}
                     {settings.press_founder_bio2 && (
-                      <p className="text-white/60 text-sm leading-relaxed">{settings.press_founder_bio2}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{settings.press_founder_bio2}</p>
                     )}
                   </div>
 
@@ -178,7 +176,7 @@ export default async function PressPage() {
                   <div className="mt-8">
                     <Link
                       href={`/contact?subject=Press Enquiry — Interview Request`}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/25"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-md shadow-primary/20"
                     >
                       <Sparkles className="w-4 h-4" />
                       Request an Interview

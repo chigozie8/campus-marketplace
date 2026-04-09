@@ -23,10 +23,11 @@ export async function POST(req: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } },
   )
 
+  // Create user WITHOUT email_confirm so they must verify via Appwrite OTP
   const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    email_confirm: true,
+    email_confirm: false,
     user_metadata: {
       full_name,
       whatsapp_number: whatsapp_number || null,
@@ -60,5 +61,28 @@ export async function POST(req: Request) {
     )
   }
 
-  return NextResponse.json({ success: true })
+  // Now send the OTP via Appwrite
+  try {
+    const otpRes = await fetch(
+      `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ? process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT.replace('/v1', '') : ''}/v1/account/tokens/email`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!,
+          'X-Appwrite-Key': process.env.APPWRITE_API_KEY!,
+        },
+        body: JSON.stringify({ userId: 'unique()', email }),
+      },
+    )
+    const otpData = await otpRes.json()
+    if (!otpRes.ok) {
+      console.error('[register] Appwrite OTP error:', otpData)
+      return NextResponse.json({ success: true, otpSent: false })
+    }
+    return NextResponse.json({ success: true, otpSent: true, userId: otpData.userId })
+  } catch (err) {
+    console.error('[register] Appwrite OTP send error:', err)
+    return NextResponse.json({ success: true, otpSent: false })
+  }
 }

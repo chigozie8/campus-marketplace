@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { detectUniversity } from '@/lib/universities'
 
@@ -109,18 +108,12 @@ function SignUpPageInner() {
       return
     }
 
-    const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     toast.dismiss(toastId)
-    if (signInError) {
-      toast.error('Account created! Please sign in.')
-      router.push('/auth/login')
-      return
-    }
-
-    toast.success('Welcome to VendoorX! 🎉', { description: 'Your account is ready.' })
-    router.push('/dashboard')
-    router.refresh()
+    toast.success('Account created! Check your email for a verification code.')
+    // Store password temporarily so verify page can auto sign-in after OTP
+    sessionStorage.setItem('_vx_tmp_pw', password)
+    const userId = result.userId || ''
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}&uid=${encodeURIComponent(userId)}`)
   }
 
   return (
