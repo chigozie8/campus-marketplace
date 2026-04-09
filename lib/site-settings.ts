@@ -22,5 +22,5 @@ async function fetchSiteSettings(): Promise<SiteSettings> {
 export const getSiteSettings = unstable_cache(
   fetchSiteSettings,
   ['site-settings'],
-  { revalidate: 60, tags: ['site-settings'] },
+  { revalidate: false, tags: ['site-settings'] },
 )

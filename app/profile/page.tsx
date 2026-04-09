@@ -310,30 +310,23 @@ export default function ProfilePage() {
       if (!user) return
 
       const payload = {
-        id:              user.id,
-        full_name:       form.full_name,
-        phone:           form.phone,
-        whatsapp_number: form.whatsapp_number,
-        university:      form.university,
-        campus:          form.campus,
-        bio:             form.bio,
-        avatar_url:      form.avatar_url,
-        updated_at:      new Date().toISOString(),
+        id:               user.id,
+        full_name:        form.full_name,
+        phone:            form.phone,
+        whatsapp_number:  form.whatsapp_number,
+        university:       form.university,
+        campus:           form.campus,
+        bio:              form.bio,
+        avatar_url:       form.avatar_url,
+        instagram_handle: form.instagram_handle,
+        facebook_handle:  form.facebook_handle,
+        updated_at:       new Date().toISOString(),
       }
 
-      // Try with social handles (requires migration 004)
-      const fullPayload = { ...payload, instagram_handle: form.instagram_handle, facebook_handle: form.facebook_handle }
-      const { error } = await supabase.from('profiles').upsert(fullPayload)
+      const { error } = await supabase.from('profiles').upsert(payload)
 
       if (error) {
-        // If social handle columns don't exist yet, save without them
-        if (error.message.includes('column') || error.code === 'PGRST204' || error.code === '42703') {
-          const { error: fallbackError } = await supabase.from('profiles').upsert(payload)
-          if (fallbackError) { toast.error(fallbackError.message); return }
-          toast.success('Profile saved! Run migration 004 to enable social handle fields.')
-        } else {
-          toast.error(error.message)
-        }
+        toast.error(error.message)
       } else {
         toast.success('Profile saved successfully!')
         // Fire-and-forget milestone check after profile update

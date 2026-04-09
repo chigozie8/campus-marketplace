@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ArrowRight, Bell, Briefcase, MapPin, Sparkles, Users, Zap, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Careers | VendoorX',
   description: 'Join the VendoorX team. We\'re building Africa\'s most loved campus marketplace — roles opening soon.',

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
@@ -42,6 +42,9 @@ export async function PUT(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  revalidateTag('site-settings', 'max')
+  revalidateTag('site-settings')
+  revalidatePath('/')
+  revalidatePath('/press')
+  revalidatePath('/pricing')
   return NextResponse.json({ ok: true })
 }
