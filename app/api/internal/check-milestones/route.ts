@@ -21,12 +21,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
     }
 
-    if (role === 'seller' || role === 'both') {
-      checkAndNotifySellerMilestones(userId).catch(() => {})
-    }
-    if (role === 'buyer' || role === 'both') {
-      checkAndNotifyBuyerMilestones(userId).catch(() => {})
-    }
+    // Await both checks inside the endpoint for durability —
+    // the HTTP caller (backend) is fire-and-forget, but the work completes here.
+    await Promise.all([
+      role === 'seller' || role === 'both' ? checkAndNotifySellerMilestones(userId) : Promise.resolve(),
+      role === 'buyer'  || role === 'both' ? checkAndNotifyBuyerMilestones(userId)  : Promise.resolve(),
+    ])
 
     return NextResponse.json({ ok: true })
   } catch {

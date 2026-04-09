@@ -16,10 +16,10 @@ export async function POST() {
       .eq('id', user.id)
       .maybeSingle()
 
-    if (profile?.is_seller === true) {
-      await checkAndNotifySellerMilestones(user.id).catch(() => {})
-    }
-    await checkAndNotifyBuyerMilestones(user.id).catch(() => {})
+    await Promise.all([
+      profile?.is_seller === true ? checkAndNotifySellerMilestones(user.id) : Promise.resolve(),
+      checkAndNotifyBuyerMilestones(user.id),
+    ])
 
     return NextResponse.json({ ok: true })
   } catch {
