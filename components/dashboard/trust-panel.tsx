@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import {
-  ShieldCheck, ChevronDown, ChevronUp, Loader2,
-  TrendingUp, Star, Medal, Trophy,
+  ShieldCheck, ChevronDown, ChevronUp, Loader2, TrendingUp,
 } from 'lucide-react'
 import {
   TrustBadge, TrustScoreBar, SellerTierBadge,
-  getMilestoneBadge, getTrustLevel, getSellerTier,
+  getMilestoneBadge, getSellerTier,
 } from '@/components/TrustBadge'
 
 type Breakdown = {
