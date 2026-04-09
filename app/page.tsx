@@ -1,23 +1,47 @@
 import type { Metadata } from 'next'
+import lazyLoad from 'next/dynamic'
 import { buildMetadata, SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdmin } from '@supabase/supabase-js'
 import { getSiteSettings } from '@/lib/site-settings'
+
+/* ── Above the fold — eager imports (critical for LCP) ── */
+import { LandingNav } from '@/components/landing/landing-nav'
 import { HeroSection } from '@/components/landing/hero-section'
 import { StatsBar } from '@/components/landing/stats-bar'
-import { ProblemSolutionSection } from '@/components/landing/problem-solution-section'
-import { WhatsappMockupSection } from '@/components/landing/whatsapp-mockup-section'
-import { HowItWorksSection } from '@/components/landing/how-it-works-section'
-import { Features } from '@/components/landing/features'
-import { IntegrationsSection } from '@/components/landing/integrations-section'
-import { CategoriesSection } from '@/components/landing/categories-section'
-import { TestimonialsSection } from '@/components/landing/testimonials-section'
-import { PricingSection } from '@/components/landing/pricing-section'
-import { FaqSection } from '@/components/landing/faq-section'
-import { CtaSection } from '@/components/landing/cta-section'
-import { TrustedBySection } from '@/components/landing/trusted-by-section'
-import { TrustSection } from '@/components/landing/trust-section'
-import { LandingNav } from '@/components/landing/landing-nav'
-import { LandingFooter } from '@/components/landing/landing-footer'
+
+/* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
+const TrustedBySection      = lazyLoad(() => import('@/components/landing/trusted-by-section').then(m => ({ default: m.TrustedBySection })))
+const ProblemSolutionSection = lazyLoad(() => import('@/components/landing/problem-solution-section').then(m => ({ default: m.ProblemSolutionSection })))
+const WhatsappMockupSection  = lazyLoad(() => import('@/components/landing/whatsapp-mockup-section').then(m => ({ default: m.WhatsappMockupSection })))
+const HowItWorksSection      = lazyLoad(() => import('@/components/landing/how-it-works-section').then(m => ({ default: m.HowItWorksSection })))
+const Features               = lazyLoad(() => import('@/components/landing/features').then(m => ({ default: m.Features })))
+const IntegrationsSection    = lazyLoad(() => import('@/components/landing/integrations-section').then(m => ({ default: m.IntegrationsSection })))
+const CategoriesSection      = lazyLoad(() => import('@/components/landing/categories-section').then(m => ({ default: m.CategoriesSection })))
+const TestimonialsSection    = lazyLoad(() => import('@/components/landing/testimonials-section').then(m => ({ default: m.TestimonialsSection })))
+const TrustSection           = lazyLoad(() => import('@/components/landing/trust-section').then(m => ({ default: m.TrustSection })))
+const PricingSection         = lazyLoad(() => import('@/components/landing/pricing-section').then(m => ({ default: m.PricingSection })))
+const FaqSection             = lazyLoad(() => import('@/components/landing/faq-section').then(m => ({ default: m.FaqSection })))
+const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
+const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
+
+async function getPricingPlans() {
+  try {
+    const admin = createAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } },
+    )
+    const { data } = await admin
+      .from('pricing_plans')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order')
+    return data ?? []
+  } catch {
+    return []
+  }
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -157,9 +181,12 @@ const itemListJsonLd = {
 }
 
 export default async function Home() {
-  const supabase = await createClient()
+  const [supabase, settings, plans] = await Promise.all([
+    createClient(),
+    getSiteSettings(),
+    getPricingPlans(),
+  ])
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
-  const settings = await getSiteSettings()
 
   return (
     <main className="min-h-screen bg-background">
@@ -196,7 +223,7 @@ export default async function Home() {
       <CategoriesSection />
       <TestimonialsSection />
       <TrustSection />
-      <PricingSection />
+      <PricingSection plans={plans} />
       <FaqSection />
       <CtaSection user={user} />
       <LandingFooter settings={settings} />

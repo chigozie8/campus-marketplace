@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Check, X, Zap, Crown, Sparkles, ArrowRight, Star, Loader2 } from 'lucide-react'
+import { Check, X, Zap, Crown, Sparkles, ArrowRight, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -84,18 +84,13 @@ function formatPrice(price: number) {
   return `₦${price.toLocaleString()}`
 }
 
-export function PricingSection() {
-  const [annual, setAnnual] = useState(false)
-  const [plans, setPlans] = useState<Plan[]>(FALLBACK_PLANS)
-  const [loadingPlans, setLoadingPlans] = useState(true)
+interface PricingSectionProps {
+  plans?: Plan[]
+}
 
-  useEffect(() => {
-    fetch('/api/pricing')
-      .then(r => r.json())
-      .then(d => { if (d.plans?.length) setPlans(d.plans) })
-      .catch(() => {})
-      .finally(() => setLoadingPlans(false))
-  }, [])
+export function PricingSection({ plans: initialPlans }: PricingSectionProps = {}) {
+  const [annual, setAnnual] = useState(false)
+  const [plans] = useState<Plan[]>(initialPlans?.length ? initialPlans : FALLBACK_PLANS)
 
   return (
     <section id="pricing" className="py-24 sm:py-32 px-4 sm:px-6 relative overflow-hidden bg-background">
@@ -144,13 +139,8 @@ export function PricingSection() {
         </div>
 
         {/* Cards */}
-        {loadingPlans ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
-            {plans.map((plan) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+          {plans.map((plan) => {
               const Icon = getPlanIcon(plan.id)
               const price = annual ? plan.annual_price : plan.monthly_price
 
@@ -259,7 +249,6 @@ export function PricingSection() {
               )
             })}
           </div>
-        )}
 
         {/* Trust strip */}
         <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground">
