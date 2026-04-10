@@ -41,7 +41,9 @@ export async function GET(
     }
 
     const tx = paystackData.data
-    const status = tx.status === 'success' ? 'success' : 'failed'
+    // Pass the real Paystack status through — callback page needs to distinguish
+    // 'abandoned' (user cancelled) from 'failed' (actual payment failure).
+    const status: string = tx.status ?? 'failed'
 
     if (status === 'success') {
       const admin = db()
