@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
     const { data: product, error: productErr } = await admin
       .from('products')
-      .select('id, title, price, seller_id, is_available')
+      .select('id, title, price, seller_id, is_available, delivery_fee')
       .eq('id', product_id)
       .single()
 
@@ -48,7 +48,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'You cannot buy your own listing' }, { status: 400 })
     }
 
-    const totalAmount = product.price * quantity
+    const itemTotal = product.price * quantity
+    const deliveryFee = Number(product.delivery_fee ?? 0)
+    const platformFee = 100
+    const totalAmount = itemTotal + deliveryFee + platformFee
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
@@ -58,6 +61,8 @@ export async function POST(req: Request) {
         seller_id: product.seller_id,
         quantity,
         total_amount: totalAmount,
+        delivery_fee: deliveryFee,
+        platform_fee: platformFee,
         delivery_address: delivery_address.trim(),
         status: 'pending',
       })
