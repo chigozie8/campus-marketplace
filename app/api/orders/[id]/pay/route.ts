@@ -32,14 +32,20 @@ export async function POST(
     const supabase = await createClient()
     if (!supabase) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
 
+    // getUser() already includes the email — no separate admin lookup needed
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+
+    const email = user.email
+    if (!email) {
+      return NextResponse.json({ success: false, message: 'Account has no email address' }, { status: 400 })
+    }
 
     const admin = db()
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
-      .select('id, buyer_id, seller_id, total_amount, status, payment_ref, products(title)')
+      .select('id, buyer_id, seller_id, total_amount, status')
       .eq('id', orderId)
       .single()
 
@@ -51,12 +57,6 @@ export async function POST(
     }
     if (order.status !== 'pending') {
       return NextResponse.json({ success: false, message: 'Order is not pending payment' }, { status: 400 })
-    }
-
-    const { data: { user: authUser } } = await admin.auth.admin.getUserById(user.id)
-    const email = authUser?.email
-    if (!email) {
-      return NextResponse.json({ success: false, message: 'Could not retrieve buyer email' }, { status: 400 })
     }
 
     const { data: sellerProfile } = await admin
