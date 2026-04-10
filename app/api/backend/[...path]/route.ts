@@ -24,11 +24,19 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
     body = await req.text()
   }
 
-  const upstream = await fetch(target, {
-    method: req.method,
-    headers,
-    body: body || undefined,
-  })
+  let upstream: Response
+  try {
+    upstream = await fetch(target, {
+      method: req.method,
+      headers,
+      body: body || undefined,
+    })
+  } catch {
+    return NextResponse.json(
+      { success: false, message: 'Backend service unavailable' },
+      { status: 503 },
+    )
+  }
 
   const responseBody = await upstream.text()
 

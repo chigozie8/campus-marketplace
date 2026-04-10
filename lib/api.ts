@@ -34,6 +34,27 @@ async function request<T>(
   return res.json() as Promise<T>
 }
 
+// Calls Next.js API routes directly (not via the backend Express proxy).
+// Used for routes implemented as native Next.js handlers.
+async function directRequest<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  }
+
+  const res = await fetch(path, { ...options, headers })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(body.message || `HTTP ${res.status}`)
+  }
+
+  return res.json() as Promise<T>
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 export const authApi = {
@@ -83,8 +104,9 @@ export const productsApi = {
 // ─── Orders ───────────────────────────────────────────────────────────────────
 
 export const ordersApi = {
+  // Uses the direct Next.js API route — works in production without the Express backend.
   create: (data: CreateOrderPayload) =>
-    request<{ success: boolean; data: BackendOrder }>('/orders', {
+    directRequest<{ success: boolean; data: BackendOrder }>('/api/orders', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
@@ -101,13 +123,15 @@ export const ordersApi = {
       body: JSON.stringify({ status }),
     }),
 
+  // Uses the direct Next.js API route — works in production without the Express backend.
   initializePayment: (id: string) =>
-    request<{ success: boolean; data: { authorization_url: string; reference: string } }>(`/orders/${id}/pay`, {
+    directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(`/api/orders/${id}/pay`, {
       method: 'POST',
     }),
 
+  // Uses the direct Next.js API route — works in production without the Express backend.
   verifyPayment: (reference: string) =>
-    request<{ success: boolean; data: { status: string } }>(`/orders/verify/${reference}`),
+    directRequest<{ success: boolean; data: { status: string } }>(`/api/orders/verify/${reference}`),
 
   getVendorOrders: (page = 1, limit = 20) =>
     request<PaginatedResponse<BackendOrder>>(`/orders/vendor/dashboard?page=${page}&limit=${limit}`),
