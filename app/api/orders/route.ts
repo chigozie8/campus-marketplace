@@ -33,18 +33,16 @@ export async function POST(req: Request) {
 
     const { data: product, error: productErr } = await admin
       .from('products')
-      .select('id, title, price, seller_id, stock_quantity, is_available')
+      .select('id, title, price, seller_id, is_available')
       .eq('id', product_id)
       .single()
 
     if (productErr || !product) {
-      return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 })
+      const msg = productErr?.message ?? 'Product not found'
+      return NextResponse.json({ success: false, message: msg }, { status: 404 })
     }
     if (product.is_available === false) {
       return NextResponse.json({ success: false, message: 'This item is no longer available' }, { status: 400 })
-    }
-    if (product.stock_quantity !== null && product.stock_quantity < quantity) {
-      return NextResponse.json({ success: false, message: 'Insufficient stock' }, { status: 400 })
     }
     if (product.seller_id === user.id) {
       return NextResponse.json({ success: false, message: 'You cannot buy your own listing' }, { status: 400 })
@@ -68,11 +66,6 @@ export async function POST(req: Request) {
 
     if (orderErr || !order) {
       return NextResponse.json({ success: false, message: orderErr?.message ?? 'Failed to create order' }, { status: 500 })
-    }
-
-    if (product.stock_quantity !== null) {
-      const newQty = Math.max(0, product.stock_quantity - quantity)
-      await admin.from('products').update({ stock_quantity: newQty }).eq('id', product_id).catch(() => {})
     }
 
     sendNotification({
