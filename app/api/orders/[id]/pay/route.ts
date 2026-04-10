@@ -19,7 +19,7 @@ function generateRef(): string {
 }
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -68,7 +68,15 @@ export async function POST(
     const subaccountCode = (sellerProfile as { paystack_subaccount_code?: string | null } | null)?.paystack_subaccount_code ?? null
 
     const reference = generateRef()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus-marketplace.replit.app'
+    // Derive the callback URL from the actual request origin so dev and prod
+    // both redirect back to the correct domain after Paystack.
+    const reqOrigin = req.headers.get('origin')
+    const fwdHost = req.headers.get('x-forwarded-host')
+    const siteUrl =
+      reqOrigin ||
+      (fwdHost ? `https://${fwdHost}` : null) ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'https://campus-marketplace.replit.app'
     const callbackUrl = `${siteUrl}/payment/callback`
 
     const payload: Record<string, unknown> = {

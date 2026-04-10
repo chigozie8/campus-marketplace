@@ -24,9 +24,11 @@ function CallbackContent() {
 
     ordersApi.verifyPayment(reference)
       .then(result => {
-        const s = result.data.status
-        const meta = (result.data as { status: string; metadata?: { order_id?: string } }).metadata
-        if (meta?.order_id) setOrderId(meta.order_id)
+        const d = result.data as { status: string; order_id?: string | null; metadata?: { order_id?: string } }
+        const s = d.status
+        // Prefer top-level order_id from our DB lookup, fall back to metadata
+        const oid = d.order_id || d.metadata?.order_id || null
+        if (oid) setOrderId(oid)
 
         if (s === 'success') {
           setStatus('success')
@@ -49,6 +51,7 @@ function CallbackContent() {
       const result = await ordersApi.initializePayment(orderId)
       window.location.href = result.data.authorization_url
     } catch {
+      setRetrying(false)
       router.push('/dashboard/orders')
     }
   }
