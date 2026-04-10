@@ -232,6 +232,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 <div className="space-y-2">
                   <ProductBuyButton
                     product={{ id: p.id, title: p.title, price: p.price, images: p.images, delivery_fee: (p as any).delivery_fee ?? null }}
+                    sellerId={p.seller_id}
                     className="w-full h-12 rounded-2xl text-base font-bold shadow-lg shadow-primary/20"
                   />
                   <p className="text-xs text-center text-gray-400 dark:text-muted-foreground">

@@ -59,14 +59,18 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
     }
 
     hapticImpact('medium')
-    const result = await createOrder.mutateAsync({
-      product_id: product.id,
-      quantity,
-      delivery_address: address.trim(),
-    })
-
-    setOrderId(result.data.id)
-    setStep('confirm')
+    try {
+      const result = await createOrder.mutateAsync({
+        product_id: product.id,
+        quantity,
+        delivery_address: address.trim(),
+      })
+      setOrderId(result.data.id)
+      setStep('confirm')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create order'
+      toast.error(msg)
+    }
   }
 
   async function handlePay() {

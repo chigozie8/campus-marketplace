@@ -12,10 +12,11 @@ import { hapticImpact } from '@/lib/capacitor'
 
 interface ProductBuyButtonProps {
   product: CheckoutProduct
+  sellerId?: string
   className?: string
 }
 
-export function ProductBuyButton({ product, className }: ProductBuyButtonProps) {
+export function ProductBuyButton({ product, sellerId, className }: ProductBuyButtonProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -27,6 +28,11 @@ export function ProductBuyButton({ product, className }: ProductBuyButtonProps) 
     if (!user) {
       toast.error('Sign in to purchase', { description: 'You need an account to place an order.' })
       router.push('/auth/login')
+      return
+    }
+
+    if (sellerId && user.id === sellerId) {
+      toast.error('This is your own listing', { description: 'You cannot buy a product you listed.' })
       return
     }
 
