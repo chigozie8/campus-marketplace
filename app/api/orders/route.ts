@@ -50,7 +50,15 @@ export async function POST(req: Request) {
 
     const itemTotal = product.price * quantity
     const deliveryFee = Number(product.delivery_fee ?? 0)
-    const platformFee = 100
+
+    // Read the platform fee from site_settings (falls back to ₦100)
+    const { data: feeRows } = await admin
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['platform_fee_amount'])
+    const feeMap = Object.fromEntries((feeRows ?? []).map((r: { key: string; value: string }) => [r.key, r.value]))
+    const platformFee = Math.max(0, Number(feeMap.platform_fee_amount ?? '100'))
+
     const totalAmount = itemTotal + deliveryFee + platformFee
 
     const { data: order, error: orderErr } = await admin

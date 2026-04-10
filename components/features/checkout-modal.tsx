@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Loader2, MapPin, ShoppingCart, CreditCard, CheckCircle2, Shield, Lock, Phone } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -32,13 +32,24 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
   const [address, setAddress] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [orderId, setOrderId] = useState<string | null>(null)
+  const [platformFee, setPlatformFee] = useState(100)
+  const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
 
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
 
+  useEffect(() => {
+    fetch('/api/platform-fee')
+      .then(r => r.json())
+      .then(d => {
+        if (typeof d.amount === 'number') setPlatformFee(d.amount)
+        if (d.label) setPlatformFeeLabel(d.label)
+      })
+      .catch(() => {})
+  }, [])
+
   const subtotal = product.price * quantity
   const deliveryFee = product.delivery_fee ?? 0
-  const platformFee = 100
   const total = subtotal + deliveryFee + platformFee
 
   async function handleCreateOrder() {
@@ -168,10 +179,12 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                   : <span className="font-semibold text-emerald-600">Free</span>
                 }
               </div>
-              <div className="flex justify-between py-2 border-b border-border/50">
-                <span className="text-muted-foreground">Platform fee</span>
-                <span className="font-semibold">₦{platformFee.toLocaleString()}</span>
-              </div>
+              {platformFee > 0 && (
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">{platformFeeLabel}</span>
+                  <span className="font-semibold">₦{platformFee.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between py-2">
                 <span className="font-black">Total</span>
                 <span className="font-black text-primary text-base">₦{total.toLocaleString()}</span>
@@ -210,11 +223,11 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 ← Edit address
               </button>
               <a
-                href="tel:07082039250"
+                href="tel:07082039150"
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 <Phone className="w-3 h-3" />
-                07082039250
+                07082039150
               </a>
             </div>
           </div>

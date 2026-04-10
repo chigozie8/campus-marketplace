@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { AdminRolesManager } from '@/components/admin/admin-roles-manager'
 import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
 import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
+import { PlatformFeeEditor } from '@/components/admin/platform-fee-editor'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
@@ -51,7 +52,15 @@ export default async function AdminSettingsPage() {
 
       <div>
         <h2 className="text-lg font-black text-foreground tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage admin access, social links, platform stats, and site content</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage fees, admin access, social links, platform stats, and site content</p>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">💳 Platform Fee</h3>
+        <PlatformFeeEditor
+          initialAmount={Number(settings.platform_fee_amount ?? 100)}
+          initialLabel={settings.platform_fee_label ?? 'VAT & Service Fee'}
+        />
       </div>
 
       <div>

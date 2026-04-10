@@ -17,6 +17,9 @@ export type SiteSettings = {
   press_founder_quote: string
   press_contact_email: string
   press_assets: string
+  /* ── Platform Fee ── */
+  platform_fee_amount: string
+  platform_fee_label: string
   /* ── Contact & Support ── */
   support_phone: string
   support_whatsapp_url: string
@@ -161,8 +164,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
   press_contact_email: 'press@vendoorx.com',
   press_assets: '',
+  /* platform fee */
+  platform_fee_amount: '100',
+  platform_fee_label: 'VAT & Service Fee',
   /* contact */
-  support_phone: '07082039250',
+  support_phone: '07082039150',
   support_whatsapp_url: 'https://wa.me/2347082039250',
   contact_email: 'support@vendoorx.com',
   contact_hero_subtitle: "Got a question, bug report, or partnership idea? We're all ears. Our team usually responds within 2 hours.",
