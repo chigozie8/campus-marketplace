@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'VendoorX — WhatsApp commerce platform',
     short_name: 'VendoorX',
-    description: "Nigeria's AI-powered WhatsApp commerce platform. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp with zero platform fees.",
+    description: "Nigeria's AI-powered WhatsApp commerce platform. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp with zero commission.",
     start_url: '/',
     scope: '/',
     display: 'standalone',

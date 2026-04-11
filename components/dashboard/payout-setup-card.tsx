@@ -118,7 +118,7 @@ export function PayoutSetupCard({
                 : 'Your bank account is linked.'}
             </p>
             <p className="text-xs text-green-600 dark:text-green-500/70 mt-1">
-              You receive the full sale price minus a ₦100 platform fee per transaction.
+              You receive the full sale price minus a ₦100 VAT per transaction.
             </p>
           </div>
           <button
@@ -144,7 +144,7 @@ export function PayoutSetupCard({
           <p className="text-xs text-muted-foreground mt-0.5">
             {editing
               ? 'Enter your new bank details below. Your account will be re-verified.'
-              : 'Link your bank account to receive payments directly when a buyer checks out. We deduct a flat ₦100 platform fee per sale.'}
+              : 'Link your bank account to receive payments directly when a buyer checks out. We deduct a flat ₦100 VAT per sale.'}
           </p>
         </div>
         {editing && (

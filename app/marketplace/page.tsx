@@ -13,7 +13,7 @@ import { buildMetadata, SITE_URL } from '@/lib/seo'
 export const metadata: Metadata = buildMetadata({
   title: 'Campus Marketplace — Browse 120,000+ Student Listings',
   description:
-    'Shop electronics, textbooks, fashion, food, services and more from verified student sellers across 120+ Nigerian universities. WhatsApp-direct, zero platform fees.',
+    'Shop electronics, textbooks, fashion, food, services and more from verified student sellers across 120+ Nigerian universities. WhatsApp-direct, zero commission.',
   path: '/marketplace',
   keywords: [
     'buy electronics campus Nigeria',

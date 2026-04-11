@@ -32,7 +32,7 @@ const CATEGORIES = [
     border: 'border-green-200 dark:border-green-900/40',
     questions: [
       { q: 'How do I post a listing?', a: 'Click "Sell" in the navigation. Fill in your product name, description, price, category, and up to 5 photos or videos. Your listing goes live instantly after submission.' },
-      { q: 'Is it free to list products?', a: 'Yes — listing is 100% free forever. VendoorX only charges a flat ₦100 platform fee when a buyer completes a Paystack checkout (not on WhatsApp deals).' },
+      { q: 'Is it free to list products?', a: 'Yes — listing is 100% free forever. VendoorX only charges a flat ₦100 VAT when a buyer completes a Paystack checkout (not on WhatsApp deals).' },
       { q: 'How do I boost my listing?', a: 'From your dashboard, click "Boost" next to any listing. Pay ₦500–₦2,000 via Paystack for 7 days of priority placement. Boosted listings show a "Featured" badge.' },
       { q: 'Can I sell food or services?', a: 'Absolutely! VendoorX supports all legal products and services — food, fashion, electronics, textbooks, tutoring, graphic design, photography, and more.' },
     ],
@@ -44,7 +44,7 @@ const CATEGORIES = [
     bg: 'bg-purple-50 dark:bg-purple-950/30',
     border: 'border-purple-200 dark:border-purple-900/40',
     questions: [
-      { q: 'How does checkout payment work?', a: 'When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 48 hours with no dispute), funds are released to the seller\'s wallet minus the ₦100 platform fee.' },
+      { q: 'How does checkout payment work?', a: 'When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 48 hours with no dispute), funds are released to the seller\'s wallet minus the ₦100 VAT.' },
       { q: 'How do I withdraw my wallet balance?', a: 'Go to Dashboard → Payouts. Connect your bank account, then click "Withdraw." Transfers are processed instantly via Paystack. Minimum withdrawal is ₦500.' },
       { q: 'What payment methods are accepted?', a: 'Paystack supports debit cards, bank transfers, USSD, and mobile money. For WhatsApp deals, payment is arranged directly between buyer and seller.' },
       { q: 'Is my payment information secure?', a: 'All payments are processed by Paystack, a PCI-DSS certified payment provider. VendoorX never stores your card details.' },
@@ -66,7 +66,7 @@ const CATEGORIES = [
 ]
 
 const POPULAR = [
-  { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 platform fee applies only to Paystack checkout orders.' },
+  { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 VAT applies only to Paystack checkout orders.' },
   { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for local orders. Check the listing for the seller\'s delivery details.' },
   { q: 'Can I sell to buyers in other cities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
 ]

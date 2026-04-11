@@ -36,7 +36,7 @@ export function PlatformFeeEditor({ initialAmount, initialLabel }: PlatformFeeEd
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
-      toast.success('Platform fee updated')
+      toast.success('VAT settings updated')
       setEditing(false)
     } catch {
       toast.error('Could not save — try again')
@@ -57,7 +57,7 @@ export function PlatformFeeEditor({ initialAmount, initialLabel }: PlatformFeeEd
         <div className="flex items-center gap-2">
           <Receipt className="w-4 h-4 text-primary" />
           <div>
-            <h4 className="font-black text-sm text-foreground">Platform Fee (VAT / Service Charge)</h4>
+            <h4 className="font-black text-sm text-foreground">VAT / Service Charge</h4>
             <p className="text-xs text-muted-foreground mt-0.5">
               Added to every buyer's checkout total. Shown as "{label}" on the payment screen.
             </p>

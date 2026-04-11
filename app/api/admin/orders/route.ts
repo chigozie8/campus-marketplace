@@ -60,7 +60,7 @@ async function releaseSellerEarnings(sellerId: string, orderId: string) {
     type: 'release',
     amount: txn.amount,
     status: 'completed',
-    description: `Earnings released by admin — order completed (₦${PLATFORM_FEE} platform fee already deducted)`,
+    description: `Earnings released by admin — order completed (₦${PLATFORM_FEE} VAT already deducted)`,
   })
 }
 

@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     const itemTotal = product.price * quantity
     const deliveryFee = Number(product.delivery_fee ?? 0)
 
-    // Read the platform fee from site_settings (falls back to ₦100)
+    // Read the VAT amount from site_settings (falls back to ₦100)
     const { data: feeRows } = await admin
       .from('site_settings')
       .select('key, value')

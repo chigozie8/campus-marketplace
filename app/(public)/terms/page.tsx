@@ -53,8 +53,8 @@ You understand that VendoorX is a marketplace platform and is not party to trans
   },
   {
     id: 'platform-fee',
-    title: '5. Platform Fee',
-    content: `VendoorX charges a flat ₦100 platform fee on transactions processed through the Paystack checkout system. This fee:
+    title: '5. VAT & Fees',
+    content: `VendoorX deducts a flat ₦100 VAT on transactions processed through the Paystack checkout system. This charge:
 - Is deducted automatically from the buyer payment before it reaches your wallet.
 - Does NOT apply to WhatsApp direct deals conducted outside the VendoorX checkout.
 - Is non-refundable once a transaction is complete.

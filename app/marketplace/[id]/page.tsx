@@ -223,7 +223,7 @@ export default async function ProductDetailPage({ params }: Props) {
                     : <span className="text-emerald-600 font-semibold">Free delivery</span>
                   }
                   <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>
-                  <span>₦100 platform fee</span>
+                  <span>₦100 VAT</span>
                 </div>
               )}
 
