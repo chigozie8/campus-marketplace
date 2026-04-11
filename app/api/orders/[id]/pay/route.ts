@@ -68,14 +68,12 @@ export async function POST(
     const subaccountCode = (sellerProfile as { paystack_subaccount_code?: string | null } | null)?.paystack_subaccount_code ?? null
 
     const reference = generateRef()
-    // Derive the callback URL from the actual request origin so dev and prod
-    // both redirect back to the correct domain after Paystack.
-    const reqOrigin = req.headers.get('origin')
-    const fwdHost = req.headers.get('x-forwarded-host')
+    // Build callback URL using reliable server-side env vars.
+    // REPLIT_DEV_DOMAIN is always set in the Replit dev environment.
+    // NEXT_PUBLIC_SITE_URL should be set when deploying to production.
     const siteUrl =
-      reqOrigin ||
-      (fwdHost ? `https://${fwdHost}` : null) ||
       process.env.NEXT_PUBLIC_SITE_URL ||
+      (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null) ||
       'https://campus-marketplace.replit.app'
     const callbackUrl = `${siteUrl}/payment/callback`
 

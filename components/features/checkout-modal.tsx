@@ -129,6 +129,10 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     try {
       const result = await initPayment.mutateAsync(orderId)
       onPaystackRedirect?.()
+      // Close the modal BEFORE navigating so it is never frozen open in the
+      // browser's back-forward cache. If the user returns via back button or
+      // Paystack cancels back to this page, the modal is already shut.
+      handleClose()
       window.location.href = result.data.authorization_url
     } catch {
       setStep('confirm')
