@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Always use the internal address for server-to-server calls.
-// NEXT_PUBLIC_BACKEND_URL may be the public Replit domain which can't be
-// reached from within the same container — localhost:3001 is always correct.
-const BACKEND_INTERNAL = 'http://localhost:3001'
+// In production (Vercel), BACKEND_URL points to the Railway backend.
+// In development (Replit), fall back to localhost:3001.
+const BACKEND_INTERNAL = process.env.BACKEND_URL ?? 'http://localhost:3001'
 
 async function proxy(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params
