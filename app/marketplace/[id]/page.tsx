@@ -222,8 +222,6 @@ export default async function ProductDetailPage({ params }: Props) {
                     ? <span>Delivery: <strong className="text-gray-900 dark:text-white">₦{Number((p as any).delivery_fee).toLocaleString()}</strong></span>
                     : <span className="text-emerald-600 font-semibold">Free delivery</span>
                   }
-                  <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>
-                  <span>₦100 VAT</span>
                 </div>
               )}
 
