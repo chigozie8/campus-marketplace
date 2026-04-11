@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Users, Building2, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Users, MessageCircle, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
 
@@ -12,16 +12,16 @@ interface CtaSectionProps {
 
 const PERKS = [
   'Free to join, free to list',
-  'WhatsApp-first, no middlemen',
+  'AI handles buyer conversations',
   'Verified seller badge',
   'Zero commission on sales',
 ]
 
 const STATS = [
-  { end: 50000, fmt: (n: number) => n >= 1000 ? `${Math.floor(n / 1000)}K+` : `${n}+`, label: 'Active Vendors', icon: Users },
-  { end: 120,   fmt: (n: number) => `${n}+`,                                             label: 'Campuses',      icon: Building2 },
-  { end: 2,     fmt: (n: number) => `₦${n}B+`,                                           label: 'Sales Made',    icon: TrendingUp },
-  { end: 4.9,   fmt: (n: number) => `${n.toFixed(1)}/5`,                                 label: 'Avg Rating',    icon: Star, decimal: true },
+  { end: 50000, fmt: (n: number) => n >= 1000 ? `${Math.floor(n / 1000)}K+` : `${n}+`, label: 'Active Sellers',     icon: Users },
+  { end: 36,    fmt: (n: number) => `${n}+`,                                             label: 'States Covered',   icon: MessageCircle },
+  { end: 2,     fmt: (n: number) => `₦${n}B+`,                                           label: 'Sales Processed',  icon: TrendingUp },
+  { end: 4.9,   fmt: (n: number) => `${n.toFixed(1)}/5`,                                 label: 'Avg Rating',       icon: Star, decimal: true },
 ]
 
 function StatCard({
@@ -45,7 +45,7 @@ function StatCard({
       const DURATION = 1600
       const tick = () => {
         const p = Math.min((Date.now() - t0) / DURATION, 1)
-        const e = 1 - Math.pow(1 - p, 4)   // ease-out quart
+        const e = 1 - Math.pow(1 - p, 4)
         setVal(decimal ? Math.round(e * end * 10) / 10 : Math.floor(e * end))
         if (p < 1) raf.current = requestAnimationFrame(tick)
         else        setVal(end)
@@ -116,7 +116,7 @@ export function CtaSection({ user }: CtaSectionProps) {
         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8">
           <Zap className="w-4 h-4 text-[#16a34a]" />
           <span className="text-sm font-semibold text-[#16a34a] tracking-wide">
-            {isAuthed ? 'Your store is live and ready to grow' : 'Nigeria\'s #1 campus marketplace'}
+            {isAuthed ? 'Your store is live and ready to grow' : 'Nigeria\'s AI-Powered WhatsApp Commerce Platform'}
           </span>
         </div>
 
@@ -125,7 +125,7 @@ export function CtaSection({ user }: CtaSectionProps) {
           {isAuthed ? (
             <>Keep growing your{' '}<span className="text-[#16a34a]">business.</span></>
           ) : (
-            <>Your campus hustle{' '}<span className="text-[#16a34a]">starts here.</span></>
+            <>Your WhatsApp business{' '}<span className="text-[#16a34a]">starts here.</span></>
           )}
         </h2>
 
@@ -134,11 +134,11 @@ export function CtaSection({ user }: CtaSectionProps) {
           {isAuthed ? (
             <>
               Everything you need is in your dashboard. Boost your listings, track your orders, and{' '}
-              <span className="text-[#16a34a] font-semibold">keep growing your campus business</span>.
+              <span className="text-[#16a34a] font-semibold">keep growing your business</span>.
             </>
           ) : (
             <>
-              Join <span className="text-white font-bold">50,000+ students</span> already making real money on VendoorX.
+              Join <span className="text-white font-bold">50,000+ sellers</span> already making real money on VendoorX.
               It&apos;s{' '}
               <span className="text-[#16a34a] font-semibold">free to join</span>{' '}
               and <span className="text-[#16a34a] font-semibold">free to start selling</span> — right now.
@@ -213,7 +213,7 @@ export function CtaSection({ user }: CtaSectionProps) {
 
         {/* Trust line */}
         <p className="text-white/30 text-sm mt-10 tracking-wide">
-          Trusted by students across 120+ Nigerian campuses &bull; No credit card required &bull; Cancel anytime
+          Trusted by sellers across Nigeria &bull; No credit card required &bull; Cancel anytime
         </p>
       </div>
     </section>

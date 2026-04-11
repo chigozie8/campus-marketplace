@@ -12,10 +12,10 @@ export interface StatItem {
 const ICONS = [Users, Building2, TrendingUp, Star]
 
 const DEFAULT_STATS: StatItem[] = [
-  { value: '50,000+', label: 'Active Vendors',    sublabel: 'Selling right now' },
-  { value: '120+',    label: 'Nigerian Campuses', sublabel: 'From UNILAG to BUK' },
-  { value: '₦2.4B+',  label: 'Sales Processed',  sublabel: 'And growing daily' },
-  { value: '4.9/5',   label: 'Average Rating',    sublabel: 'From 12,500+ reviews' },
+  { value: '50,000+', label: 'Active Sellers',      sublabel: 'Selling right now' },
+  { value: '36+',     label: 'States Nationwide',   sublabel: 'Lagos to Maiduguri' },
+  { value: '₦2.4B+',  label: 'Sales Processed',     sublabel: 'And growing daily' },
+  { value: '4.9/5',   label: 'Average Rating',       sublabel: 'From 12,500+ reviews' },
 ]
 
 function parseNumber(str: string) {

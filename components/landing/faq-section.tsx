@@ -16,9 +16,14 @@ const FAQS = [
     a: 'Not at all. VendoorX gives you a ready-made store page you can share with anyone, instantly. No coding, no hosting, no setup headache — just sign up, add your products, and your store is live within 2 minutes.',
   },
   {
+    category: 'Getting Started',
+    q: 'Who is VendoorX for?',
+    a: 'VendoorX is for any seller or business that wants to automate their sales and customer conversations on WhatsApp. Whether you\'re a solo entrepreneur, a small business, a growing brand, or anyone selling products or services in Nigeria — VendoorX gives you the AI tools to sell, support customers, and collect payments, all through chat.',
+  },
+  {
     category: 'Payments',
     q: 'How do payments work on VendoorX?',
-    a: 'On the free plan, you settle payments directly with your buyer however you like — cash, bank transfer, etc. On Growth and Pro plans, buyers can pay you online with their card right from your store page, and you get an instant alert the moment money lands. Simple.',
+    a: 'On the free plan, you settle payments directly with your buyer however you like — cash, bank transfer, etc. On Growth and Pro plans, buyers can pay you online with their card right from your store page or through WhatsApp, and you get an instant alert the moment money lands. Simple.',
   },
   {
     category: 'Payments',
@@ -27,18 +32,18 @@ const FAQS = [
   },
   {
     category: 'Platform',
-    q: 'Which social platforms can I share my listings to?',
+    q: 'How does the AI handle my customer conversations?',
+    a: 'VendoorX AI automatically replies to buyers on your behalf on WhatsApp — answering product questions, confirming orders, and guiding customers through checkout 24/7. You can customise its tone and responses from your dashboard. It\'s like having a sales assistant that never sleeps.',
+  },
+  {
+    category: 'Platform',
+    q: 'Which platforms can I share my listings to?',
     a: 'You can share your listings to WhatsApp Status, Instagram Stories, Facebook, TikTok, and more — in a single tap. VendoorX generates the perfect post for each platform so you don\'t have to think about it.',
   },
   {
     category: 'Platform',
     q: 'How does the Verified Seller badge work?',
     a: 'The Verified Seller badge is available on the Pro plan. Our team reviews your profile and products before granting verification. Once verified, a trust badge appears on your store and listings — giving buyers confidence to choose you over unverified sellers. Verified sellers consistently close more deals.',
-  },
-  {
-    category: 'Platform',
-    q: 'Is VendoorX only for university students in Nigeria?',
-    a: 'VendoorX is built specifically for Nigerian campus communities, but anyone can use it. We currently serve 120+ campuses across Nigeria including UNILAG, OAU, UI, FUTA, ABU, UNIBEN, BUK, and many more.',
   },
   {
     category: 'Billing',
@@ -49,11 +54,6 @@ const FAQS = [
     category: 'Platform',
     q: 'What is the AI listing assistant?',
     a: 'The AI listing assistant (Pro plan only) helps you write better product titles, descriptions, and even suggests the right price for your items. It looks at what\'s working in your category and gives you copy that attracts more buyers and converts faster. Think of it as a personal copywriter for your store.',
-  },
-  {
-    category: 'Getting Started',
-    q: 'How do I get started right now?',
-    a: 'Click "Get Started Free" anywhere on this page. Sign up with your email or Google account in seconds, create your store profile, and add your first product. The whole thing takes under 5 minutes — no card needed, no approval waiting.',
   },
 ]
 

@@ -42,10 +42,10 @@ const TRUST_PILLARS = [
     color: 'text-purple-600 dark:text-purple-400',
     bg: 'bg-purple-50 dark:bg-purple-950/40',
     border: 'border-purple-100 dark:border-purple-900/50',
-    title: 'Verified Student Sellers',
+    title: 'Verified Sellers',
     body:
-      'Every seller on VendoorX must verify with a real Nigerian university email. You always know you\'re buying from an actual student at a real campus — not a random stranger.',
-    badge: 'University Verified',
+      'Every seller on VendoorX goes through a verification process before receiving a badge. You always know you\'re buying from a real, accountable person — not a random stranger.',
+    badge: 'Seller Verified',
     badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
   },
   {
@@ -66,7 +66,7 @@ const TRUST_PILLARS = [
     border: 'border-rose-100 dark:border-rose-900/50',
     title: 'Real Nigerian Support',
     body:
-      'Got a problem? Our Nigerian support team personally reviews every dispute within 24 hours. We\'re not overseas — we understand exactly what campus life in Nigeria looks like.',
+      'Got a problem? Our Nigerian support team personally reviews every dispute within 24 hours. We\'re not overseas — we understand exactly how business works in Nigeria.',
     badge: 'Nigerian Support',
     badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
   },
@@ -141,7 +141,7 @@ export function TrustSection() {
           <h2 className="text-3xl sm:text-4xl font-black text-gray-950 dark:text-white mb-4 tracking-tight">
             Built so{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
-              Nigerian students
+              every Nigerian
             </span>{' '}
             can trade with confidence
           </h2>

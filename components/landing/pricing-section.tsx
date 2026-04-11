@@ -41,7 +41,7 @@ const FALLBACK_PLANS: Plan[] = [
     ],
   },
   {
-    id: 'growth', name: 'Growth', tagline: 'For serious campus sellers',
+    id: 'growth', name: 'Growth', tagline: 'For serious sellers ready to scale',
     monthly_price: 2500, annual_price: 2000, cta_text: 'Start Growing', cta_href: '/auth/sign-up',
     is_highlighted: true, badge: 'Most Popular', color: 'from-green-500 to-emerald-700', sort_order: 2,
     features: [

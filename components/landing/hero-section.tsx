@@ -9,11 +9,11 @@ import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { DEFAULT_SETTINGS } from '@/lib/site-settings-defaults'
 
 const AVATAR_META = [
-  { alt: 'Nigerian campus seller',   fallback: 'AO', color: 'bg-primary' },
-  { alt: 'Nigerian student vendor',   fallback: 'CE', color: 'bg-emerald-600' },
-  { alt: 'Campus entrepreneur',       fallback: 'BN', color: 'bg-teal-600' },
-  { alt: 'Active vendor',             fallback: 'OA', color: 'bg-green-700' },
-  { alt: 'Nigerian campus student',   fallback: 'FA', color: 'bg-cyan-600' },
+  { alt: 'Nigerian seller on VendoorX',   fallback: 'AO', color: 'bg-primary' },
+  { alt: 'WhatsApp business owner',        fallback: 'CE', color: 'bg-emerald-600' },
+  { alt: 'Nigerian entrepreneur',          fallback: 'BN', color: 'bg-teal-600' },
+  { alt: 'Active vendor on VendoorX',      fallback: 'OA', color: 'bg-green-700' },
+  { alt: 'Online seller Nigeria',          fallback: 'FA', color: 'bg-cyan-600' },
 ]
 
 interface HeroSectionProps {
@@ -32,9 +32,9 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
   ]
   const AVATARS = AVATAR_META.map((meta, i) => ({ ...meta, src: avatarSrcs[i] }))
   const FEATURES = [
-    { icon: Shield, text: 'Verified Vendors' },
-    { icon: Zap, text: 'WhatsApp Orders' },
-    { icon: Users, text: `${vendorCount} Sellers` },
+    { icon: Shield, text: 'Verified Sellers' },
+    { icon: Zap, text: 'AI-Powered Orders' },
+    { icon: Users, text: `${vendorCount} Active Sellers` },
   ]
   const isAuthed = !!user
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
@@ -52,7 +52,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
           <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
           {isAuthed && firstName
             ? `Welcome back, ${firstName}! Your store awaits 🎉`
-            : "The Shopify for WhatsApp & Social Sellers in Africa"
+            : 'Nigeria\'s AI-Powered WhatsApp Commerce Platform'
           }
         </div>
 
@@ -65,9 +65,9 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
 
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
-          Stop tracking orders in chats. VendoorX turns your WhatsApp, Instagram, and Facebook conversations into a{' '}
-          <span className="text-primary font-semibold">structured, trackable store</span>{' '}
-          — with payments, dashboards, and order management built in.
+          Stop tracking orders in chats. VendoorX is a conversational commerce platform where{' '}
+          <span className="text-primary font-semibold">AI handles your customer conversations, product discovery, order flow, and payments</span>{' '}
+          — all on WhatsApp.
         </p>
 
         {/* Feature badges */}
@@ -178,7 +178,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
               ))}
             </div>
             <span className="text-sm text-muted-foreground font-medium">
-              <span className="text-foreground font-bold">{vendorCount}</span> active vendors
+              <span className="text-foreground font-bold">{vendorCount}</span> active sellers
             </span>
           </div>
         </div>

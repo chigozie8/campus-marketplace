@@ -33,7 +33,7 @@ export function CategoriesSection() {
             Whatever you need, <span className="text-primary">it&apos;s here.</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto text-balance leading-relaxed">
-            From second-hand laptops to fresh jollof rice — your entire campus life, in one marketplace.
+            From second-hand laptops to fresh jollof rice — whatever you sell in Nigeria, it belongs on VendoorX.
           </p>
         </div>
 

@@ -24,14 +24,14 @@ const LINKS = {
 }
 
 const SPONSORS = [
-  { name: 'UNILAG', full: 'University of Lagos' },
-  { name: 'UI Ibadan', full: 'University of Ibadan' },
-  { name: 'OAU', full: 'Obafemi Awolowo University' },
-  { name: 'ABU Zaria', full: 'Ahmadu Bello University' },
-  { name: 'Babcock', full: 'Babcock University' },
-  { name: 'Covenant', full: 'Covenant University' },
-  { name: 'FUTA', full: 'Federal Univ. of Tech. Akure' },
-  { name: 'BUK', full: 'Bayero University Kano' },
+  { name: 'Lagos', full: 'Lagos State' },
+  { name: 'Abuja', full: 'FCT Abuja' },
+  { name: 'Port Harcourt', full: 'Rivers State' },
+  { name: 'Kano', full: 'Kano State' },
+  { name: 'Ibadan', full: 'Oyo State' },
+  { name: 'Enugu', full: 'Enugu State' },
+  { name: 'Benin City', full: 'Edo State' },
+  { name: 'Aba', full: 'Abia State' },
 ]
 
 function NewsletterForm() {
@@ -83,7 +83,7 @@ function NewsletterForm() {
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          placeholder="Enter your university email"
+          placeholder="Enter your email address"
           required
           className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
         />
@@ -171,13 +171,13 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
             </Link>
 
             <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
-              Nigeria&apos;s #1 campus marketplace. Buy, sell, and close deals directly on WhatsApp — zero fees, zero friction, just fast campus commerce.
+              Nigeria&apos;s AI-powered WhatsApp commerce platform. Automate your sales, support, and payments — all through chat. Zero commission, free to start.
             </p>
 
             <div className="flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                Made in Nigeria — built for campus hustle
+                Made in Nigeria — built for Nigerian commerce
               </div>
               <a
                 href="tel:+15792583013"
@@ -222,10 +222,10 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Stay in the loop</p>
               <h3 className="text-2xl font-black text-foreground leading-tight mb-1">
-                Get the best campus deals<br />
-                <span className="text-primary">before anyone else.</span>
+                Get the best deals and seller tips<br />
+                <span className="text-primary">straight to your inbox.</span>
               </h3>
-              <p className="text-sm text-muted-foreground">Join thousands of students getting weekly deal alerts.</p>
+              <p className="text-sm text-muted-foreground">Join thousands of sellers and buyers getting weekly updates.</p>
             </div>
 
             <NewsletterForm />
@@ -237,11 +237,11 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
         </div>
       </div>
 
-      {/* ── PARTNER CAMPUSES STRIP ── */}
+      {/* ── ACTIVE CITIES STRIP ── */}
       <div className="border-t border-border bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
-            Active on 120+ campuses across Nigeria
+            Active in cities across Nigeria
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             {SPONSORS.map(({ name, full }) => (
@@ -254,7 +254,7 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
               </div>
             ))}
             <div className="px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
-              +112 more
+              +28 more cities
             </div>
           </div>
         </div>
@@ -298,7 +298,7 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
                 { icon: ShieldCheck, text: 'Verified Sellers' },
                 { icon: Zap,         text: 'WhatsApp Powered' },
                 { icon: Star,        text: '4.9 Rated Platform' },
-                { icon: Users,       text: 'Active Student Community' },
+                { icon: Users,       text: 'Active Seller Community' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
                   <Icon className="w-3.5 h-3.5 text-primary" />
@@ -321,7 +321,7 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
             &copy; {new Date().getFullYear()} VendoorX Technologies Ltd. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground italic hidden md:block">
-            Connecting Nigerian campuses, one deal at a time.
+            Connecting Nigerian buyers and sellers, one deal at a time.
           </p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>

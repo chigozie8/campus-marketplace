@@ -7,84 +7,84 @@ const TESTIMONIALS = [
   {
     name: 'Adaeze Okonkwo',
     role: 'Fashion Seller',
-    school: 'UNILAG',
+    location: 'Lagos',
     avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'AO',
     flag: '🇳🇬',
     metric: '₦180K',
     metricLabel: 'first month',
     rating: 5,
-    quote: 'I made ₦180,000 in my first month selling clothes on VendoorX. The WhatsApp button is genius — buyers just chat me directly and we close deals in minutes. I\'ve never sold this fast.',
+    quote: 'I made ₦180,000 in my first month selling clothes on VendoorX. The WhatsApp button is genius — buyers just chat me directly and we close deals in minutes. I\'ve never sold this fast in my life.',
     verified: true,
     accent: '#16a34a',
   },
   {
     name: 'Chukwuemeka Eze',
     role: 'Electronics Reseller',
-    school: 'UI Ibadan',
+    location: 'Ibadan',
     avatar: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'CE',
     flag: '🇳🇬',
     metric: '3 Laptops',
     metricLabel: 'in one week',
     rating: 5,
-    quote: 'Sold 3 laptops in one week just from listing them here. The platform is clean, fast, and my dashboard shows exactly how many people are viewing my listings in real time.',
+    quote: 'Sold 3 laptops in one week just from listing them here. The platform is clean, fast, and my dashboard shows exactly how many people are viewing my listings in real time. Love it.',
     verified: true,
     accent: '#2563eb',
   },
   {
     name: 'Fatimah Al-Hassan',
     role: 'Food Vendor',
-    school: 'ABU Zaria',
+    location: 'Abuja',
     avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'FA',
     flag: '🇳🇬',
     metric: 'Daily Orders',
-    metricLabel: 'campus-wide',
+    metricLabel: 'on autopilot',
     rating: 5,
-    quote: 'My jollof rice business completely blew up after I listed on VendoorX. I get daily orders from students all over campus now. Best business decision I\'ve ever made.',
+    quote: 'My jollof rice business completely blew up after I listed on VendoorX. I get daily orders from buyers across the city now, and the AI handles the conversations while I focus on cooking. Best decision ever.',
     verified: true,
     accent: '#ea580c',
   },
   {
     name: 'Oluwafemi Adeyemi',
-    role: 'Textbook Seller',
-    school: 'OAU',
+    role: 'Books & Supplies Seller',
+    location: 'Port Harcourt',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'OA',
     flag: '🇳🇬',
-    metric: 'School Fees',
-    metricLabel: 'fully recouped',
+    metric: '₦2.4M',
+    metricLabel: 'in 6 months',
     rating: 5,
-    quote: 'I made back my school fees just selling used textbooks! Students are always looking for affordable books and VendoorX puts me right in front of them. It basically sells for me.',
+    quote: 'I made ₦2.4 million in six months selling books and supplies online. Buyers find me through VendoorX and the orders just keep coming. It basically sells for me while I sleep — I\'m not exaggerating.',
     verified: false,
     accent: '#7c3aed',
   },
   {
     name: 'Blessing Nwosu',
     role: 'Beauty Entrepreneur',
-    school: 'FUTA',
+    location: 'Enugu',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'BN',
     flag: '🇳🇬',
     metric: '3× Sales',
     metricLabel: 'after getting verified',
     rating: 5,
-    quote: 'The verified seller badge changed everything. Buyers feel safe buying from me now. My sales literally tripled after I got verified. VendoorX is the real deal for serious entrepreneurs.',
+    quote: 'The verified seller badge changed everything. Buyers feel safe purchasing from me now. My sales literally tripled after I got verified. VendoorX is the real deal for any serious entrepreneur.',
     verified: true,
     accent: '#db2777',
   },
   {
     name: 'Ibrahim Musa',
     role: 'Tech Repair Service',
-    school: 'BUK',
+    location: 'Kano',
     avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&h=120&fit=crop&crop=faces&q=80',
     initials: 'IM',
     flag: '🇳🇬',
     metric: 'Steady Clients',
     metricLabel: 'every single week',
     rating: 5,
-    quote: 'I offer laptop repairs and VendoorX sends me a steady stream of clients every week. I didn\'t even run ads — people just find my listing and message me directly. It runs itself.',
+    quote: 'I offer laptop repairs and VendoorX sends me a steady stream of clients every week. I didn\'t run any ads — people just find my listing and message me directly. The AI handles the first conversation. It runs itself.',
     verified: true,
     accent: '#0891b2',
   },
@@ -129,14 +129,14 @@ export function TestimonialsSection() {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#16a34a]/10 border border-[#16a34a]/20 text-[#16a34a] text-xs font-black uppercase tracking-[0.18em] mb-5">
             <span className="w-2 h-2 rounded-full bg-[#16a34a] animate-pulse" />
-            Real Students. Real Results.
+            Real Sellers. Real Results.
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-gray-950 dark:text-white text-balance leading-tight mb-4">
-            Nigerian students are{' '}
-            <span className="text-[#16a34a]">eating good</span> on VendoorX
+            Nigerian sellers are{' '}
+            <span className="text-[#16a34a]">winning big</span> on VendoorX
           </h2>
           <p className="text-gray-500 dark:text-muted-foreground text-lg max-w-xl mx-auto">
-            From Lagos to Kano, students across Nigeria are turning their skills and products into real income. Here&apos;s what they&apos;re saying.
+            From Lagos to Kano, sellers across every industry are turning their skills and products into real income on WhatsApp. Here&apos;s what they&apos;re saying.
           </p>
         </div>
 
@@ -167,8 +167,8 @@ export function TestimonialsSection() {
           <div className="w-px h-12 bg-gray-100 dark:bg-border hidden sm:block" />
           <div className="text-center">
             <p className="text-4xl font-black text-gray-950 dark:text-white leading-none">50K+</p>
-            <p className="text-xs text-gray-400 mt-1.5">Active vendors</p>
-            <p className="text-xs text-[#16a34a] font-bold mt-0.5">120+ campuses 🇳🇬</p>
+            <p className="text-xs text-gray-400 mt-1.5">Active sellers</p>
+            <p className="text-xs text-[#16a34a] font-bold mt-0.5">Across Nigeria 🇳🇬</p>
           </div>
         </div>
 
@@ -183,7 +183,7 @@ export function TestimonialsSection() {
               <div className="h-1 w-full" style={{ background: t.accent }} />
 
               <div className="p-6 flex flex-col gap-4 flex-1">
-                {/* Metric + school */}
+                {/* Metric + location */}
                 <div className="flex items-start justify-between gap-3">
                   <div
                     className="flex flex-col items-start px-3.5 py-2.5 rounded-2xl shrink-0"
@@ -193,7 +193,7 @@ export function TestimonialsSection() {
                     <span className="text-[10px] font-semibold mt-0.5" style={{ color: t.accent, opacity: 0.8 }}>{t.metricLabel}</span>
                   </div>
                   <span className="text-xs font-bold text-gray-400 bg-gray-50 dark:bg-muted px-2.5 py-1.5 rounded-full shrink-0">
-                    {t.flag} {t.school}
+                    {t.flag} {t.location}
                   </span>
                 </div>
 
@@ -226,7 +226,7 @@ export function TestimonialsSection() {
 
         {/* Bottom CTA strip */}
         <div className="mt-16 text-center">
-          <p className="text-sm text-gray-400 mb-2">Join over 50,000 students already making money on VendoorX</p>
+          <p className="text-sm text-gray-400 mb-2">Join over 50,000 sellers already making money on VendoorX</p>
           <a
             href="/auth/sign-up"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#16a34a] text-white font-black text-sm hover:bg-[#15803d] transition-colors shadow-lg shadow-[#16a34a]/25"

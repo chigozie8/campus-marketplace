@@ -7,28 +7,28 @@ const STEPS = [
     step: '01',
     icon: UserPlus,
     title: 'Create your free account',
-    description: 'Sign up in seconds. Add your name, campus, WhatsApp number, and what you sell. Your store profile goes live immediately — no approval waiting.',
+    description: 'Sign up in seconds. Add your name, WhatsApp number, and what you sell. Your store profile goes live immediately — no approval, no waiting, no technical setup.',
     color: 'from-emerald-500 to-green-600',
   },
   {
     step: '02',
     icon: Camera,
     title: 'List your first product',
-    description: 'Upload a photo, write a short description, set your price, and pick a category. Done. Your listing is visible to buyers across your campus right away.',
+    description: 'Upload a photo, write a short description, set your price, and pick a category. Done. Your listing is instantly visible to buyers looking for exactly what you sell.',
     color: 'from-teal-500 to-cyan-600',
   },
   {
     step: '03',
     icon: Share2,
     title: 'Share everywhere in one tap',
-    description: 'Hit share and your listing lands on WhatsApp Status, Instagram Stories, and Facebook instantly. One action. Maximum reach. Zero hassle.',
+    description: 'Hit share and your listing lands on WhatsApp Status, Instagram Stories, Facebook, and TikTok in seconds. One action. Maximum reach across every channel your buyers are on.',
     color: 'from-cyan-500 to-blue-600',
   },
   {
     step: '04',
     icon: MessageCircle,
-    title: 'Close the deal on WhatsApp',
-    description: 'Buyers click "Chat on WhatsApp" and land right in your DMs. Negotiate, confirm, and get paid — all in the app you already know and love.',
+    title: 'Let AI close the deal on WhatsApp',
+    description: 'Buyers tap "Chat on WhatsApp" and land right in your store. VendoorX AI handles their questions, confirms orders, and collects payment — so you earn even while you sleep.',
     color: 'from-green-500 to-emerald-600',
   },
 ]
@@ -53,7 +53,7 @@ export function HowItWorksSection() {
             <span className="text-primary">in under 5 minutes</span>
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
-            No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale.
+            No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale — powered by AI on WhatsApp.
           </p>
         </div>
 
