@@ -34,7 +34,7 @@ export function OnboardingBanner({ hasListings, isVerified, hasOrders, profileCo
       id: 'profile',
       icon: UserCheck,
       title: 'Complete your profile',
-      description: 'Add your photo, campus, and contact details so buyers trust you.',
+      description: 'Add your photo, location, and contact details so buyers trust you.',
       href: '/profile',
       cta: 'Edit Profile',
       done: profileComplete,
@@ -44,7 +44,7 @@ export function OnboardingBanner({ hasListings, isVerified, hasOrders, profileCo
       icon: Package,
       title: 'Add your first listing',
       description: 'List a product to start selling. It takes under 2 minutes.',
-      href: '/products/new',
+      href: '/seller/new',
       cta: 'Add Listing',
       done: hasListings,
     },
@@ -53,7 +53,7 @@ export function OnboardingBanner({ hasListings, isVerified, hasOrders, profileCo
       icon: ShoppingBag,
       title: 'Verify your account',
       description: 'Verified sellers get a badge, more trust, and 3× more buyers.',
-      href: '/profile#verify',
+      href: '/profile?tab=Verify',
       cta: 'Get Verified',
       done: isVerified,
     },
@@ -90,7 +90,7 @@ export function OnboardingBanner({ hasListings, isVerified, hasOrders, profileCo
         <h2 className="text-sm font-black text-foreground">Welcome to VendoorX!</h2>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Complete these steps to start selling on your campus.
+        Complete these steps and start growing your business on VendoorX.
       </p>
 
       {/* Progress bar */}

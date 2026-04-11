@@ -2,7 +2,7 @@
 
 import { useState, useRef, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, Camera, User, Phone, MapPin,
   GraduationCap, ShieldCheck, Bell, Lock, LogOut,
@@ -57,8 +57,12 @@ interface ProfileForm {
 
 export default function ProfilePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [tab, setTab] = useState<Tab>('Profile')
+  const [tab, setTab] = useState<Tab>(() => {
+    const t = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('tab') : null
+    return (TABS as readonly string[]).includes(t ?? '') ? (t as Tab) : 'Profile'
+  })
   const [isAdmin, setIsAdmin] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [saving, startSave] = useTransition()
@@ -127,6 +131,11 @@ export default function ProfilePage() {
     instagram_handle: '', facebook_handle: '',
     university: '', campus: '', bio: '', avatar_url: '',
   })
+
+  useEffect(() => {
+    const t = searchParams.get('tab')
+    if (t && (TABS as readonly string[]).includes(t)) setTab(t as Tab)
+  }, [searchParams])
 
   useEffect(() => {
     const supabase = createClient()
