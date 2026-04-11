@@ -3,12 +3,12 @@ import type { CapacitorConfig } from '@capacitor/cli'
 const config: CapacitorConfig = {
   appId: 'com.vendoorx.app',
   appName: 'VendoorX',
-  webDir: 'public',
+  webDir: 'out',
   server: {
-    url: 'https://vendoorx.ng',
+    url: 'https://www.vendoorx.ng',
     cleartext: false,
     androidScheme: 'https',
-    allowNavigation: ['vendoorx.ng', '*.vendoorx.ng'],
+    allowNavigation: ['vendoorx.ng', '*.vendoorx.ng', 'www.vendoorx.ng'],
   },
   plugins: {
     SplashScreen: {
