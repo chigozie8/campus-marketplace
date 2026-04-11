@@ -555,12 +555,13 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 h-14">
-          <button
-            onClick={() => router.back()}
-            className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-muted"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+            <ArrowLeft className="w-4 h-4" />
+            Dashboard
+          </Link>
           <h1 className="font-black text-lg flex-1 tracking-tight">My Profile</h1>
           <button
             onClick={handleSave}
