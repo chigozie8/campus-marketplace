@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { query } from '../config/db.js'
+import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
 const OTP_LENGTH = 6
@@ -23,50 +23,39 @@ export interface OtpRecord {
   otp_hash: string | null
   appwrite_user_id: string | null
   channel: OtpChannel
-  expires_at: Date
+  expires_at: string
   attempts: number
   used: boolean
-  created_at: Date
+  created_at: string
 }
-
-// ---------------------------------------------------------------------------
-// Unified record creator — used by all channels
-// ---------------------------------------------------------------------------
 
 interface CreateOtpRecordOptions {
   orderId: string
   channel: OtpChannel
-  /** Populated for sms and both channels */
   phone?: string
-  /** Populated for sms and both channels */
   otpHash?: string
-  /** Populated for email and both channels */
   appwriteUserId?: string
 }
 
 export async function createOtpRecord(opts: CreateOtpRecordOptions): Promise<void> {
-  await query(`DELETE FROM delivery_otps WHERE order_id = $1`, [opts.orderId])
+  // Delete any existing OTP for this order first
+  await supabaseAdmin.from('delivery_otps').delete().eq('order_id', opts.orderId)
 
-  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000)
+  const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000).toISOString()
 
-  await query(
-    `INSERT INTO delivery_otps
-       (order_id, channel, phone, otp_hash, appwrite_user_id, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [
-      opts.orderId,
-      opts.channel,
-      opts.phone ?? null,
-      opts.otpHash ?? null,
-      opts.appwriteUserId ?? null,
-      expiresAt,
-    ],
-  )
+  const { error } = await supabaseAdmin.from('delivery_otps').insert({
+    order_id: opts.orderId,
+    channel: opts.channel,
+    phone: opts.phone ?? null,
+    otp_hash: opts.otpHash ?? null,
+    appwrite_user_id: opts.appwriteUserId ?? null,
+    expires_at: expiresAt,
+  })
 
+  if (error) throw new Error(`[otpService] Failed to create OTP record: ${error.message}`)
   logger.info(`[otpService] OTP record created for order ${opts.orderId} (channel=${opts.channel})`)
 }
 
-/** Raw code generation — exposed so routes can use the same code for both SMS + email in 'both' mode */
 export function generateRawOtp(): string {
   return generateOtp()
 }
@@ -75,30 +64,41 @@ export function hashRawOtp(otp: string): string {
   return hashOtp(otp)
 }
 
-// ---------------------------------------------------------------------------
-// Record retrieval and lifecycle
-// ---------------------------------------------------------------------------
-
 export async function getOtpRecord(orderId: string): Promise<OtpRecord | null> {
-  const result = await query<OtpRecord>(
-    `SELECT * FROM delivery_otps WHERE order_id = $1 ORDER BY created_at DESC LIMIT 1`,
-    [orderId],
-  )
-  return result.rowCount === 0 ? null : result.rows[0]
+  const { data, error } = await supabaseAdmin
+    .from('delivery_otps')
+    .select('*')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw new Error(`[otpService] Failed to get OTP record: ${error.message}`)
+  return data as OtpRecord | null
 }
 
 export async function markOtpUsed(orderId: string): Promise<void> {
-  await query(`UPDATE delivery_otps SET used = TRUE WHERE order_id = $1`, [orderId])
+  const { error } = await supabaseAdmin
+    .from('delivery_otps')
+    .update({ used: true })
+    .eq('order_id', orderId)
+
+  if (error) throw new Error(`[otpService] Failed to mark OTP used: ${error.message}`)
   logger.info(`[otpService] OTP marked used for order ${orderId}`)
 }
 
 export async function incrementAttempts(recordId: string): Promise<void> {
-  await query(`UPDATE delivery_otps SET attempts = attempts + 1 WHERE id = $1`, [recordId])
-}
+  const { data: current } = await supabaseAdmin
+    .from('delivery_otps')
+    .select('attempts')
+    .eq('id', recordId)
+    .single()
 
-// ---------------------------------------------------------------------------
-// Hash-based verification (SMS / both channels)
-// ---------------------------------------------------------------------------
+  await supabaseAdmin
+    .from('delivery_otps')
+    .update({ attempts: (current?.attempts ?? 0) + 1 })
+    .eq('id', recordId)
+}
 
 export type VerifyResult =
   | { success: true }
@@ -120,10 +120,6 @@ export async function verifyHashOtp(record: OtpRecord, otp: string): Promise<Ver
   return { success: true }
 }
 
-// ---------------------------------------------------------------------------
-// Legacy Termii-only helpers (kept for backward compatibility)
-// ---------------------------------------------------------------------------
-
 export async function createOtp(orderId: string, phone: string): Promise<string> {
   const otp = generateOtp()
   await createOtpRecord({
@@ -144,10 +140,17 @@ export async function verifyOtp(orderId: string, otp: string): Promise<VerifyRes
 }
 
 export async function cleanupExpiredOtps(): Promise<void> {
-  const result = await query(
-    `DELETE FROM delivery_otps WHERE expires_at < NOW() AND used = FALSE`,
-  )
-  if ((result.rowCount ?? 0) > 0) {
-    logger.info(`[otpService] Cleaned up ${result.rowCount} expired OTPs`)
+  const { count, error } = await supabaseAdmin
+    .from('delivery_otps')
+    .delete({ count: 'exact' })
+    .lt('expires_at', new Date().toISOString())
+    .eq('used', false)
+
+  if (error) {
+    logger.warn(`[otpService] Cleanup failed: ${error.message}`)
+    return
+  }
+  if ((count ?? 0) > 0) {
+    logger.info(`[otpService] Cleaned up ${count} expired OTPs`)
   }
 }
