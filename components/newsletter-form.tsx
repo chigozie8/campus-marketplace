@@ -52,7 +52,7 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
       <div className={`rounded-2xl bg-[#0a0a0a] p-6 text-white ${className}`}>
         <h3 className="text-lg font-black mb-1">Stay in the loop</h3>
         <p className="text-sm text-white/60 mb-4">
-          Campus deals, new features & seller tips — straight to your inbox.
+          exclusive deals, new features & seller tips — straight to your inbox.
         </p>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input

@@ -6,15 +6,15 @@ import { getSiteSettings } from '@/lib/site-settings'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'About VendoorX — Nigeria\'s #1 Campus Marketplace',
-  description: 'Learn about VendoorX, our mission to connect Nigerian campus communities, and the team building Africa\'s most loved student marketplace.',
+  title: 'About VendoorX — Nigeria\'s AI-powered WhatsApp commerce platform',
+  description: 'Learn about VendoorX, our mission to connect Nigerian seller communities, and the team building Africa\'s most loved commerce platform.',
 }
 
 const VALUES = [
   {
     icon: Heart,
-    title: 'Student-First',
-    desc: 'Every decision starts with the question: does this make life better for Nigerian students? We build for the campus, not the boardroom.',
+    title: 'Seller-First',
+    desc: 'Every decision starts with the question: does this make it easier for Nigerians to sell and buy? We build for sellers and buyers, not the boardroom.',
     color: 'text-rose-500',
     bg: 'bg-rose-50 dark:bg-rose-950/30',
   },
@@ -45,7 +45,7 @@ const MILESTONES = [
   { year: '2022', event: 'VendoorX idea born at UNILAG hostel, frustrated by scattered WhatsApp sales' },
   { year: '2023', event: 'Beta launched at 3 universities — 500 sellers in 30 days' },
   { year: '2024', event: 'Paystack integration, wallets, and boosted listings go live' },
-  { year: '2025', event: '50,000 active vendors, 120+ campuses, ₦2B+ in transactions processed' },
+  { year: '2025', event: '50,000 active vendors, 36+ states nationwide, ₦2B+ in transactions processed' },
   { year: '2026', event: 'Expanding to West Africa — Ghana, Kenya, and beyond 🌍' },
 ]
 
@@ -56,7 +56,7 @@ export default async function AboutPage() {
 
   const STATS = [
     { value: settings.stat_active_vendors, label: 'Active Vendors',    icon: Users },
-    { value: settings.stat_campuses,        label: 'Campuses',           icon: Globe },
+    { value: settings.stat_campuses,        label: 'States Nationwide',           icon: Globe },
     { value: settings.stat_transactions,    label: 'Transactions',       icon: TrendingUp },
     { value: settings.stat_rating,          label: 'Avg Rating',         icon: Target },
   ]
@@ -75,10 +75,10 @@ export default async function AboutPage() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
             We&apos;re building the{' '}
             <span className="text-primary">economic backbone</span>{' '}
-            of Nigerian campuses.
+            across Nigeria.
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
-            VendoorX started as a frustrated student&apos;s late-night idea and grew into Nigeria&apos;s most trusted campus marketplace — connecting buyers and sellers across 120+ universities.
+            VendoorX started as a late-night idea to fix online commerce in Nigeria and grew into the country&apos;s most trusted WhatsApp commerce platform — connecting buyers and sellers across 36+ states nationwide.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -118,15 +118,15 @@ export default async function AboutPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Our Mission</p>
             <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-6 leading-tight">
-              Every Nigerian student deserves a{' '}
+              Every Nigerian seller deserves a{' '}
               <span className="text-primary">powerful platform</span>{' '}
               to sell what they have.
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
-              The hustle is real. Nigerian students sell everything — jollof rice, secondhand textbooks, refurbished phones, handmade jewelry, graphic design services — and they&apos;ve been doing it through scattered WhatsApp groups and Facebook posts for years.
+              The hustle is real. Nigerian sellers offer everything — jollof rice, secondhand items, refurbished phones, handmade jewelry, graphic design services — and they&apos;ve been doing it through scattered WhatsApp groups and Facebook posts for years.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              VendoorX gives every student entrepreneur a professional storefront, payment tools, and real buyers — all in one place, completely free to join.
+              VendoorX gives every seller and entrepreneur a professional storefront, payment tools, and real buyers — all in one place, completely free to join.
             </p>
             <ul className="flex flex-col gap-3">
               {['Zero commission, ever', 'WhatsApp-powered deals', 'Paystack-secured payments', 'Seller verification system'].map((item) => (
@@ -188,7 +188,7 @@ export default async function AboutPage() {
             <span className="text-primary">the movement?</span>
           </h2>
           <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-            Join {settings.stat_active_vendors} students already building their campus businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
+            Join {settings.stat_active_vendors} sellers already building their businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
           </p>
           <Link
             href="/auth/sign-up"

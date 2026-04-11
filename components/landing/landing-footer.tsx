@@ -187,11 +187,11 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
                 +1 (579) 258-3013
               </a>
               <a
-                href="mailto:hello@vendoorx.com"
+                href="mailto:hello@vendoorx.ng"
                 className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
               >
                 <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
-                hello@vendoorx.com
+                hello@vendoorx.ng
               </a>
             </div>
 

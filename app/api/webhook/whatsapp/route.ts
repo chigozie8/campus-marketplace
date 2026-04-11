@@ -85,10 +85,10 @@ function detectIntent(raw: string) {
 }
 
 // ─── Response builders ───────────────────────────────────────────────────────
-const URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://campus-marketplace.replit.app'
+const URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vendoorx.ng'
 
 const GREETING_MSG = () =>
-  `👋 Hi! Welcome to *VendoorX* — Nigeria's #1 campus marketplace.\n\n` +
+  `👋 Hi! Welcome to *VendoorX* — Nigeria's AI-powered WhatsApp commerce platform.\n\n` +
   `Here's what I can help you with:\n\n` +
   `🔍 *1* — Search for products\n` +
   `📦 *2* — Track / check your order\n` +
@@ -137,7 +137,7 @@ const HOW_IT_WORKS_MSG = () =>
 const HUMAN_MSG = () =>
   `🙋 *Connecting you to our support team…*\n\n` +
   `Available *Mon–Sat, 8am–8pm*.\n\n` +
-  `📧 support@vendoorx.com\n` +
+  `📧 support@vendoorx.ng\n` +
   `🌐 ${URL}/help\n\n` +
   `We typically respond within *1–2 hours*. Thank you for your patience! 🙏`
 

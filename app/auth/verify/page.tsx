@@ -253,14 +253,14 @@ function VerifyPageInner() {
               <span className="text-[#16a34a]">the market.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              We sent a 6-digit code to your email. Enter it to activate your account and start buying or selling on campus.
+              We sent a 6-digit code to your email. Enter it to activate your account and start buying or selling on VendoorX.
             </p>
 
             <div className="space-y-3.5 mb-10">
               {[
                 { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder' },
                 { icon: '🔢', label: 'Enter the 6-digit code', sub: 'It expires in 10 minutes' },
-                { icon: '🚀', label: 'Start selling on campus', sub: 'Free forever, no commissions' },
+                { icon: '🚀', label: 'Start selling on VendoorX', sub: 'Free forever, no commissions' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-lg">

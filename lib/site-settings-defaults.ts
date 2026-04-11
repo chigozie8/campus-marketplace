@@ -162,7 +162,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_founder_bio: 'Kenneth Okoronkwo is the founder and CEO of VendoorX, Nigeria\'s leading campus commerce platform. A serial entrepreneur and software engineer, Kenneth built VendoorX to solve the informal, unstructured nature of campus trade in Nigeria.',
   press_founder_bio2: 'Under his leadership, VendoorX has grown to serve 50,000+ vendors across 120+ Nigerian universities, processing over ₦2 billion in verified transactions.',
   press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
-  press_contact_email: 'press@vendoorx.com',
+  press_contact_email: 'press@vendoorx.ng',
   press_assets: '',
   /* platform fee */
   platform_fee_amount: '100',
@@ -170,7 +170,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   /* contact */
   support_phone: '07082039150',
   support_whatsapp_url: 'https://wa.me/2347082039250',
-  contact_email: 'support@vendoorx.com',
+  contact_email: 'support@vendoorx.ng',
   contact_hero_subtitle: "Got a question, bug report, or partnership idea? We're all ears. Our team usually responds within 2 hours.",
   contact_response_time: '2 hours',
   contact_hours: 'Mon – Sat: 8am – 10pm WAT\nSunday: 10am – 6pm WAT',

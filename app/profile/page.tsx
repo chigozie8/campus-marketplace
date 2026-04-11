@@ -650,7 +650,7 @@ export default function ProfilePage() {
               { key: 'whatsapp_number', label: 'WhatsApp Number', icon: Phone, placeholder: '+234 800 000 0000', type: 'tel' },
               { key: 'instagram_handle', label: 'Instagram Username', icon: AtSign, placeholder: 'e.g. yourname (without @)', type: 'text' },
               { key: 'facebook_handle', label: 'Facebook Username / Page ID', icon: AtSign, placeholder: 'e.g. yourname or page.id', type: 'text' },
-              { key: 'university', label: 'University', icon: GraduationCap, placeholder: 'e.g. University of Lagos', type: 'text' },
+              { key: 'university', label: 'Organisation / Business', icon: GraduationCap, placeholder: 'e.g. Your business or school name', type: 'text' },
               { key: 'campus', label: 'Campus / Hostel', icon: MapPin, placeholder: 'e.g. Hall 3, Moremi', type: 'text' },
             ].map(({ key, label, icon: Icon, placeholder, type }) => (
               <div key={key}>

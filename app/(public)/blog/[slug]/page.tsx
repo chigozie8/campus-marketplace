@@ -177,9 +177,9 @@ export default async function BlogPostPage({
     publisher: {
       '@type': 'Organization',
       name: 'VendoorX',
-      logo: { '@type': 'ImageObject', url: 'https://vendoorx.com/logo.png' },
+      logo: { '@type': 'ImageObject', url: 'https://vendoorx.ng/logo.png' },
     },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendoorx.com/blog/${slug}` },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://vendoorx.ng/blog/${slug}` },
     keywords: (post.tags ?? []).join(', '),
   }
 
@@ -347,7 +347,7 @@ export default async function BlogPostPage({
                 </div>
                 <div className="flex flex-col gap-2">
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' — https://vendoorx.ng/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-sm font-semibold transition-colors"
                   >
@@ -355,7 +355,7 @@ export default async function BlogPostPage({
                     WhatsApp
                   </a>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent('https://vendoorx.ng/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold transition-colors"
                   >
@@ -363,7 +363,7 @@ export default async function BlogPostPage({
                     Twitter / X
                   </a>
                   <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendoorx.com/blog/' + slug)}`}
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://vendoorx.ng/blog/' + slug)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] text-sm font-semibold transition-colors"
                   >

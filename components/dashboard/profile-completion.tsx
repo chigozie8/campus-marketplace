@@ -17,8 +17,8 @@ const STEPS = [
   { key: 'whatsapp',   label: 'WhatsApp number',     tip: 'Essential for receiving inquiries' },
   { key: 'instagram',  label: 'Instagram handle',    tip: 'Show your social credibility' },
   { key: 'bio',        label: 'Write a short bio',   tip: 'Tell buyers who you are' },
-  { key: 'university', label: 'University',          tip: 'Campus buyers prefer local sellers' },
-  { key: 'campus',     label: 'Campus / hostel',     tip: 'Help buyers find you easily' },
+  { key: 'university', label: 'Business / Organisation',  tip: 'Help buyers know more about you' },
+  { key: 'campus',     label: 'City / Location',           tip: 'Help buyers in your area find you' },
 ] as const
 
 export function ProfileCompletion(props: Props) {

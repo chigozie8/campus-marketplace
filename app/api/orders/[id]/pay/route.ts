@@ -74,7 +74,7 @@ export async function POST(
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
       (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : null) ||
-      'https://campus-marketplace.replit.app'
+      'https://vendoorx.ng'
     const callbackUrl = `${siteUrl}/payment/callback`
 
     const payload: Record<string, unknown> = {

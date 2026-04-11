@@ -16,13 +16,13 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['what.*vendoorx', 'what is vendoorx', 'tell me about vendoorx', 'explain vendoorx', 'what does vendoorx do', 'about.*vendoorx', 'vendoorx.*about'],
-    answer: "**VendoorX** is Nigeria's #1 campus marketplace for university students! 🎓🇳🇬\n\nHere's what we do:\n• 🏪 Sellers create beautiful online stores in minutes\n• 🛒 Buyers browse & buy from trusted student vendors\n• 💳 Secure payments via Paystack (card, transfer, USSD)\n• 📱 WhatsApp, Instagram & Facebook messages in one inbox\n• 📦 Order tracking, analytics & dashboards built in\n\nWe're the Shopify for campus sellers in Africa — structured, trackable, and built for students!",
+    answer: "**VendoorX** is Nigeria's AI-powered WhatsApp commerce platform for sellers and buyers! 🎓🇳🇬\n\nHere's what we do:\n• 🏪 Sellers create beautiful online stores in minutes\n• 🛒 Buyers browse & buy from trusted sellers\n• 💳 Secure payments via Paystack (card, transfer, USSD)\n• 📱 WhatsApp, Instagram & Facebook messages in one inbox\n• 📦 Order tracking, analytics & dashboards built in\n\nWe're the Shopify for sellers in Africa — structured, trackable, and built for Nigerian sellers!",
   },
 
   // ── Sign Up & Account ──
   {
     patterns: ['sign up', 'register', 'create.*account', 'join', 'how.*join', 'get started', 'new.*account', 'open.*account'],
-    answer: "Joining VendoorX is free and takes under 2 minutes! 🎉\n\n1. Click **Join Free** at the top of the page\n2. Enter your name, email & password\n3. Verify your email\n4. You're in! 🚀\n\nTip: Use your **university email** (.edu.ng) to unlock the **Student Verified** badge — buyers trust verified sellers more!",
+    answer: "Joining VendoorX is free and takes under 2 minutes! 🎉\n\n1. Click **Join Free** at the top of the page\n2. Enter your name, email & password\n3. Verify your email\n4. You're in! 🚀\n\nTip: Complete your profile and apply for a Verified Seller badge — buyers trust verified sellers more!",
   },
   {
     patterns: ['login', 'log in', 'sign in', 'cant.*login', 'cannot.*login', 'trouble.*login', 'login.*problem', 'access.*account'],
@@ -42,7 +42,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['profile', 'edit.*profile', 'update.*profile', 'change.*name', 'change.*photo', 'profile.*picture'],
-    answer: "You can update your profile anytime! ✏️\n\nGo to **Dashboard → Profile** to:\n• Change your name & bio\n• Upload a profile photo\n• Update your phone number\n• Edit your university info\n\nA complete profile builds more trust with buyers and gets you more sales!",
+    answer: "You can update your profile anytime! ✏️\n\nGo to **Dashboard → Profile** to:\n• Change your name & bio\n• Upload a profile photo\n• Update your phone number\n• Edit your business or organisation info\n\nA complete profile builds more trust with buyers and gets you more sales!",
   },
 
   // ── Store Setup ──
@@ -52,11 +52,11 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['store.*name', 'store.*link', 'store.*url', 'share.*store', 'my.*store.*link', 'store.*slug'],
-    answer: "Your store gets its own shareable link! 🔗\n\nIt looks like: **vendoorx.com/store/your-store-name**\n\nFind it in **Dashboard → Store → Share Link**. You can:\n• Share it on WhatsApp status\n• Add it to your Instagram bio\n• Put it in your Twitter/X profile\n• Send it directly to customers\n\nThe more you share, the more sales you make!",
+    answer: "Your store gets its own shareable link! 🔗\n\nIt looks like: **vendoorx.ng/store/your-store-name**\n\nFind it in **Dashboard → Store → Share Link**. You can:\n• Share it on WhatsApp status\n• Add it to your Instagram bio\n• Put it in your Twitter/X profile\n• Send it directly to customers\n\nThe more you share, the more sales you make!",
   },
   {
     patterns: ['list.*product', 'add.*product', 'upload.*product', 'post.*product', 'create.*listing', 'how.*list', 'new.*product'],
-    answer: "Adding a product takes less than 2 minutes! 📦\n\n1. Go to **Dashboard → Products → Add Product**\n2. Upload clear photos (up to 5 images)\n3. Write a good title & description\n4. Set your price\n5. Choose a category\n6. Click **Publish**!\n\n💡 Pro tips:\n• Use bright, clear photos — they get 3x more clicks\n• Write honest, detailed descriptions\n• Price competitively for your campus market",
+    answer: "Adding a product takes less than 2 minutes! 📦\n\n1. Go to **Dashboard → Products → Add Product**\n2. Upload clear photos (up to 5 images)\n3. Write a good title & description\n4. Set your price\n5. Choose a category\n6. Click **Publish**!\n\n💡 Pro tips:\n• Use bright, clear photos — they get 3x more clicks\n• Write honest, detailed descriptions\n• Price competitively for your marketplace",
   },
   {
     patterns: ['edit.*product', 'update.*product', 'change.*product', 'modify.*product', 'product.*edit'],
@@ -72,7 +72,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['category', 'categories', 'what.*sell', 'what.*can.*sell', 'what.*type.*product', 'product.*type'],
-    answer: "You can sell almost anything on VendoorX! 🛍️\n\nPopular categories include:\n• 👗 Fashion & clothing\n• 📱 Electronics & gadgets\n• 📚 Textbooks & course materials\n• 🍔 Food & snacks (homemade too!)\n• 💄 Beauty & skincare\n• 🎒 Bags & accessories\n• 🏠 Dorm room essentials\n• 💻 Tech services & freelancing\n• 🎨 Art, crafts & handmade items\n\nIf it's legal and campus-appropriate, you can list it!",
+    answer: "You can sell almost anything on VendoorX! 🛍️\n\nPopular categories include:\n• 👗 Fashion & clothing\n• 📱 Electronics & gadgets\n• 📚 Textbooks & course materials\n• 🍔 Food & snacks (homemade too!)\n• 💄 Beauty & skincare\n• 🎒 Bags & accessories\n• 🏠 Dorm room essentials\n• 💻 Tech services & freelancing\n• 🎨 Art, crafts & handmade items\n\nIf it's legal and appropriate, you can list it!",
   },
 
   // ── Buying ──
@@ -82,7 +82,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['find.*product', 'search.*product', 'browse', 'marketplace', 'how.*search', 'look.*for'],
-    answer: "Finding what you need is easy! 🔍\n\n• **Search bar** — Type what you're looking for at the top of the Marketplace\n• **Browse by category** — Filter by fashion, electronics, food, books, etc.\n• **Filter by price** — Set a budget range\n• **Filter by university** — See sellers from your campus\n• **Sort by** — Newest, price, or most popular\n\nYou can also follow a seller's store to see all their new listings!",
+    answer: "Finding what you need is easy! 🔍\n\n• **Search bar** — Type what you're looking for at the top of the Marketplace\n• **Browse by category** — Filter by fashion, electronics, food, books, etc.\n• **Filter by price** — Set a budget range\n• **Filter by city or state** — See sellers in your area\n• **Sort by** — Newest, price, or most popular\n\nYou can also follow a seller's store to see all their new listings!",
   },
   {
     patterns: ['make.*offer', 'negotiate', 'bargain', 'discount', 'lower.*price', 'offer.*price', 'price.*negotiate'],
@@ -126,29 +126,29 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Delivery ──
   {
     patterns: ['deliver', 'shipping', 'logistics', 'how.*deliver', 'deliver.*how', 'ship.*item', 'dispatch', 'pickup', 'drop off'],
-    answer: "Delivery is arranged directly between you and the seller! 🚚\n\nCommon delivery options on VendoorX:\n• **Campus pickup** — Meet the seller at a safe spot on campus\n• **Hostel drop-off** — Seller drops to your hostel\n• **Dispatch rider** — Seller sends via bike (buyer usually pays delivery fee)\n• **Courier** — For inter-city orders\n\n💡 Always confirm delivery method and fee with the seller **before** paying!",
+    answer: "Delivery is arranged directly between you and the seller! 🚚\n\nCommon delivery options on VendoorX:\n• **Local pickup** — Meet the seller at a safe, agreed spot\n• **Home drop-off** — Seller delivers to your address\n• **Dispatch rider** — Seller sends via bike (buyer usually pays delivery fee)\n• **Courier** — For inter-city orders\n\n💡 Always confirm delivery method and fee with the seller **before** paying!",
   },
   {
     patterns: ['delivery.*fee', 'shipping.*cost', 'how much.*deliver', 'deliver.*cost', 'delivery.*price', 'cost.*delivery'],
-    answer: "Delivery fees vary by seller and location 📍\n\n• **On-campus pickups** — Usually free or very cheap\n• **Hostel delivery** — ₦200–₦500 typically\n• **Dispatch riders** — ₦500–₦2,000+ depending on distance\n• **Interstate courier** — Varies (GIG, DHL, Sendbox, etc.)\n\nAlways check with the seller directly. Some sellers offer free delivery for orders above a certain amount!",
+    answer: "Delivery fees vary by seller and location 📍\n\n• **Local pickups** — Usually free or very cheap\n• **Local delivery** — ₦200–₦500 typically\n• **Dispatch riders** — ₦500–₦2,000+ depending on distance\n• **Interstate courier** — Varies (GIG, DHL, Sendbox, etc.)\n\nAlways check with the seller directly. Some sellers offer free delivery for orders above a certain amount!",
   },
   {
     patterns: ['delivery.*time', 'how long.*deliver', 'when.*arrive', 'how long.*take', 'delivery.*duration'],
-    answer: "Delivery times depend on the seller and your location ⏱️\n\n• **On-campus** — Same day or next day usually\n• **Same city** — 1-2 days\n• **Different state** — 2-5 business days via courier\n\nAlways ask the seller their estimated delivery time before ordering. You can message them directly from the product page!",
+    answer: "Delivery times depend on the seller and your location ⏱️\n\n• **Same area** — Same day or next day usually\n• **Same city** — 1-2 days\n• **Different state** — 2-5 business days via courier\n\nAlways ask the seller their estimated delivery time before ordering. You can message them directly from the product page!",
   },
 
   // ── Safety & Trust ──
   {
     patterns: ['safe', 'scam', 'trust', 'secure', 'legit', 'real', 'verified', 'fake', 'fraud', 'is it safe', 'trustworthy'],
-    answer: "VendoorX is built with your safety in mind! 🛡️\n\n**How we protect you:**\n• 🔒 **Secure payments** — Money held until you confirm delivery (no cash risk)\n• ✅ **Verified seller badges** — We verify trusted vendors\n• 🎓 **Student verification** — University email verified badges\n• ⭐ **Reviews & ratings** — See what others say before buying\n• 🏛️ **Dispute resolution** — Our team mediates if something goes wrong\n• 📋 **Order records** — Everything documented for accountability\n\nAlways pay through the platform — never send money directly to avoid scams!",
+    answer: "VendoorX is built with your safety in mind! 🛡️\n\n**How we protect you:**\n• 🔒 **Secure payments** — Money held until you confirm delivery (no cash risk)\n• ✅ **Verified seller badges** — We verify trusted vendors\n• ✅ **Seller verification** — Verified seller badges\n• ⭐ **Reviews & ratings** — See what others say before buying\n• 🏛️ **Dispute resolution** — Our team mediates if something goes wrong\n• 📋 **Order records** — Everything documented for accountability\n\nAlways pay through the platform — never send money directly to avoid scams!",
   },
   {
     patterns: ['verified.*seller', 'seller.*badge', 'trusted.*seller', 'verify.*seller', 'how.*seller.*verified', 'blue.*badge', 'green.*badge'],
-    answer: "VendoorX has **two types of trust badges** ✅🎓\n\n• 🟢 **Verified Seller** — Our team has reviewed and verified this seller as legitimate\n• 🎓 **Student Verified** — Seller signed up with a university email (.edu.ng)\n\nVerified sellers get:\n• Higher visibility in search\n• More buyer trust (and more sales!)\n• Priority customer support\n\nSellers can apply for verification through **Dashboard → Profile → Get Verified**!",
+    answer: "VendoorX has **trust badges** to help you shop safely ✅\n\n• 🟢 **Verified Seller** — Our team has reviewed and verified this seller as legitimate\n• 🎓 **Institution Verified** — Seller linked a verified institution or business email\n\nVerified sellers get:\n• Higher visibility in search\n• More buyer trust (and more sales!)\n• Priority customer support\n\nSellers can apply for verification through **Dashboard → Profile → Get Verified**!",
   },
   {
     patterns: ['review', 'rating', 'feedback', 'rate.*seller', 'leave.*review', 'how.*review'],
-    answer: "Reviews help the whole community! ⭐\n\nAfter receiving your order:\n1. Go to **Dashboard → Orders**\n2. Find the completed order\n3. Click **Leave a Review**\n4. Rate the seller (1-5 stars) and write your feedback\n\nYour review helps other buyers make informed decisions. Be honest and specific — good reviews massively help honest student sellers grow! 🙌",
+    answer: "Reviews help the whole community! ⭐\n\nAfter receiving your order:\n1. Go to **Dashboard → Orders**\n2. Find the completed order\n3. Click **Leave a Review**\n4. Rate the seller (1-5 stars) and write your feedback\n\nYour review helps other buyers make informed decisions. Be honest and specific — good reviews massively help honest sellers grow! 🙌",
   },
   {
     patterns: ['report.*seller', 'report.*buyer', 'report.*scam', 'report.*fraud', 'block.*seller', 'suspicious'],
@@ -210,7 +210,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── University & Student Verification ──
   {
     patterns: ['university', 'campus', 'student.*verify', 'school.*email', 'edu.*email', 'student.*badge', 'student.*verified', 'which.*school', 'which.*university'],
-    answer: "VendoorX is built for **Nigerian university students**! 🎓\n\nWe support students from all Nigerian universities including:\nUIUI, UNILAG, OAU, UNIBEN, ABU, UNN, FUTA, LAUTECH, BU, Covenant, Babcock, and many more!\n\n**How to get your Student Verified badge:**\n1. Sign up with your **university email** (e.g. name@unilag.edu.ng)\n2. Your email is automatically verified\n3. 🎓 Badge appears on your store and products!\n\nThe badge builds trust with buyers and makes you stand out!",
+    answer: "VendoorX is built for **Nigerian sellers and buyers**! 🇳🇬\n\nAnyone can sell on VendoorX — from individual traders to businesses, schools, and organisations across all 36 states!\n\n**How to get your Verified Seller badge:**\n1. Go to **Dashboard → Profile → Get Verified**\n2. Submit your government ID and a selfie\n3. Our team reviews within 48 hours\n4. ✅ Badge appears on your store and products!\n\nThe badge builds trust with buyers and gets you more sales!",
   },
 
   // ── Notifications ──
@@ -234,13 +234,13 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── WhatsApp for Support ──
   {
     patterns: ['contact.*support', 'customer.*service', 'customer.*care', 'reach.*team', 'contact.*vendoorx', 'help.*team', 'support.*team', 'need.*help', 'i need.*support'],
-    answer: "Our support team is always ready to help! 💪\n\n**Ways to reach us:**\n• 💬 **WhatsApp** — Tap the WhatsApp button in the chat header, or message **+1 (579) 258-3013** directly (fastest!)\n• 🌐 **Website** — vendoorx.com/contact\n\n**Support hours:**\n• Monday–Friday: 8am–8pm\n• Saturday: 10am–5pm\n• Sunday: Limited (urgent issues only)\n\nFor urgent issues (payment problems, account locked, disputes), **WhatsApp is fastest** — we typically reply within minutes!",
+    answer: "Our support team is always ready to help! 💪\n\n**Ways to reach us:**\n• 💬 **WhatsApp** — Tap the WhatsApp button in the chat header, or message **+1 (579) 258-3013** directly (fastest!)\n• 🌐 **Website** — vendoorx.ng/contact\n\n**Support hours:**\n• Monday–Friday: 8am–8pm\n• Saturday: 10am–5pm\n• Sunday: Limited (urgent issues only)\n\nFor urgent issues (payment problems, account locked, disputes), **WhatsApp is fastest** — we typically reply within minutes!",
   },
 
   // ── Complaints ──
   {
     patterns: ['complain', 'complaint', 'not happy', 'disappointed', 'frustrated', 'bad.*service', 'terrible', 'horrible', 'worst'],
-    answer: "I'm really sorry to hear you're having a bad experience 😔\n\nYour feedback matters to us! Please share exactly what happened and we'll make it right.\n\nFor the fastest resolution:\n• Tap the **WhatsApp button** in the header to speak directly with our team\n• Or email us at **support@vendoorx.com**\n\nWe take every complaint seriously and will do everything we can to fix your issue. Thank you for giving us the chance to improve! 🙏",
+    answer: "I'm really sorry to hear you're having a bad experience 😔\n\nYour feedback matters to us! Please share exactly what happened and we'll make it right.\n\nFor the fastest resolution:\n• Tap the **WhatsApp button** in the header to speak directly with our team\n• Or email us at **support@vendoorx.ng**\n\nWe take every complaint seriously and will do everything we can to fix your issue. Thank you for giving us the chance to improve! 🙏",
   },
 
   // ── Dark Mode ──
@@ -330,7 +330,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Privacy & Data ──
   {
     patterns: ['privacy', 'data.*protection', 'my.*data', 'personal.*information', 'gdpr', 'ndpr', 'data.*policy', 'privacy.*policy'],
-    answer: "VendoorX takes your privacy seriously! 🔒\n\n**What we collect:**\n• Name, email, phone (for your account)\n• Payment info (processed securely by Paystack — we never store card details)\n• Order history and communications\n\n**What we never do:**\n• Sell your data to third parties\n• Share your info without consent\n• Store sensitive payment data\n\nYou can request a copy of your data or ask for deletion anytime. Read our full Privacy Policy at **vendoorx.com/privacy**\n\nFor data-related requests, message us on WhatsApp **+1 (579) 258-3013**! 🛡️",
+    answer: "VendoorX takes your privacy seriously! 🔒\n\n**What we collect:**\n• Name, email, phone (for your account)\n• Payment info (processed securely by Paystack — we never store card details)\n• Order history and communications\n\n**What we never do:**\n• Sell your data to third parties\n• Share your info without consent\n• Store sensitive payment data\n\nYou can request a copy of your data or ask for deletion anytime. Read our full Privacy Policy at **vendoorx.ng/privacy**\n\nFor data-related requests, message us on WhatsApp **+1 (579) 258-3013**! 🛡️",
   },
 
   // ── Prohibited Items ──
@@ -342,11 +342,11 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Partnerships & Collaborations ──
   {
     patterns: ['partner', 'partnership', 'collaborate', 'collab', 'work.*together', 'business.*proposal', 'invest', 'investor', 'sponsor', 'sponsorship'],
-    answer: "Interested in partnering with VendoorX? We love collaborations! 🤝\n\nWe're open to:\n• Campus brand ambassadors\n• Student organization partnerships\n• Sponsor placements\n• Business-to-business integrations\n• Media and press inquiries\n\nPlease reach our team directly on WhatsApp **+1 (579) 258-3013** with your proposal and we'll get back to you! We're always open to ideas that help Nigerian students thrive. 🚀",
+    answer: "Interested in partnering with VendoorX? We love collaborations! 🤝\n\nWe're open to:\n• Campus brand ambassadors\n• Seller and business partnerships\n• Sponsor placements\n• Business-to-business integrations\n• Media and press inquiries\n\nPlease reach our team directly on WhatsApp **+1 (579) 258-3013** with your proposal and we'll get back to you! We're always open to ideas that help Nigerian sellers and buyers thrive. 🚀",
   },
   {
     patterns: ['ambassador', 'campus.*rep', 'campus.*ambassador', 'brand.*rep', 'become.*rep', 'represent.*vendoorx'],
-    answer: "Become a VendoorX Campus Ambassador! 🌟\n\nAs an ambassador you'll:\n• Represent VendoorX at your university\n• Earn commissions for every seller/buyer you bring in\n• Get exclusive perks and rewards\n• Build your CV and leadership experience\n• Be part of a growing student-first movement!\n\nTo apply, message us on WhatsApp **+1 (579) 258-3013** with your name, university, and why you'd make a great ambassador. We'd love to have you on the team! 💚🎓",
+    answer: "Become a VendoorX Brand Ambassador! 🌟\n\nAs an ambassador you'll:\n• Represent VendoorX in your city\n• Earn commissions for every seller/buyer you bring in\n• Get exclusive perks and rewards\n• Build your CV and leadership experience\n• Be part of a growing seller-first movement!\n\nTo apply, message us on WhatsApp **+1 (579) 258-3013** with your name, city, and why you'd make a great ambassador. We'd love to have you on the team! 💚🎓",
   },
 
   // ── Feedback & Suggestions ──
@@ -358,7 +358,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Terms & Legal ──
   {
     patterns: ['terms', 'terms.*service', 'terms.*condition', 'legal', 'policy', 'rules', 'guidelines', 'community.*standard'],
-    answer: "VendoorX's full legal documents are available on our website!\n\n📄 **Key policies:**\n• **Terms of Service** — vendoorx.com/terms\n• **Privacy Policy** — vendoorx.com/privacy\n• **Seller Guidelines** — vendoorx.com/seller-guidelines\n• **Refund Policy** — vendoorx.com/refunds\n\nIf you have specific legal questions or need clarification on any policy, message us on WhatsApp **+1 (579) 258-3013** and our team will explain everything clearly! ⚖️",
+    answer: "VendoorX's full legal documents are available on our website!\n\n📄 **Key policies:**\n• **Terms of Service** — vendoorx.ng/terms\n• **Privacy Policy** — vendoorx.ng/privacy\n• **Seller Guidelines** — vendoorx.ng/seller-guidelines\n• **Refund Policy** — vendoorx.ng/refunds\n\nIf you have specific legal questions or need clarification on any policy, message us on WhatsApp **+1 (579) 258-3013** and our team will explain everything clearly! ⚖️",
   },
 
   // ── Store Customisation ──
@@ -382,7 +382,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Late / Missing Delivery ──
   {
     patterns: ['late.*delivery', 'delayed.*delivery', 'delivery.*late', 'order.*late', 'not.*delivered', 'missing.*package', 'lost.*package', 'package.*missing', 'where.*my.*order'],
-    answer: "Order late or missing? Let's investigate! 🔍\n\n**First steps:**\n1. Check your order status at **Dashboard → Orders**\n2. Message the seller directly from the order page\n3. Confirm the delivery address was correct\n4. Check if a neighbour signed for it (for campus deliveries)\n\n**If the seller isn't responding or it's been way too long:**\n→ Open a dispute at **Dashboard → Orders → Report Issue**\n→ Or message our team on WhatsApp **+1 (579) 258-3013** — we'll mediate and ensure you get your item or a full refund! 💪",
+    answer: "Order late or missing? Let's investigate! 🔍\n\n**First steps:**\n1. Check your order status at **Dashboard → Orders**\n2. Message the seller directly from the order page\n3. Confirm the delivery address was correct\n4. Check if a neighbour signed for it (for local deliveries)\n\n**If the seller isn't responding or it's been way too long:**\n→ Open a dispute at **Dashboard → Orders → Report Issue**\n→ Or message our team on WhatsApp **+1 (579) 258-3013** — we'll mediate and ensure you get your item or a full refund! 💪",
   },
 
   // ── Wrong / Damaged Item ──
@@ -412,7 +412,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── How to Get Verified ──
   {
     patterns: ['get.*verified', 'how.*verified', 'apply.*verification', 'verification.*process', 'verified.*badge.*how', 'become.*verified'],
-    answer: "Getting verified on VendoorX builds massive trust with buyers! ✅\n\n**Student Verified badge (automatic):**\n• Just sign up with your **.edu.ng university email**\n• Badge is applied automatically — no application needed!\n\n**Verified Seller badge (manual review):**\n1. Go to **Dashboard → Profile → Get Verified**\n2. Submit your: government ID, proof of business, and a selfie\n3. Our team reviews within 48 hours\n4. Once approved, ✅ badge appears on all your listings!\n\nVerified sellers get significantly more sales. Message us on WhatsApp **+1 (579) 258-3013** if you need help with the process! 🎓",
+    answer: "Getting verified on VendoorX builds massive trust with buyers! ✅\n\n**Verified Seller badge (manual review):**\n1. Go to **Dashboard → Profile → Get Verified**\n2. Submit your: government ID, proof of business, and a selfie\n3. Our team reviews within 48 hours\n4. Once approved, ✅ badge appears on all your listings!\n\nVerified sellers get significantly more sales. Message us on WhatsApp **+1 (579) 258-3013** if you need help with the process! 💚",
   },
 
   // ── Counterfeit / Authenticity ──
@@ -436,7 +436,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Student Groups / Organisations ──
   {
     patterns: ['student.*union', 'association', 'club', 'group.*order', 'organization', 'department.*store', 'faculty'],
-    answer: "VendoorX works great for student organizations! 🎓🤝\n\nStudent clubs, associations, and departments use VendoorX to:\n• Sell branded merchandise (hoodies, bags, notebooks)\n• Sell event tickets and conference materials\n• Run departmental stores for course materials\n• Raise funds for association activities\n\nWe offer **special partnership packages** for registered student organizations. Message us on WhatsApp **+1 (579) 258-3013** with your organization details and we'll set you up with a great deal! 💚",
+    answer: "VendoorX works great for organisations and groups! 🤝\n\nBusinesses, associations, clubs, and schools use VendoorX to:\n• Sell branded merchandise (hoodies, bags, notebooks)\n• Sell event tickets and conference materials\n• Run department or chapter stores\n• Raise funds for group activities\n\nWe offer **special partnership packages** for registered organisations. Message us on WhatsApp **+1 (579) 258-3013** with your organisation details and we'll set you up with a great deal! 💚",
   },
 
   // ── How VendoorX Makes Money ──
@@ -448,7 +448,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── VendoorX vs Competitors ──
   {
     patterns: ['vs.*jiji', 'vs.*konga', 'vs.*jumia', 'better.*than', 'compare.*vendoorx', 'why.*vendoorx', 'why.*not.*jiji', 'why.*choose.*vendoorx'],
-    answer: "Great question! Here's what makes VendoorX different 🏆\n\n**VendoorX vs other platforms:**\n• 🎓 **Built for students** — designed for campus buying & selling\n• 📱 **Social selling hub** — WhatsApp, Instagram, Facebook all in one dashboard\n• 💳 **0% commission** — you keep 100% of your earnings\n• 🔒 **Escrow payments** — money held safely until delivery confirmed\n• 🏪 **Your own store link** — shareable, branded storefront\n• 🤖 **AI support** — instant help 24/7\n• 🚀 **Student verified** — trust badges for campus sellers\n\nNo other platform is built specifically for Nigerian student sellers. We're your home! 💚",
+    answer: "Great question! Here's what makes VendoorX different 🏆\n\n**VendoorX vs other platforms:**\n• 🎓 **Built for Nigerian sellers** — designed for WhatsApp-powered selling\n• 📱 **Social selling hub** — WhatsApp, Instagram, Facebook all in one dashboard\n• 💳 **0% commission** — you keep 100% of your earnings\n• 🔒 **Escrow payments** — money held safely until delivery confirmed\n• 🏪 **Your own store link** — shareable, branded storefront\n• 🤖 **AI support** — instant help 24/7\n• 🚀 **Verified Seller** — trust badges for sellers\n\nNo other platform is built specifically for Nigerian sellers. We're your home! 💚",
   },
 
   // ── Closings ──

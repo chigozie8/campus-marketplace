@@ -116,7 +116,7 @@ export function ContactEditor({ initialSettings }: Props) {
                 type="email"
                 value={settings.contact_email}
                 onChange={e => set('contact_email', e.target.value)}
-                placeholder="support@vendoorx.com"
+                placeholder="support@vendoorx.ng"
               />
             </div>
           </Field>

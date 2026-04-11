@@ -471,7 +471,7 @@ export default function NewListingPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">University / Campus</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-muted-foreground uppercase tracking-wider mb-1.5 block">City / Location</label>
                 <div className="relative">
                   <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <input

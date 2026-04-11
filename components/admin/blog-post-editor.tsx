@@ -193,7 +193,7 @@ export function BlogPostEditor({
 
             {/* Slug */}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="text-muted-foreground/50">vendoorx.com/blog/</span>
+              <span className="text-muted-foreground/50">vendoorx.ng/blog/</span>
               <input
                 value={data.slug}
                 onChange={e => update('slug', toSlug(e.target.value))}
@@ -299,7 +299,7 @@ export function BlogPostEditor({
                     {data.seo_title || data.title || 'Your post title'}
                   </p>
                   <p className="text-[#006621] dark:text-green-400 text-xs mt-0.5">
-                    vendoorx.com › blog › {data.slug || 'post-slug'}
+                    vendoorx.ng › blog › {data.slug || 'post-slug'}
                   </p>
                   <p className="text-zinc-600 dark:text-zinc-400 text-sm mt-1 line-clamp-2">
                     {data.seo_description || data.excerpt || 'Meta description will appear here…'}

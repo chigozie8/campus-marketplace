@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = "VendoorX — Nigeria's #1 Campus Marketplace"
+export const alt = "VendoorX — Nigeria's AI-Powered WhatsApp Commerce"
 export const size = { width: 1200, height: 600 }
 export const contentType = 'image/png'
 
@@ -35,7 +35,7 @@ export default function TwitterImage() {
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 680 }}>
           <div style={{ color: '#4ade80', fontSize: 18, fontWeight: 700 }}>
-            Nigeria&apos;s #1 Campus Marketplace
+            Nigeria&apos;s #1 WhatsApp Commerce Platform
           </div>
           <div
             style={{
@@ -49,7 +49,7 @@ export default function TwitterImage() {
             Vendoor<span style={{ color: '#16a34a' }}>X</span>
           </div>
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 20, lineHeight: 1.5 }}>
-            Buy &amp; sell on campus. Zero fees. WhatsApp-powered.
+            AI-Powered Sales. Zero Fees. WhatsApp Commerce.
           </div>
         </div>
         <div

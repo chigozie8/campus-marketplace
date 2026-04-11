@@ -83,7 +83,7 @@ export default function StatusPage() {
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            Status updates are refreshed every 5 minutes. For urgent issues, contact support@vendoorx.com.
+            Status updates are refreshed every 5 minutes. For urgent issues, contact support@vendoorx.ng.
           </p>
         </div>
       </section>

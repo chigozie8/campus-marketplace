@@ -67,7 +67,7 @@ npx cap open ios
 
 ## Important Notes
 
-- The `capacitor.config.ts` at the project root points the WebView to `https://vendoorx.com`
+- The `capacitor.config.ts` at the project root points the WebView to `https://vendoorx.ng`
   so native shells always serve the live web app — no static export needed for the shell.
 - To change the app icon: replace icons in `android/app/src/main/res/` and `ios/App/App/Assets.xcassets/`
 - For push notifications, add `@capacitor/push-notifications` and configure FCM (Android) / APNS (iOS)

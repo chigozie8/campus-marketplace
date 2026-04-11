@@ -1,6 +1,6 @@
 import { ProductRow } from '../types/index.js'
 
-const APP_URL = process.env.FRONTEND_URL ?? 'https://vendoorx.com'
+const APP_URL = process.env.FRONTEND_URL ?? 'https://vendoorx.ng'
 
 export function buildGreeting(): string {
   return (
@@ -132,7 +132,7 @@ export function buildHumanHandoff(): string {
   return (
     `🙋 *Connecting you to our support team…*\n\n` +
     `Our team is available *Mon–Sat, 8am–8pm*.\n\n` +
-    `📧 Email: support@vendoorx.com\n` +
+    `📧 Email: support@vendoorx.ng\n` +
     `🌐 Help centre: ${APP_URL}/help\n\n` +
     `You can also raise a ticket directly from your dashboard:\n` +
     `🔗 ${APP_URL}/dashboard\n\n` +

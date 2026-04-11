@@ -13,11 +13,11 @@ import { BlogPostGridSkeleton } from '@/components/ui/skeletons'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Blog | VendoorX — Campus Commerce Insights & Seller Tips',
-  description: 'Read seller guides, campus business tips, success stories, and platform updates from VendoorX — Nigeria\'s #1 campus marketplace.',
+  title: 'Blog | VendoorX — WhatsApp Commerce Insights & Seller Tips',
+  description: 'Read seller guides, business tips, success stories, and platform updates from VendoorX — Nigeria\'s AI-powered WhatsApp commerce platform.',
   openGraph: {
-    title: 'VendoorX Blog — Campus Commerce Insights',
-    description: 'Seller tips, campus business guides, success stories, and market trends for Nigerian university students.',
+    title: 'VendoorX Blog — WhatsApp Commerce Insights',
+    description: 'Seller tips, business guides, success stories, and market trends for Nigerian sellers and entrepreneurs.',
     type: 'website',
   },
 }
@@ -209,13 +209,13 @@ async function BlogSidebar() {
       <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-5 text-white">
         <h3 className="text-base font-black mb-1">Get updates first</h3>
         <p className="text-white/80 text-xs leading-relaxed mb-4">
-          New posts, seller tips & campus deals — straight to your inbox. No spam.
+          New posts, seller tips & exclusive deals — straight to your inbox. No spam.
         </p>
         <form action="/api/newsletter" method="POST" className="flex flex-col gap-2">
           <input
             type="email"
             name="email"
-            placeholder="your@university.edu.ng"
+            placeholder="your@email.com"
             required
             className="w-full px-3.5 py-2.5 rounded-xl bg-white/20 border border-white/30 focus:border-white text-white placeholder:text-white/50 outline-none text-sm"
           />
@@ -270,10 +270,10 @@ export default async function BlogPage({
             <span className="text-[#4ade80] text-xs font-bold uppercase tracking-widest">VendoorX Blog</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-white mb-4 leading-tight max-w-2xl">
-            Insights to grow your <span className="text-[#4ade80]">campus hustle</span>
+            Insights to grow your <span className="text-[#4ade80]">WhatsApp business</span>
           </h1>
           <p className="text-zinc-400 text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
-            Seller tips, campus business guides, success stories, and everything you need to win on VendoorX.
+            Seller tips, business guides, success stories, and everything you need to win on VendoorX.
           </p>
           <form method="GET" className="flex gap-3 max-w-md">
             <div className="relative flex-1">

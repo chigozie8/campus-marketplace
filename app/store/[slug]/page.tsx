@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const name = seller.full_name || 'Seller'
   const campus = seller.campus || seller.university || 'Nigerian University'
   const description = seller.bio
-    || `Shop ${name}'s listings on VendoorX — campus marketplace for ${campus} students.`
+    || `Shop ${name}'s listings on VendoorX — seller on VendoorX in Nigeria.`
 
   return {
     title: `${name}'s Store — VendoorX`,
@@ -78,8 +78,8 @@ export default async function StorePage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'Store',
     name: `${name}'s VendoorX Store`,
-    description: seller.bio || `Campus seller on VendoorX`,
-    url: `https://vendoorx.com/store/${slug}`,
+    description: seller.bio || `Seller on VendoorX`,
+    url: `https://vendoorx.ng/store/${slug}`,
     image: seller.avatar_url || undefined,
   }
 
@@ -139,11 +139,11 @@ export default async function StorePage({ params }: PageProps) {
                   )}
                   {seller.is_student_verified && (
                     <span
-                      title={`Verified ${seller.university || 'student'}`}
+                      title={`Verified ${seller.university || 'seller'}`}
                       className="flex items-center gap-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 px-1.5 py-0.5 rounded-full"
                     >
                       <GraduationCap className="w-3 h-3" />
-                      Student
+                      Verified
                     </span>
                   )}
                   {isStoreFeatured && (
@@ -249,7 +249,7 @@ export default async function StorePage({ params }: PageProps) {
           {/* Footer CTA */}
           <div className="text-center py-4">
             <p className="text-xs text-muted-foreground mb-3">
-              Want to sell on your campus? It's 100% free.
+              Want to start selling? It's 100% free.
             </p>
             <Link
               href="/auth/sign-up"

@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'VendoorX — Campus Marketplace',
+    name: 'VendoorX — WhatsApp commerce platform',
     short_name: 'VendoorX',
-    description: "Nigeria's #1 campus marketplace. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp with zero platform fees.",
+    description: "Nigeria's AI-powered WhatsApp commerce platform. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp with zero platform fees.",
     start_url: '/',
     scope: '/',
     display: 'standalone',
@@ -35,7 +35,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: 'Browse Marketplace',
         short_name: 'Browse',
-        description: 'Discover products from campus vendors',
+        description: 'Discover products from sellers',
         url: '/marketplace',
         icons: [{ src: '/icon-192', sizes: '192x192' }],
       },
@@ -65,7 +65,7 @@ export default function manifest(): MetadataRoute.Manifest {
       sizes: '1280x720',
       type: 'image/jpeg',
       form_factor: 'wide',
-      label: 'VendoorX campus marketplace',
+      label: 'VendoorX WhatsApp commerce platform',
     },
   ],
   }

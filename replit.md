@@ -1,4 +1,4 @@
-# Campus Marketplace / VendorX
+# VendoorX — Nigeria's AI-Powered WhatsApp Commerce Platform
 
 ## Recently Completed Features (Latest Session)
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
   title: '404 — Page Not Found | VendoorX',
-  description: "The page you're looking for doesn't exist. Head back to VendoorX and discover thousands of campus deals.",
+  description: "The page you're looking for doesn't exist. Head back to VendoorX and discover thousands of exclusive deals.",
   robots: { index: false, follow: true },
 }
 

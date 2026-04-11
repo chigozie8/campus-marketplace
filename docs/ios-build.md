@@ -122,4 +122,4 @@ npm run cap:ios
 
 **White screen on launch:**
 → Confirm `server.url` in `capacitor.config.ts` points to your live deployed URL
-→ The app loads vendoorx.com inside the native shell — make sure the site is live
+→ The app loads vendoorx.ng inside the native shell — make sure the site is live

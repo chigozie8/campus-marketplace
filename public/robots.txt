@@ -1,5 +1,5 @@
 # VendoorX Robots.txt
-# https://vendoorx.com
+# https://vendoorx.ng
 
 User-agent: *
 Allow: /
@@ -17,4 +17,4 @@ Allow: /marketplace/
 Allow: /marketplace/*
 
 # Sitemap location
-Sitemap: https://vendoorx.com/sitemap.xml
+Sitemap: https://vendoorx.ng/sitemap.xml

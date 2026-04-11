@@ -54,7 +54,7 @@ const SECTIONS = [
   {
     id: 'data-retention',
     title: '4. Data Retention',
-    content: `We retain your personal data for as long as your account is active or as needed to provide services. You may request deletion of your account and associated data at any time by going to Settings → Account → Delete Account, or by emailing privacy@vendoorx.com.
+    content: `We retain your personal data for as long as your account is active or as needed to provide services. You may request deletion of your account and associated data at any time by going to Settings → Account → Delete Account, or by emailing privacy@vendoorx.ng.
 
 Upon deletion:
 - Your listings are removed from the marketplace immediately.
@@ -71,7 +71,7 @@ Upon deletion:
 - Access to production systems is restricted to authorised personnel only.
 - We conduct regular security reviews and penetration tests.
 
-No method of internet transmission is 100% secure. If you suspect your account has been compromised, change your password immediately and contact us at security@vendoorx.com.`,
+No method of internet transmission is 100% secure. If you suspect your account has been compromised, change your password immediately and contact us at security@vendoorx.ng.`,
   },
   {
     id: 'your-rights',
@@ -84,17 +84,17 @@ No method of internet transmission is 100% secure. If you suspect your account h
 - **Objection:** Object to processing based on legitimate interests.
 - **Withdraw Consent:** Withdraw consent for marketing communications at any time.
 
-To exercise these rights, email privacy@vendoorx.com or use the controls in your Account Settings.`,
+To exercise these rights, email privacy@vendoorx.ng or use the controls in your Account Settings.`,
   },
   {
     id: 'cookies',
     title: '7. Cookies',
-    content: `We use cookies and similar technologies to operate VendoorX effectively. See our full Cookie Policy at vendoorx.com/cookies for details on what cookies we use and how to manage them.`,
+    content: `We use cookies and similar technologies to operate VendoorX effectively. See our full Cookie Policy at vendoorx.ng/cookies for details on what cookies we use and how to manage them.`,
   },
   {
     id: 'children',
     title: '8. Children\'s Privacy',
-    content: `VendoorX is not directed to children under 16 years of age. We do not knowingly collect personal information from children under 16. If you believe a child under 16 has provided us with personal data, please contact us immediately at privacy@vendoorx.com and we will delete that information.`,
+    content: `VendoorX is not directed to children under 16 years of age. We do not knowingly collect personal information from children under 16. If you believe a child under 16 has provided us with personal data, please contact us immediately at privacy@vendoorx.ng and we will delete that information.`,
   },
   {
     id: 'changes',
@@ -106,7 +106,7 @@ To exercise these rights, email privacy@vendoorx.com or use the controls in your
     title: '10. Contact Us',
     content: `For privacy-related questions or to exercise your rights, contact our Data Protection Officer:
 
-Email: privacy@vendoorx.com
+Email: privacy@vendoorx.ng
 Address: VendoorX Technologies Ltd, Victoria Island, Lagos, Nigeria.
 
 We aim to respond to all privacy requests within 5 business days.`,

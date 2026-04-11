@@ -4,14 +4,14 @@ import { ArrowRight, Users, MessageCircle, Star, Zap, Trophy } from 'lucide-reac
 
 export const metadata: Metadata = {
   title: 'Community | VendoorX',
-  description: 'Join the VendoorX community of 50,000+ student entrepreneurs. Connect, learn, and grow together.',
+  description: 'Join the VendoorX community of 50,000+ seller and entrepreneurs. Connect, learn, and grow together.',
 }
 
 const CHANNELS = [
   {
     icon: MessageCircle,
     title: 'WhatsApp Community',
-    desc: 'Join our WhatsApp community groups — organised by university and category. Get tips, ask questions, and find buyers.',
+    desc: 'Join our WhatsApp community groups — organised by category and location. Get tips, ask questions, and find buyers.',
     cta: 'Join WhatsApp Community',
     href: 'https://wa.me/2348000000000',
     color: '#25D366',
@@ -49,7 +49,7 @@ export default function CommunityPage() {
             <span className="text-primary">One community.</span>
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-            The VendoorX community is where Nigeria&apos;s best campus entrepreneurs share tips, celebrate wins, support each other, and close deals together.
+            The VendoorX community is where Nigeria&apos;s best seller and entrepreneurs share tips, celebrate wins, support each other, and close deals together.
           </p>
         </div>
       </section>

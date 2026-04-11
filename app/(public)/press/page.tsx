@@ -18,7 +18,7 @@ export default async function PressPage() {
 
   const STATS = [
     { value: settings.stat_active_vendors, label: 'Active Vendors' },
-    { value: settings.stat_campuses,        label: 'Nigerian Campuses' },
+    { value: settings.stat_campuses,        label: 'Nigerian States Nationwide' },
     { value: settings.stat_transactions,    label: 'Transactions Processed' },
     { value: settings.stat_rating,          label: 'Average Rating' },
   ]
@@ -114,7 +114,7 @@ export default async function PressPage() {
                       {settings.stat_active_vendors} Vendors
                     </span>
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-                      {settings.stat_campuses} Campuses
+                      {settings.stat_campuses} States Nationwide
                     </span>
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold">
                       {settings.stat_transactions} GMV
@@ -218,7 +218,7 @@ export default async function PressPage() {
             <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/15">
               <p className="text-sm text-muted-foreground">
                 <span className="font-bold text-foreground">PWA Available Now:</span> Users can install VendoorX directly from their browser — tap &quot;Add to Home Screen&quot; on any mobile device at{' '}
-                <a href="https://vendoorx.com" className="text-primary underline font-semibold">vendoorx.com</a>
+                <a href="https://vendoorx.ng" className="text-primary underline font-semibold">vendoorx.ng</a>
               </p>
             </div>
           </div>

@@ -8,16 +8,16 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Careers | VendoorX',
-  description: 'Join the VendoorX team. We\'re building Africa\'s most loved campus marketplace — roles opening soon.',
+  description: 'Join the VendoorX team. We\'re building Africa\'s most loved WhatsApp commerce platform — roles opening soon.',
 }
 
 const PHOTOS = [
-  { id: 'p1', src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Nigerian university students collaborating' },
-  { id: 'p2', src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Student at Nigerian campus' },
-  { id: 'p3', src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Students working on laptops' },
-  { id: 'p4', src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'University students studying together' },
-  { id: 'p5', src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Student with laptop on campus' },
-  { id: 'p6', src: 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Students in university library' },
+  { id: 'p1', src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Nigerian sellers and buyers collaborating' },
+  { id: 'p2', src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Entrepreneur at work in Nigeria' },
+  { id: 'p3', src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Sellers working on laptops' },
+  { id: 'p4', src: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'sellers and buyers studying together' },
+  { id: 'p5', src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Seller with laptop on VendoorX' },
+  { id: 'p6', src: 'https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Business owners collaborating' },
 ]
 
 const STATUS_LABELS: Record<string, string> = {
@@ -89,13 +89,13 @@ export default async function CareersPage() {
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-none tracking-tight mb-6 max-w-4xl">
             Build what{' '}
             <span className="text-[#16a34a]">
-              50,000+<br className="sm:hidden" /> students
+              50,000+<br className="sm:hidden" /> sellers
             </span>{' '}
             depend on.
           </h1>
 
           <p className="text-zinc-400 text-lg sm:text-xl leading-relaxed max-w-2xl mb-10">
-            We&apos;re assembling the team that will power campus commerce across every university in Nigeria.
+            We&apos;re assembling the team that will power WhatsApp commerce across every state in Nigeria.
             {hasActive ? ' Open roles listed below.' : ' Roles are opening soon — be first in line.'}
           </p>
 
@@ -104,7 +104,7 @@ export default async function CareersPage() {
               <input
                 type="email"
                 name="email"
-                placeholder="your@university.edu.ng"
+                placeholder="your@email.com"
                 required
                 className="flex-1 px-5 py-4 rounded-xl bg-white/10 border border-white/20 focus:border-[#16a34a] text-white placeholder:text-zinc-500 outline-none transition-colors text-sm"
               />
@@ -194,8 +194,8 @@ export default async function CareersPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             {[
-              { stat: '50K+', label: 'students on the platform' },
-              { stat: '120+', label: 'campuses across Nigeria' },
+              { stat: '50K+', label: 'sellers on the platform' },
+              { stat: '36+', label: 'states across Nigeria' },
               { stat: '₦0', label: 'fee to sell on WhatsApp' },
             ].map(({ stat, label }) => (
               <div key={stat} className="rounded-2xl bg-white/5 border border-white/10 p-8">
@@ -205,9 +205,9 @@ export default async function CareersPage() {
             ))}
           </div>
           <p className="text-zinc-400 text-base leading-relaxed mt-10 text-center max-w-xl mx-auto">
-            VendoorX is how Nigerian students buy and sell — textbooks, food, fashion, electronics — all on WhatsApp, with real payments and real trust built in.
+            VendoorX is how Nigerians buy and sell — fashion, electronics, food, services, and more — all on WhatsApp, with real payments and real trust built in.
             <br /><br />
-            When you join us, your code, designs, and ideas are used by real students every single day.
+            When you join us, your code, designs, and ideas are used by real sellers and buyers every single day.
           </p>
         </div>
       </section>
@@ -230,8 +230,8 @@ export default async function CareersPage() {
           </Link>
           <p className="text-zinc-600 text-xs mt-5">
             Email us directly at{' '}
-            <a href="mailto:team@vendoorx.com" className="text-[#4ade80] hover:underline">
-              team@vendoorx.com
+            <a href="mailto:team@vendoorx.ng" className="text-[#4ade80] hover:underline">
+              team@vendoorx.ng
             </a>
           </p>
         </div>

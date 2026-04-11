@@ -144,8 +144,8 @@ export default function ResetPasswordPage() {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
             <p className="text-white/60 text-xs text-center">
               Need help?{' '}
-              <a href="mailto:support@vendoorx.com" className="text-[#4ade80] hover:underline">
-                support@vendoorx.com
+              <a href="mailto:support@vendoorx.ng" className="text-[#4ade80] hover:underline">
+                support@vendoorx.ng
               </a>
             </p>
           </div>

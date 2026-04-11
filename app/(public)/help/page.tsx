@@ -4,7 +4,7 @@ import { ArrowRight, Search, ShoppingBag, CreditCard, Shield, Package, Star, Mes
 
 export const metadata: Metadata = {
   title: 'Help Center | VendoorX',
-  description: 'Get help with buying, selling, payments, account issues, and more on VendoorX campus marketplace.',
+  description: 'Get help with buying, selling, payments, account issues, and more on VendoorX WhatsApp commerce platform.',
 }
 
 const CATEGORIES = [
@@ -15,9 +15,9 @@ const CATEGORIES = [
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900/40',
     questions: [
-      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, university, and condition. The "Nearest" filter shows listings closest to your campus.' },
+      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your campus.' },
       { q: 'How do I contact a seller?', a: 'Click the "Chat on WhatsApp" button on any listing. This opens WhatsApp with a pre-filled message to the seller. You can also make an offer directly on the listing page.' },
-      { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with university email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
+      { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
       { q: 'What if a product is not as described?', a: 'You have 48 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
     ],
   },
@@ -54,7 +54,7 @@ const CATEGORIES = [
     bg: 'bg-orange-50 dark:bg-orange-950/30',
     border: 'border-orange-200 dark:border-orange-900/40',
     questions: [
-      { q: 'How do I get verified as a seller?', a: 'Sign up with your .edu.ng university email address. Your account is automatically flagged as a university student. Complete your profile with a clear photo to boost trust with buyers.' },
+      { q: 'How do I get verified as a seller?', a: 'Sign up with your email address address. Your account is automatically flagged as a seller. Complete your profile with a clear photo to boost trust with buyers.' },
       { q: 'I forgot my password. What do I do?', a: 'Click "Sign in" then "Forgot password." Enter your email and we\'ll send a password reset link. Check your spam folder if you don\'t see it within 2 minutes.' },
       { q: 'How do I report a fraudulent seller?', a: 'Click "Report" on any listing or seller profile. Fill in the reason and evidence. Our trust & safety team reviews reports within 24 hours and bans confirmed bad actors.' },
       { q: 'Can I delete my account?', a: 'Yes. Go to Settings → Account → Delete Account. Note: any active listings will be removed and pending wallet balance will be paid out first.' },
@@ -64,7 +64,7 @@ const CATEGORIES = [
 
 const POPULAR = [
   { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 platform fee applies only to Paystack checkout orders.' },
-  { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most campus sellers deliver within 1–3 hours for on-campus orders. Check the listing for delivery details.' },
+  { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for on-campus orders. Check the listing for delivery details.' },
   { q: 'Can I sell across different universities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
 ]
 

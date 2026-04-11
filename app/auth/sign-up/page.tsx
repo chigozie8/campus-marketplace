@@ -156,7 +156,7 @@ function SignUpPageInner() {
                 'Free to join, free to list forever',
                 'Direct WhatsApp buyer connections',
                 'Seller analytics & verified badge',
-                'Campus-only trusted community',
+                'Trusted seller community',
                 'Instant buyer notifications',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3">
@@ -192,7 +192,7 @@ function SignUpPageInner() {
               </div>
               <div>
                 <p className="text-white text-xs font-semibold">Adaeze O.</p>
-                <p className="text-white/40 text-[11px]">OAU, Ile-Ife</p>
+                <p className="text-white/40 text-[11px]">Enugu</p>
               </div>
               <div className="ml-auto flex gap-0.5">
                 {[...Array(5)].map((_, i) => <span key={i} className="text-[#16a34a] text-xs">★</span>)}
@@ -292,7 +292,7 @@ function SignUpPageInner() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@university.edu.ng"
+                  placeholder="you@email.com"
                   value={email}
                   onChange={e => handleEmailChange(e.target.value)}
                   required
@@ -301,7 +301,7 @@ function SignUpPageInner() {
                 {detectedUniversity && (
                   <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[#16a34a] font-semibold">
                     <GraduationCap className="w-3.5 h-3.5" />
-                    Student email detected — {detectedUniversity}
+                    Institution detected — {detectedUniversity}
                   </div>
                 )}
               </div>
@@ -309,14 +309,14 @@ function SignUpPageInner() {
               {/* University */}
               <div className="space-y-1.5">
                 <Label htmlFor="university" className="text-sm font-semibold text-gray-700 dark:text-foreground">
-                  University <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
+                  Organisation / Business <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
                 </Label>
                 <div className="relative">
                   <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
                   <Input
                     id="university"
                     type="text"
-                    placeholder="e.g. University of Lagos"
+                    placeholder="e.g. Your business or school name"
                     value={university}
                     onChange={e => setUniversity(e.target.value)}
                     className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"

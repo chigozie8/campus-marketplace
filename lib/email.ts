@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
-const FROM = 'VendoorX <notifications@vendoorx.com>'
+const FROM = 'VendoorX <notifications@vendoorx.ng>'
 
 export async function sendVerificationApprovedEmail(to: string, name: string) {
   if (!resend) return
@@ -29,7 +29,7 @@ export async function sendVerificationApprovedEmail(to: string, name: string) {
             <p style="color:#15803d;font-size:13px;font-weight:600;margin:0 0 4px">✓ Buyers can see your verified status</p>
             <p style="color:#15803d;font-size:13px;font-weight:600;margin:0">✓ Higher search ranking</p>
           </div>
-          <a href="https://vendoorx.com/dashboard" style="display:block;background:#0a0a0a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Go to Dashboard →</a>
+          <a href="https://vendoorx.ng/dashboard" style="display:block;background:#0a0a0a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Go to Dashboard →</a>
         </div>
         <div style="padding:16px 32px;border-top:1px solid #f3f4f6;text-align:center">
           <p style="color:#9ca3af;font-size:12px;margin:0">VendoorX Campus Marketplace · Nigeria</p>
@@ -68,7 +68,7 @@ export async function sendVerificationRejectedEmail(to: string, name: string, re
           <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 24px">
             You can correct the issue and resubmit from your profile page.
           </p>
-          <a href="https://vendoorx.com/profile" style="display:block;background:#0a0a0a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Resubmit Verification →</a>
+          <a href="https://vendoorx.ng/profile" style="display:block;background:#0a0a0a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none">Resubmit Verification →</a>
         </div>
         <div style="padding:16px 32px;border-top:1px solid #f3f4f6;text-align:center">
           <p style="color:#9ca3af;font-size:12px;margin:0">VendoorX Campus Marketplace · Nigeria</p>

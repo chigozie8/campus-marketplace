@@ -6,8 +6,8 @@ const INACTIVE_DAYS = 7
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000 // every 6h
 
 const MESSAGES = [
-  { title: '👋 We miss you!', body: 'New listings have arrived since you were last here. Come check out what\'s new on campus!' },
-  { title: '🛍️ Back already?', body: 'Your campus marketplace has fresh deals waiting. Don\'t miss out!' },
+  { title: '👋 We miss you!', body: 'New listings have arrived since you were last here. Come check out what\'s new online!' },
+  { title: '🛍️ Back already?', body: 'Your WhatsApp commerce platform has fresh deals waiting. Don\'t miss out!' },
   { title: '🔥 Hot right now', body: 'Students near you are selling great stuff. Come see what\'s trending!' },
 ]
 

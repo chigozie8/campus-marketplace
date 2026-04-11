@@ -5,10 +5,10 @@ const config: CapacitorConfig = {
   appName: 'VendoorX',
   webDir: 'public',
   server: {
-    url: 'https://vendoorx.com',
+    url: 'https://vendoorx.ng',
     cleartext: false,
     androidScheme: 'https',
-    allowNavigation: ['vendoorx.com', '*.vendoorx.com'],
+    allowNavigation: ['vendoorx.ng', '*.vendoorx.ng'],
   },
   plugins: {
     SplashScreen: {

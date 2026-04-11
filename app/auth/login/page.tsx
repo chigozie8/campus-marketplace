@@ -17,11 +17,11 @@ import { cn } from '@/lib/utils'
 const FEATURES = [
   { icon: Zap, label: 'Instant WhatsApp connect with buyers' },
   { icon: ShieldCheck, label: 'Verified seller badges for trust' },
-  { icon: Users, label: '50,000+ active campus traders' },
+  { icon: Users, label: '50,000+ active sellers' },
 ]
 
 const STATS = [
-  { value: '50K+', label: 'Students' },
+  { value: '50K+', label: 'Sellers' },
   { value: '120K+', label: 'Listings' },
   { value: '4.9★', label: 'Rating' },
 ]
@@ -106,15 +106,15 @@ export default function LoginPage() {
           <div className="flex-1 flex flex-col justify-center">
             <div className="mb-3">
               <span className="inline-block bg-[#16a34a]/20 text-[#4ade80] text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full border border-[#16a34a]/30">
-                Campus Marketplace
+                WhatsApp commerce platform
               </span>
             </div>
             <h1 className="text-4xl xl:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight mb-5">
               The smartest way<br />to buy & sell<br />
-              <span className="text-[#16a34a]">on campus.</span>
+              <span className="text-[#16a34a]">online.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              Join thousands of Nigerian students trading smarter with WhatsApp-powered listings.
+              Join thousands of Nigerian sellers trading smarter with WhatsApp-powered listings.
             </p>
 
             {/* Features */}
@@ -212,7 +212,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@university.edu.ng"
+                  placeholder="you@email.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required

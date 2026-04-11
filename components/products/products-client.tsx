@@ -11,7 +11,7 @@ import { DashboardActions } from '@/components/dashboard-actions'
 import { EmptyState } from '@/components/empty-state'
 import type { Product } from '@/lib/types'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.com'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
 
 function shareLinks(product: Product) {
   const url = encodeURIComponent(`${SITE_URL}/marketplace/${product.id}`)

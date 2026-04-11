@@ -22,7 +22,7 @@ import {
 export const metadata: Metadata = {
   title: 'Trust & Safety | VendoorX — Your Money Is Protected',
   description:
-    'Learn how VendoorX escrow protection, full refund guarantee, and verified sellers keep every transaction on campus safe. Support: 07082039250.',
+    'Learn how VendoorX escrow protection, full refund guarantee, and verified sellers keep every transaction on VendoorX safe. Support: 07082039250.',
 }
 
 const SUPPORT_PHONE = '07082039250'
@@ -82,8 +82,8 @@ const GUARANTEES = [
   },
   {
     icon: UserCheck,
-    title: 'Verified Student Sellers',
-    desc: 'Every seller verified with their Nigerian university email. You know exactly who you\'re buying from — real people on real campuses.',
+    title: 'Verified Sellers',
+    desc: 'Every seller verified with their Nigerian email address. You know exactly who you\'re buying from — real, accountable people.',
     color: 'text-purple-600 dark:text-purple-400',
     bg: 'bg-purple-50 dark:bg-purple-950/30',
     border: 'border-purple-200 dark:border-purple-800',
@@ -99,7 +99,7 @@ const GUARANTEES = [
   {
     icon: Headphones,
     title: 'Nigerian Support Team',
-    desc: 'Our support team is Nigerian, campus-aware, and based locally. We understand your situation because we\'ve lived it.',
+    desc: 'Our support team is Nigerian, locally-based, and based locally. We understand your situation because we\'ve lived it.',
     color: 'text-rose-600 dark:text-rose-400',
     bg: 'bg-rose-50 dark:bg-rose-950/30',
     border: 'border-rose-200 dark:border-rose-800',
@@ -320,7 +320,7 @@ export default function TrustPage() {
               WhatsApp Support
             </a>
             <a
-              href="mailto:support@vendoorx.com"
+              href="mailto:support@vendoorx.ng"
               className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl border-2 border-border bg-background hover:bg-muted text-foreground font-bold text-sm transition-all hover:scale-[1.02] active:scale-95"
             >
               Email Support

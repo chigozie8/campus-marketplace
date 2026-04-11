@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           <div className="bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-2xl p-4 mb-6 text-left">
             <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed">
               <span className="font-semibold text-gray-700 dark:text-foreground">Did not receive it?</span> Check your spam folder or{' '}
-              <a href="mailto:support@vendoorx.com" className="text-[#16a34a] hover:underline">contact support</a>.
+              <a href="mailto:support@vendoorx.ng" className="text-[#16a34a] hover:underline">contact support</a>.
             </p>
           </div>
 
@@ -140,8 +140,8 @@ export default function ForgotPasswordPage() {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
             <p className="text-white/60 text-xs text-center">
               Need more help?{' '}
-              <a href="mailto:support@vendoorx.com" className="text-[#4ade80] hover:underline">
-                support@vendoorx.com
+              <a href="mailto:support@vendoorx.ng" className="text-[#4ade80] hover:underline">
+                support@vendoorx.ng
               </a>
             </p>
           </div>
@@ -222,7 +222,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-2xl p-4">
               <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed">
                 <span className="font-semibold text-gray-700 dark:text-foreground">Did not get the email?</span> Check your spam folder or{' '}
-                <a href="mailto:support@vendoorx.com" className="text-[#16a34a] hover:underline">
+                <a href="mailto:support@vendoorx.ng" className="text-[#16a34a] hover:underline">
                   contact support
                 </a>
                 .
