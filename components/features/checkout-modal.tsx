@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone } from 'lucide-react'
+import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
@@ -25,6 +26,15 @@ interface CheckoutModalProps {
   product: CheckoutProduct
 }
 
+interface AppliedCoupon {
+  id: string
+  code: string
+  discount_type: 'percent' | 'fixed'
+  discount_value: number
+  description?: string
+  discount: number
+}
+
 type Step = 'address' | 'confirm' | 'paying'
 
 export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
@@ -34,6 +44,11 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
   const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
+
+  const [couponCode, setCouponCode] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null)
+  const [showCouponInput, setShowCouponInput] = useState(false)
 
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
@@ -50,7 +65,38 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
 
   const subtotal = product.price * quantity
   const deliveryFee = product.delivery_fee ?? 0
-  const total = subtotal + deliveryFee + platformFee
+  const couponDiscount = appliedCoupon?.discount ?? 0
+  const total = Math.max(0, subtotal + deliveryFee + platformFee - couponDiscount)
+
+  async function handleApplyCoupon() {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) return
+    setCouponLoading(true)
+    try {
+      const res = await fetch('/api/coupon/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, order_total: subtotal }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.valid) {
+        toast.error(data.error || 'Invalid or expired coupon')
+        return
+      }
+      setAppliedCoupon({ ...data.coupon, discount: data.discount })
+      toast.success(`Coupon applied! You save ₦${data.discount.toLocaleString()}`)
+    } catch {
+      toast.error('Failed to validate coupon')
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null)
+    setCouponCode('')
+    setShowCouponInput(false)
+  }
 
   async function handleCreateOrder() {
     if (address.trim().length < 5) {
@@ -64,6 +110,8 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
         product_id: product.id,
         quantity,
         delivery_address: address.trim(),
+        coupon_id: appliedCoupon?.id,
+        coupon_discount: couponDiscount > 0 ? couponDiscount : undefined,
       })
       setOrderId(result.data.id)
       setStep('confirm')
@@ -77,7 +125,6 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
     if (!orderId) return
     hapticNotification('success')
     setStep('paying')
-
     try {
       const result = await initPayment.mutateAsync(orderId)
       window.location.href = result.data.authorization_url
@@ -91,6 +138,9 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
     setAddress('')
     setQuantity(1)
     setOrderId(null)
+    setCouponCode('')
+    setAppliedCoupon(null)
+    setShowCouponInput(false)
     onClose()
   }
 
@@ -155,6 +205,63 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
               />
             </div>
 
+            {/* Coupon Code */}
+            {appliedCoupon ? (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                    {appliedCoupon.code} applied!
+                  </p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                    You save ₦{appliedCoupon.discount.toLocaleString()}
+                  </p>
+                </div>
+                <button onClick={removeCoupon} className="text-emerald-600 hover:text-emerald-800 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : showCouponInput ? (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-primary" />
+                  Coupon Code
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
+                    className="rounded-xl text-sm font-mono tracking-widest"
+                    autoCapitalize="characters"
+                  />
+                  <Button
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading || !couponCode.trim()}
+                    variant="outline"
+                    className="rounded-xl shrink-0 font-bold"
+                  >
+                    {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                  </Button>
+                </div>
+                <button
+                  onClick={() => setShowCouponInput(false)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowCouponInput(true)}
+                className="flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline transition-colors"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                Have a coupon code?
+              </button>
+            )}
+
             <Button
               onClick={handleCreateOrder}
               disabled={createOrder.isPending || address.trim().length < 5}
@@ -187,6 +294,15 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 <div className="flex justify-between py-2 border-b border-border/50">
                   <span className="text-muted-foreground">{platformFeeLabel}</span>
                   <span className="font-semibold">₦{platformFee.toLocaleString()}</span>
+                </div>
+              )}
+              {appliedCoupon && couponDiscount > 0 && (
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                    <Tag className="w-3 h-3" />
+                    Coupon ({appliedCoupon.code})
+                  </span>
+                  <span className="font-bold text-emerald-600">-₦{couponDiscount.toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between py-2">

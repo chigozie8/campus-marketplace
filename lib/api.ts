@@ -188,6 +188,8 @@ export interface CreateOrderPayload {
   product_id: string
   quantity: number
   delivery_address: string
+  coupon_id?: string
+  coupon_discount?: number
 }
 
 export interface CreateProductPayload {

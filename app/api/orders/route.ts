@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
 
     const body = await req.json()
-    const { product_id, quantity = 1, delivery_address } = body
+    const { product_id, quantity = 1, delivery_address, coupon_id, coupon_discount } = body
 
     if (!product_id || !delivery_address?.trim()) {
       return NextResponse.json({ success: false, message: 'product_id and delivery_address are required' }, { status: 400 })
@@ -59,7 +59,8 @@ export async function POST(req: Request) {
     const feeMap = Object.fromEntries((feeRows ?? []).map((r: { key: string; value: string }) => [r.key, r.value]))
     const platformFee = Math.max(0, Number(feeMap.platform_fee_amount ?? '100'))
 
-    const totalAmount = itemTotal + deliveryFee + platformFee
+    const discount = Math.max(0, Math.min(Number(coupon_discount ?? 0), itemTotal))
+    const totalAmount = Math.max(0, itemTotal + deliveryFee + platformFee - discount)
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
@@ -79,6 +80,20 @@ export async function POST(req: Request) {
 
     if (orderErr || !order) {
       return NextResponse.json({ success: false, message: orderErr?.message ?? 'Failed to create order' }, { status: 500 })
+    }
+
+    // Increment coupon uses_count if a coupon was applied
+    if (coupon_id && discount > 0) {
+      admin.from('coupon_codes').select('uses_count').eq('id', coupon_id).single()
+        .then(({ data: c }) => {
+          if (c) {
+            admin.from('coupon_codes')
+              .update({ uses_count: (c.uses_count ?? 0) + 1 })
+              .eq('id', coupon_id)
+              .catch(() => {})
+          }
+        })
+        .catch(() => {})
     }
 
     sendNotification({

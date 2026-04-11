@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
 import { SearchAutocomplete } from '@/components/marketplace/search-autocomplete'
+import { FlashSalesSection } from '@/components/features/flash-sales-section'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { buildMetadata, SITE_URL } from '@/lib/seo'
@@ -468,6 +469,9 @@ export default async function MarketplacePage({
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28">
+        {/* Flash Sales */}
+        <FlashSalesSection />
+
         {/* Filters row */}
         <div className="flex flex-wrap items-center justify-between mb-5 gap-y-3 gap-x-2">
           <div className="min-w-0">
