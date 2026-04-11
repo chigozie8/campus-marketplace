@@ -7,7 +7,7 @@ export const SITE_DESCRIPTION =
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
 export const SITE_TWITTER = '@vendoorx'
-export const OG_IMAGE = `${SITE_URL}/og-image.png`
+export const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 export const SITE_KEYWORDS = [
   'WhatsApp commerce Nigeria',

@@ -31,27 +31,27 @@ type Message = {
 }
 
 const QUICK_PROMPTS = [
-  { icon: Laptop, label: 'Cheap laptops', query: 'Find me a cheap laptop under ₦100k on campus' },
+  { icon: Laptop, label: 'Cheap laptops', query: 'Find me a cheap laptop under ₦100k' },
   { icon: BookOpen, label: 'Textbooks', query: 'What textbooks are available for 200 level students?' },
-  { icon: Utensils, label: 'Food nearby', query: 'Who sells the best jollof rice on campus?' },
+  { icon: Utensils, label: 'Food nearby', query: 'Who sells the best jollof rice near me?' },
   { icon: Shirt, label: 'Fashion deals', query: 'Show me fashion items under ₦5,000' },
   { icon: ShoppingBag, label: 'How to sell', query: 'How do I list my items for sale on VendoorX?' },
-  { icon: Home, label: 'Accommodation', query: 'Are there student accommodation listings?' },
+  { icon: Home, label: 'Accommodation', query: 'Are there accommodation listings available?' },
 ]
 
-const SYSTEM_PROMPT = `You are VendoorX AI — a smart, friendly, and energetic shopping assistant for VendoorX, Nigeria's #1 campus marketplace. You help university students buy and sell products like electronics, textbooks, fashion, food, services, and accommodation.
+const SYSTEM_PROMPT = `You are VendoorX AI — a smart, friendly, and energetic shopping assistant for VendoorX, Nigeria's AI-powered WhatsApp commerce platform. You help Nigerian sellers and buyers find products and services including electronics, textbooks, fashion, food, services, and accommodation.
 
-Your personality: upbeat, helpful, knowledgeable about Nigerian campus life, uses light Nigerian slang naturally (e.g. "sharp sharp", "no wahala", "omo"), but always professional and clear.
+Your personality: upbeat, helpful, knowledgeable about Nigerian commerce and markets, uses light Nigerian slang naturally (e.g. "sharp sharp", "no wahala", "omo"), but always professional and clear.
 
 Key marketplace facts:
-- VendoorX connects 50,000+ students across 120+ Nigerian campuses (UNILAG, OAU, UI, FUTA, LASU, ABU, etc.)
+- VendoorX connects 50,000+ sellers and buyers across all 36 Nigerian states
 - Buyers contact sellers directly via WhatsApp — zero platform fees, zero commission
 - Product categories: Electronics, Textbooks, Clothing, Food & Drinks, Services, Accommodation, Furniture, Sports, Beauty, Others
 - Listing is free — go to /seller/new to create a listing
 - Browse at /marketplace
-- Students can filter by campus, category, condition (new/like-new/good/fair) and price
+- Buyers can filter by city, category, condition (new/like-new/good/fair) and price
 
-When users ask about products, give helpful suggestions, price ranges typical on Nigerian campuses, and always include a call to action to browse the marketplace. Format responses nicely with line breaks. Keep responses concise but warm and friendly.`
+When users ask about products, give helpful suggestions, price ranges typical in Nigerian markets, and always include a call to action to browse the marketplace. Format responses nicely with line breaks. Keep responses concise but warm and friendly.`
 
 // Typewriter effect hook
 function useTypewriter(text: string, speed = 12, active = false) {
@@ -305,7 +305,7 @@ export default function AssistantPage() {
     const resetMsg: Message = {
       id: Date.now().toString(),
       role: 'assistant',
-      content: "Chat cleared! Ready to help you find the best campus deals. What are you looking for?",
+      content: "Chat cleared! Ready to help you find the best deals. What are you looking for?",
       timestamp: new Date(),
     }
     setMessages([resetMsg])
@@ -385,7 +385,7 @@ export default function AssistantPage() {
                 </div>
               </div>
               <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">VendoorX AI</h1>
-              <p className="text-gray-500 text-sm mt-1">Your campus shopping genius</p>
+              <p className="text-gray-500 text-sm mt-1">Your AI shopping assistant</p>
             </div>
           )}
 
@@ -438,7 +438,7 @@ export default function AssistantPage() {
             <div className="flex-1 relative bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-3xl overflow-hidden focus-within:border-green-400 focus-within:ring-2 focus-within:ring-green-100 dark:focus-within:ring-green-900 transition-all">
               <textarea
                 ref={inputRef}
-                placeholder="Ask anything about campus deals…"
+                placeholder="Ask anything about products, selling, or deals…"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -475,7 +475,7 @@ export default function AssistantPage() {
           <div className="flex items-center justify-center gap-1.5 mt-2.5">
             <Sparkles className="w-3 h-3 text-green-500" />
             <p className="text-[10px] font-semibold text-green-600 tracking-wide">
-              Your smartest campus shopping companion ✨
+              Your smartest WhatsApp commerce companion ✨
             </p>
           </div>
         </div>

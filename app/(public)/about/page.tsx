@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Target, Heart, Zap, Shield, Users, Globe, TrendingUp, CheckCircle2 } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
+import { buildMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'About VendoorX — Nigeria\'s AI-powered WhatsApp commerce platform',
-  description: 'Learn about VendoorX, our mission to connect Nigerian seller communities, and the team building Africa\'s most loved commerce platform.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'About VendoorX',
+  description: 'Learn about VendoorX — our mission to empower Nigerian sellers and buyers with AI-powered WhatsApp commerce. Zero commission. Built for Nigeria.',
+  path: '/about',
+  keywords: ['about vendoorx', 'vendoorx mission', 'nigerian commerce platform', 'whatsapp selling nigeria', 'vendoorx team'],
+})
 
 const VALUES = [
   {

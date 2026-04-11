@@ -51,7 +51,7 @@ export const metadata: Metadata = {
       'VendoorX automates your sales, support, and transactions across WhatsApp and messaging channels. Let AI handle customer conversations, product discovery, order flow, and payments — so you can focus on growing.',
     images: [
       {
-        url: `${siteUrl}/og-image.png`,
+        url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     title: 'VendoorX — AI-Powered WhatsApp Commerce',
     description:
       'Automate sales, support & payments across WhatsApp with AI. Nigeria\'s leading conversational commerce platform — zero commission, free to start.',
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/opengraph-image`],
     creator: '@vendoorx',
     site: '@vendoorx',
   },

@@ -43,23 +43,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const { seller } = result
   const name = seller.full_name || 'Seller'
-  const campus = seller.campus || seller.university || 'Nigerian University'
+  const location = seller.campus || seller.university || 'Nigeria'
   const description = seller.bio
-    || `Shop ${name}'s listings on VendoorX — seller on VendoorX in Nigeria.`
+    || `Shop ${name}'s listings on VendoorX — verified seller in ${location}.`
+  const storeUrl = `https://vendoorx.ng/store/${slug}`
 
   return {
     title: `${name}'s Store — VendoorX`,
     description,
+    alternates: { canonical: storeUrl },
     openGraph: {
       title: `${name}'s Store on VendoorX`,
       description,
+      url: storeUrl,
       type: 'website',
-      images: seller.avatar_url ? [{ url: seller.avatar_url }] : [],
+      siteName: 'VendoorX',
+      locale: 'en_NG',
+      images: seller.avatar_url
+        ? [{ url: seller.avatar_url, width: 400, height: 400, alt: `${name} on VendoorX` }]
+        : [{ url: 'https://vendoorx.ng/opengraph-image', width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary',
       title: `${name}'s Store on VendoorX`,
       description,
+      site: '@vendoorx',
     },
   }
 }
@@ -74,13 +82,40 @@ export default async function StorePage({ params }: PageProps) {
   const initials = name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
   const whatsappNumber = seller.whatsapp_number?.replace(/\D/g, '') || ''
 
+  const storeSchemaUrl = `https://vendoorx.ng/store/${slug}`
   const schemaOrg = {
     '@context': 'https://schema.org',
-    '@type': 'Store',
-    name: `${name}'s VendoorX Store`,
-    description: seller.bio || `Seller on VendoorX`,
-    url: `https://vendoorx.ng/store/${slug}`,
-    image: seller.avatar_url || undefined,
+    '@graph': [
+      {
+        '@type': 'ProfilePage',
+        '@id': `${storeSchemaUrl}#page`,
+        url: storeSchemaUrl,
+        name: `${name}'s Store on VendoorX`,
+        description: seller.bio || `Verified seller on VendoorX`,
+        inLanguage: 'en-NG',
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://vendoorx.ng' },
+            { '@type': 'ListItem', position: 2, name: 'Marketplace', item: 'https://vendoorx.ng/marketplace' },
+            { '@type': 'ListItem', position: 3, name: `${name}'s Store`, item: storeSchemaUrl },
+          ],
+        },
+      },
+      {
+        '@type': 'Person',
+        '@id': `${storeSchemaUrl}#seller`,
+        name,
+        url: storeSchemaUrl,
+        image: seller.avatar_url || undefined,
+        description: seller.bio || undefined,
+        worksFor: {
+          '@type': 'Organization',
+          name: 'VendoorX',
+          url: 'https://vendoorx.ng',
+        },
+      },
+    ],
   }
 
   const storeBoostExpiry = (seller as Record<string, unknown>).store_boost_expires_at as string | undefined

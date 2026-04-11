@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Download, Mail, FileText, Phone, Smartphone, Sparkles, Award, TrendingUp } from 'lucide-react'
@@ -7,10 +8,12 @@ import { parsePressAssets } from '@/lib/site-settings-defaults'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'Newsroom | VendoorX',
-  description: 'VendoorX brand assets, company story, founder details, and media contact information. Everything journalists and partners need in one place.',
-}
+  description: 'VendoorX brand assets, company story, founder details, and media contact information — everything journalists and partners need in one place.',
+  path: '/press',
+  keywords: ['vendoorx press', 'vendoorx newsroom', 'vendoorx media kit', 'nigeria whatsapp commerce news', 'vendoorx brand assets'],
+})
 
 export default async function PressPage() {
   const settings = await getSiteSettings()

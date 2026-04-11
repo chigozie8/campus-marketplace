@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import {
   Shield,
@@ -19,11 +20,12 @@ import {
   UserCheck,
 } from 'lucide-react'
 
-export const metadata: Metadata = {
-  title: 'Trust & Safety | VendoorX — Your Money Is Protected',
-  description:
-    'Learn how VendoorX escrow protection, full refund guarantee, and verified sellers keep every transaction on VendoorX safe. Support: 07082039250.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'Trust & Safety | VendoorX',
+  description: 'Your money is protected on VendoorX. Escrow payments, full refund guarantee, verified sellers, and a dispute team on standby. Safe buying and selling across Nigeria.',
+  path: '/trust',
+  keywords: ['safe buying nigeria', 'escrow payment nigeria', 'verified sellers nigeria', 'vendoorx safety', 'whatsapp commerce safety'],
+})
 
 const SUPPORT_PHONE = '07082039250'
 const SUPPORT_WHATSAPP = 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...'

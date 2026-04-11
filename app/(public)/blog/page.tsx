@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import { cache, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'

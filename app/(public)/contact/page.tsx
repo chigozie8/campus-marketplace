@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import { ArrowRight, Mail, MapPin, Clock, Phone, MessageCircle } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { parseContactSubjects } from '@/lib/site-settings-defaults'
@@ -6,10 +7,12 @@ import { ContactForm } from '@/components/contact/contact-form'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Contact Us | VendoorX',
-  description: 'Get in touch with the VendoorX support team. Call, WhatsApp, or email — we respond within 2 hours.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'Contact VendoorX',
+  description: 'Get in touch with the VendoorX support team. WhatsApp, call, or email — we respond within 2 hours. Nigerian support team, available 8am–8pm.',
+  path: '/contact',
+  keywords: ['vendoorx contact', 'vendoorx support', 'vendoorx whatsapp support', 'nigeria ecommerce support', 'contact vendoorx'],
+})
 
 export default async function ContactPage() {
   const settings = await getSiteSettings()

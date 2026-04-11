@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ArrowRight, Search, ShoppingBag, CreditCard, Shield, Package, Star, MessageCircle, ChevronDown } from 'lucide-react'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildMetadata({
   title: 'Help Center | VendoorX',
-  description: 'Get help with buying, selling, payments, account issues, and more on VendoorX WhatsApp commerce platform.',
-}
+  description: 'Get answers to common questions about buying, selling, payments, account setup, and more on VendoorX — Nigeria\'s WhatsApp commerce platform.',
+  path: '/help',
+  keywords: ['vendoorx help', 'vendoorx faq', 'how to sell on vendoorx', 'whatsapp store help nigeria', 'vendoorx support'],
+})
 
 const CATEGORIES = [
   {

@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = "VendoorX — Nigeria's #1 Campus Marketplace"
+export const alt = "VendoorX — Nigeria's AI-Powered WhatsApp Commerce Platform"
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -88,7 +88,7 @@ export default function OGImage() {
           }}
         >
           <span style={{ color: '#4ade80', fontSize: 16, fontWeight: 700 }}>
-            Nigeria&apos;s #1 Campus Marketplace
+            Nigeria&apos;s AI-Powered WhatsApp Commerce Platform
           </span>
         </div>
 
@@ -96,7 +96,7 @@ export default function OGImage() {
         <div
           style={{
             color: '#ffffff',
-            fontSize: 64,
+            fontSize: 62,
             fontWeight: 900,
             lineHeight: 1.1,
             letterSpacing: '-2px',
@@ -104,8 +104,8 @@ export default function OGImage() {
             maxWidth: 820,
           }}
         >
-          Buy &amp; Sell on Campus.{' '}
-          <span style={{ color: '#16a34a' }}>Zero Fees.</span>
+          Sell Smarter on{' '}
+          <span style={{ color: '#16a34a' }}>WhatsApp.</span>
         </div>
 
         {/* Sub text */}
@@ -119,14 +119,14 @@ export default function OGImage() {
             lineHeight: 1.5,
           }}
         >
-          50,000+ students · 120+ universities · WhatsApp-powered
+          50,000+ sellers · 36+ states · AI-powered commerce
         </div>
 
         {/* Stats row */}
         <div style={{ display: 'flex', gap: 40 }}>
           {[
-            { value: '120+', label: 'Universities' },
-            { value: '50K+', label: 'Students' },
+            { value: '36+', label: 'States' },
+            { value: '50K+', label: 'Sellers' },
             { value: '₦0', label: 'Commission' },
           ].map(({ value, label }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

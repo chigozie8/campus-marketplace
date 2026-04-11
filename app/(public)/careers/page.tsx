@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { buildMetadata } from '@/lib/seo'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, Bell, Briefcase, MapPin, Sparkles, Users, Zap, ExternalLink } from 'lucide-react'
@@ -6,10 +7,12 @@ import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Careers | VendoorX',
-  description: 'Join the VendoorX team. We\'re building Africa\'s most loved WhatsApp commerce platform — roles opening soon.',
-}
+export const metadata: Metadata = buildMetadata({
+  title: 'Careers at VendoorX',
+  description: 'Join the VendoorX team and help build Nigeria\'s leading WhatsApp commerce platform. Engineering, design, product, and growth roles — based in Nigeria.',
+  path: '/careers',
+  keywords: ['vendoorx careers', 'jobs nigeria tech', 'whatsapp commerce jobs', 'nigeria startup careers', 'vendoorx jobs'],
+})
 
 const PHOTOS = [
   { id: 'p1', src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=480&h=640&fit=crop&crop=faces&q=85', alt: 'Nigerian sellers and buyers collaborating' },
