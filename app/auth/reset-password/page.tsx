@@ -16,14 +16,15 @@ function PasswordStrength({ password }: { password: string }) {
     { label: 'At least 8 characters', pass: password.length >= 8 },
     { label: 'One uppercase letter', pass: /[A-Z]/.test(password) },
     { label: 'One number', pass: /\d/.test(password) },
+    { label: 'One special character', pass: /[^A-Za-z0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  const colors = ['bg-red-400', 'bg-amber-400', 'bg-[#16a34a]']
+  const colors = ['bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-amber-400', 'bg-[#16a34a]']
   if (!password) return null
   return (
     <div className="mt-2 space-y-2">
       <div className="flex gap-1">
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2, 3].map(i => (
           <div key={i} className={cn('h-1 flex-1 rounded-full transition-all duration-300', i < score ? colors[score - 1] : 'bg-gray-200 dark:bg-muted')} />
         ))}
       </div>
@@ -67,6 +68,18 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     if (password.length < 8) {
       toast.error('Password must be at least 8 characters')
+      return
+    }
+    if (!/[A-Z]/.test(password)) {
+      toast.error('Password must contain at least one uppercase letter')
+      return
+    }
+    if (!/[0-9]/.test(password)) {
+      toast.error('Password must contain at least one number')
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      toast.error('Password must contain at least one special character (e.g. !@#$%)')
       return
     }
     if (password !== confirm) {

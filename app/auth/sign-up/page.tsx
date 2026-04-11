@@ -20,14 +20,15 @@ function PasswordStrength({ password }: { password: string }) {
     { label: '8+ chars', pass: password.length >= 8 },
     { label: 'Uppercase', pass: /[A-Z]/.test(password) },
     { label: 'Number', pass: /[0-9]/.test(password) },
+    { label: 'Symbol', pass: /[^A-Za-z0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  const barColor = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-[#16a34a]'][score]
+  const barColor = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-amber-400', 'bg-[#16a34a]'][score]
   if (!password) return null
   return (
     <div className="mt-2 space-y-1.5">
       <div className="flex gap-1">
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2, 3].map(i => (
           <div
             key={i}
             className={cn(
@@ -37,7 +38,7 @@ function PasswordStrength({ password }: { password: string }) {
           />
         ))}
       </div>
-      <div className="flex gap-4">
+      <div className="flex gap-3 flex-wrap">
         {checks.map(({ label, pass }) => (
           <span
             key={label}
@@ -82,6 +83,9 @@ function SignUpPageInner() {
     e.preventDefault()
     if (!role) { toast.error('Please select your account type'); return }
     if (password.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (!/[A-Z]/.test(password)) { toast.error('Password must contain at least one uppercase letter'); return }
+    if (!/[0-9]/.test(password)) { toast.error('Password must contain at least one number'); return }
+    if (!/[^A-Za-z0-9]/.test(password)) { toast.error('Password must contain at least one special character (e.g. !@#$%)'); return }
     if (!agreedToTerms) { toast.error('Please agree to the Terms & Privacy Policy'); return }
     setLoading(true)
     const toastId = toast.loading('Creating your account...')
