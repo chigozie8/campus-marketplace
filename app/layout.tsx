@@ -24,7 +24,7 @@ const siteUrl = SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "VendoorX — Buy & Sell on Campus | Nigeria's #1 Student Marketplace",
+    default: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
     template: '%s | VendoorX',
   },
   description: SITE_DESCRIPTION,
@@ -46,24 +46,24 @@ export const metadata: Metadata = {
     locale: 'en_NG',
     url: siteUrl,
     siteName: 'VendoorX',
-    title: "VendoorX — Buy & Sell on Campus | Nigeria's #1 Student Marketplace",
+    title: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
     description:
-      "Join 50,000+ students on Nigeria's largest campus marketplace. Buy and sell electronics, fashion, books, food, and services directly on WhatsApp. Zero fees, instant connections!",
+      'VendoorX automates your sales, support, and transactions across WhatsApp and messaging channels. Let AI handle customer conversations, product discovery, order flow, and payments — so you can focus on growing.',
     images: [
       {
         url: `${siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "VendoorX — Nigeria's #1 Campus Marketplace",
+        alt: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VendoorX — Buy & Sell on Campus',
+    title: 'VendoorX — AI-Powered WhatsApp Commerce',
     description:
-      "Nigeria's #1 campus marketplace. 50,000+ students trading electronics, fashion, books & more. Zero fees, WhatsApp direct deals!",
+      'Automate sales, support & payments across WhatsApp with AI. Nigeria\'s leading conversational commerce platform — zero commission, free to start.',
     images: [`${siteUrl}/og-image.png`],
     creator: '@vendoorx',
     site: '@vendoorx',
@@ -118,7 +118,7 @@ const jsonLd = {
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
       name: 'VendoorX',
-      description: "Nigeria's #1 campus marketplace for students",
+      description: 'Nigeria\'s AI-powered WhatsApp commerce platform — automate sales, support, and transactions across messaging channels.',
       publisher: {
         '@id': `${siteUrl}/#organization`,
       },
@@ -181,9 +181,12 @@ const jsonLd = {
       featureList: [
         'Free to join',
         'Zero commission fees',
-        'WhatsApp integration',
-        'Verified student sellers',
-        'Campus-based trading',
+        'WhatsApp-powered commerce',
+        'AI customer conversation automation',
+        'AI-driven product discovery',
+        'Automated order flow',
+        'Payments via chat',
+        'Multi-platform — web, mobile & chat',
       ],
     },
     {
@@ -224,10 +227,10 @@ const jsonLd = {
         },
         {
           '@type': 'Question',
-          name: 'Is VendoorX only for university students in Nigeria?',
+          name: 'Who is VendoorX for?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'VendoorX is focused on Nigerian campuses and university students, but anyone can use the platform. We currently serve 120+ campuses across Nigeria.',
+            text: 'VendoorX is for any seller or business that wants to automate their sales and customer conversations on WhatsApp. Whether you are a solo entrepreneur, a small business, or a growing brand in Nigeria, VendoorX gives you the AI tools to sell, support customers, and collect payments — all through chat.',
           },
         },
         {
@@ -287,7 +290,7 @@ export default function RootLayout({
         '</span>',
       '</div>',
       // Tagline
-      '<p style="margin-top:10px;font-size:10.5px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#9ca3af;font-family:system-ui,sans-serif;animation:vx-rise 0.45s 0.22s ease-out both">Campus Marketplace</p>',
+      '<p style="margin-top:10px;font-size:10.5px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#9ca3af;font-family:system-ui,sans-serif;animation:vx-rise 0.45s 0.22s ease-out both">WhatsApp Commerce</p>',
       // Progress bar track
       '<div id="__vx-track" style="margin-top:44px;width:180px;height:3px;border-radius:99px;background:#f0f0f0;overflow:hidden;animation:vx-rise 0.4s 0.3s ease-out both">',
         '<div id="__vx-bar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#0a0a0a 0%,#16a34a 100%);transition:width 280ms cubic-bezier(0.4,0,0.2,1);box-shadow:0 0 8px rgba(22,163,74,.45)"></div>',

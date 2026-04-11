@@ -1,27 +1,27 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Handshake, Building2, GraduationCap, Megaphone, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Handshake, Building2, Zap, Megaphone, ShieldCheck } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Partnerships | VendoorX',
-  description: 'Partner with VendoorX to reach 50,000+ Nigerian student entrepreneurs. Explore sponsorship, university, and brand partnership opportunities.',
+  description: 'Partner with VendoorX to grow your reach across Nigeria\'s AI-powered WhatsApp commerce platform. Explore brand, technology, and affiliate partnership opportunities.',
 }
 
 const TYPES = [
   {
-    icon: GraduationCap,
-    title: 'University Partnerships',
-    desc: 'Bring VendoorX officially to your campus. We work with student unions, enterprise centres, and university administrations to create verified seller hubs and campus-exclusive marketplaces.',
-    cta: 'Partner with your university',
+    icon: Zap,
+    title: 'Business & Brand Partnerships',
+    desc: 'Reach Nigeria\'s most active buyers and sellers on WhatsApp. Partner with VendoorX to place your brand at the centre of conversational commerce — through sponsored listings, category features, and co-branded campaigns.',
+    cta: 'Explore brand partnerships',
     color: 'text-green-600',
     bg: 'bg-green-50 dark:bg-green-950/30',
     border: 'border-green-200 dark:border-green-900/40',
   },
   {
     icon: Building2,
-    title: 'Brand Sponsorships',
-    desc: 'Reach Nigeria\'s most active young consumer base — 50,000+ university students who buy and sell daily. Sponsor categories, featured listing spots, or weekly newsletters.',
-    cta: 'Explore sponsorship',
+    title: 'Reseller & Agency Partnerships',
+    desc: 'Are you a digital agency, growth consultant, or business enabler in Nigeria? Resell VendoorX to your clients, earn recurring commissions, and help businesses automate their sales on WhatsApp.',
+    cta: 'Become a reseller',
     color: 'text-blue-600',
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900/40',
@@ -29,7 +29,7 @@ const TYPES = [
   {
     icon: Megaphone,
     title: 'Affiliate & Creator Partnerships',
-    desc: 'Are you a campus influencer, YouTuber, or student content creator? Join our affiliate programme, earn referral bonuses, and get exclusive creator perks.',
+    desc: 'Are you an influencer, content creator, or community leader? Join our affiliate programme, earn referral bonuses for every seller you bring on board, and get exclusive creator perks.',
     cta: 'Become an affiliate',
     color: 'text-rose-600',
     bg: 'bg-rose-50 dark:bg-rose-950/30',
@@ -38,7 +38,7 @@ const TYPES = [
   {
     icon: ShieldCheck,
     title: 'Technology Integrations',
-    desc: 'Want to integrate your payment, logistics, or fintech product with VendoorX? We have open APIs and a partnership programme for complementary tech companies.',
+    desc: 'Want to integrate your payment, logistics, fintech, or AI product with VendoorX? We offer open APIs and a partnership programme for complementary tech companies building in the African commerce space.',
     cta: 'Explore integration',
     color: 'text-purple-600',
     bg: 'bg-purple-50 dark:bg-purple-950/30',
@@ -57,10 +57,10 @@ export default function PartnershipsPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-5 leading-tight">
             Grow with VendoorX&apos;s{' '}
-            <span className="text-primary">campus community.</span>
+            <span className="text-primary">commerce network.</span>
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-            We&apos;re building a network of partners — universities, brands, creators, and tech companies — who believe in the economic power of Nigerian students.
+            We&apos;re building a network of partners — brands, agencies, creators, and tech companies — who believe in the power of AI-driven commerce across messaging channels in Nigeria and beyond.
           </p>
         </div>
       </section>

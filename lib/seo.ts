@@ -1,46 +1,37 @@
 import type { Metadata } from 'next'
 
 export const SITE_NAME = 'VendoorX'
-export const SITE_TAGLINE = "Nigeria's #1 Campus Marketplace"
+export const SITE_TAGLINE = "Nigeria's AI-Powered WhatsApp Commerce Platform"
 export const SITE_DESCRIPTION =
-  "VendoorX is Nigeria's #1 campus marketplace. Buy and sell electronics, textbooks, fashion, food, and services directly on WhatsApp with zero platform fees across 120+ Nigerian universities."
+  'VendoorX is a conversational commerce platform that automates sales, support, and transactions across messaging channels. Sell on WhatsApp with AI handling customer conversations, product discovery, order flow, and payments — all in one place.'
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.replit.app'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
 export const SITE_TWITTER = '@vendoorx'
 export const OG_IMAGE = `${SITE_URL}/og-image.png`
 
 export const SITE_KEYWORDS = [
-  'campus marketplace Nigeria',
-  'student marketplace Nigeria',
-  'buy and sell on campus',
-  'Nigerian university marketplace',
-  'UNILAG marketplace',
-  'OAU marketplace',
-  'UI Ibadan marketplace',
-  'FUTA marketplace',
-  'ABU Zaria marketplace',
-  'LASU marketplace',
-  'student trader Nigeria',
-  'sell on campus Nigeria',
-  'WhatsApp marketplace Nigeria',
-  'campus ecommerce Nigeria',
+  'WhatsApp commerce Nigeria',
+  'conversational commerce Nigeria',
+  'AI-powered marketplace Nigeria',
+  'sell on WhatsApp Nigeria',
+  'WhatsApp store Nigeria',
+  'AI sales automation Nigeria',
+  'chat commerce Nigeria',
+  'WhatsApp business automation',
+  'ecommerce chatbot Nigeria',
+  'AI WhatsApp seller Nigeria',
+  'online marketplace Nigeria',
+  'automated sales Nigeria',
+  'WhatsApp payment Nigeria',
   'VendoorX',
-  'vendoorx marketplace',
-  'buy cheap electronics campus Nigeria',
-  'second hand books university Nigeria',
-  'student buy sell swap Nigeria',
-  'campus deals Nigeria',
-  'zero commission student marketplace',
-  'free student marketplace app Nigeria',
-]
-
-/**
- * Top Nigerian universities used to enrich page-level keyword targeting.
- */
-export const NIGERIAN_UNIVERSITIES = [
-  'UNILAG', 'OAU', 'UI', 'FUTA', 'ABU', 'LASU', 'UNIBEN',
-  'UNIPORT', 'UNILORIN', 'FUTA', 'NOUN', 'LAUTECH', 'EKSU', 'FUTO',
-  'DELSU', 'UNIZIK', 'ATBU', 'BUK', 'UDUS', 'UNIABUJA',
+  'vendoorx Nigeria',
+  'sell online Nigeria',
+  'buyer seller marketplace Nigeria',
+  'multi-platform commerce Nigeria',
+  'mobile commerce Nigeria',
+  'WhatsApp order management',
+  'AI customer service Nigeria',
+  'zero commission marketplace Nigeria',
 ]
 
 /**
@@ -121,7 +112,6 @@ export function buildMetadata({
           },
         },
     verification: {
-      // Add your Google Search Console verification token here
       google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     },
   }
