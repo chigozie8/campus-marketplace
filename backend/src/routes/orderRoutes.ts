@@ -9,10 +9,6 @@ import * as payoutService from '../services/payoutService.js'
 import { AuthRequest } from '../types/index.js'
 import logger from '../utils/logger.js'
 
-/**
- * Delegate milestone checking to the canonical Next.js internal endpoint.
- * This avoids duplicating the trust computation logic in the backend.
- */
 async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 'both') {
   try {
     const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
@@ -34,12 +30,54 @@ async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 
 }
 
 const router = Router()
+
+// ── Public: payment verification ─────────────────────────────────────────────
+// No auth required — the Paystack reference is a secret, unguessable token.
+// This is called by the Next.js server after Paystack redirects the buyer back.
+router.get('/verify/:reference', async (req, res, next) => {
+  try {
+    const transaction = await paymentService.verifyPayment(req.params.reference)
+    const order = await orderService.getOrderByReference(req.params.reference)
+
+    if (transaction.status === 'success') {
+      if (order && order.status === 'pending') {
+        await orderService.updateOrderStatus(order.id, 'paid')
+        logger.info(`[orderRoutes] Order ${order.id} marked as paid via verify endpoint.`)
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Payment verified. Order marked as paid.',
+        data: {
+          status: transaction.status,
+          amount: transaction.amount,
+          order_id: order?.id ?? null,
+          metadata: transaction.metadata,
+        },
+      })
+    }
+
+    return res.status(200).json({
+      success: false,
+      message: 'Payment not successful.',
+      data: {
+        status: transaction.status,
+        amount: transaction.amount,
+        order_id: order?.id ?? null,
+        metadata: transaction.metadata,
+      },
+    })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// ── All routes below require authentication ───────────────────────────────────
 router.use(authenticate)
 
 router.post('/', validate(createOrderSchema), orderController.createOrder)
 router.get('/me', orderController.getMyOrders)
 router.get('/vendor/dashboard', requireRole('vendor', 'admin'), orderController.getVendorOrders)
-router.get('/:id', orderController.getOrderById)
 
 router.patch(
   '/:id/status',
@@ -62,7 +100,6 @@ router.post('/:id/pay', async (req, res, next) => {
       return
     }
 
-    // Fetch seller's Paystack subaccount (if they've set up payouts)
     const sellerSubaccountCode = await payoutService.getSellerSubaccountCode(order.seller_id)
 
     const result = await paymentService.initializePayment({
@@ -78,7 +115,6 @@ router.post('/:id/pay', async (req, res, next) => {
   }
 })
 
-// Buyer confirms delivery — releases escrow to seller
 router.post('/:id/confirm-delivery', async (req, res, next) => {
   try {
     const order = await orderService.getOrderById(req.params.id)
@@ -94,7 +130,6 @@ router.post('/:id/confirm-delivery', async (req, res, next) => {
     }
 
     const updated = await orderService.updateOrderStatus(order.id, 'completed')
-    // Fire-and-forget: check milestones for buyer and seller via canonical endpoint
     triggerMilestoneCheck(userId, 'buyer').catch(() => {})
     triggerMilestoneCheck(order.seller_id, 'seller').catch(() => {})
     res.status(200).json({ success: true, data: updated, message: 'Delivery confirmed! Funds released to seller.' })
@@ -103,23 +138,7 @@ router.post('/:id/confirm-delivery', async (req, res, next) => {
   }
 })
 
-router.get('/verify/:reference', async (req, res, next) => {
-  try {
-    const transaction = await paymentService.verifyPayment(req.params.reference)
-
-    if (transaction.status === 'success') {
-      const order = await orderService.getOrderByReference(req.params.reference)
-      if (order && order.status === 'pending') {
-        await orderService.updateOrderStatus(order.id, 'paid')
-      }
-      res.status(200).json({ success: true, message: 'Payment verified. Order marked as paid.', data: transaction })
-      return
-    }
-
-    res.status(400).json({ success: false, message: 'Payment not successful.', data: transaction })
-  } catch (err) {
-    next(err)
-  }
-})
+// Keep /:id last — it's a catch-all for GET order by ID
+router.get('/:id', orderController.getOrderById)
 
 export default router

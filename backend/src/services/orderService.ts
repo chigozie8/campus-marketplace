@@ -181,6 +181,26 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
       }).catch(() => {})
       addTrustScoreJob({ type: 'order_failed', vendorId: order.seller_id })
         .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
+      // Restore stock so the product can be sold to another buyer
+      ;(async () => {
+        try {
+          const { data: product } = await supabaseAdmin
+            .from('products')
+            .select('stock_quantity')
+            .eq('id', (order as any).product_id)
+            .single()
+          if (product && product.stock_quantity !== null && product.stock_quantity !== undefined) {
+            const qty = Number((order as any).quantity ?? 1)
+            await supabaseAdmin
+              .from('products')
+              .update({ stock_quantity: product.stock_quantity + qty })
+              .eq('id', (order as any).product_id)
+            logger.info(`[orderService] Restored ${qty} unit(s) to product ${(order as any).product_id} after cancellation of order ${id}.`)
+          }
+        } catch (err: unknown) {
+          logger.warn(`[orderService] Stock restoration failed for order ${id}: ${err instanceof Error ? err.message : String(err)}`)
+        }
+      })()
       break
   }
 
