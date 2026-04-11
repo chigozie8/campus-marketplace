@@ -87,6 +87,10 @@ function SignUpPageInner() {
     if (!/[0-9]/.test(password)) { toast.error('Password must contain at least one number'); return }
     if (!/[^A-Za-z0-9]/.test(password)) { toast.error('Password must contain at least one special character (e.g. !@#$%)'); return }
     if (!agreedToTerms) { toast.error('Please agree to the Terms & Privacy Policy'); return }
+    if (whatsapp.trim() && !/^\+?[\d\s\-()]{10,15}$/.test(whatsapp.trim())) {
+      toast.error('Enter a valid WhatsApp number, e.g. 08012345678 or +2348012345678')
+      return
+    }
     setLoading(true)
     const toastId = toast.loading('Creating your account...')
 

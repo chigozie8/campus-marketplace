@@ -31,7 +31,7 @@ const VALUES = [
   {
     icon: Zap,
     title: 'Speed Over Everything',
-    desc: 'Slow apps kill deals. VendoorX is built for 2G networks, old phones, and the hustle that never sleeps between lectures.',
+    desc: 'Slow apps kill deals. VendoorX is built for 2G networks, old phones, and the hustle that never stops.',
     color: 'text-amber-500',
     bg: 'bg-amber-50 dark:bg-amber-950/30',
   },
@@ -45,8 +45,8 @@ const VALUES = [
 ]
 
 const MILESTONES = [
-  { year: '2022', event: 'VendoorX idea born at UNILAG hostel, frustrated by scattered WhatsApp sales' },
-  { year: '2023', event: 'Beta launched at 3 universities — 500 sellers in 30 days' },
+  { year: '2022', event: 'VendoorX founded to fix the chaos of scattered WhatsApp sales groups across Nigeria' },
+  { year: '2023', event: 'Beta launched in 3 cities — 500 sellers onboarded in the first 30 days' },
   { year: '2024', event: 'Paystack integration, wallets, and boosted listings go live' },
   { year: '2025', event: '50,000 active vendors, 36+ states nationwide, ₦2B+ in transactions processed' },
   { year: '2026', event: 'Expanding to West Africa — Ghana, Kenya, and beyond 🌍' },

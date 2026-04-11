@@ -399,6 +399,7 @@ function VerifyPageInner() {
               </p>
               {canResend ? (
                 <button
+                  type="button"
                   onClick={handleResend}
                   disabled={resending}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors disabled:opacity-50"

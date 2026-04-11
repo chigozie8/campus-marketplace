@@ -75,6 +75,7 @@ export default function ForgotPasswordPage() {
               </Link>
             </Button>
             <button
+              type="button"
               onClick={() => setSuccess(false)}
               className="text-sm text-[#16a34a] hover:underline font-medium"
             >

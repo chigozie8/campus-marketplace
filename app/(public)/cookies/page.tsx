@@ -27,7 +27,7 @@ const COOKIE_TYPES = [
     examples: [
       { name: 'theme', purpose: 'Stores your light/dark mode preference', duration: '1 year' },
       { name: 'vx-lang', purpose: 'Stores your language preference', duration: '1 year' },
-      { name: 'vx-last-university', purpose: 'Remembers your last selected location filter', duration: '30 days' },
+      { name: 'vx-last-location', purpose: 'Remembers your last selected location filter', duration: '30 days' },
     ],
   },
   {

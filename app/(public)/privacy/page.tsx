@@ -16,7 +16,7 @@ const SECTIONS = [
     content: `We collect information you provide directly to us and information generated as you use VendoorX.
 
 **Information you provide:**
-- Account information: full name, email address, password, university affiliation, phone number, and profile photo.
+- Account information: full name, email address, password, business or organisation name, phone number, and profile photo.
 - Listing information: product title, description, photos/videos, price, location, and category.
 - Payment information: bank account details for payouts (stored by Paystack, not VendoorX). Card details are never stored by VendoorX.
 - Communications: messages you send to our support team, dispute submissions, and review content.
@@ -24,7 +24,7 @@ const SECTIONS = [
 **Information collected automatically:**
 - Device data: browser type, operating system, device identifiers.
 - Usage data: pages visited, search queries, click patterns, listing views.
-- Location data: approximate location (city/campus) when you enable location features.
+- Location data: approximate location (city or area) when you enable location features.
 - Cookies and similar tracking technologies as described in our Cookie Policy.`,
   },
   {
@@ -33,7 +33,7 @@ const SECTIONS = [
     content: `We use collected information to:
 - Operate, maintain, and improve VendoorX services.
 - Process transactions and send related information including purchase confirmations and invoices.
-- Verify seller identity and university affiliation.
+- Verify seller identity and business legitimacy.
 - Send promotional communications, weekly deal digests, and platform updates (opt-out available at any time).
 - Detect and prevent fraudulent activity and enforce our Terms of Service.
 - Respond to customer support requests and dispute resolution.
@@ -45,7 +45,7 @@ const SECTIONS = [
     title: '3. Information Sharing',
     content: `We do not sell your personal data. We share information only in the following circumstances:
 
-- **Other users:** Your public profile (name, university, seller rating, listings) is visible to all VendoorX users. Your WhatsApp number is shared with buyers who click "Contact Seller" only if you have enabled it.
+- **Other users:** Your public profile (name, business name, seller rating, listings) is visible to all VendoorX users. Your WhatsApp number is shared with buyers who click "Contact Seller" only if you have enabled it.
 - **Payment processors:** Paystack receives payment and payout information necessary to process transactions.
 - **Service providers:** We use third-party services (hosting, analytics, email) who process data on our behalf under confidentiality agreements.
 - **Legal requirements:** We may disclose information when required by Nigerian law, court order, or to protect the rights, property, or safety of VendoorX, our users, or the public.

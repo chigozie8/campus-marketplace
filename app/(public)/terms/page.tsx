@@ -22,7 +22,7 @@ These Terms constitute a legally binding agreement between you and VendoorX Tech
     title: '2. Eligibility',
     content: `To use VendoorX you must:
 - Be at least 16 years of age.
-- Be a registered student, staff member, or alumnus of a Nigerian university (for seller verification features).
+- Be a seller, buyer, or business operator in Nigeria.
 - Provide accurate, complete, and current registration information.
 - Not have been previously banned from VendoorX.
 

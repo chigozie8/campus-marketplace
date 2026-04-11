@@ -18,7 +18,7 @@ const CATEGORIES = [
     bg: 'bg-blue-50 dark:bg-blue-950/30',
     border: 'border-blue-200 dark:border-blue-900/40',
     questions: [
-      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your campus.' },
+      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your current location.' },
       { q: 'How do I contact a seller?', a: 'Click the "Chat on WhatsApp" button on any listing. This opens WhatsApp with a pre-filled message to the seller. You can also make an offer directly on the listing page.' },
       { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
       { q: 'What if a product is not as described?', a: 'You have 48 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
@@ -67,8 +67,8 @@ const CATEGORIES = [
 
 const POPULAR = [
   { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 platform fee applies only to Paystack checkout orders.' },
-  { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for on-campus orders. Check the listing for delivery details.' },
-  { q: 'Can I sell across different universities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
+  { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for local orders. Check the listing for the seller\'s delivery details.' },
+  { q: 'Can I sell to buyers in other cities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
 ]
 
 export default function HelpPage() {
