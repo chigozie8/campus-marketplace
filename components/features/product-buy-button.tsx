@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CheckoutModal } from './checkout-modal'
@@ -19,6 +19,37 @@ interface ProductBuyButtonProps {
 export function ProductBuyButton({ product, sellerId, className }: ProductBuyButtonProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  // Track whether we navigated away to Paystack so we know when to close the modal on return
+  const wentToPaystack = useRef(false)
+
+  useEffect(() => {
+    // pageshow fires when the page is shown — e.persisted=true means it came
+    // from bfcache (browser back button after Paystack redirect). The modal
+    // invisible backdrop would block all clicks in that case, so force-close it.
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setOpen(false)
+        wentToPaystack.current = false
+      }
+    }
+
+    // visibilitychange catches the user returning from the Paystack tab on
+    // mobile (the browser doesn't always do a bfcache restore in that flow).
+    // Only close if we actually navigated away to Paystack.
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && wentToPaystack.current) {
+        setOpen(false)
+        wentToPaystack.current = false
+      }
+    }
+
+    window.addEventListener('pageshow', handlePageShow)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
 
   async function handleClick() {
     hapticImpact('medium')
@@ -39,6 +70,11 @@ export function ProductBuyButton({ product, sellerId, className }: ProductBuyBut
     setOpen(true)
   }
 
+  // Called by CheckoutModal when it redirects to Paystack
+  function handlePaystackRedirect() {
+    wentToPaystack.current = true
+  }
+
   return (
     <>
       <Button
@@ -53,6 +89,7 @@ export function ProductBuyButton({ product, sellerId, className }: ProductBuyBut
         open={open}
         onClose={() => setOpen(false)}
         product={product}
+        onPaystackRedirect={handlePaystackRedirect}
       />
     </>
   )

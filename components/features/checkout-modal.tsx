@@ -24,6 +24,7 @@ interface CheckoutModalProps {
   open: boolean
   onClose: () => void
   product: CheckoutProduct
+  onPaystackRedirect?: () => void
 }
 
 interface AppliedCoupon {
@@ -37,7 +38,7 @@ interface AppliedCoupon {
 
 type Step = 'address' | 'confirm' | 'paying'
 
-export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
+export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
   const [step, setStep] = useState<Step>('address')
   const [address, setAddress] = useState('')
   const [quantity, setQuantity] = useState(1)
@@ -127,6 +128,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
     setStep('paying')
     try {
       const result = await initPayment.mutateAsync(orderId)
+      onPaystackRedirect?.()
       window.location.href = result.data.authorization_url
     } catch {
       setStep('confirm')
