@@ -336,6 +336,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
 (function(){
   try {
+    // Skip splash on coming-soon page
+    if (window.location.pathname === '/coming-soon') return;
     // Inject keyframe animations
     var st = document.createElement('style');
     st.textContent = [
