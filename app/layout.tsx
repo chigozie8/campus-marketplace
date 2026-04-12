@@ -242,6 +242,78 @@ const jsonLd = {
             text: 'Yes. You can upgrade, downgrade, or cancel your subscription at any time from your dashboard settings.',
           },
         },
+        {
+          '@type': 'Question',
+          name: 'What is VendoorX?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'VendoorX is Nigeria\'s #1 AI-powered WhatsApp vendor marketplace. It lets vendors list products, receive orders, and collect payments directly through WhatsApp — with AI automating the entire conversation, from product discovery to delivery confirmation.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How do I become a vendor on VendoorX?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Sign up for free at vendoorx.ng, complete your seller profile, and start listing your products. Your public store page is live instantly and buyers can contact you directly on WhatsApp.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is VendoorX available across Nigeria?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. VendoorX is available to buyers and vendors across all of Nigeria — including Lagos, Abuja, Port Harcourt, Ibadan, Kano, and all university campuses nationwide.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How does escrow payment work on VendoorX?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'When a buyer pays on VendoorX, the funds are held securely in escrow. The money is only released to the vendor after the buyer confirms they have received their item. This protects both buyers and sellers from fraud.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I sell on VendoorX without a physical store?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Absolutely. VendoorX is designed for home-based vendors, students, and small businesses. You only need a phone and a WhatsApp number to start selling. No physical store, no website, no technical skills required.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'What types of products can I sell on VendoorX?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'You can sell almost anything legal — electronics, fashion and clothing, food and drinks, textbooks, furniture, beauty products, sports items, services, and more. VendoorX supports all product categories.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Is Vendoor and VendoorX the same thing?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. Vendoor and VendoorX refer to the same platform — VendoorX (vendoorx.ng). The full brand name is VendoorX.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'How does VendoorX use AI?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'VendoorX uses AI to automate WhatsApp conversations between buyers and vendors — handling product discovery, answering buyer questions, processing orders, sending payment links, and confirming delivery. This lets vendors earn money even when they are not online.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does VendoorX work for campus and university students?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Yes. VendoorX was built with Nigerian campus life in mind. Students can buy and sell within their campus community — from lecture notes and textbooks to food, fashion, electronics, and services — all through WhatsApp.',
+          },
+        },
       ],
     },
   ],

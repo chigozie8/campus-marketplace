@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { SellerTierBadge, TrustBadge } from '@/components/TrustBadge'
 import { computeSellerScore, getMilestoneBadge, getSellerTier } from '@/lib/trust'
+import { SellerJsonLd } from '@/components/seo/seller-jsonld'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -19,11 +20,49 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
   if (!supabase) return { title: 'Seller Not Found' }
-  const { data } = await supabase.from('profiles').select('full_name, university').eq('id', id).single()
-  if (!data) return { title: 'Seller Not Found' }
+  const { data } = await supabase
+    .from('profiles')
+    .select('full_name, university, store_name, bio, avatar_url, is_verified, total_sales, rating')
+    .eq('id', id).single()
+  if (!data) return { title: 'Vendor Not Found | VendoorX', robots: { index: false, follow: false } }
+
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
+  const sellerName = data.store_name || data.full_name
+  const university = data.university ? ` at ${data.university}` : ''
+  const verified = data.is_verified ? 'Verified vendor' : 'Vendor'
+  const title = `${sellerName} — ${verified} on VendoorX | Buy via WhatsApp`
+  const description = data.bio
+    ? `${data.bio.slice(0, 140)}… Shop from ${sellerName}${university} on VendoorX — Nigeria's #1 WhatsApp vendor marketplace.`
+    : `Shop from ${sellerName}${university} on VendoorX — Nigeria's #1 WhatsApp vendor marketplace. Browse listings and buy securely with escrow protection.`
+
   return {
-    title: `${data.full_name} — Seller on VendoorX`,
-    description: `Browse listings from ${data.full_name}${data.university ? ` at ${data.university}` : ''} on VendoorX Campus Marketplace.`,
+    title,
+    description,
+    keywords: [
+      sellerName, 'VendoorX vendor', 'VendoorX seller', 'WhatsApp vendor Nigeria',
+      'buy on WhatsApp Nigeria', 'vendoorx', 'vendor marketplace Nigeria',
+      data.university || '', 'campus vendor Nigeria', 'online seller Nigeria',
+    ].filter(Boolean),
+    alternates: { canonical: `${SITE_URL}/sellers/${id}` },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/sellers/${id}`,
+      siteName: 'VendoorX',
+      locale: 'en_NG',
+      type: 'profile',
+      images: data.avatar_url
+        ? [{ url: data.avatar_url, width: 400, height: 400, alt: sellerName }]
+        : [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: `${sellerName} on VendoorX` }],
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      site: '@vendoorx',
+      images: data.avatar_url ? [data.avatar_url] : [`${SITE_URL}/opengraph-image`],
+    },
+    robots: { index: true, follow: true },
   }
 }
 
@@ -92,6 +131,7 @@ export default async function SellerProfilePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
+      <SellerJsonLd seller={profile} products={products ?? []} />
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center gap-3">

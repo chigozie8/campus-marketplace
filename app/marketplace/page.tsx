@@ -11,18 +11,27 @@ import type { Metadata } from 'next'
 import { buildMetadata, SITE_URL } from '@/lib/seo'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Campus Marketplace — Browse 120,000+ Student Listings',
+  title: 'VendoorX Marketplace — Buy from Verified Vendors on WhatsApp Nigeria',
   description:
-    'Shop electronics, textbooks, fashion, food, services and more from verified student sellers across 120+ Nigerian universities. WhatsApp-direct, zero commission.',
+    'Browse thousands of products from verified vendors across Nigeria on VendoorX — electronics, textbooks, fashion, food, services and more. Buy securely via WhatsApp with escrow protection. Zero commission, free to join.',
   path: '/marketplace',
   keywords: [
-    'buy electronics campus Nigeria',
-    'student listings marketplace',
+    'VendoorX marketplace',
+    'vendoorx shop',
+    'buy on VendoorX',
+    'WhatsApp vendor marketplace Nigeria',
+    'buy from vendors Nigeria',
+    'verified vendors Nigeria',
+    'buy electronics Nigeria WhatsApp',
     'buy textbooks Nigeria',
-    'campus fashion deals',
-    'buy food campus Nigeria',
-    'student seller Nigeria marketplace',
-    'second hand goods university Nigeria',
+    'buy fashion Nigeria online',
+    'buy food Nigeria delivery',
+    'student marketplace Nigeria',
+    'campus marketplace Nigeria',
+    'second hand Nigeria marketplace',
+    'cheap items Nigeria',
+    'buy sell Nigeria online',
+    'Nigeria online shopping WhatsApp',
   ],
 })
 
