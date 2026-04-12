@@ -1,37 +1,82 @@
 import type { Metadata } from 'next'
 
 export const SITE_NAME = 'VendoorX'
-export const SITE_TAGLINE = "Nigeria's AI-Powered WhatsApp Commerce Platform"
+export const SITE_TAGLINE = "Nigeria's #1 AI-Powered WhatsApp Vendor Marketplace"
 export const SITE_DESCRIPTION =
-  'VendoorX is a conversational commerce platform that automates sales, support, and transactions across messaging channels. Sell on WhatsApp with AI handling customer conversations, product discovery, order flow, and payments — all in one place.'
+  'VendoorX is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI-powered automation — product discovery, orders, payments, and delivery tracking all handled through WhatsApp. Join thousands of vendors and buyers on VendoorX.'
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
 export const SITE_TWITTER = '@vendoorx'
 export const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 export const SITE_KEYWORDS = [
+  // Brand keywords
+  'VendoorX',
+  'Vendoorx',
+  'vendoorx',
+  'Vendoor',
+  'vendoor',
+  'vendoor marketplace',
+  'VendoorX Nigeria',
+  'VendoorX app',
+  'VendoorX store',
+  'vendoorx.ng',
+
+  // WhatsApp commerce
+  'WhatsApp marketplace Nigeria',
+  'WhatsApp vendor Nigeria',
   'WhatsApp commerce Nigeria',
-  'conversational commerce Nigeria',
-  'AI-powered marketplace Nigeria',
   'sell on WhatsApp Nigeria',
   'WhatsApp store Nigeria',
-  'AI sales automation Nigeria',
-  'chat commerce Nigeria',
-  'WhatsApp business automation',
-  'ecommerce chatbot Nigeria',
-  'AI WhatsApp seller Nigeria',
-  'online marketplace Nigeria',
-  'automated sales Nigeria',
+  'WhatsApp shop Nigeria',
+  'WhatsApp business Nigeria',
+  'WhatsApp order Nigeria',
   'WhatsApp payment Nigeria',
-  'VendoorX',
-  'vendoorx Nigeria',
+  'WhatsApp seller Nigeria',
+  'WhatsApp buyer Nigeria',
+  'WhatsApp product listing Nigeria',
+  'buy on WhatsApp Nigeria',
+
+  // Vendor / seller keywords
+  'vendor marketplace Nigeria',
+  'online vendor Nigeria',
+  'become a vendor Nigeria',
+  'vendor app Nigeria',
   'sell online Nigeria',
-  'buyer seller marketplace Nigeria',
-  'multi-platform commerce Nigeria',
+  'online seller Nigeria',
+  'Nigeria vendor platform',
+  'Nigerian vendors',
+  'campus vendor Nigeria',
+  'student vendor Nigeria',
+
+  // AI keywords
+  'AI marketplace Nigeria',
+  'AI powered commerce Nigeria',
+  'AI vendor platform Nigeria',
+  'AI shopping Nigeria',
+  'AI WhatsApp bot Nigeria',
+  'conversational commerce Nigeria',
+  'AI sales automation Nigeria',
+  'chatbot marketplace Nigeria',
+
+  // Commerce / marketplace
+  'online marketplace Nigeria',
+  'Nigerian marketplace',
+  'ecommerce Nigeria',
   'mobile commerce Nigeria',
-  'WhatsApp order management',
-  'AI customer service Nigeria',
-  'zero commission marketplace Nigeria',
+  'buy and sell Nigeria',
+  'campus marketplace Nigeria',
+  'student marketplace Nigeria',
+  'escrow payment Nigeria',
+  'secure payment Nigeria',
+  'Paystack marketplace',
+
+  // Location-specific
+  'Lagos marketplace',
+  'Abuja marketplace',
+  'Port Harcourt marketplace',
+  'Nigerian university marketplace',
+  'campus store Nigeria',
 ]
 
 /**
@@ -122,12 +167,18 @@ export const ORGANISATION_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'VendoorX',
+  alternateName: ['Vendoor', 'VendoorX Nigeria', 'Vendoorx'],
   url: SITE_URL,
   logo: `${SITE_URL}/icon-512`,
   description: SITE_DESCRIPTION,
+  foundingDate: '2024',
+  foundingLocation: 'Nigeria',
+  areaServed: 'Nigeria',
   sameAs: [
     'https://twitter.com/vendoorx',
     'https://instagram.com/vendoorx',
+    'https://facebook.com/vendoorx',
+    'https://wa.me/vendoorx',
   ],
   contactPoint: {
     '@type': 'ContactPoint',
@@ -141,7 +192,10 @@ export const WEBSITE_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'VendoorX',
+  alternateName: 'Vendoor',
   url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  inLanguage: 'en-NG',
   potentialAction: {
     '@type': 'SearchAction',
     target: {
@@ -150,4 +204,13 @@ export const WEBSITE_JSONLD = {
     },
     'query-input': 'required name=search_term_string',
   },
+}
+
+/** Marketplace JSON-LD for the main marketplace page */
+export const MARKETPLACE_JSONLD = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'VendoorX Marketplace — Buy & Sell on WhatsApp',
+  description: 'Browse thousands of products from verified vendors across Nigeria. Shop electronics, fashion, food, textbooks and more on VendoorX.',
+  url: `${SITE_URL}/marketplace`,
 }

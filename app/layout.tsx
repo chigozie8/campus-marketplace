@@ -24,7 +24,7 @@ const siteUrl = SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
+    default: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
     template: '%s | VendoorX',
   },
   description: SITE_DESCRIPTION,
@@ -46,24 +46,24 @@ export const metadata: Metadata = {
     locale: 'en_NG',
     url: siteUrl,
     siteName: 'VendoorX',
-    title: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
+    title: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
     description:
-      'VendoorX automates your sales, support, and transactions across WhatsApp and messaging channels. Let AI handle customer conversations, product discovery, order flow, and payments — so you can focus on growing.',
+      'VendoorX is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI automation — browse products, place orders, pay securely, and track delivery all through WhatsApp. Join VendoorX today.',
     images: [
       {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: 'VendoorX — AI-Powered WhatsApp Commerce Platform',
+        alt: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VendoorX — AI-Powered WhatsApp Commerce',
+    title: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
     description:
-      'Automate sales, support & payments across WhatsApp with AI. Nigeria\'s leading conversational commerce platform — zero commission, free to start.',
+      'VendoorX is Nigeria\'s #1 WhatsApp vendor marketplace. Buy & sell with AI. Thousands of vendors on VendoorX — electronics, fashion, food & more. Free to join.',
     images: [`${siteUrl}/opengraph-image`],
     creator: '@vendoorx',
     site: '@vendoorx',
@@ -118,7 +118,8 @@ const jsonLd = {
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
       name: 'VendoorX',
-      description: 'Nigeria\'s AI-powered WhatsApp commerce platform — automate sales, support, and transactions across messaging channels.',
+      alternateName: ['Vendoor', 'VendoorX Nigeria', 'Vendoorx', 'WhatsApp Vendor Marketplace Nigeria'],
+      description: 'VendoorX is Nigeria\'s #1 WhatsApp vendor marketplace — buy and sell with AI-powered automation for product discovery, orders, payments, and delivery tracking.',
       publisher: {
         '@id': `${siteUrl}/#organization`,
       },
