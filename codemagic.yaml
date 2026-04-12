@@ -3,18 +3,31 @@ workflows:
     name: VendoorX Android Debug APK
     max_build_duration: 60
     environment:
-      node: 22.0.0
+      node: 22.14.0
       java: 17
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $HOME/.npm
+
     scripts:
       - name: Install dependencies
-        script: npm ci
+        script: npm install --legacy-peer-deps
 
-      - name: Create Capacitor webDir fallback
-        script: mkdir -p out && echo '<!DOCTYPE html><html><body>Loading VendoorX...</body></html>' > out/index.html
+      - name: Set Gradle memory options
+        script: |
+          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.parallel=false" >> android/gradle.properties
+
+      - name: Create out directory placeholder (Capacitor webDir)
+        script: |
+          mkdir -p out
+          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><p>Loading VendoorX...</p></body></html>' > out/index.html
 
       - name: Add Android platform (if missing)
         script: |
-          if [ ! -d "android" ]; then
+          if [ ! -d "android" ] || [ ! -f "android/gradlew" ]; then
             npx cap add android
           fi
 
@@ -25,7 +38,51 @@ workflows:
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
     artifacts:
       - android/app/build/outputs/apk/debug/app-debug.apk
+
+  android-release:
+    name: VendoorX Android Release APK (unsigned)
+    max_build_duration: 60
+    environment:
+      node: 22.14.0
+      java: 17
+    cache:
+      cache_paths:
+        - $HOME/.gradle/caches
+        - $HOME/.npm
+
+    scripts:
+      - name: Install dependencies
+        script: npm install --legacy-peer-deps
+
+      - name: Set Gradle memory options
+        script: |
+          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" >> android/gradle.properties
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.parallel=false" >> android/gradle.properties
+
+      - name: Create out directory placeholder
+        script: |
+          mkdir -p out
+          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><p>Loading VendoorX...</p></body></html>' > out/index.html
+
+      - name: Add Android platform (if missing)
+        script: |
+          if [ ! -d "android" ] || [ ! -f "android/gradlew" ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor
+        script: npx cap sync android
+
+      - name: Build release APK (unsigned)
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+    artifacts:
+      - android/app/build/outputs/apk/release/app-release-unsigned.apk
