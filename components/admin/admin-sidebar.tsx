@@ -31,6 +31,7 @@ import {
   Phone,
   MessageCircle,
   MapPin,
+  ListChecks,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -39,6 +40,7 @@ import { useRouter } from 'next/navigation'
 const NAV_ITEMS = [
   { label: 'Overview',        href: '/admin',                   icon: LayoutDashboard },
   { label: 'Users',           href: '/admin/users',             icon: Users },
+  { label: 'Waitlist',        href: '/admin/waitlist',          icon: ListChecks },
   { label: 'Listings',        href: '/admin/listings',          icon: ShoppingBag },
   { label: 'Orders',          href: '/admin/orders',            icon: Package },
   { label: 'Disputes',        href: '/admin/disputes',          icon: AlertTriangle },

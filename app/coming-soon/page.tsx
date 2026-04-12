@@ -1,19 +1,35 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) setSubmitted(true)
+    if (!email) return
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Something went wrong. Try again.')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -22,16 +38,10 @@ export default function ComingSoonPage() {
       {/* Top accent bar */}
       <div className="h-1 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 flex-shrink-0" />
 
-      {/* Main content — centered, scrollable */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-12">
-        <div
-          className="w-full max-w-lg"
-          style={{
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
-          }}
-        >
+        <div className="w-full max-w-lg">
+
           {/* Badge */}
           <div className="flex justify-center mb-8">
             <span className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold tracking-widest uppercase px-4 py-2 rounded-full">
@@ -62,10 +72,7 @@ export default function ComingSoonPage() {
           {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2 mb-10">
             {['Verified Vendors', 'WhatsApp Checkout', 'Secure Escrow', 'Campus Delivery'].map(f => (
-              <span
-                key={f}
-                className="text-xs font-medium text-green-700 bg-green-50 border border-green-100 px-3 py-1.5 rounded-full"
-              >
+              <span key={f} className="text-xs font-medium text-green-700 bg-green-50 border border-green-100 px-3 py-1.5 rounded-full">
                 {f}
               </span>
             ))}
@@ -86,14 +93,16 @@ export default function ComingSoonPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="flex-1 min-w-0 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all"
+                  disabled={loading}
+                  className="flex-1 min-w-0 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all disabled:opacity-60"
                   required
                 />
                 <button
                   type="submit"
-                  className="bg-green-500 hover:bg-green-600 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap shadow-sm shadow-green-200"
+                  disabled={loading}
+                  className="bg-green-500 hover:bg-green-600 active:scale-95 disabled:opacity-60 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap shadow-sm shadow-green-200"
                 >
-                  Notify Me
+                  {loading ? 'Saving…' : 'Notify Me'}
                 </button>
               </form>
             ) : (
@@ -103,6 +112,10 @@ export default function ComingSoonPage() {
                 </svg>
                 You&apos;re on the list! We&apos;ll reach out soon.
               </div>
+            )}
+
+            {error && (
+              <p className="mt-2 text-xs text-red-500">{error}</p>
             )}
           </div>
 
@@ -120,6 +133,7 @@ export default function ComingSoonPage() {
               Chat with us on WhatsApp
             </a>
           </div>
+
         </div>
       </div>
 
