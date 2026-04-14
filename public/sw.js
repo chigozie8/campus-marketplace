@@ -1,7 +1,7 @@
 // VendoorX Service Worker — Network-first, offline fallback + Web Push
 // Note: When running inside Capacitor native app, native push is handled
 // by the @capacitor/push-notifications plugin — web push is skipped.
-const CACHE_VERSION = 'v8'
+const CACHE_VERSION = 'v9'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 const FLAGS_CACHE = 'vendoorx-flags'
 const NATIVE_FLAG_KEY = '/native-mode'
@@ -61,10 +61,6 @@ self.addEventListener('activate', (event) => {
         )
       )
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then((clients) => {
-        clients.forEach((client) => client.navigate(client.url))
-      })
   )
 })
 
