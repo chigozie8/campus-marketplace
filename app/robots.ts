@@ -46,7 +46,6 @@ export default function robots(): MetadataRoute.Robots {
           '/auth/verify',
           '/_next/',
           '/static/',
-          '/offline',
           '/payment/',
           '/orders/',
           '/wallet/',

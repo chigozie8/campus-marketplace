@@ -339,7 +339,7 @@ export default function RootLayout({
   try {
     // Skip splash on coming-soon page
     var _p = window.location.pathname;
-    if (_p === '/coming-soon' || _p === '/offline') return;
+    if (_p === '/coming-soon') return;
     // Inject keyframe animations
     var st = document.createElement('style');
     st.textContent = [
