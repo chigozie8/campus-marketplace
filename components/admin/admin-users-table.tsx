@@ -521,7 +521,110 @@ export function AdminUsersTable({ users }: Props) {
           </div>
         </div>
 
-        {/* Full-profile side panel */}
+        {/* Full-profile side panel — modal on mobile, sidebar on desktop */}
+        {detailUser && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 lg:hidden" onClick={() => { setDetailUser(null); setDetailData(null); setDetailError(false) }}>
+            <div className="w-full sm:w-[420px] max-h-[92vh] flex flex-col bg-card border border-border rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              {/* Mobile header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
+                <h3 className="font-black text-sm text-foreground">User Profile</h3>
+                <button onClick={() => { setDetailUser(null); setDetailData(null); setDetailError(false) }} className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"><X className="w-4 h-4" /></button>
+              </div>
+              {/* Avatar + badges */}
+              <div className="px-5 pt-5 pb-3 flex-shrink-0">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {detailUser.avatar_url ? <img src={detailUser.avatar_url} alt="" className="w-full h-full object-cover" /> : <span className="text-primary text-xl font-black">{(detailUser.full_name ?? 'U').charAt(0).toUpperCase()}</span>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-foreground text-sm truncate">{detailUser.full_name ?? 'Unnamed'}</p>
+                    <p className="text-xs text-muted-foreground">{detailData?.profile?.email ?? detailUser.phone ?? 'Loading…'}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${detailUser.is_seller ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>{detailUser.is_seller ? 'Seller' : 'Buyer'}</span>
+                      {detailUser.seller_verified && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">Verified</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Tabs */}
+              <div className="flex gap-0.5 px-5 pb-3 flex-shrink-0">
+                {SECTIONS.map(({ key, label, icon: Icon }) => (
+                  <button key={key} onClick={() => setActiveSection(key)} className={`flex-1 flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl text-[9px] font-bold transition-all ${activeSection === key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-accent'}`}>
+                    <Icon className="w-3 h-3" />{label}
+                  </button>
+                ))}
+              </div>
+              {/* Content */}
+              <div className="overflow-y-auto flex-1 px-5 pb-6 space-y-4">
+                {detailLoading ? (
+                  <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+                ) : detailError || !detailData ? (
+                  <div className="flex items-center justify-center py-10 gap-2"><AlertTriangle className="w-5 h-5 text-muted-foreground" /><span className="text-sm text-muted-foreground">Failed to load profile</span></div>
+                ) : (
+                  <>
+                    {activeSection === 'profile' && (
+                      <div className="space-y-3">
+                        <DetailSection label="Contact Info">
+                          <InfoRow label="Email" value={detailData.profile?.email ?? '—'} copyKey="email_m" copyValue={detailData.profile?.email ?? null} copiedKey={copiedKey} onCopy={copyText} />
+                          <InfoRow label="Phone" value={detailData.profile?.phone ?? '—'} copyKey="phone_m" copyValue={detailData.profile?.phone ?? null} copiedKey={copiedKey} onCopy={copyText} />
+                          <InfoRow label="WhatsApp" value={detailData.profile?.whatsapp_number ?? '—'} copyKey="wa_m" copyValue={detailData.profile?.whatsapp_number ?? null} copiedKey={copiedKey} onCopy={copyText} />
+                        </DetailSection>
+                        <DetailSection label="Basic Info">
+                          <InfoRow label="University" value={detailData.profile?.university ?? '—'} />
+                          <InfoRow label="Campus" value={detailData.profile?.campus ?? '—'} />
+                          <InfoRow label="Rating" value={`${detailData.profile?.rating ?? 0} / 5`} />
+                          <InfoRow label="Total Sales" value={String(detailData.profile?.total_sales ?? 0)} />
+                          <InfoRow label="Joined" value={detailData.profile?.created_at ? new Date(detailData.profile.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
+                        </DetailSection>
+                        <DetailSection label="Trust & Activity">
+                          <InfoRow label="Trust Score" value={detailData.profile?.trust_score != null ? `${detailData.profile.trust_score} / 100` : '—'} />
+                          <InfoRow label="Total Orders" value={String(detailData.profile?.total_orders ?? 0)} />
+                          <InfoRow label="Successful" value={String(detailData.profile?.successful_orders ?? 0)} />
+                          <InfoRow label="Disputes" value={String(detailData.profile?.disputes_count ?? 0)} />
+                        </DetailSection>
+                        <div className="space-y-2 pt-1">
+                          <button onClick={() => { setNotifyUser(detailUser); setNotifyTitle(''); setNotifyBody('') }} className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all"><Bell className="w-4 h-4" />Send Notification</button>
+                          <button onClick={() => toggleBan(detailUser)} disabled={banningId === detailUser.id} className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40 ${bannedIds.has(detailUser.id) ? 'bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300' : 'bg-background border border-border text-muted-foreground hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50'}`}><Ban className="w-4 h-4" />{bannedIds.has(detailUser.id) ? 'Unban User' : 'Ban User'}</button>
+                          <button onClick={() => deleteUser(detailUser.id)} className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl bg-background border border-border text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"><Trash2 className="w-4 h-4" />Delete User</button>
+                        </div>
+                      </div>
+                    )}
+                    {activeSection === 'orders' && <div className="space-y-4"><OrderList label="As Buyer" orders={detailData.buyerOrders} /><OrderList label="As Seller" orders={detailData.sellerOrders} /></div>}
+                    {activeSection === 'wallet' && (
+                      <div className="space-y-3">
+                        <DetailSection label="Wallet Balance">
+                          {detailData.wallet ? (
+                            <>
+                              <InfoRow label="Available" value={`₦${Number(detailData.wallet.available ?? 0).toLocaleString()}`} />
+                              <InfoRow label="Pending" value={`₦${Number(detailData.wallet.pending ?? 0).toLocaleString()}`} />
+                            </>
+                          ) : <p className="text-[11px] text-muted-foreground">No wallet yet</p>}
+                        </DetailSection>
+                        {detailData.bankAccounts.length > 0 && (
+                          <DetailSection label="Bank Accounts">
+                            {detailData.bankAccounts.map((acct, i) => (
+                              <div key={i}><InfoRow label={acct.bank_name} value={acct.account_number} copyKey={`macct_${i}`} copyValue={acct.account_number} copiedKey={copiedKey} onCopy={copyText} /></div>
+                            ))}
+                          </DetailSection>
+                        )}
+                      </div>
+                    )}
+                    {activeSection === 'listings' && (
+                      <div className="space-y-3">
+                        {detailData.listings.length === 0 ? <div className="py-6 text-center text-sm text-muted-foreground">No listings yet</div> : detailData.listings.map(p => (
+                          <div key={p.id} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">{p.images?.[0] ? <img src={p.images[0]} alt="" className="w-full h-full object-cover" /> : <ShoppingBag className="w-4 h-4 text-muted-foreground" />}</div>
+                            <div className="flex-1 min-w-0"><p className="text-xs font-bold text-foreground truncate">{p.title}</p><p className="text-[11px] text-muted-foreground">₦{Number(p.price).toLocaleString()}</p></div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {detailUser && (
           <div className="hidden lg:flex flex-col w-[360px] flex-shrink-0 bg-card border border-border rounded-2xl overflow-hidden h-fit sticky top-4 max-h-[90vh]">
             {/* Panel header */}

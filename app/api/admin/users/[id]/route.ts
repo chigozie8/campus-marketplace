@@ -126,6 +126,18 @@ export async function GET(
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
+  // Fetch email from auth.users if not on profile
+  if (!profile.email) {
+    try {
+      const { data: authUser } = await adminClient.auth.admin.getUserById(id)
+      if (authUser?.user?.email) {
+        profile.email = authUser.user.email
+      }
+    } catch {
+      // Non-fatal — email stays null
+    }
+  }
+
   return NextResponse.json({
     profile,
     verification,

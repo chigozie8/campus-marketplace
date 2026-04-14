@@ -211,7 +211,7 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed, currentUserId }: { or
   const [submittingDispute, setSubmittingDispute] = useState(false)
   const [disputeDone, setDisputeDone] = useState(false)
 
-  const canRefund = ['paid', 'pending', 'shipped'].includes(order.status) && !refundDone
+  const canRefund = order.status === 'paid' && !refundDone
   const canDispute = ['paid', 'shipped', 'delivered'].includes(order.status) && !disputeDone
 
   async function handleDisputeSubmit(e: React.FormEvent) {
