@@ -1,7 +1,7 @@
 // VendoorX Service Worker — Network-first, offline fallback + Web Push
 // Note: When running inside Capacitor native app, native push is handled
 // by the @capacitor/push-notifications plugin — web push is skipped.
-const CACHE_VERSION = 'v11'
+const CACHE_VERSION = 'v12'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 const FLAGS_CACHE = 'vendoorx-flags'
 const NATIVE_FLAG_KEY = '/native-mode'
@@ -72,7 +72,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
-  if (url.pathname.startsWith('/_next/') && !request.mode === 'navigate') return
+  // Skip all Next.js internal assets and RSC/prefetch requests
+  if (url.pathname.startsWith('/_next/')) return
+  // Skip Next.js RSC and prefetch fetches (non-navigate fetches with special headers)
+  if (request.headers.get('RSC') === '1') return
+  if (request.headers.get('Next-Router-Prefetch') === '1') return
+  if (request.headers.get('Next-Router-State-Tree')) return
 
   if (request.mode === 'navigate') {
     event.respondWith(
