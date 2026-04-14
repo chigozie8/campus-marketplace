@@ -68,16 +68,14 @@ export function Web3WalletButtons({ mode = 'signin' }: Web3WalletButtonsProps) {
   }
 
   async function signInWithEthereum() {
+    const eth = (window as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum
+    if (!eth) {
+      // No wallet injected — open MetaMask's in-app browser immediately (no loading flash)
+      window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`
+      return
+    }
     setEthLoading(true)
     try {
-      const eth = (window as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum
-      if (!eth) {
-        // On mobile, redirect into MetaMask's built-in browser where window.ethereum is injected
-        setEthLoading(false)
-        const deeplink = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`
-        window.location.href = deeplink
-        return
-      }
 
       const accounts = await eth.request({ method: 'eth_requestAccounts' }) as string[]
       const address = accounts[0]
@@ -117,18 +115,16 @@ export function Web3WalletButtons({ mode = 'signin' }: Web3WalletButtonsProps) {
   }
 
   async function signInWithSolana() {
+    const sol = (window as { solana?: { isPhantom?: boolean; connect: () => Promise<void>; publicKey: { toBase58: () => string }; signMessage: (msg: Uint8Array, enc: string) => Promise<{ signature: Uint8Array }> } }).solana
+    if (!sol?.isPhantom) {
+      // No wallet injected — open Phantom's in-app browser immediately (no loading flash)
+      const currentUrl = encodeURIComponent(window.location.href)
+      const ref = encodeURIComponent(window.location.origin)
+      window.location.href = `https://phantom.app/ul/browse/${currentUrl}?ref=${ref}`
+      return
+    }
     setSolLoading(true)
     try {
-      const sol = (window as { solana?: { isPhantom?: boolean; connect: () => Promise<void>; publicKey: { toBase58: () => string }; signMessage: (msg: Uint8Array, enc: string) => Promise<{ signature: Uint8Array }> } }).solana
-      if (!sol?.isPhantom) {
-        // On mobile, redirect into Phantom's built-in browser where window.solana is injected
-        setSolLoading(false)
-        const currentUrl = encodeURIComponent(window.location.href)
-        const ref = encodeURIComponent(window.location.origin)
-        const deeplink = `https://phantom.app/ul/browse/${currentUrl}?ref=${ref}`
-        window.location.href = deeplink
-        return
-      }
 
       await sol.connect()
       const address = sol.publicKey.toBase58()

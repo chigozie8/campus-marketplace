@@ -289,7 +289,7 @@ function VerifyPageInner() {
               )}
             </div>
 
-            <div className="flex gap-2.5 sm:gap-3 justify-center mb-8" onPaste={handlePaste}>
+            <div className="flex gap-1.5 sm:gap-3 justify-center mb-8 w-full" onPaste={handlePaste}>
               {digits.map((digit, i) => (
                 <input
                   key={i}
@@ -303,11 +303,13 @@ function VerifyPageInner() {
                   disabled={loading}
                   aria-label={`Digit ${i + 1}`}
                   className={cn(
-                    'w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black rounded-xl border-2 transition-all duration-150',
+                    'flex-1 min-w-0 max-w-[44px] sm:max-w-[56px]',
+                    'h-11 sm:h-14 md:h-16',
+                    'text-center text-base sm:text-xl md:text-2xl font-black rounded-lg sm:rounded-xl border-2 transition-all duration-150',
                     'bg-gray-50 dark:bg-muted text-gray-900 dark:text-foreground',
                     'focus:outline-none focus:ring-0',
                     digit
-                      ? 'border-[#16a34a] bg-[#16a34a]/5 dark:bg-[#16a34a]/10 text-[#16a34a] dark:text-[#4ade80] scale-105 shadow-md shadow-[#16a34a]/20'
+                      ? 'border-[#16a34a] bg-[#16a34a]/5 dark:bg-[#16a34a]/10 text-[#16a34a] dark:text-[#4ade80] scale-[1.04] shadow-md shadow-[#16a34a]/20'
                       : 'border-gray-200 dark:border-border focus:border-[#16a34a] focus:shadow-md focus:shadow-[#16a34a]/15',
                     loading && 'opacity-50 cursor-not-allowed',
                   )}
