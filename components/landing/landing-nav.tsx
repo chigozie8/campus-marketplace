@@ -17,8 +17,9 @@ const NAV_LINKS = [
   { href: '/#how-it-works', label: 'How it works' },
   { href: '/#features', label: 'Features' },
   { href: '/marketplace', label: 'Browse' },
-  { href: '/#pricing', label: 'Pricing' },
-  { href: '/#testimonials', label: 'Reviews' },
+  { href: '/categories', label: 'Categories' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/reviews', label: 'Reviews' },
   { href: '/blog', label: 'Blog' },
 ]
 

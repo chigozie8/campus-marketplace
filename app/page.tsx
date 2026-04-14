@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import lazyLoad from 'next/dynamic'
 import { buildMetadata, SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
 import { getSiteSettings } from '@/lib/site-settings'
 
 /* ── Above the fold — eager imports (critical for LCP) ── */
@@ -17,31 +16,10 @@ const WhatsappMockupSection  = lazyLoad(() => import('@/components/landing/whats
 const HowItWorksSection      = lazyLoad(() => import('@/components/landing/how-it-works-section').then(m => ({ default: m.HowItWorksSection })))
 const Features               = lazyLoad(() => import('@/components/landing/features').then(m => ({ default: m.Features })))
 const IntegrationsSection    = lazyLoad(() => import('@/components/landing/integrations-section').then(m => ({ default: m.IntegrationsSection })))
-const CategoriesSection      = lazyLoad(() => import('@/components/landing/categories-section').then(m => ({ default: m.CategoriesSection })))
-const TestimonialsSection    = lazyLoad(() => import('@/components/landing/testimonials-section').then(m => ({ default: m.TestimonialsSection })))
 const TrustSection           = lazyLoad(() => import('@/components/landing/trust-section').then(m => ({ default: m.TrustSection })))
-const PricingSection         = lazyLoad(() => import('@/components/landing/pricing-section').then(m => ({ default: m.PricingSection })))
 const FaqSection             = lazyLoad(() => import('@/components/landing/faq-section').then(m => ({ default: m.FaqSection })))
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
-
-async function getPricingPlans() {
-  try {
-    const admin = createAdmin(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { persistSession: false } },
-    )
-    const { data } = await admin
-      .from('pricing_plans')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order')
-    return data ?? []
-  } catch {
-    return []
-  }
-}
 
 export const dynamic = 'force-dynamic'
 
@@ -174,10 +152,9 @@ const itemListJsonLd = {
 }
 
 export default async function Home() {
-  const [supabase, settings, plans] = await Promise.all([
+  const [supabase, settings] = await Promise.all([
     createClient(),
     getSiteSettings(),
-    getPricingPlans(),
   ])
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
 
@@ -213,10 +190,7 @@ export default async function Home() {
       <HowItWorksSection />
       <Features />
       <IntegrationsSection />
-      <CategoriesSection />
-      <TestimonialsSection />
       <TrustSection />
-      <PricingSection plans={plans} />
       <FaqSection />
       <CtaSection user={user} />
       <LandingFooter settings={settings} />
