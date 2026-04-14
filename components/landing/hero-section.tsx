@@ -57,8 +57,8 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.05] text-balance">
-          <span className="text-foreground">Sell smarter on</span>
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] text-balance">
+          <span className="text-gray-950 dark:text-white">Sell smarter on</span>
           <br />
           <span className="text-primary italic">WhatsApp.</span>
         </h1>
