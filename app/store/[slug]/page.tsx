@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
-import { ShareButton } from '@/components/product/product-interactions'
+import { StoreShareWidget } from '@/components/store/store-share-widget'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -224,7 +224,7 @@ export default async function StorePage({ params }: PageProps) {
                     Chat
                   </a>
                 )}
-                <ShareButton title={`${name}'s Store on VendoorX`} />
+                <StoreShareWidget storeName={name} storeUrl={`https://www.vendoorx.ng/store/${slug}`} />
               </div>
             </div>
           </div>
