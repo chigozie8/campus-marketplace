@@ -158,53 +158,51 @@ export default async function StorePage({ params }: PageProps) {
 
       <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
         {/* Top nav */}
-        <div className="sticky top-0 z-40 bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <Link href="/marketplace" className="text-xl font-black tracking-tight">
+        <div className="sticky top-0 z-40 bg-white/90 dark:bg-background/90 backdrop-blur-xl border-b border-border/50 px-4 py-3">
+          <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
+            <Link href="/marketplace" className="text-xl font-black tracking-tight shrink-0">
               Vendoor<span className="text-primary">X</span>
             </Link>
             <Link
               href="/auth/sign-up"
-              className="text-xs font-bold bg-primary text-white px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors"
+              className="text-xs font-bold bg-primary text-white px-3 py-2 rounded-xl hover:bg-primary/90 transition-colors shrink-0"
             >
               Join for free
             </Link>
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
           {/* Featured Store banner */}
           {isStoreFeatured && (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary/10 to-emerald-50 dark:from-primary/15 dark:to-emerald-950/20 border border-primary/20">
-              <Zap className="w-4 h-4 text-primary flex-shrink-0 fill-primary" />
+              <Zap className="w-4 h-4 text-primary shrink-0 fill-primary" />
               <p className="text-xs font-bold text-primary">Featured Store — verified top seller on VendoorX</p>
             </div>
           )}
 
-          {/* Seller profile card */}
-          <div className={`bg-white dark:bg-card rounded-2xl border p-5 ${isStoreFeatured ? 'border-primary/30 ring-1 ring-primary/10' : 'border-border'}`}>
-            <div className="flex items-start gap-4">
-              {/* Avatar */}
-              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center flex-shrink-0">
+          {/* Seller profile card — mobile-first stacked layout */}
+          <div className={`bg-white dark:bg-card rounded-2xl border p-4 sm:p-5 ${isStoreFeatured ? 'border-primary/30 ring-1 ring-primary/10' : 'border-border'}`}>
+
+            {/* Top row: avatar + name/meta */}
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
                 {seller.avatar_url ? (
                   <img src={seller.avatar_url} alt={name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xl font-black text-primary">{initials}</span>
+                  <span className="text-lg sm:text-xl font-black text-primary">{initials}</span>
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h1 className="text-lg font-black text-foreground">{name}</h1>
+                  <h1 className="text-base sm:text-lg font-black text-foreground leading-tight">{name}</h1>
                   {seller.seller_verified && (
-                    <BadgeCheck className="w-5 h-5 text-primary flex-shrink-0" />
+                    <BadgeCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
                   )}
                   {seller.is_student_verified && (
-                    <span
-                      title={`Verified ${seller.university || 'seller'}`}
-                      className="flex items-center gap-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 px-1.5 py-0.5 rounded-full"
-                    >
+                    <span className="flex items-center gap-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 px-1.5 py-0.5 rounded-full">
                       <GraduationCap className="w-3 h-3" />
                       Verified
                     </span>
@@ -216,50 +214,52 @@ export default async function StorePage({ params }: PageProps) {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                   {seller.rating > 0 && (
                     <div className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                      <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-500 fill-amber-500" />
                       <span className="text-xs font-semibold">{seller.rating.toFixed(1)}</span>
                     </div>
                   )}
                   {(seller.campus || seller.university) && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3" />
-                      {seller.campus || seller.university}
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate max-w-[120px] sm:max-w-none">{seller.campus || seller.university}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Package className="w-3 h-3" />
+                    <Package className="w-3 h-3 shrink-0" />
                     {products.length} listing{products.length !== 1 ? 's' : ''}
                   </div>
                 </div>
-
-                {seller.bio && (
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{seller.bio}</p>
-                )}
               </div>
+            </div>
 
-              <div className="flex flex-col gap-2 flex-shrink-0">
-                {whatsappNumber && (
-                  <a
-                    href={`https://wa.me/${whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] text-white text-xs font-bold hover:bg-[#20bd5a] transition-colors"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    Chat
-                  </a>
-                )}
-                <StoreShareWidget storeName={name} storeUrl={`https://www.vendoorx.ng/store/${slug}`} />
-              </div>
+            {/* Bio (full width below avatar row) */}
+            {seller.bio && (
+              <p className="text-xs sm:text-sm text-muted-foreground mt-3 leading-relaxed">{seller.bio}</p>
+            )}
+
+            {/* Action buttons — full width row on mobile */}
+            <div className="flex items-center gap-2 mt-4">
+              {whatsappNumber && (
+                <a
+                  href={`https://wa.me/${whatsappNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#20bd5a] transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 shrink-0" />
+                  Chat on WhatsApp
+                </a>
+              )}
+              <StoreShareWidget storeName={name} storeUrl={`https://www.vendoorx.ng/store/${slug}`} />
             </div>
           </div>
 
           {/* Listings */}
           <div>
-            <h2 className="text-sm font-black text-foreground mb-3">
+            <h2 className="text-sm font-black text-foreground mb-3 px-0.5">
               {products.length > 0 ? `Available (${products.length})` : 'No listings yet'}
             </h2>
 
@@ -269,7 +269,7 @@ export default async function StorePage({ params }: PageProps) {
                 <p className="text-sm text-muted-foreground">No items listed yet</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                 {products.map((product) => {
                   const image = product.images?.[0]
                   const discount = product.original_price && product.original_price > product.price
@@ -281,7 +281,7 @@ export default async function StorePage({ params }: PageProps) {
                       href={`/marketplace/${product.id}`}
                       className="bg-white dark:bg-card rounded-2xl border border-border overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all group"
                     >
-                      <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                      <div className="relative aspect-square bg-muted overflow-hidden">
                         {image ? (
                           <img src={image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         ) : (
@@ -295,7 +295,7 @@ export default async function StorePage({ params }: PageProps) {
                           </div>
                         )}
                       </div>
-                      <div className="p-3">
+                      <div className="p-2.5 sm:p-3">
                         <p className="text-xs font-semibold text-foreground line-clamp-2 mb-1">{product.title}</p>
                         <p className="text-sm font-black text-foreground">₦{product.price.toLocaleString()}</p>
                         {product.original_price && product.original_price > product.price && (
@@ -310,7 +310,7 @@ export default async function StorePage({ params }: PageProps) {
           </div>
 
           {/* Footer CTA */}
-          <div className="text-center py-4">
+          <div className="text-center py-4 pb-8">
             <p className="text-xs text-muted-foreground mb-3">
               Want to start selling? It's 100% free.
             </p>
