@@ -3,50 +3,35 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+function softChime(freq: number, volume: number, ctx: AudioContext, startAt = 0) {
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + startAt)
+  gain.gain.setValueAtTime(0, ctx.currentTime + startAt)
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + startAt + 0.08)
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + startAt + 0.9)
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  osc.start(ctx.currentTime + startAt)
+  osc.stop(ctx.currentTime + startAt + 0.95)
+}
+
 function playOfflineSound() {
   try {
     const ctx = new AudioContext()
-    const gains = [0.35, 0.25, 0.15]
-    const freqs = [520, 380, 260]
-    freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(freq, ctx.currentTime)
-      gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(gains[i], ctx.currentTime + 0.05 + i * 0.13)
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.18 + i * 0.13)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(ctx.currentTime + i * 0.13)
-      osc.stop(ctx.currentTime + 0.22 + i * 0.13)
-    })
-    setTimeout(() => ctx.close(), 1000)
+    softChime(330, 0.06, ctx, 0.0)
+    softChime(262, 0.05, ctx, 0.18)
+    setTimeout(() => ctx.close(), 1500)
   } catch {}
 }
 
 function playOnlineSound() {
   try {
     const ctx = new AudioContext()
-    const notes = [
-      { freq: 440, t: 0.00 },
-      { freq: 554, t: 0.12 },
-      { freq: 659, t: 0.24 },
-    ]
-    notes.forEach(({ freq, t }) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + t)
-      gain.gain.setValueAtTime(0, ctx.currentTime + t)
-      gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + t + 0.04)
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.18)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(ctx.currentTime + t)
-      osc.stop(ctx.currentTime + t + 0.22)
-    })
-    setTimeout(() => ctx.close(), 1000)
+    softChime(392, 0.05, ctx, 0.0)
+    softChime(523, 0.06, ctx, 0.18)
+    setTimeout(() => ctx.close(), 1500)
   } catch {}
 }
 
