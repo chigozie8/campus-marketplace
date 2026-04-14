@@ -1,0 +1,72 @@
+
+
+1/1
+
+Next.js 16.2.3
+Turbopack
+Console TypeError
+
+
+
+Failed to fetch
+Call Stack
+28
+
+createFetch
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (8084:21)
+fetchServerResponse
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (7928:27)
+navigateToUnknownRoute
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (10094:90)
+navigateImpl
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (9989:12)
+navigate
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (9953:12)
+navigateReducer
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (10530:37)
+clientReducer
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11382:61)
+Object.action
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11631:55)
+runAction
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11536:38)
+dispatchAction
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11599:9)
+Object.dispatch
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11629:40)
+<unknown>
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (963:29)
+startTransition
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (5469:31)
+nextDispatch
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (962:13)
+dispatchAppRouterAction
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (922:5)
+dispatchNavigateAction
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js (11688:49)
+<unknown>
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_0~8i4yo._.js (2159:13)
+Object.startTransition
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js (1279:31)
+linkClicked
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_0~8i4yo._.js (2158:24)
+onClick
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_0~8i4yo._.js (2398:13)
+executeDispatch
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (10329:13)
+runWithFiberInDEV
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (965:74)
+processDispatchQueue
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (10355:41)
+<unknown>
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (10633:13)
+batchedUpdates$1
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (2253:44)
+dispatchEventForPluginEventSystem
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (10431:9)
+dispatchEvent
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (13002:37)
+dispatchDiscreteEvent
+file:///home/runner/workspace/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js (12984:64)
+1
+2

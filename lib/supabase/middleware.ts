@@ -57,30 +57,40 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
-  const protectedRoutes = ['/dashboard', '/seller', '/profile', '/assistant', '/protected', '/admin']
-  const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
+  // RSC navigation fetches (Next.js internal) must never receive a redirect —
+  // the client-side router cannot process a redirect to an RSC response.
+  // These requests carry special Next.js headers; let them pass through so the
+  // router's own redirect handling (via the page itself) takes over.
+  const isRSC = request.headers.get('RSC') === '1'
+    || !!request.headers.get('Next-Router-State-Tree')
+    || request.headers.get('Next-Router-Prefetch') === '1'
 
-  // Not logged in trying to access protected route → login
-  if (isProtected && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
-    return NextResponse.redirect(url)
-  }
+  if (!isRSC) {
+    const pathname = request.nextUrl.pathname
+    const protectedRoutes = ['/dashboard', '/seller', '/profile', '/assistant', '/protected', '/admin']
+    const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
 
-  // Logged in but email not verified → verify page
-  if (isProtected && user && !user.email_confirmed_at) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/verify'
-    if (user.email) url.searchParams.set('email', user.email)
-    return NextResponse.redirect(url)
-  }
+    // Not logged in trying to access protected route → login
+    if (isProtected && !user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      return NextResponse.redirect(url)
+    }
 
-  // Already verified trying to visit /auth/verify → dashboard
-  if (pathname === '/auth/verify' && user?.email_confirmed_at) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
+    // Logged in but email not verified → verify page
+    if (isProtected && user && !user.email_confirmed_at) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/verify'
+      if (user.email) url.searchParams.set('email', user.email)
+      return NextResponse.redirect(url)
+    }
+
+    // Already verified trying to visit /auth/verify → dashboard
+    if (pathname === '/auth/verify' && user?.email_confirmed_at) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
