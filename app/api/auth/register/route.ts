@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export async function POST(req: Request) {
   const {
@@ -17,14 +18,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
   }
 
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
-  )
+  const adminClient = createServiceClient()
+  if (!adminClient) {
+    return NextResponse.json({ error: 'Service unavailable.' }, { status: 503 })
+  }
 
-  // Create user WITHOUT email_confirm so they must verify via Appwrite OTP
-  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+  const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: false,
@@ -47,7 +46,7 @@ export async function POST(req: Request) {
   }
 
   if (data.user) {
-    await supabaseAdmin.from('profiles').upsert(
+    await adminClient.from('profiles').upsert(
       {
         id: data.user.id,
         full_name,
@@ -61,28 +60,12 @@ export async function POST(req: Request) {
     )
   }
 
-  // Now send the OTP via Appwrite
-  try {
-    const otpRes = await fetch(
-      `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ? process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT.replace('/v1', '') : ''}/v1/account/tokens/email`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Appwrite-Project': process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!,
-          'X-Appwrite-Key': process.env.APPWRITE_API_KEY!,
-        },
-        body: JSON.stringify({ userId: 'unique()', email }),
-      },
-    )
-    const otpData = await otpRes.json()
-    if (!otpRes.ok) {
-      console.error('[register] Appwrite OTP error:', otpData)
-      return NextResponse.json({ success: true, otpSent: false })
-    }
-    return NextResponse.json({ success: true, otpSent: true, userId: otpData.userId })
-  } catch (err) {
-    console.error('[register] Appwrite OTP send error:', err)
-    return NextResponse.json({ success: true, otpSent: false })
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY
+  if (supabaseUrl && supabaseAnon) {
+    const publicClient = createClient(supabaseUrl, supabaseAnon)
+    await publicClient.auth.resend({ type: 'signup', email })
   }
+
+  return NextResponse.json({ success: true })
 }

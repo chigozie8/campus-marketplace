@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { detectUniversity } from '@/lib/universities'
+import { Web3WalletButtons } from '@/components/auth/web3-wallet-buttons'
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
@@ -120,8 +121,7 @@ function SignUpPageInner() {
     toast.success('Account created! Check your email for a verification code.')
     // Store password temporarily so verify page can auto sign-in after OTP
     sessionStorage.setItem('_vx_tmp_pw', password)
-    const userId = result.userId || ''
-    router.push(`/auth/verify?email=${encodeURIComponent(email)}&uid=${encodeURIComponent(userId)}`)
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
   }
 
   return (
@@ -412,6 +412,15 @@ function SignUpPageInner() {
                 )}
               </Button>
             </form>
+
+            {/* Web3 wallet sign up */}
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">OR CONNECT WALLET</span>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+            </div>
+
+            <Web3WalletButtons mode="signup" />
 
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />

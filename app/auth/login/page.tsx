@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { Web3WalletButtons } from '@/components/auth/web3-wallet-buttons'
 
 const FEATURES = [
   { icon: Zap, label: 'Instant WhatsApp connect with buyers' },
@@ -284,6 +285,15 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
+
+            {/* Web3 Wallets divider */}
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">OR CONNECT WALLET</span>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+            </div>
+
+            <Web3WalletButtons mode="signin" />
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">

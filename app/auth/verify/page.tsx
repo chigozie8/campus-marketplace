@@ -17,7 +17,6 @@ function VerifyPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') ?? ''
-  const uid = searchParams.get('uid') ?? ''
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
   const [loading, setLoading] = useState(false)
@@ -25,10 +24,8 @@ function VerifyPageInner() {
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [resending, setResending] = useState(false)
-  const [appwriteUserId, setAppwriteUserId] = useState(uid)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // If already logged in, go to dashboard
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data }) => {
@@ -97,98 +94,51 @@ function VerifyPageInner() {
       router.push('/auth/sign-up')
       return
     }
-    if (!appwriteUserId) {
-      toast.error('Session expired. Please sign up again.')
-      router.push('/auth/sign-up')
-      return
-    }
 
     setLoading(true)
-    try {
-      // Step 1: Verify OTP with Appwrite
-      const otpRes = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: appwriteUserId, otp: token }),
-      })
-      const otpData = await otpRes.json()
-      if (!otpRes.ok) {
-        setLoading(false)
-        setDigits(Array(CODE_LENGTH).fill(''))
-        setTimeout(() => inputRefs.current[0]?.focus(), 50)
-        toast.error(otpData.error || 'Invalid code', {
-          description: 'Double-check the code from your email and try again.',
-        })
-        return
-      }
+    const supabase = createClient()
 
-      // Step 2: Mark email as confirmed in Supabase
-      const confirmRes = await fetch('/api/auth/confirm-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (!confirmRes.ok) {
-        console.warn('[verify] Could not confirm email in Supabase')
-      }
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup',
+    })
 
-      // Step 3: Sign the user into Supabase
-      const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        // We need the password — get it from sessionStorage set at signup
-        password: sessionStorage.getItem('_vx_tmp_pw') ?? '',
-      })
-
-      setVerified(true)
-      setLoading(false)
-
-      if (signInError) {
-        // Still verified — just tell them to log in manually
-        toast.success('Email verified! Please sign in.', { description: 'Welcome to VendoorX 🎉' })
-        sessionStorage.removeItem('_vx_tmp_pw')
-        setTimeout(() => router.push('/auth/login'), 1200)
-      } else {
-        sessionStorage.removeItem('_vx_tmp_pw')
-        toast.success('Email verified!', { description: 'Welcome to VendoorX 🎉' })
-        setTimeout(() => {
-          router.push('/dashboard')
-          router.refresh()
-        }, 1200)
-      }
-    } catch {
+    if (error) {
       setLoading(false)
       setDigits(Array(CODE_LENGTH).fill(''))
       setTimeout(() => inputRefs.current[0]?.focus(), 50)
-      toast.error('Something went wrong. Please try again.')
+      toast.error('Invalid or expired code', {
+        description: 'Double-check the code from your email and try again.',
+      })
+      return
     }
-  }, [email, appwriteUserId, router])
+
+    setVerified(true)
+    setLoading(false)
+    sessionStorage.removeItem('_vx_tmp_pw')
+    toast.success('Email verified!', { description: 'Welcome to VendoorX 🎉' })
+    setTimeout(() => {
+      router.push('/dashboard')
+      router.refresh()
+    }, 1200)
+  }, [email, router])
 
   async function handleResend() {
     if (!canResend || resending || !email) return
     setResending(true)
-    try {
-      const res = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      const data = await res.json()
-      setResending(false)
-      if (!res.ok) {
-        toast.error(data.error || 'Failed to resend code')
-        return
-      }
-      if (data.userId) setAppwriteUserId(data.userId)
-      setCountdown(60)
-      setCanResend(false)
-      setDigits(Array(CODE_LENGTH).fill(''))
-      setTimeout(() => inputRefs.current[0]?.focus(), 50)
-      toast.success('New code sent!', { description: 'Check your inbox and spam folder.' })
-    } catch {
-      setResending(false)
-      toast.error('Failed to resend code')
+    const supabase = createClient()
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    setResending(false)
+    if (error) {
+      toast.error(error.message || 'Failed to resend code')
+      return
     }
+    setCountdown(60)
+    setCanResend(false)
+    setDigits(Array(CODE_LENGTH).fill(''))
+    setTimeout(() => inputRefs.current[0]?.focus(), 50)
+    toast.success('New code sent!', { description: 'Check your inbox and spam folder.' })
   }
 
   const code = digits.join('')
@@ -225,7 +175,6 @@ function VerifyPageInner() {
         />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#16a34a]/20 rounded-full blur-3xl" />
         <div className="absolute top-0 right-0 w-52 h-52 bg-[#16a34a]/10 rounded-full blur-2xl" />
-        <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-primary/8 rounded-full blur-2xl" />
 
         <div className="relative z-10 flex flex-col h-full p-12">
           <Link href="/" className="inline-flex items-center w-fit">
@@ -235,7 +184,6 @@ function VerifyPageInner() {
           </Link>
 
           <div className="flex-1 flex flex-col justify-center">
-            {/* Animated icon */}
             <div className="relative w-20 h-20 mb-8">
               <div className="absolute inset-0 bg-[#16a34a]/20 rounded-2xl blur-xl" />
               <div className="relative w-20 h-20 rounded-2xl bg-[#16a34a]/15 border border-[#16a34a]/30 flex items-center justify-center">
@@ -253,14 +201,14 @@ function VerifyPageInner() {
               <span className="text-[#16a34a]">the market.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              We sent a 6-digit code to your email. Enter it to activate your account and start buying or selling on VendoorX.
+              We sent a 6-digit code to your email. Enter it to activate your VendoorX account.
             </p>
 
             <div className="space-y-3.5 mb-10">
               {[
-                { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder' },
+                { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder too' },
                 { icon: '🔢', label: 'Enter the 6-digit code', sub: 'It expires in 10 minutes' },
-                { icon: '🚀', label: 'Start selling on VendoorX', sub: 'Free forever, no commissions' },
+                { icon: '🚀', label: 'Start trading on VendoorX', sub: 'Free forever, no commissions' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-lg">
@@ -283,7 +231,7 @@ function VerifyPageInner() {
           </div>
 
           <div className="flex items-center gap-4 text-xs text-white/30 mt-6">
-            <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Secured by Appwrite</div>
+            <div className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Secured by Supabase</div>
             <div className="w-px h-3 bg-white/20" />
             <div className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> 256-bit SSL</div>
           </div>
@@ -310,14 +258,12 @@ function VerifyPageInner() {
 
         <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-16">
           <div className="w-full max-w-[420px]">
-            {/* Mobile wordmark */}
             <div className="lg:hidden mb-8">
               <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
-            {/* Icon */}
             <div className="relative w-16 h-16 mb-6">
               <div className="absolute inset-0 bg-[#16a34a]/15 rounded-2xl blur-lg" />
               <div className="relative w-16 h-16 rounded-2xl bg-[#16a34a]/10 border border-[#16a34a]/20 flex items-center justify-center">
@@ -325,7 +271,6 @@ function VerifyPageInner() {
               </div>
             </div>
 
-            {/* Heading */}
             <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-2">
               Check your email
             </h2>
@@ -344,7 +289,6 @@ function VerifyPageInner() {
               )}
             </div>
 
-            {/* OTP inputs */}
             <div className="flex gap-2.5 sm:gap-3 justify-center mb-8" onPaste={handlePaste}>
               {digits.map((digit, i) => (
                 <input
@@ -371,7 +315,6 @@ function VerifyPageInner() {
               ))}
             </div>
 
-            {/* Verifying indicator */}
             {loading && (
               <div className="flex items-center justify-center gap-2 text-sm text-[#16a34a] font-semibold mb-4">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -379,7 +322,6 @@ function VerifyPageInner() {
               </div>
             )}
 
-            {/* Submit */}
             <Button
               onClick={() => handleVerify(code)}
               disabled={!isComplete || loading}
@@ -392,7 +334,6 @@ function VerifyPageInner() {
               )}
             </Button>
 
-            {/* Resend */}
             <div className="text-center space-y-3 mb-6">
               <p className="text-sm text-gray-500 dark:text-muted-foreground">
                 Didn&apos;t receive a code?
@@ -418,7 +359,6 @@ function VerifyPageInner() {
               )}
             </div>
 
-            {/* Tips */}
             <div className="space-y-2 mb-6">
               <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
                 <span className="text-base shrink-0">⚠️</span>
@@ -434,7 +374,6 @@ function VerifyPageInner() {
               </div>
             </div>
 
-            {/* Wrong email */}
             <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
               <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">WRONG EMAIL?</span>
@@ -457,7 +396,7 @@ function VerifyPageInner() {
               <div className="w-px h-3 bg-gray-200 dark:bg-border" />
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Secured by Appwrite</span>
+                <span>Secured by Supabase</span>
               </div>
             </div>
           </div>
