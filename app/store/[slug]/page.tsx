@@ -2,30 +2,58 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
 import { StoreShareWidget } from '@/components/store/store-share-widget'
+
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
+function extractIdPrefix(slug: string): string {
+  const parts = slug.split('-')
+  return parts[parts.length - 1] ?? slug
+}
+
 async function getSellerBySlug(slug: string) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
   if (!supabase) return null
 
-  const idPrefix = slug.slice(-6)
+  const idPrefix = extractIdPrefix(slug)
 
-  const { data: profiles } = await supabase
+  const { data: profiles, error } = await supabase
     .from('profiles')
     .select('*')
-    .ilike('id', `${idPrefix}%`)
-    .limit(1)
+    .filter('id::text', 'like', `${idPrefix}%`)
+    .limit(5)
 
-  const seller = profiles?.[0] as Profile | undefined
-  if (!seller) return null
+  if (error || !profiles?.length) {
+    const { data: fallback } = await supabase
+      .from('profiles')
+      .select('*')
+      .limit(200)
 
+    const seller = (fallback ?? []).find((p: Profile) => {
+      const pIdPrefix = String(p.id).slice(0, idPrefix.length)
+      return pIdPrefix.toLowerCase() === idPrefix.toLowerCase()
+    }) as Profile | undefined
+
+    if (!seller) return null
+
+    const { data: products } = await supabase
+      .from('products')
+      .select('*, categories(*)')
+      .eq('seller_id', seller.id)
+      .eq('is_available', true)
+      .order('created_at', { ascending: false })
+
+    return { seller, products: (products || []) as Product[] }
+  }
+
+  const seller = profiles[0] as Profile
   const { data: products } = await supabase
     .from('products')
     .select('*, categories(*)')
