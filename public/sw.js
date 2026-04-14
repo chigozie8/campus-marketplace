@@ -1,6 +1,6 @@
 // VendoorX Service Worker — Offline fallback + Web Push
 // Capacitor native app uses @capacitor/push-notifications — web push is skipped there.
-const CACHE_VERSION = 'v13'
+const CACHE_VERSION = 'v14'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 const FLAGS_CACHE   = 'vendoorx-flags'
 const NATIVE_FLAG_KEY = '/native-mode'

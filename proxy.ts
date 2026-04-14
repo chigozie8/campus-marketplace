@@ -15,6 +15,8 @@ const BYPASS_PREFIXES = [
   '/manifest.webmanifest',
   '/robots.txt',
   '/sitemap.xml',
+  '/offline.html',
+  '/sw.js',
 ]
 
 export async function proxy(request: NextRequest) {
