@@ -8,147 +8,132 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --primary: #16a34a;
-      --bg: #f8f9fa;
-      --card: #ffffff;
-      --text: #0a0a0a;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --red: #ef4444;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0a0a0a;
-        --card: #111111;
-        --text: #f9fafb;
-        --muted: #9ca3af;
-        --border: #1f2937;
-      }
-    }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #ffffff;
+      color: #0a0a0a;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Nav */
+    /* Top nav — white with green wordmark */
     .nav {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      background: var(--card);
+      padding: 14px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
     .logo {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 900;
       letter-spacing: -0.04em;
-      color: var(--text);
+      color: #0a0a0a;
       text-decoration: none;
     }
-    .logo span { color: var(--primary); }
+    .logo span { color: #16a34a; }
 
-    /* Main */
+    /* Green top accent strip */
+    .accent-strip {
+      height: 4px;
+      background: linear-gradient(90deg, #16a34a 0%, #22c55e 60%, #bbf7d0 100%);
+    }
+
+    /* Main centred area */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 48px 24px;
+      padding: 40px 24px 24px;
       text-align: center;
     }
 
-    /* Icon card */
+    /* Icon container — green tinted */
     .icon-wrap {
       position: relative;
       margin-bottom: 28px;
     }
     .icon-card {
-      width: 112px;
-      height: 112px;
+      width: 108px;
+      height: 108px;
       border-radius: 28px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      background: #f0fdf4;
+      border: 2px solid #bbf7d0;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 24px rgba(22,163,74,0.12);
     }
-    .icon-card svg { color: #d1d5db; }
     .badge {
       position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 28px;
-      height: 28px;
+      top: -8px;
+      right: -8px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: var(--red);
-      border: 3px solid var(--bg);
+      background: #ef4444;
+      border: 3px solid #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-size: 14px;
+      color: #fff;
+      font-size: 15px;
       font-weight: 900;
       line-height: 1;
     }
 
-    /* Text */
+    /* Heading */
     h1 {
-      font-size: 1.875rem;
+      font-size: 1.85rem;
       font-weight: 900;
       letter-spacing: -0.04em;
-      color: var(--text);
-      margin-bottom: 12px;
+      color: #0a0a0a;
+      margin-bottom: 10px;
       line-height: 1.1;
     }
     .desc {
-      color: var(--muted);
+      color: #6b7280;
       font-size: 0.9rem;
       line-height: 1.65;
-      max-width: 280px;
+      max-width: 270px;
       margin-bottom: 28px;
     }
 
-    /* Status pill */
+    /* Status pill — green when online */
     .pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 18px;
+      padding: 9px 20px;
       border-radius: 99px;
       font-size: 0.8rem;
       font-weight: 700;
-      background: #f3f4f6;
-      color: var(--muted);
-      border: 1px solid var(--border);
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1.5px solid #bbf7d0;
       margin-bottom: 32px;
       transition: all 0.3s ease;
     }
-    .pill.online {
-      background: rgba(22,163,74,0.1);
-      color: var(--primary);
-      border-color: rgba(22,163,74,0.25);
+    .pill.offline {
+      background: #fafafa;
+      color: #6b7280;
+      border-color: #e5e7eb;
     }
     .dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #9ca3af;
-      animation: pulse 1.4s ease-in-out infinite;
+      background: #16a34a;
     }
-    .dot.online { background: var(--primary); animation: none; }
+    .dot.pulse { animation: pulse 1.4s ease-in-out infinite; background: #9ca3af; }
     @keyframes pulse {
       0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.2); }
+      50%       { opacity: 1;   transform: scale(1.3); }
     }
 
     /* Buttons */
@@ -164,7 +149,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 14px 20px;
+      padding: 15px 20px;
       border-radius: 16px;
       font-size: 0.9rem;
       font-weight: 700;
@@ -175,61 +160,77 @@
       -webkit-tap-highlight-color: transparent;
     }
     .btn:active { transform: scale(0.96); opacity: 0.85; }
+
+    /* Primary = solid green */
     .btn-primary {
-      background: var(--text);
-      color: var(--bg);
+      background: #16a34a;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(22,163,74,0.3);
     }
+    .btn-primary:hover { background: #15803d; }
+
+    /* Secondary = white outlined */
     .btn-secondary {
-      background: var(--card);
-      color: var(--text);
-      border: 1.5px solid var(--border);
+      background: #ffffff;
+      color: #0a0a0a;
+      border: 1.5px solid #e5e7eb;
     }
-    @media (prefers-color-scheme: dark) {
-      .btn-primary { background: #f9fafb; color: #0a0a0a; }
-    }
+    .btn-secondary:hover { background: #f9fafb; }
 
-    /* Footer tip */
-    .tip {
-      padding: 20px 24px 40px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.75rem;
-      line-height: 1.6;
-    }
-
-    /* Success state */
-    .success-check {
+    /* Success check bubble */
+    .check-bubble {
       display: none;
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
-      background: rgba(22,163,74,0.12);
+      background: #f0fdf4;
+      border: 2px solid #bbf7d0;
       align-items: center;
       justify-content: center;
       margin: 0 auto 20px;
     }
-    body.is-online .icon-wrap { display: none; }
-    body.is-online .success-check { display: flex; }
-    body.is-online h1::before { content: ""; }
-    body.is-online .main-title { display: none; }
-    body.is-online .online-title { display: block; }
-    body.is-online .main-desc { display: none; }
-    body.is-online .online-desc { display: block; }
-    body.is-online .btns { display: none; }
 
-    .online-title, .online-desc { display: none; }
+    /* Footer tip */
+    .tip {
+      padding: 24px 24px 44px;
+      text-align: center;
+      font-size: 0.73rem;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+    .tip strong { color: #16a34a; font-weight: 700; }
+
+    /* Online state transitions */
+    body.is-online .icon-wrap  { display: none; }
+    body.is-online .check-bubble { display: flex; }
+    body.is-online .offline-h  { display: none; }
+    body.is-online .online-h   { display: block; }
+    body.is-online .offline-d  { display: none; }
+    body.is-online .online-d   { display: block; }
+    body.is-online .btns       { display: none; }
+    body.is-online .tip        { display: none; }
+
+    .online-h, .online-d { display: none; }
   </style>
 </head>
 <body>
+  <!-- Green accent top strip -->
+  <div class="accent-strip"></div>
+
+  <!-- Nav -->
   <div class="nav">
     <a href="/" class="logo">Vendoor<span>X</span></a>
   </div>
 
+  <!-- Main -->
   <div class="main">
-    <!-- Offline icon -->
+
+    <!-- Offline icon (green-tinted card) -->
     <div class="icon-wrap">
       <div class="icon-card">
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+             stroke="#16a34a" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="1" y1="1" x2="23" y2="23"/>
           <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
           <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
@@ -242,29 +243,38 @@
       <div class="badge">!</div>
     </div>
 
-    <!-- Online success icon -->
-    <div class="success-check">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Online success bubble -->
+    <div class="check-bubble">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none"
+           stroke="#16a34a" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 6 9 17l-5-5"/>
       </svg>
     </div>
 
-    <h1 class="main-title">You're offline</h1>
-    <h1 class="online-title">Back online!</h1>
+    <h1 class="offline-h">You're offline</h1>
+    <h1 class="online-h">Back online!</h1>
 
-    <p class="desc main-desc">Check your data or Wi-Fi connection and try again. Pages you've visited before are still available.</p>
-    <p class="desc online-desc">Connection restored. Taking you back now…</p>
+    <p class="desc offline-d">
+      Check your data or Wi-Fi and try again.<br>
+      Pages you've visited before are still available.
+    </p>
+    <p class="desc online-d">
+      Connection restored. Taking you back now…
+    </p>
 
     <!-- Status pill -->
-    <div class="pill" id="pill">
-      <span class="dot" id="dot"></span>
+    <div class="pill offline" id="pill">
+      <span class="dot pulse" id="dot"></span>
       <span id="pill-text">Waiting for connection</span>
     </div>
 
     <!-- Buttons -->
     <div class="btns">
       <button class="btn btn-primary" onclick="window.location.reload()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 4 23 10 17 10"/>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
         </svg>
@@ -275,35 +285,36 @@
   </div>
 
   <p class="tip">
-    Pages you've already visited can still be<br>viewed while you're offline.
+    <strong>Tip:</strong> Pages you've already visited can still be viewed while offline.
   </p>
 
   <script>
     var dots = 0;
+    var pillEl   = document.getElementById('pill');
+    var dotEl    = document.getElementById('dot');
     var pillText = document.getElementById('pill-text');
-    var pill = document.getElementById('pill');
-    var dotEl = document.getElementById('dot');
 
-    // Animate the waiting dots
-    setInterval(function() {
+    // Animate waiting dots
+    var timer = setInterval(function () {
       if (document.body.classList.contains('is-online')) return;
       dots = (dots % 3) + 1;
       pillText.textContent = 'Waiting for connection' + '.'.repeat(dots);
     }, 600);
 
     function goOnline() {
+      clearInterval(timer);
       document.body.classList.add('is-online');
-      pill.classList.add('online');
-      dotEl.classList.add('online');
+      pillEl.classList.remove('offline');
+      dotEl.classList.remove('pulse');
       pillText.textContent = 'Connected — redirecting';
-      setTimeout(function() { window.location.href = '/'; }, 1500);
+      setTimeout(function () { window.location.href = '/'; }, 1500);
     }
 
     window.addEventListener('online', goOnline);
 
-    // If already online when this page loads, redirect immediately
+    // Already online → redirect immediately
     if (navigator.onLine) {
-      setTimeout(function() { window.location.href = '/'; }, 800);
+      setTimeout(function () { window.location.href = '/'; }, 600);
     }
   </script>
 </body>
