@@ -136,7 +136,7 @@ export function OrderChat({ orderId, currentUserId, otherUserName, orderRef }: P
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed inset-x-0 bottom-0 z-50 sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[360px] flex flex-col bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[80vh] sm:max-h-[500px]">
+        <div className="fixed inset-x-0 bottom-0 z-[60] sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[360px] flex flex-col bg-card border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: 'min(80vh, 520px)', height: 'min(80vh, 520px)' }}>
 
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card rounded-t-2xl">
@@ -219,7 +219,7 @@ export function OrderChat({ orderId, currentUserId, otherUserName, orderRef }: P
       {/* Backdrop (mobile only) */}
       {open && (
         <div
-          className="sm:hidden fixed inset-0 z-40 bg-black/40"
+          className="sm:hidden fixed inset-0 z-[59] bg-black/40"
           onClick={() => setOpen(false)}
         />
       )}
