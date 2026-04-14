@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield, Flag } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield, Flag, Download } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,6 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { OrderChat } from '@/components/features/order-chat'
-import { LocationTracker } from '@/components/features/location-tracker'
 
 async function getToken() {
   const supabase = createClient()
@@ -343,11 +342,20 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed, currentUserId }: { or
                   <p className="text-xs text-muted-foreground mb-0.5">Total Paid</p>
                   <p className="font-black text-primary">₦{order.total_amount.toLocaleString()}</p>
                 </div>
-                <div className="p-3 rounded-xl bg-muted/50 col-span-2">
-                  <p className="text-xs text-muted-foreground mb-0.5">Delivery Address</p>
-                  <p className="text-xs font-medium">{order.delivery_address}</p>
-                </div>
               </div>
+
+              {/* Download receipt button for paid/completed orders */}
+              {['paid', 'shipped', 'delivered', 'completed'].includes(order.status) && order.payment_ref && (
+                <a
+                  href={`/receipt/${order.payment_ref}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-9 rounded-xl border border-emerald-300 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download Receipt
+                </a>
+              )}
 
               {/* Pay button for pending orders */}
               {order.status === 'pending' && (
@@ -529,7 +537,6 @@ export default function OrdersPage() {
             <h1 className="text-xl font-black text-foreground">My Orders</h1>
             <p className="text-xs text-muted-foreground">Track and manage your orders</p>
           </div>
-          <LocationTracker showBadge mandatory pageLabel="My Orders" />
           <Link
             href="/dashboard/wallet"
             className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center hover:bg-muted transition-colors"
@@ -556,8 +563,8 @@ export default function OrdersPage() {
             <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mb-4">
               <ShoppingBag className="w-8 h-8 text-destructive/60" />
             </div>
-            <h3 className="font-bold text-foreground mb-1">Failed to load orders</h3>
-            <p className="text-sm text-muted-foreground mb-4">Make sure the backend API is running</p>
+            <h3 className="font-bold text-foreground mb-1">Couldn't load your orders</h3>
+            <p className="text-sm text-muted-foreground mb-4">There was a connection issue. Please try again.</p>
             <Button onClick={() => refetch()} variant="outline" size="sm" className="rounded-xl">
               Try again
             </Button>

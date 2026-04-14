@@ -3,8 +3,9 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, XCircle, Loader2, RotateCcw, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, RotateCcw, ShoppingBag, ArrowLeft, ArrowRight, Download } from 'lucide-react'
 import { ordersApi } from '@/lib/api'
+import { toast } from 'sonner'
 
 type Status = 'loading' | 'success' | 'cancelled' | 'failed' | 'no_reference'
 
@@ -49,7 +50,7 @@ function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
   )
 }
 
-function SuccessView({ orderId, onGoNow }: { orderId: string | null; onGoNow: () => void }) {
+function SuccessView({ orderId, reference, onGoNow }: { orderId: string | null; reference: string | null; onGoNow: () => void }) {
   const [countdown, setCountdown] = useState(REDIRECT_SECONDS)
   const router = useRouter()
   const destination = orderId ? `/dashboard/orders/${orderId}` : '/dashboard/orders'
@@ -97,6 +98,18 @@ function SuccessView({ orderId, onGoNow }: { orderId: string | null; onGoNow: ()
           Keep Shopping
         </Link>
       </div>
+
+      {reference && (
+        <a
+          href={`/receipt/${reference}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Download Receipt
+        </a>
+      )}
     </div>
   )
 }
@@ -124,6 +137,7 @@ function CallbackContent() {
 
         if (s === 'success') {
           setStatus('success')
+          toast.success('Payment confirmed! Your order is now active.', { duration: 6000 })
         } else if (s === 'abandoned' || s === 'cancelled') {
           setStatus('cancelled')
         } else {
@@ -170,7 +184,7 @@ function CallbackContent() {
   }
 
   if (status === 'success') {
-    return <SuccessView orderId={orderId} onGoNow={handleGoNow} />
+    return <SuccessView orderId={orderId} reference={reference} onGoNow={handleGoNow} />
   }
 
   if (status === 'cancelled') {
