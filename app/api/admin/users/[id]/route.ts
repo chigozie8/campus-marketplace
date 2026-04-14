@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
-const adminClient = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const adminClient = createServiceClient()!
 
 async function getAdminUser() {
   const supabase = await createClient()
@@ -26,7 +23,7 @@ export async function GET(
   const { id } = await context.params
 
   const [
-    { data: profile },
+    { data: profile, error: profileError },
     { data: verification },
     { data: listings },
     { data: buyerOrders },
@@ -36,16 +33,9 @@ export async function GET(
   ] = await Promise.all([
     adminClient
       .from('profiles')
-      .select([
-        'id', 'full_name', 'avatar_url', 'phone', 'email', 'university', 'campus',
-        'is_seller', 'seller_verified', 'trust_score', 'rating', 'total_sales',
-        'created_at', 'bio', 'whatsapp_number', 'payout_bank_name', 'payout_bank_code',
-        'payout_account_number', 'payout_account_name', 'paystack_subaccount_code',
-        'is_business_verified', 'is_student_verified',
-        'total_orders', 'successful_orders', 'failed_orders', 'disputes_count',
-      ].join(', '))
+      .select('*')
       .eq('id', id)
-      .single(),
+      .maybeSingle(),
 
     adminClient
       .from('vendor_verifications')
@@ -122,6 +112,9 @@ export async function GET(
     })
   }
 
+  if (profileError) {
+    return NextResponse.json({ error: 'Profile query failed', detail: profileError.message }, { status: 500 })
+  }
   if (!profile) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
