@@ -3,6 +3,53 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+function playOfflineSound() {
+  try {
+    const ctx = new AudioContext()
+    const gains = [0.35, 0.25, 0.15]
+    const freqs = [520, 380, 260]
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime)
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(gains[i], ctx.currentTime + 0.05 + i * 0.13)
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.18 + i * 0.13)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime + i * 0.13)
+      osc.stop(ctx.currentTime + 0.22 + i * 0.13)
+    })
+    setTimeout(() => ctx.close(), 1000)
+  } catch {}
+}
+
+function playOnlineSound() {
+  try {
+    const ctx = new AudioContext()
+    const notes = [
+      { freq: 440, t: 0.00 },
+      { freq: 554, t: 0.12 },
+      { freq: 659, t: 0.24 },
+    ]
+    notes.forEach(({ freq, t }) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + t)
+      gain.gain.setValueAtTime(0, ctx.currentTime + t)
+      gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + t + 0.04)
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.18)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime + t)
+      osc.stop(ctx.currentTime + t + 0.22)
+    })
+    setTimeout(() => ctx.close(), 1000)
+  } catch {}
+}
+
 export function NetworkToast() {
   const wasOnline = useRef(true)
 
@@ -11,6 +58,7 @@ export function NetworkToast() {
 
     function handleOffline() {
       wasOnline.current = false
+      playOfflineSound()
       toast.error('You\'re offline', {
         id: 'network-status',
         description: 'Check your internet connection.',
@@ -29,6 +77,7 @@ export function NetworkToast() {
 
     function handleOnline() {
       if (!wasOnline.current) {
+        playOnlineSound()
         toast.success('Back online!', {
           id: 'network-status',
           description: 'Your connection has been restored.',
