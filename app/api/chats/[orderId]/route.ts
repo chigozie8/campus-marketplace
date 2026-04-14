@@ -8,26 +8,6 @@ const adminDb = createAdmin(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
-async function ensureTable() {
-  await adminDb.rpc('exec_sql', {
-    sql: `
-      CREATE TABLE IF NOT EXISTS order_chats (
-        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        order_id    UUID NOT NULL,
-        sender_id   UUID NOT NULL,
-        receiver_id UUID NOT NULL,
-        message     TEXT NOT NULL,
-        read        BOOLEAN NOT NULL DEFAULT FALSE,
-        created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS order_chats_order_idx ON order_chats (order_id);
-      CREATE INDEX IF NOT EXISTS order_chats_receiver_idx ON order_chats (receiver_id, read);
-    `,
-  }).catch(() => {
-    // rpc may not exist — try direct insert instead; table might already exist
-  })
-}
-
 /** Verify caller is buyer or seller of this order */
 async function getOrderParties(orderId: string, userId: string) {
   const { data: order } = await adminDb
@@ -90,8 +70,6 @@ export async function POST(
 
   const { message } = await req.json()
   if (!message?.trim()) return NextResponse.json({ error: 'Message is required' }, { status: 400 })
-
-  await ensureTable()
 
   const receiverId = order.buyer_id === user.id ? order.seller_id : order.buyer_id
 
