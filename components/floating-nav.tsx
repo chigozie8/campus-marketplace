@@ -17,6 +17,8 @@ export function FloatingNav() {
   const pathname = usePathname()
 
   if (pathname.startsWith('/auth')) return null
+  if (pathname === '/offline') return null
+  if (pathname === '/coming-soon') return null
 
   return (
     <nav
