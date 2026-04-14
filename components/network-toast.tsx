@@ -3,38 +3,6 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
-function softChime(freq: number, volume: number, ctx: AudioContext, startAt = 0) {
-  const osc = ctx.createOscillator()
-  const gain = ctx.createGain()
-  osc.type = 'sine'
-  osc.frequency.setValueAtTime(freq, ctx.currentTime + startAt)
-  gain.gain.setValueAtTime(0, ctx.currentTime + startAt)
-  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + startAt + 0.08)
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + startAt + 0.9)
-  osc.connect(gain)
-  gain.connect(ctx.destination)
-  osc.start(ctx.currentTime + startAt)
-  osc.stop(ctx.currentTime + startAt + 0.95)
-}
-
-function playOfflineSound() {
-  try {
-    const ctx = new AudioContext()
-    softChime(330, 0.06, ctx, 0.0)
-    softChime(262, 0.05, ctx, 0.18)
-    setTimeout(() => ctx.close(), 1500)
-  } catch {}
-}
-
-function playOnlineSound() {
-  try {
-    const ctx = new AudioContext()
-    softChime(392, 0.05, ctx, 0.0)
-    softChime(523, 0.06, ctx, 0.18)
-    setTimeout(() => ctx.close(), 1500)
-  } catch {}
-}
-
 export function NetworkToast() {
   const wasOnline = useRef(true)
 
@@ -43,7 +11,6 @@ export function NetworkToast() {
 
     function handleOffline() {
       wasOnline.current = false
-      playOfflineSound()
       toast.error('You\'re offline', {
         id: 'network-status',
         description: 'Check your internet connection.',
@@ -62,7 +29,6 @@ export function NetworkToast() {
 
     function handleOnline() {
       if (!wasOnline.current) {
-        playOnlineSound()
         toast.success('Back online!', {
           id: 'network-status',
           description: 'Your connection has been restored.',
