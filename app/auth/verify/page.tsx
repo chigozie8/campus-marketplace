@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
-const CODE_LENGTH = 6
+const CODE_LENGTH = 8
 
 function VerifyPageInner() {
   const router = useRouter()

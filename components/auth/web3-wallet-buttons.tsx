@@ -72,10 +72,10 @@ export function Web3WalletButtons({ mode = 'signin' }: Web3WalletButtonsProps) {
     try {
       const eth = (window as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum
       if (!eth) {
-        toast.error('MetaMask not found', {
-          description: 'Install MetaMask at metamask.io then try again.',
-        })
+        // On mobile, redirect into MetaMask's built-in browser where window.ethereum is injected
         setEthLoading(false)
+        const deeplink = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`
+        window.location.href = deeplink
         return
       }
 
@@ -121,10 +121,12 @@ export function Web3WalletButtons({ mode = 'signin' }: Web3WalletButtonsProps) {
     try {
       const sol = (window as { solana?: { isPhantom?: boolean; connect: () => Promise<void>; publicKey: { toBase58: () => string }; signMessage: (msg: Uint8Array, enc: string) => Promise<{ signature: Uint8Array }> } }).solana
       if (!sol?.isPhantom) {
-        toast.error('Phantom not found', {
-          description: 'Install Phantom at phantom.app then try again.',
-        })
+        // On mobile, redirect into Phantom's built-in browser where window.solana is injected
         setSolLoading(false)
+        const currentUrl = encodeURIComponent(window.location.href)
+        const ref = encodeURIComponent(window.location.origin)
+        const deeplink = `https://phantom.app/ul/browse/${currentUrl}?ref=${ref}`
+        window.location.href = deeplink
         return
       }
 
