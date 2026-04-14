@@ -1,12 +1,12 @@
 // VendoorX Service Worker — Network-first, offline fallback + Web Push
 // Note: When running inside Capacitor native app, native push is handled
 // by the @capacitor/push-notifications plugin — web push is skipped.
-const CACHE_VERSION = 'v9'
+const CACHE_VERSION = 'v10'
 const OFFLINE_CACHE = `vendoorx-offline-${CACHE_VERSION}`
 const FLAGS_CACHE = 'vendoorx-flags'
 const NATIVE_FLAG_KEY = '/native-mode'
 
-const OFFLINE_PAGES = ['/offline']
+const OFFLINE_PAGES = ['/offline.html']
 
 // In-memory native mode flag — set by SET_NATIVE_MODE message or restored from cache
 let nativeModeActive = false
@@ -77,9 +77,9 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(async () => {
-        const cached = await caches.match('/offline', { cacheName: OFFLINE_CACHE })
+        const cached = await caches.match('/offline.html', { cacheName: OFFLINE_CACHE })
         return cached || new Response(
-          '<html><body><h1>You are offline</h1><p>Please check your connection.</p></body></html>',
+          '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline — VendoorX</title><style>body{font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8f9fa;color:#0a0a0a;text-align:center;padding:24px}.logo{font-size:1.5rem;font-weight:900;margin-bottom:32px}.logo span{color:#16a34a}h1{font-size:1.75rem;font-weight:900;margin-bottom:12px}p{color:#6b7280;margin-bottom:28px;max-width:280px;line-height:1.6}button,a{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:14px;font-size:.9rem;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:.12s}button{background:#0a0a0a;color:#fff;margin-right:10px}a{background:#fff;color:#0a0a0a;border:1.5px solid #e5e7eb}</style></head><body><div class="logo">Vendoor<span>X</span></div><h1>You\'re offline</h1><p>Check your internet connection and try again.</p><button onclick="location.reload()">Try Again</button><a href="/">Go Home</a></body></html>',
           { headers: { 'Content-Type': 'text/html' }, status: 503 }
         )
       })
