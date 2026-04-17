@@ -11,6 +11,7 @@ import {
   MessageCircle, ShoppingBag, TrendingDown, Sparkles, BarChart2,
   Banknote, UserPlus, Tag, ShieldAlert, Building2, FileImage,
   CreditCard, Clock, CheckCircle, XCircle, Upload, Users, Megaphone,
+  Eye, EyeOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadToCloudinary } from '@/lib/cloudinary'
@@ -69,6 +70,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [localAvatar, setLocalAvatar] = useState('')
   const [errors, setErrors] = useState<Partial<ProfileForm>>({})
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [showNewPwd, setShowNewPwd] = useState(false)
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false)
 
   // 2FA state
   const [mfaEnabled, setMfaEnabled] = useState(false)
@@ -345,6 +354,24 @@ export default function ProfilePage() {
         fetch('/api/profile/check-milestones', { method: 'POST' }).catch(() => {})
       }
     })
+  }
+
+  // ── Password change handler ──
+  async function handleChangePassword() {
+    if (newPassword.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (newPassword !== confirmPassword) { toast.error('Passwords do not match'); return }
+    setPasswordSaving(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) {
+      toast.error(error.message)
+    } else {
+      toast.success('Password updated successfully!')
+      setNewPassword('')
+      setConfirmPassword('')
+      setShowPasswordForm(false)
+    }
+    setPasswordSaving(false)
   }
 
   // ── 2FA handlers ──
@@ -715,19 +742,92 @@ export default function ProfilePage() {
         {tab === 'Security' && (
           <div className="space-y-3">
             {/* Change Password */}
-            <Link
-              href="/auth/forgot-password"
-              className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-muted flex items-center justify-center">
-                <Lock className="w-5 h-5 text-gray-700 dark:text-foreground" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm text-gray-900 dark:text-white">Change Password</p>
-                <p className="text-xs text-gray-500">Update your login password</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
+            <div className="rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card shadow-sm overflow-hidden">
+              <button
+                onClick={() => setShowPasswordForm(v => !v)}
+                className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-muted/40 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-muted flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-gray-700 dark:text-foreground" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-sm text-gray-900 dark:text-white">Change Password</p>
+                  <p className="text-xs text-gray-500">Update your login password</p>
+                </div>
+                <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${showPasswordForm ? 'rotate-90' : ''}`} />
+              </button>
+
+              {showPasswordForm && (
+                <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gray-100 dark:border-border">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-foreground mb-1.5 mt-3">
+                      New password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showNewPwd ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        placeholder="At least 8 characters"
+                        className="w-full px-4 py-2.5 pr-10 bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-xl text-sm focus:outline-none focus:border-[#16a34a] focus:bg-white dark:focus:bg-background transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPwd(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showNewPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-foreground mb-1.5">
+                      Re-enter new password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPwd ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={e => setConfirmPassword(e.target.value)}
+                        placeholder="Type it again"
+                        className="w-full px-4 py-2.5 pr-10 bg-gray-50 dark:bg-muted border border-gray-200 dark:border-border rounded-xl text-sm focus:outline-none focus:border-[#16a34a] focus:bg-white dark:focus:bg-background transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPwd(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showConfirmPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {confirmPassword && newPassword !== confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1.5">Passwords don't match</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        setShowPasswordForm(false)
+                        setNewPassword('')
+                        setConfirmPassword('')
+                      }}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-600 bg-gray-100 dark:bg-muted hover:bg-gray-200 dark:hover:bg-muted/70 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleChangePassword}
+                      disabled={passwordSaving || !newPassword || !confirmPassword}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#16a34a] text-white hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                      {passwordSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save new password'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Two-Factor Auth */}
             <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-border bg-white dark:bg-card shadow-sm">
