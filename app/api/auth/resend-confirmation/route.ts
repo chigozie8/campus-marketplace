@@ -1,33 +1,29 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
-import { sendConfirmationLinkEmail } from '@/lib/email'
+import { createPublicClient } from '@/lib/supabase/public'
 
 export async function POST(req: Request) {
-  const { email, name } = await req.json()
+  const { email } = await req.json()
 
   if (!email) {
     return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
   }
 
-  const adminClient = createServiceClient()
-  if (!adminClient) {
+  const supabase = createPublicClient()
+  if (!supabase) {
     return NextResponse.json({ error: 'Service unavailable.' }, { status: 503 })
   }
 
   const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
-  const redirectTo = `${appUrl}/auth/confirm`
 
-  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+  const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
-    options: { redirectTo },
+    options: { emailRedirectTo: `${appUrl}/auth/confirm` },
   })
 
-  if (linkError || !linkData?.properties?.action_link) {
-    return NextResponse.json({ error: 'Could not generate confirmation link.' }, { status: 500 })
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 })
   }
-
-  await sendConfirmationLinkEmail(email, name || 'there', linkData.properties.action_link)
 
   return NextResponse.json({ success: true })
 }

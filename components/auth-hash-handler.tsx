@@ -33,6 +33,25 @@ export function AuthHashHandler() {
     const accessToken = params.get('access_token')
     const refreshToken = params.get('refresh_token')
     const type = params.get('type')
+    const errorCode = params.get('error_code')
+    const errorDesc = params.get('error_description')
+
+    // Handle Supabase auth errors (expired link, etc) that get redirected to Site URL
+    if (errorCode || errorDesc) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      const isExpired = errorCode === 'otp_expired' || (errorDesc || '').toLowerCase().includes('expired')
+      toast.error(
+        isExpired ? 'Your confirmation link has expired' : 'Confirmation failed',
+        {
+          description: isExpired
+            ? 'Links are valid for a limited time. Please request a new one below.'
+            : decodeURIComponent((errorDesc || 'Please try again.').replace(/\+/g, ' ')),
+          duration: 8000,
+        }
+      )
+      router.replace('/auth/resend-confirmation')
+      return
+    }
 
     if (!accessToken || !refreshToken) return
 
