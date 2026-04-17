@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { sendConfirmationLinkEmail } from '@/lib/email'
+import { createPublicClient } from '@/lib/supabase/public'
 
 export async function POST(req: Request) {
   const {
@@ -18,27 +18,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
   }
 
+  const publicClient = createPublicClient()
   const adminClient = createServiceClient()
-  if (!adminClient) {
+  if (!publicClient || !adminClient) {
     return NextResponse.json({ error: 'Service unavailable.' }, { status: 503 })
   }
 
-  const { data, error } = await adminClient.auth.admin.createUser({
+  const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
+
+  // Use signUp so Supabase automatically sends its own confirmation email
+  // (using the email template configured in the Supabase dashboard).
+  const { data, error } = await publicClient.auth.signUp({
     email,
     password,
-    email_confirm: false,
-    user_metadata: {
-      full_name,
-      whatsapp_number: whatsapp_number || null,
-      university: university || null,
-      role,
-      referred_by: referred_by || null,
-      is_student_verified: !!is_student_verified,
+    options: {
+      emailRedirectTo: `${appUrl}/auth/confirm`,
+      data: {
+        full_name,
+        whatsapp_number: whatsapp_number || null,
+        university: university || null,
+        role,
+        referred_by: referred_by || null,
+        is_student_verified: !!is_student_verified,
+      },
     },
   })
 
   if (error) {
-    const isDupe = error.message.toLowerCase().includes('already')
+    const isDupe = error.message.toLowerCase().includes('already') ||
+                   error.message.toLowerCase().includes('registered')
     return NextResponse.json(
       { error: isDupe ? 'This email is already registered. Please sign in.' : error.message },
       { status: 400 },
@@ -58,19 +66,6 @@ export async function POST(req: Request) {
       },
       { onConflict: 'id' },
     )
-
-    const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
-    const redirectTo = `${appUrl}/auth/confirm`
-
-    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
-      type: 'signup',
-      email,
-      options: { redirectTo },
-    })
-
-    if (!linkError && linkData?.properties?.action_link) {
-      await sendConfirmationLinkEmail(email, full_name, linkData.properties.action_link)
-    }
   }
 
   return NextResponse.json({ success: true })
