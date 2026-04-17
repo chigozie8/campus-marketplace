@@ -107,27 +107,18 @@ router.post('/refund/:orderId', async (req, res, next) => {
       .update({ status: 'cancelled', updated_at: new Date().toISOString() })
       .eq('id', orderId)
 
-    // Reverse seller's pending wallet credit
-    await walletService.reversePendingCredit(order.seller_id, orderId)
+    // Reverse seller's pending wallet credit AND credit the buyer's wallet
+    // with the full amount they paid. Funds remain on the platform's
+    // Paystack balance, so we credit the buyer in-app rather than calling
+    // Paystack /refund (which would double-pay).
+    await walletService.reversePendingCredit(
+      order.seller_id,
+      order.buyer_id,
+      orderId,
+      Number(order.total_amount) || 0,
+    )
 
-    // Issue Paystack refund if payment was made
-    if (order.payment_ref) {
-      try {
-        const paystackKey = process.env.PAYSTACK_SECRET_KEY
-        await fetch('https://api.paystack.co/refund', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${paystackKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ transaction: order.payment_ref }),
-        })
-      } catch {
-        // Log but don't fail — admin can process manually
-      }
-    }
-
-    res.json({ success: true, message: 'Refund request submitted. We\'ll process it within 3–5 business days.' })
+    res.json({ success: true, message: 'Refund processed — the funds have been credited to your wallet.' })
   } catch (err) { next(err) }
 })
 

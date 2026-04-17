@@ -239,7 +239,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               )}
 
-              {/* Dynamic: views, likes, WhatsApp, Instagram, Facebook, save button */}
+              {/* Dynamic: views, likes, WhatsApp, save button */}
               <ProductInteractions
                 productId={p.id}
                 productTitle={p.title}
@@ -248,8 +248,6 @@ export default async function ProductDetailPage({ params }: Props) {
                 initialLiked={initialLiked}
                 whatsappUrl={whatsappUrl}
                 whatsappMessage={whatsappMessage}
-                instagramHandle={p.profiles?.instagram_handle ?? null}
-                facebookHandle={p.profiles?.facebook_handle ?? null}
               />
 
               {/* Description */}

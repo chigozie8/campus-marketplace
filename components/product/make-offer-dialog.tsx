@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
-import { Tag, Loader2, X, Send, CheckCircle2 } from 'lucide-react'
+import { Tag, Loader2, X, Send, CheckCircle2, MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,11 +18,13 @@ interface Props {
 }
 
 export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerId, currentUserId }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [offerPrice, setOfferPrice] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [createdOfferId, setCreatedOfferId] = useState<string | null>(null)
 
   function handleOpen() {
     if (!currentUserId) { toast.error('Sign in to make an offer'); return }
@@ -44,6 +47,7 @@ export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerI
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to send offer')
+      setCreatedOfferId(data.offer?.id ?? null)
       setDone(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Something went wrong')
@@ -54,7 +58,7 @@ export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerI
 
   function handleClose() {
     setOpen(false)
-    setTimeout(() => { setDone(false); setOfferPrice(''); setMessage('') }, 300)
+    setTimeout(() => { setDone(false); setOfferPrice(''); setMessage(''); setCreatedOfferId(null) }, 300)
   }
 
   const discount = offerPrice && Number(offerPrice) > 0
@@ -108,7 +112,24 @@ export function MakeOfferDialog({ productId, productTitle, listingPrice, sellerI
                       The seller will be notified and can accept or counter your offer.
                     </p>
                   </div>
-                  <Button onClick={handleClose} className="w-full rounded-xl">Done</Button>
+                  <div className="w-full grid grid-cols-2 gap-2">
+                    {createdOfferId && (
+                      <Button
+                        onClick={() => { router.push(`/offers/${createdOfferId}`); handleClose() }}
+                        className="rounded-xl gap-1.5"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Open Chat
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleClose}
+                      variant={createdOfferId ? 'outline' : 'default'}
+                      className={`rounded-xl ${createdOfferId ? '' : 'col-span-2'}`}
+                    >
+                      Done
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <>

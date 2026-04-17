@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import { notify } from '../services/notificationService.js'
+import { reversePendingCredit } from '../services/walletService.js'
 import logger from '../utils/logger.js'
 
 const CANCEL_AFTER_DAYS = 5
@@ -38,6 +39,14 @@ async function runAutoCancel() {
           logger.error(`[autoCancelOrders] Failed to cancel order ${order.id}: ${updateErr.message}`)
           continue
         }
+
+        // Refund the buyer in-app and reverse the seller's pending credit
+        await reversePendingCredit(
+          order.seller_id,
+          order.buyer_id,
+          order.id,
+          Number(order.total_amount) || 0,
+        )
 
         const productTitle = (order.products as any)?.title ?? 'your item'
         const shortId = order.id.split('-')[0].toUpperCase()

@@ -5,7 +5,6 @@ import {
   ArrowLeft, BadgeCheck, Star, Package, MapPin,
   GraduationCap, MessageCircle, ShoppingBag, User,
 } from 'lucide-react'
-import { InstagramCTA, FacebookCTA } from '@/components/features/social-cta'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { Badge } from '@/components/ui/badge'
@@ -245,16 +244,6 @@ export default async function SellerProfilePage({ params }: Props) {
               <MessageCircle className="w-5 h-5" />
               Chat on WhatsApp
             </a>
-          )}
-          {(profile.instagram_handle || profile.facebook_handle) && (
-            <div className={`grid gap-2 ${profile.instagram_handle && profile.facebook_handle ? 'grid-cols-2' : 'grid-cols-1'}`}>
-              {profile.instagram_handle && (
-                <InstagramCTA handle={profile.instagram_handle} variant="primary" label="DM on Instagram" />
-              )}
-              {profile.facebook_handle && (
-                <FacebookCTA handle={profile.facebook_handle} variant="primary" label="Message on Facebook" />
-              )}
-            </div>
           )}
         </div>
 

@@ -167,7 +167,7 @@ export default function LoginPage() {
       {/* ── Right panel: white form ── */}
       <div className="flex-1 flex flex-col">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-5 lg:px-10">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-5 lg:px-10">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
@@ -175,27 +175,27 @@ export default function LoginPage() {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to home
           </Link>
-          <p className="text-sm text-gray-500 dark:text-muted-foreground">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-muted-foreground whitespace-nowrap">
             No account?{' '}
             <Link href="/auth/sign-up" className="font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors">
-              Sign up free
+              Sign up
             </Link>
           </p>
         </div>
 
         {/* Form area */}
-        <div className="flex-1 flex items-center justify-center px-6 py-8 lg:px-16">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8 lg:px-16">
           <div className="w-full max-w-[420px]">
             {/* Mobile logo */}
-            <div className="lg:hidden mb-8">
+            <div className="lg:hidden mb-6 sm:mb-8">
               <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
             {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">
                 Welcome back
               </h2>
               <p className="text-gray-500 dark:text-muted-foreground text-sm">

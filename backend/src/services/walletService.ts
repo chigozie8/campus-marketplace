@@ -119,44 +119,82 @@ export async function releaseSellerEarnings(sellerId: string, orderId: string) {
   }
 }
 
-// Called on refund — reverse pending credit
-export async function reversePendingCredit(sellerId: string, orderId: string) {
+// Called on refund — reverse pending credit on the seller's wallet AND
+// credit the buyer's wallet so they have an immediate, in-platform refund.
+//
+// Escrow model: the original Paystack settlement sits with the platform.
+// We hold the seller's earnings in `pending` until delivery is confirmed.
+// When a refund is approved we:
+//   1) Drop the seller's pending balance back down (reverse the credit), and
+//   2) Add the buyer-paid amount to the buyer's `available` wallet balance.
+// The buyer can then withdraw to their bank or reuse the funds.
+export async function reversePendingCredit(
+  sellerId: string,
+  buyerId: string,
+  orderId: string,
+  buyerRefundAmount: number,
+) {
   try {
-    const wallet = await ensureWallet(sellerId)
+    // 1) Reverse the seller-side pending credit (if it exists)
+    const sellerWallet = await ensureWallet(sellerId)
 
     const { data: txn } = await supabaseAdmin
       .from('wallet_transactions')
       .select('*')
-      .eq('wallet_id', wallet.id)
+      .eq('wallet_id', sellerWallet.id)
       .eq('order_id', orderId)
       .eq('type', 'pending')
       .single()
 
-    if (!txn) return
+    if (txn) {
+      await supabaseAdmin
+        .from('wallets')
+        .update({
+          pending: Math.max(0, sellerWallet.pending - txn.amount),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', sellerWallet.id)
 
-    await supabaseAdmin
-      .from('wallets')
-      .update({
-        pending: Math.max(0, wallet.pending - txn.amount),
-        updated_at: new Date().toISOString(),
+      await supabaseAdmin
+        .from('wallet_transactions')
+        .update({ status: 'reversed' })
+        .eq('id', txn.id)
+
+      await supabaseAdmin.from('wallet_transactions').insert({
+        wallet_id: sellerWallet.id,
+        order_id: orderId,
+        type: 'refund',
+        amount: txn.amount,
+        status: 'completed',
+        description: 'Pending earnings reversed — order refunded to buyer',
       })
-      .eq('id', wallet.id)
+    }
 
-    await supabaseAdmin
-      .from('wallet_transactions')
-      .update({ status: 'reversed' })
-      .eq('id', txn.id)
+    // 2) Credit the buyer's wallet with the full amount they paid
+    if (buyerRefundAmount > 0) {
+      const buyerWallet = await ensureWallet(buyerId)
 
-    await supabaseAdmin.from('wallet_transactions').insert({
-      wallet_id: wallet.id,
-      order_id: orderId,
-      type: 'refund',
-      amount: txn.amount,
-      status: 'completed',
-      description: 'Refund issued to buyer — order disputed',
-    })
+      await supabaseAdmin
+        .from('wallets')
+        .update({
+          available: buyerWallet.available + buyerRefundAmount,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', buyerWallet.id)
+
+      await supabaseAdmin.from('wallet_transactions').insert({
+        wallet_id: buyerWallet.id,
+        order_id: orderId,
+        type: 'refund',
+        amount: buyerRefundAmount,
+        status: 'completed',
+        description: 'Refund credited — order cancelled',
+      })
+
+      logger.info(`[wallet] Refunded ₦${buyerRefundAmount} to buyer ${buyerId} for order ${orderId}`)
+    }
   } catch (err) {
-    logger.error(`[wallet] Failed to reverse credit for order ${orderId}: ${err}`)
+    logger.error(`[wallet] Failed to process refund for order ${orderId}: ${err}`)
   }
 }
 

@@ -34,17 +34,21 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single()
 
-    const { error: insertError } = await supabase.from('offers').insert({
-      product_id: productId,
-      buyer_id: user.id,
-      seller_id: product.seller_id,
-      offer_price: offerPrice,
-      message: message || null,
-      status: 'pending',
-    })
+    const { data: insertedOffer, error: insertError } = await supabase
+      .from('offers')
+      .insert({
+        product_id: productId,
+        buyer_id: user.id,
+        seller_id: product.seller_id,
+        offer_price: offerPrice,
+        message: message || null,
+        status: 'pending',
+      })
+      .select('id')
+      .single()
 
-    if (insertError) {
-      return NextResponse.json({ error: insertError.message }, { status: 500 })
+    if (insertError || !insertedOffer) {
+      return NextResponse.json({ error: insertError?.message || 'Failed to create offer' }, { status: 500 })
     }
 
     const buyerName = buyerProfile?.full_name || 'A buyer'
@@ -57,11 +61,11 @@ export async function POST(req: Request) {
         title: 'New Offer Received',
         body: notifBody,
         type: 'offer',
-        data: { url: '/dashboard', productId, offerPrice, buyerId: user.id },
+        data: { url: `/offers/${insertedOffer.id}`, productId, offerPrice, buyerId: user.id },
       })
     } catch { /* non-critical */ }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, offer: { id: insertedOffer.id } })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Server error'
     return NextResponse.json({ error: msg }, { status: 500 })

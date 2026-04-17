@@ -2,6 +2,23 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Two-Way Offer Conversations + Escrow Refund Fix + Order Detail Page
+- **Offers — full negotiation thread:** new `offer_messages` table (`scripts/030_offer_messages.sql`) lets buyer & seller exchange replies and counter-prices on a single offer. New routes:
+  - `GET/PATCH /api/offers/[id]` — fetch single offer with both parties; accept/decline/withdraw/counter
+  - `GET/POST /api/offers/[id]/messages` — list & post messages, sets offer to `countered` when a counter price is sent
+  - Conversation UI at `app/offers/[id]/page.tsx` with light 5s polling
+  - Inbox at `app/dashboard/offers/page.tsx` with Received/Sent tabs
+  - `POST /api/offers` now returns the new offer id; `make-offer-dialog.tsx` shows an "Open Chat" button that deep-links into the conversation
+- **Escrow refund bug fix:** `reversePendingCredit` in `backend/src/services/walletService.ts` now takes `(sellerId, buyerId, orderId, amount)` and credits the buyer's wallet `available` balance in addition to reversing the seller's pending credit. Removed the duplicate Paystack `/refund` call (funds stayed on the platform's Paystack balance, so the in-wallet credit is the actual refund). Auto-cancel job (`backend/src/jobs/autoCancelOrders.ts`) now also refunds the buyer when an order is auto-cancelled after 5 days unshipped.
+- **Order detail page:** created `app/dashboard/orders/[id]/page.tsx` (was missing — payment callback redirected to a 404). Shows status tracker, product summary, contextual CTAs (pay if pending), and embeds `OrderChat` for buyer↔seller messaging at any non-cancelled status.
+- **Buy Now spinner:** `components/features/product-buy-button.tsx` shows a loading spinner during the auth check before opening the checkout modal.
+- **Removed Instagram/Facebook CTAs** from `components/product/product-interactions.tsx`, `app/marketplace/[id]/page.tsx`, and `app/sellers/[id]/page.tsx`.
+- **Mobile responsiveness pass** on `app/auth/login/page.tsx` and `app/auth/sign-up/page.tsx`: tighter padding on small screens, smaller heading sizes, no-wrap "Sign in/up" link to prevent header overflow.
+
+**Pending DB action:** run `scripts/030_offer_messages.sql` in Supabase SQL editor.
+
+
+
 ### 10-Platform-Improvement Build Pass
 
 **#1 — Order status push notifications:**
