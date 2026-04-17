@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
-const CODE_LENGTH = 4
+const CODE_LENGTH = 6
 
 function VerifyPageInner() {
   const router = useRouter()
@@ -201,13 +201,13 @@ function VerifyPageInner() {
               <span className="text-[#16a34a]">the market.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              We sent a 4-digit code to your email. Enter it to activate your VendoorX account.
+              We sent a 6-digit code to your email. Enter it to activate your VendoorX account.
             </p>
 
             <div className="space-y-3.5 mb-10">
               {[
                 { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder too' },
-                { icon: '🔢', label: 'Enter the 4-digit code', sub: 'It expires in 10 minutes' },
+                { icon: '🔢', label: 'Enter the 6-digit code', sub: 'It expires in 10 minutes' },
                 { icon: '🚀', label: 'Start trading on VendoorX', sub: 'Free forever, no commissions' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3">
@@ -276,7 +276,7 @@ function VerifyPageInner() {
               Check your email
             </h2>
             <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">
-              We sent a 4-digit code to
+              We sent a 6-digit code to
             </p>
             <div className="flex items-center gap-2 mb-7">
               <p className="font-bold text-gray-900 dark:text-white text-sm break-all">
@@ -290,8 +290,8 @@ function VerifyPageInner() {
               )}
             </div>
 
-            {/* 4-digit OTP inputs — large and centered */}
-            <div className="flex gap-3 sm:gap-4 justify-center mb-7" onPaste={handlePaste}>
+            {/* 6-digit OTP inputs — responsive and centered */}
+            <div className="flex gap-2 sm:gap-3 justify-center mb-7" onPaste={handlePaste}>
               {digits.map((digit, i) => (
                 <input
                   key={i}
@@ -305,8 +305,8 @@ function VerifyPageInner() {
                   disabled={loading}
                   aria-label={`Digit ${i + 1}`}
                   className={cn(
-                    'w-16 h-16 sm:w-[72px] sm:h-[72px]',
-                    'text-center text-2xl sm:text-3xl font-black rounded-xl border-2 transition-all duration-150',
+                    'w-10 h-12 sm:w-12 sm:h-14',
+                    'text-center text-xl sm:text-2xl font-black rounded-xl border-2 transition-all duration-150',
                     'bg-gray-50 dark:bg-muted text-gray-900 dark:text-foreground',
                     'focus:outline-none focus:ring-0',
                     digit
