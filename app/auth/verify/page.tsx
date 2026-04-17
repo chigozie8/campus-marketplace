@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
-const CODE_LENGTH = 8
+const CODE_LENGTH = 4
 
 function VerifyPageInner() {
   const router = useRouter()
@@ -164,7 +164,7 @@ function VerifyPageInner() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-background">
-      {/* ── Left panel ── */}
+      {/* ── Left panel (desktop only) ── */}
       <div className="hidden lg:flex lg:w-[46%] bg-[#0a0a0a] relative overflow-hidden flex-col">
         <div
           className="absolute inset-0 opacity-[0.18]"
@@ -201,13 +201,13 @@ function VerifyPageInner() {
               <span className="text-[#16a34a]">the market.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              We sent a 6-digit code to your email. Enter it to activate your VendoorX account.
+              We sent a 4-digit code to your email. Enter it to activate your VendoorX account.
             </p>
 
             <div className="space-y-3.5 mb-10">
               {[
                 { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder too' },
-                { icon: '🔢', label: 'Enter the 6-digit code', sub: 'It expires in 10 minutes' },
+                { icon: '🔢', label: 'Enter the 4-digit code', sub: 'It expires in 10 minutes' },
                 { icon: '🚀', label: 'Start trading on VendoorX', sub: 'Free forever, no commissions' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3">
@@ -240,7 +240,7 @@ function VerifyPageInner() {
 
       {/* ── Right panel ── */}
       <div className="flex-1 flex flex-col min-h-screen">
-        <div className="flex items-center justify-between px-6 py-5 lg:px-10">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-6 sm:py-5 lg:px-10">
           <Link
             href="/auth/sign-up"
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
@@ -256,28 +256,29 @@ function VerifyPageInner() {
           </p>
         </div>
 
-        <div className="flex-1 flex items-center justify-center px-6 py-10 lg:px-16">
-          <div className="w-full max-w-[420px]">
-            <div className="lg:hidden mb-8">
+        <div className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-16">
+          <div className="w-full max-w-[380px]">
+            {/* Mobile logo */}
+            <div className="lg:hidden mb-6">
               <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
                 Vendoor<span className="text-[#16a34a]">X</span>
               </span>
             </div>
 
-            <div className="relative w-16 h-16 mb-6">
+            <div className="relative w-14 h-14 mb-5">
               <div className="absolute inset-0 bg-[#16a34a]/15 rounded-2xl blur-lg" />
-              <div className="relative w-16 h-16 rounded-2xl bg-[#16a34a]/10 border border-[#16a34a]/20 flex items-center justify-center">
-                <MailCheck className="w-8 h-8 text-[#16a34a]" />
+              <div className="relative w-14 h-14 rounded-2xl bg-[#16a34a]/10 border border-[#16a34a]/20 flex items-center justify-center">
+                <MailCheck className="w-7 h-7 text-[#16a34a]" />
               </div>
             </div>
 
-            <h2 className="text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-2">
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-2">
               Check your email
             </h2>
             <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">
-              We sent a 6-digit code to
+              We sent a 4-digit code to
             </p>
-            <div className="flex items-center gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-7">
               <p className="font-bold text-gray-900 dark:text-white text-sm break-all">
                 {email || 'your email address'}
               </p>
@@ -289,7 +290,8 @@ function VerifyPageInner() {
               )}
             </div>
 
-            <div className="flex gap-1.5 sm:gap-3 justify-center mb-8 w-full" onPaste={handlePaste}>
+            {/* 4-digit OTP inputs — large and centered */}
+            <div className="flex gap-3 sm:gap-4 justify-center mb-7" onPaste={handlePaste}>
               {digits.map((digit, i) => (
                 <input
                   key={i}
@@ -303,13 +305,12 @@ function VerifyPageInner() {
                   disabled={loading}
                   aria-label={`Digit ${i + 1}`}
                   className={cn(
-                    'flex-1 min-w-0 max-w-[44px] sm:max-w-[56px]',
-                    'h-11 sm:h-14 md:h-16',
-                    'text-center text-base sm:text-xl md:text-2xl font-black rounded-lg sm:rounded-xl border-2 transition-all duration-150',
+                    'w-16 h-16 sm:w-[72px] sm:h-[72px]',
+                    'text-center text-2xl sm:text-3xl font-black rounded-xl border-2 transition-all duration-150',
                     'bg-gray-50 dark:bg-muted text-gray-900 dark:text-foreground',
                     'focus:outline-none focus:ring-0',
                     digit
-                      ? 'border-[#16a34a] bg-[#16a34a]/5 dark:bg-[#16a34a]/10 text-[#16a34a] dark:text-[#4ade80] scale-[1.04] shadow-md shadow-[#16a34a]/20'
+                      ? 'border-[#16a34a] bg-[#16a34a]/5 dark:bg-[#16a34a]/10 text-[#16a34a] dark:text-[#4ade80] scale-[1.06] shadow-lg shadow-[#16a34a]/20'
                       : 'border-gray-200 dark:border-border focus:border-[#16a34a] focus:shadow-md focus:shadow-[#16a34a]/15',
                     loading && 'opacity-50 cursor-not-allowed',
                   )}
@@ -336,7 +337,7 @@ function VerifyPageInner() {
               )}
             </Button>
 
-            <div className="text-center space-y-3 mb-6">
+            <div className="text-center space-y-2 mb-5">
               <p className="text-sm text-gray-500 dark:text-muted-foreground">
                 Didn&apos;t receive a code?
               </p>
@@ -355,28 +356,28 @@ function VerifyPageInner() {
                 </button>
               ) : (
                 <p className="text-sm text-gray-400 dark:text-muted-foreground">
-                  Resend available in{' '}
+                  Resend in{' '}
                   <span className="font-bold text-gray-700 dark:text-foreground tabular-nums">{countdown}s</span>
                 </p>
               )}
             </div>
 
-            <div className="space-y-2 mb-6">
-              <div className="flex items-start gap-2.5 px-4 py-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+            <div className="space-y-2 mb-5">
+              <div className="flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
                 <span className="text-base shrink-0">⚠️</span>
                 <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                  <strong>Check your spam/junk folder</strong> — codes sometimes land there. Emails can take 1–2 minutes.
+                  <strong>Check your spam/junk folder</strong> — codes sometimes land there.
                 </p>
               </div>
-              <div className="flex items-start gap-2.5 px-4 py-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
+              <div className="flex items-start gap-2.5 px-3 py-2.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
                 <span className="text-base shrink-0">💡</span>
                 <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-                  <strong>Paste-friendly:</strong> You can paste the code directly into the boxes — it will fill automatically.
+                  <strong>Paste-friendly:</strong> Paste the code directly — it fills automatically.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 my-5">
+            <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
               <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">WRONG EMAIL?</span>
               <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
@@ -390,7 +391,7 @@ function VerifyPageInner() {
               <Link href="/auth/sign-up">Sign up with a different email</Link>
             </Button>
 
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
+            <div className="mt-5 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
                 <span>256-bit SSL</span>
