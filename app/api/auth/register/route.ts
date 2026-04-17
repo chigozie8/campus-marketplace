@@ -59,8 +59,8 @@ export async function POST(req: Request) {
       { onConflict: 'id' },
     )
 
-    const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
-    const redirectTo = `${appUrl}/auth/callback?next=/dashboard`
+    const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
+    const redirectTo = `${appUrl}/auth/confirm`
 
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: 'signup',
