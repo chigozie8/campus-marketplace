@@ -15,6 +15,7 @@ import { CapacitorInit } from '@/components/capacitor-init'
 import { NetworkToast } from '@/components/network-toast'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
+import { AuthHashHandler } from '@/components/auth-hash-handler'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -420,6 +421,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
+            <AuthHashHandler />
             <CapacitorInit />
             <NetworkToast />
             <SplashScreen />
