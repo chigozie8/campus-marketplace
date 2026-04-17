@@ -3,6 +3,45 @@ import { Resend } from 'resend'
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 const FROM = 'VendoorX <notifications@vendoorx.ng>'
 
+export async function sendConfirmationLinkEmail(to: string, name: string, confirmUrl: string) {
+  if (!resend) return
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: 'Confirm your VendoorX account',
+    html: `
+      <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb">
+        <div style="background:#0a0a0a;padding:32px 32px 24px;text-align:center">
+          <div style="display:inline-block;background:#16a34a22;border:1px solid #16a34a44;border-radius:12px;padding:12px 20px;margin-bottom:16px">
+            <span style="font-size:28px">✉️</span>
+          </div>
+          <h1 style="color:#fff;font-size:22px;font-weight:900;margin:0;letter-spacing:-0.5px">Confirm your email</h1>
+          <p style="color:rgba(255,255,255,0.45);font-size:13px;margin:8px 0 0">VendoorX Campus Marketplace</p>
+        </div>
+        <div style="padding:28px 32px">
+          <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 12px">Hi <strong>${name}</strong>,</p>
+          <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 24px">
+            Welcome to VendoorX! Click the button below to confirm your email address and activate your account.
+          </p>
+          <a href="${confirmUrl}" style="display:block;background:#16a34a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:20px">
+            ✅ Confirm my email
+          </a>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:20px">
+            <p style="color:#6b7280;font-size:12px;margin:0 0 6px;font-weight:600;">Or copy this link:</p>
+            <p style="color:#374151;font-size:12px;margin:0;word-break:break-all;">${confirmUrl}</p>
+          </div>
+          <p style="color:#9ca3af;font-size:12px;margin:0;line-height:1.6;">
+            This link expires in 24 hours. If you didn't create an account on VendoorX, you can safely ignore this email.
+          </p>
+        </div>
+        <div style="padding:16px 32px;border-top:1px solid #f3f4f6;text-align:center">
+          <p style="color:#9ca3af;font-size:12px;margin:0">VendoorX Campus Marketplace · Nigeria</p>
+        </div>
+      </div>
+    `,
+  }).catch(() => {})
+}
+
 export async function sendVerificationApprovedEmail(to: string, name: string) {
   if (!resend) return
   await resend.emails.send({

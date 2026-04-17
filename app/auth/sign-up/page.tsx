@@ -118,10 +118,8 @@ function SignUpPageInner() {
     }
 
     toast.dismiss(toastId)
-    toast.success('Account created! Check your email for a verification code.')
-    // Store password temporarily so verify page can auto sign-in after OTP
-    sessionStorage.setItem('_vx_tmp_pw', password)
-    router.push(`/auth/verify?email=${encodeURIComponent(email)}`)
+    toast.success('Account created! Check your email for a confirmation link.')
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}&name=${encodeURIComponent(fullName)}`)
   }
 
   return (

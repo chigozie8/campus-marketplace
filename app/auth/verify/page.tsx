@@ -1,41 +1,24 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ArrowLeft, Loader2, MailCheck, RefreshCw, CheckCircle2, ShieldCheck, Lock, Sparkles,
+  ArrowLeft, Loader2, MailCheck, RefreshCw, ShieldCheck, Lock, Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-
-const CODE_LENGTH = 6
 
 function VerifyPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') ?? ''
+  const name = searchParams.get('name') ?? ''
 
-  const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
-  const [loading, setLoading] = useState(false)
-  const [verified, setVerified] = useState(false)
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [resending, setResending] = useState(false)
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace('/dashboard')
-    })
-  }, [router])
-
-  useEffect(() => {
-    inputRefs.current[0]?.focus()
-  }, [])
 
   useEffect(() => {
     if (countdown <= 0) { setCanResend(true); return }
@@ -43,123 +26,25 @@ function VerifyPageInner() {
     return () => clearTimeout(t)
   }, [countdown])
 
-  function handleChange(index: number, value: string) {
-    if (!/^\d*$/.test(value)) return
-    const char = value.slice(-1)
-    const next = [...digits]
-    next[index] = char
-    setDigits(next)
-    if (char && index < CODE_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus()
-    }
-    if (next.every(d => d !== '')) {
-      handleVerify(next.join(''))
-    }
-  }
-
-  function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Backspace') {
-      if (digits[index]) {
-        const next = [...digits]
-        next[index] = ''
-        setDigits(next)
-      } else if (index > 0) {
-        inputRefs.current[index - 1]?.focus()
-        const next = [...digits]
-        next[index - 1] = ''
-        setDigits(next)
-      }
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      inputRefs.current[index - 1]?.focus()
-    } else if (e.key === 'ArrowRight' && index < CODE_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus()
-    }
-  }
-
-  function handlePaste(e: React.ClipboardEvent) {
-    e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, CODE_LENGTH)
-    if (!pasted) return
-    const next = [...digits]
-    for (let i = 0; i < pasted.length; i++) next[i] = pasted[i]
-    setDigits(next)
-    const focusIdx = Math.min(pasted.length, CODE_LENGTH - 1)
-    inputRefs.current[focusIdx]?.focus()
-    if (pasted.length === CODE_LENGTH) handleVerify(pasted)
-  }
-
-  const handleVerify = useCallback(async (token: string) => {
-    if (!email) {
-      toast.error('Email not found. Please sign up again.')
-      router.push('/auth/sign-up')
-      return
-    }
-
-    setLoading(true)
-    const supabase = createClient()
-
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'signup',
-    })
-
-    if (error) {
-      setLoading(false)
-      setDigits(Array(CODE_LENGTH).fill(''))
-      setTimeout(() => inputRefs.current[0]?.focus(), 50)
-      toast.error('Invalid or expired code', {
-        description: 'Double-check the code from your email and try again.',
-      })
-      return
-    }
-
-    setVerified(true)
-    setLoading(false)
-    sessionStorage.removeItem('_vx_tmp_pw')
-    toast.success('Email verified!', { description: 'Welcome to VendoorX 🎉' })
-    setTimeout(() => {
-      router.push('/dashboard')
-      router.refresh()
-    }, 1200)
-  }, [email, router])
-
   async function handleResend() {
     if (!canResend || resending || !email) return
     setResending(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.resend({ type: 'signup', email })
-    setResending(false)
-    if (error) {
-      toast.error(error.message || 'Failed to resend code')
-      return
+    try {
+      const res = await fetch('/api/auth/resend-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to resend')
+      setCountdown(60)
+      setCanResend(false)
+      toast.success('Link resent!', { description: 'Check your inbox.' })
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to resend link')
+    } finally {
+      setResending(false)
     }
-    setCountdown(60)
-    setCanResend(false)
-    setDigits(Array(CODE_LENGTH).fill(''))
-    setTimeout(() => inputRefs.current[0]?.focus(), 50)
-    toast.success('New code sent!', { description: 'Check your inbox and spam folder.' })
-  }
-
-  const code = digits.join('')
-  const isComplete = code.length === CODE_LENGTH
-
-  if (verified) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background px-6">
-        <div className="text-center max-w-sm">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 bg-[#16a34a]/20 rounded-full animate-ping" />
-            <div className="w-20 h-20 bg-[#16a34a] rounded-full flex items-center justify-center shadow-xl relative">
-              <CheckCircle2 className="w-10 h-10 text-white" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-black text-gray-950 dark:text-white mb-2">You&apos;re verified!</h2>
-          <p className="text-gray-500 dark:text-muted-foreground text-sm">Taking you to your dashboard…</p>
-          <Loader2 className="w-5 h-5 animate-spin text-[#16a34a] mx-auto mt-4" />
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -197,17 +82,17 @@ function VerifyPageInner() {
             </span>
 
             <h1 className="text-4xl font-black text-white leading-[1.1] tracking-tight mb-4">
-              One step from<br />
+              One click from<br />
               <span className="text-[#16a34a]">the market.</span>
             </h1>
             <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              We sent a 6-digit code to your email. Enter it to activate your VendoorX account.
+              We sent a confirmation link to your email. Click it to activate your VendoorX account.
             </p>
 
             <div className="space-y-3.5 mb-10">
               {[
                 { icon: '📧', label: 'Check your inbox', sub: 'And your spam/junk folder too' },
-                { icon: '🔢', label: 'Enter the 6-digit code', sub: 'It expires in 10 minutes' },
+                { icon: '🔗', label: 'Click the confirmation link', sub: 'It expires in 24 hours' },
                 { icon: '🚀', label: 'Start trading on VendoorX', sub: 'Free forever, no commissions' },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex items-center gap-3">
@@ -224,8 +109,8 @@ function VerifyPageInner() {
 
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
               <p className="text-white/50 text-xs leading-relaxed">
+                No email? Hit <strong className="text-white/70">Resend</strong> after the timer.
                 Emails can take <strong className="text-white/70">1–2 minutes</strong> to arrive.
-                No code? Hit <strong className="text-white/70">Resend</strong> after the timer.
               </p>
             </div>
           </div>
@@ -276,70 +161,21 @@ function VerifyPageInner() {
               Check your email
             </h2>
             <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">
-              We sent a 6-digit code to
+              We sent a confirmation link to
             </p>
-            <div className="flex items-center gap-2 mb-7">
-              <p className="font-bold text-gray-900 dark:text-white text-sm break-all">
-                {email || 'your email address'}
+            <p className="font-bold text-gray-900 dark:text-white text-sm break-all mb-7">
+              {email || 'your email address'}
+            </p>
+
+            <div className="bg-[#16a34a]/5 border border-[#16a34a]/20 rounded-2xl p-4 mb-7 text-center">
+              <p className="text-[#15803d] dark:text-[#4ade80] text-sm font-semibold leading-relaxed">
+                Click the <strong>Confirm my email</strong> button in the email to activate your account.
               </p>
-              {email && (
-                <span className="shrink-0 inline-flex items-center gap-1 bg-[#16a34a]/10 text-[#16a34a] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#16a34a]/20">
-                  <CheckCircle2 className="w-2.5 h-2.5" />
-                  Sent
-                </span>
-              )}
             </div>
 
-            {/* 6-digit OTP inputs — responsive and centered */}
-            <div className="flex gap-2 sm:gap-3 justify-center mb-7" onPaste={handlePaste}>
-              {digits.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={el => { inputRefs.current[i] = el }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={e => handleChange(i, e.target.value)}
-                  onKeyDown={e => handleKeyDown(i, e)}
-                  disabled={loading}
-                  aria-label={`Digit ${i + 1}`}
-                  className={cn(
-                    'w-10 h-12 sm:w-12 sm:h-14',
-                    'text-center text-xl sm:text-2xl font-black rounded-xl border-2 transition-all duration-150',
-                    'bg-gray-50 dark:bg-muted text-gray-900 dark:text-foreground',
-                    'focus:outline-none focus:ring-0',
-                    digit
-                      ? 'border-[#16a34a] bg-[#16a34a]/5 dark:bg-[#16a34a]/10 text-[#16a34a] dark:text-[#4ade80] scale-[1.06] shadow-lg shadow-[#16a34a]/20'
-                      : 'border-gray-200 dark:border-border focus:border-[#16a34a] focus:shadow-md focus:shadow-[#16a34a]/15',
-                    loading && 'opacity-50 cursor-not-allowed',
-                  )}
-                />
-              ))}
-            </div>
-
-            {loading && (
-              <div className="flex items-center justify-center gap-2 text-sm text-[#16a34a] font-semibold mb-4">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Verifying your code…
-              </div>
-            )}
-
-            <Button
-              onClick={() => handleVerify(code)}
-              disabled={!isComplete || loading}
-              className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] dark:bg-[#16a34a] dark:hover:bg-[#15803d] text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-40 disabled:translate-y-0 disabled:shadow-none mb-4"
-            >
-              {loading ? (
-                <><Loader2 className="w-4 h-4 animate-spin mr-2" />Verifying…</>
-              ) : (
-                <><CheckCircle2 className="w-4 h-4 mr-2" />Verify Email</>
-              )}
-            </Button>
-
-            <div className="text-center space-y-2 mb-5">
+            <div className="text-center space-y-2 mb-6">
               <p className="text-sm text-gray-500 dark:text-muted-foreground">
-                Didn&apos;t receive a code?
+                Didn&apos;t receive the email?
               </p>
               {canResend ? (
                 <button
@@ -351,7 +187,7 @@ function VerifyPageInner() {
                   {resending ? (
                     <><Loader2 className="w-3.5 h-3.5 animate-spin" />Sending…</>
                   ) : (
-                    <><RefreshCw className="w-3.5 h-3.5" />Resend code</>
+                    <><RefreshCw className="w-3.5 h-3.5" />Resend link</>
                   )}
                 </button>
               ) : (
@@ -362,19 +198,11 @@ function VerifyPageInner() {
               )}
             </div>
 
-            <div className="space-y-2 mb-5">
-              <div className="flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl">
-                <span className="text-base shrink-0">⚠️</span>
-                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                  <strong>Check your spam/junk folder</strong> — codes sometimes land there.
-                </p>
-              </div>
-              <div className="flex items-start gap-2.5 px-3 py-2.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
-                <span className="text-base shrink-0">💡</span>
-                <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-                  <strong>Paste-friendly:</strong> Paste the code directly — it fills automatically.
-                </p>
-              </div>
+            <div className="flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl mb-5">
+              <span className="text-base shrink-0">⚠️</span>
+              <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                <strong>Check your spam/junk folder</strong> — the email sometimes lands there.
+              </p>
             </div>
 
             <div className="flex items-center gap-3 my-4">

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/service'
+import { sendConfirmationLinkEmail } from '@/lib/email'
 
 export async function POST(req: Request) {
   const {
@@ -58,13 +58,19 @@ export async function POST(req: Request) {
       },
       { onConflict: 'id' },
     )
-  }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL
-  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY
-  if (supabaseUrl && supabaseAnon) {
-    const publicClient = createClient(supabaseUrl, supabaseAnon)
-    await publicClient.auth.resend({ type: 'signup', email })
+    const appUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
+    const redirectTo = `${appUrl}/auth/callback?next=/dashboard`
+
+    const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: 'signup',
+      email,
+      options: { redirectTo },
+    })
+
+    if (!linkError && linkData?.properties?.action_link) {
+      await sendConfirmationLinkEmail(email, full_name, linkData.properties.action_link)
+    }
   }
 
   return NextResponse.json({ success: true })
