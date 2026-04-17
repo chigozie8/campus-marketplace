@@ -93,12 +93,12 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
               <Link href="/dashboard">
                 <Button
                   size="lg"
-                  className="group relative rounded-full bg-gray-950 hover:bg-black text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-950 font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-black/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl"
+                  className="group relative rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    <LayoutDashboard className="w-4 h-4 text-primary" />
+                    <LayoutDashboard className="w-4 h-4" />
                     Go to Dashboard
-                    <ArrowRight className="w-4 h-4 text-primary transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Button>
               </Link>
@@ -117,11 +117,11 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
               <Link href="/auth/sign-up">
                 <Button
                   size="lg"
-                  className="group relative rounded-full bg-gray-950 hover:bg-black text-white dark:bg-white dark:hover:bg-gray-100 dark:text-gray-950 font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-black/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl"
+                  className="group relative rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 sm:px-10 h-14 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Get Started Free
-                    <ArrowRight className="w-4 h-4 text-primary transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Button>
               </Link>

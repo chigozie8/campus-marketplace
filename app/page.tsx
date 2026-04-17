@@ -186,33 +186,14 @@ export default async function Home() {
       ]} />
       <TrustedBySection />
       <ProblemSolutionSection />
-
       <WhatsappMockupSection />
-
-      {/* ── Dark block 1 — How It Works on thick black ── */}
-      <div className="dark bg-[#0a0a0a]">
-        <HowItWorksSection />
-      </div>
-
-      {/* ── Dark block 2 — Features on thick black ── */}
-      <div className="dark bg-[#0a0a0a]">
-        <Features />
-      </div>
-
+      <HowItWorksSection />
+      <Features />
       <IntegrationsSection />
-
-      {/* ── Dark block 3 — Trust on thick black ── */}
-      <div className="dark bg-[#0a0a0a]">
-        <TrustSection />
-      </div>
-
+      <TrustSection />
       <FaqSection />
-
-      {/* ── Closing dark block — CTA + Footer flow as one continuous base ── */}
       <CtaSection user={user} />
-      <div className="dark bg-[#0a0a0a]">
-        <LandingFooter settings={settings} />
-      </div>
+      <LandingFooter settings={settings} />
     </main>
   )
 }
