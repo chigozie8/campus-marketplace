@@ -20,9 +20,7 @@ export async function GET(request: Request) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      // Show success page for signup confirmations, otherwise go to next
-      const dest = next === '/dashboard' ? '/auth/verified' : next
-      return NextResponse.redirect(`${origin}${dest}`)
+      return NextResponse.redirect(`${origin}/dashboard?welcome=1`)
     }
   }
 
@@ -30,7 +28,7 @@ export async function GET(request: Request) {
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
     if (!error) {
-      const dest = type === 'signup' ? '/auth/verified' : next
+      const dest = type === 'signup' ? '/dashboard?welcome=1' : next
       return NextResponse.redirect(`${origin}${dest}`)
     }
   }

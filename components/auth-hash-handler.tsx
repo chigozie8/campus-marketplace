@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 
 export function AuthHashHandler() {
@@ -9,6 +10,21 @@ export function AuthHashHandler() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // Handle ?welcome=1 from PKCE callback redirect
+    const searchParams = new URLSearchParams(window.location.search)
+    if (searchParams.get('welcome') === '1') {
+      toast.success('Welcome to VendoorX! 🎉', {
+        description: "You're all verified — let's get you started.",
+        duration: 5000,
+      })
+      searchParams.delete('welcome')
+      const newSearch = searchParams.toString()
+      window.history.replaceState(
+        null, '',
+        window.location.pathname + (newSearch ? `?${newSearch}` : '')
+      )
+    }
 
     const hash = window.location.hash.substring(1)
     if (!hash) return
@@ -27,11 +43,16 @@ export function AuthHashHandler() {
     supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
       .then(({ error }) => {
         if (error) {
-          router.replace('/auth/sign-up?error=link-expired')
+          toast.error('Your link has expired. Please sign up again.')
+          router.replace('/auth/sign-up')
           return
         }
         if (type === 'signup' || type === 'email_change') {
-          router.replace('/auth/verified')
+          toast.success('Welcome to VendoorX! 🎉', {
+            description: "You're all verified — let's get you started.",
+            duration: 5000,
+          })
+          router.replace('/dashboard')
         } else if (type === 'recovery') {
           router.replace('/auth/reset-password')
         } else {
