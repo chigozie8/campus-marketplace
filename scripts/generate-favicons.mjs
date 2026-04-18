@@ -9,18 +9,8 @@ const SIZE = 512
 const SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}">
   <rect width="${SIZE}" height="${SIZE}" rx="96" fill="#ffffff"/>
-  <defs>
-    <linearGradient id="lightGreen" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#bbf7d0"/>
-      <stop offset="100%" stop-color="#86efac"/>
-    </linearGradient>
-    <linearGradient id="brandGreen" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"  stop-color="#22c55e"/>
-      <stop offset="100%" stop-color="#16a34a"/>
-    </linearGradient>
-  </defs>
-  <rect x="80"  y="80"  width="280" height="280" rx="64" fill="url(#lightGreen)"/>
-  <rect x="152" y="152" width="280" height="280" rx="64" fill="url(#brandGreen)"/>
+  <rect x="80"  y="80"  width="280" height="280" rx="64" fill="#0a0a0a"/>
+  <rect x="152" y="152" width="280" height="280" rx="64" fill="#16a34a"/>
 </svg>
 `.trim()
 
