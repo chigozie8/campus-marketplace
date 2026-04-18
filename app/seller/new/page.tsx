@@ -7,6 +7,7 @@ import {
   ArrowLeft, X, Loader2, CheckCircle,
   Tag, FileText, DollarSign, MapPin, GraduationCap,
   ImagePlus, Sparkles, Package, Camera, Play, Video, Truck,
+  ShieldOff,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -37,6 +38,7 @@ export default function NewListingPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [entries, setEntries] = useState<MediaEntry[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isBlocked, setIsBlocked] = useState(false)
 
   const [form, setForm] = useState({
     title: '',
@@ -56,6 +58,19 @@ export default function NewListingPage() {
     supabase.from('categories').select('*').order('name').then(({ data }) => {
       if (data) setCategories(data)
     })
+    // Check if the current user is blocked from creating listings.
+    // (RLS will reject the insert anyway — this is a UX-only signal so
+    // the form can show a clear banner instead of a confusing error toast.)
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_blocked')
+        .eq('id', user.id)
+        .single()
+      if (profile?.is_blocked) setIsBlocked(true)
+    })()
   }, [])
 
   function setField(key: string, value: string) {
@@ -128,6 +143,7 @@ export default function NewListingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (isBlocked) { toast.error('Your account is restricted. Please contact support to create new listings.'); return }
     if (!validate()) { toast.error('Please fix the errors'); return }
     if (anyUploading) { toast.error('Please wait for photos to finish uploading'); return }
 
@@ -201,6 +217,21 @@ export default function NewListingPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-6 pb-28">
+        {isBlocked && (
+          <div className="mb-4 rounded-2xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700/50 p-4 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <ShieldOff className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-amber-900 dark:text-amber-100 text-sm">Account restricted</p>
+              <p className="text-xs text-amber-800 dark:text-amber-200/80 mt-0.5 leading-relaxed">
+                Your account has been temporarily restricted by an admin. You can still browse and place orders, but you cannot create new listings or withdraw funds.{' '}
+                <Link href="/help" className="underline font-semibold">Contact support</Link>
+                {' '}if you believe this is a mistake.
+              </p>
+            </div>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* ── Photos & Video ── */}

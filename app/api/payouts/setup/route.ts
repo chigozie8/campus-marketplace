@@ -11,6 +11,21 @@ export async function POST(req: Request) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
 
+  // Block check: a blocked user can sign in and browse, but cannot set up
+  // or change payout details (which would otherwise allow withdrawals).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_blocked')
+    .eq('id', session.user.id)
+    .single()
+
+  if (profile?.is_blocked) {
+    return NextResponse.json({
+      success: false,
+      message: 'Your account is restricted. Withdrawals are disabled. Please contact support.',
+    }, { status: 403 })
+  }
+
   const body = await req.json()
   const { bankCode, bankName, accountNumber, businessName } = body
 

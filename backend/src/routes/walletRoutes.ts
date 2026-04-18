@@ -39,6 +39,22 @@ router.post('/withdraw', async (req, res, next) => {
       return
     }
 
+    // Block check: a "blocked" account can sign in and browse, but cannot
+    // withdraw funds. Banned users would already have been rejected at the
+    // auth layer before reaching this route.
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('is_blocked')
+      .eq('id', userId)
+      .single()
+    if (profile?.is_blocked) {
+      res.status(403).json({
+        success: false,
+        message: 'Your account is restricted. Withdrawals are disabled. Please contact support.',
+      })
+      return
+    }
+
     const result = await walletService.requestWithdrawal(
       userId,
       Number(amount),

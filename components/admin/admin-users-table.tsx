@@ -5,7 +5,7 @@ import {
   Search, BadgeCheck, Trash2, Store, Loader2,
   Bell, Ban, Download, X, Send, CheckCircle2, Eye,
   ShoppingBag, Wallet, Copy, Check,
-  Shield, ClipboardList, AlertTriangle,
+  Shield, ClipboardList, AlertTriangle, ShieldOff,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useConfirm } from '@/components/ui/confirm-dialog'
@@ -22,6 +22,8 @@ interface User {
   rating: number
   total_sales: number
   created_at: string
+  is_banned?: boolean
+  is_blocked?: boolean
 }
 
 interface UserProfile {
@@ -162,7 +164,13 @@ export function AdminUsersTable({ users }: Props) {
   const [detailLoading, setDetailLoading] = useState(false)
 
   const [banningId, setBanningId] = useState<string | null>(null)
-  const [bannedIds, setBannedIds] = useState<Set<string>>(new Set())
+  const [bannedIds, setBannedIds] = useState<Set<string>>(
+    () => new Set(users.filter(u => u.is_banned).map(u => u.id))
+  )
+  const [blockingId, setBlockingId] = useState<string | null>(null)
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(
+    () => new Set(users.filter(u => u.is_blocked).map(u => u.id))
+  )
   const [confirmDialog, confirm] = useConfirm()
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
@@ -221,8 +229,8 @@ export function AdminUsersTable({ users }: Props) {
     const ok = await confirm({
       title: `${isBanned ? 'Unban' : 'Ban'} ${user.full_name ?? 'this user'}?`,
       message: isBanned
-        ? 'This user will regain full access to the platform.'
-        : 'This user will be blocked from accessing the platform.',
+        ? 'This user will regain the ability to sign in to the platform.'
+        : 'This user will be completely locked out — they will not be able to sign in at all. Use Block instead if you only want to stop listings & withdrawals.',
       confirmText: isBanned ? 'Unban' : 'Ban user',
       cancelText: 'Cancel',
       variant: isBanned ? 'default' : 'danger',
@@ -241,6 +249,39 @@ export function AdminUsersTable({ users }: Props) {
       setBannedIds(prev => { const s = new Set(prev); s.delete(user.id); return s })
     }
     setBanningId(null)
+  }
+
+  async function toggleBlock(user: User) {
+    const isBlocked = blockedIds.has(user.id)
+    const action = isBlocked ? 'unblock' : 'block'
+    const ok = await confirm({
+      title: `${isBlocked ? 'Unblock' : 'Block'} ${user.full_name ?? 'this user'}?`,
+      message: isBlocked
+        ? 'This user will regain the ability to create new listings and withdraw funds.'
+        : 'This user will still be able to sign in, browse, and place orders — but they will NOT be able to create new listings or withdraw funds. Useful for handling disputes or suspicious sellers without fully banning them.',
+      confirmText: isBlocked ? 'Unblock' : 'Block user',
+      cancelText: 'Cancel',
+      variant: isBlocked ? 'default' : 'danger',
+    })
+    if (!ok) return
+    setBlockingId(user.id)
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/block`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        if (json.blocked) {
+          setBlockedIds(prev => new Set([...prev, user.id]))
+        } else {
+          setBlockedIds(prev => { const s = new Set(prev); s.delete(user.id); return s })
+        }
+      }
+    } finally {
+      setBlockingId(null)
+    }
   }
 
   async function sendNotification() {
@@ -403,6 +444,7 @@ export function AdminUsersTable({ users }: Props) {
                   </tr>
                 ) : filtered.map(u => {
                   const isBanned = bannedIds.has(u.id)
+                  const isBlocked = blockedIds.has(u.id)
                   return (
                     <tr key={u.id} className={`hover:bg-muted/30 transition-colors ${detailUser?.id === u.id ? 'bg-primary/5' : ''} ${isBanned ? 'opacity-60' : ''}`}>
                       <td className="px-4 py-3">
@@ -420,6 +462,7 @@ export function AdminUsersTable({ users }: Props) {
                             <p className="font-semibold text-foreground flex items-center gap-1.5">
                               {u.full_name ?? 'Unnamed User'}
                               {isBanned && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-destructive/20 text-destructive uppercase tracking-wide">Banned</span>}
+                              {!isBanned && isBlocked && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 uppercase tracking-wide">Blocked</span>}
                             </p>
                             <p className="text-xs text-muted-foreground">{u.campus ?? '—'}</p>
                           </div>
@@ -486,14 +529,26 @@ export function AdminUsersTable({ users }: Props) {
                             <Bell className="w-3.5 h-3.5" />
                           </button>
                           <button
+                            onClick={() => toggleBlock(u)}
+                            disabled={blockingId === u.id}
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
+                              isBlocked
+                                ? 'text-amber-600 bg-amber-500/10 hover:bg-amber-500/20'
+                                : 'text-muted-foreground hover:text-amber-600 hover:bg-amber-500/10'
+                            }`}
+                            title={isBlocked ? 'Unblock (allow listings & withdrawals)' : 'Block (sign-in OK, no listings/withdrawals)'}
+                          >
+                            {blockingId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldOff className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
                             onClick={() => toggleBan(u)}
                             disabled={banningId === u.id}
                             className={`inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all disabled:opacity-40 ${
                               isBanned
-                                ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
-                                : 'text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10'
+                                ? 'text-red-500 bg-red-500/10 hover:bg-red-500/20'
+                                : 'text-muted-foreground hover:text-red-500 hover:bg-red-500/10'
                             }`}
-                            title={isBanned ? 'Unban user' : 'Ban user'}
+                            title={isBanned ? 'Unban (restore sign-in)' : 'Ban (full sign-in lockout)'}
                           >
                             {banningId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
                           </button>
