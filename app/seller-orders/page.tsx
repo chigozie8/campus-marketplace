@@ -356,7 +356,7 @@ export default function SellerOrdersPage() {
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
   const [sellerId, setSellerId] = useState<string | null>(null)
   const qc = useQueryClient()
-  const { data, isLoading, isError, refetch } = useVendorOrders(page)
+  const { data, isLoading, isError, error, refetch } = useVendorOrders(page)
 
   useEffect(() => {
     const supabase = createClient()
@@ -421,10 +421,12 @@ export default function SellerOrdersPage() {
         )}
 
         {isError && (
-          <div className="text-center py-20">
+          <div className="text-center py-20 px-4">
             <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
             <p className="text-sm font-semibold text-foreground mb-1">Failed to load orders</p>
-            <p className="text-xs text-muted-foreground mb-4">Check your connection and try again</p>
+            <p className="text-xs text-muted-foreground mb-4 max-w-sm mx-auto break-words">
+              {error instanceof Error ? error.message : 'Something went wrong. Please try again.'}
+            </p>
             <button onClick={() => refetch()} className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold">Retry</button>
           </div>
         )}

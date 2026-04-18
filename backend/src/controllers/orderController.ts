@@ -52,6 +52,18 @@ export async function getOrderById(req: Request, res: Response, next: NextFuncti
 
 export async function updateOrderStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const userId = (req as AuthRequest).user.id
+    const role = (req as AuthRequest).user.role
+
+    // Verify the caller actually owns this order as the seller (or is admin).
+    // Replaces the previous requireRole gate which depended on the brittle
+    // profiles.is_seller flag.
+    const existing = await orderService.getOrderById(req.params.id)
+    if (role !== 'admin' && existing.seller_id !== userId) {
+      res.status(403).json({ success: false, message: 'Only the seller can update this order.' })
+      return
+    }
+
     const order = await orderService.updateOrderStatus(req.params.id, req.body.status)
     res.status(200).json({ success: true, message: 'Order status updated.', data: order })
   } catch (err) {

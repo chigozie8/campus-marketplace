@@ -77,11 +77,14 @@ router.use(authenticate)
 
 router.post('/', validate(createOrderSchema), orderController.createOrder)
 router.get('/me', orderController.getMyOrders)
-router.get('/vendor/dashboard', requireRole('vendor', 'admin'), orderController.getVendorOrders)
+// Any authenticated user can hit this — the query is filtered by seller_id =
+// req.user.id, so non-sellers simply receive an empty list. We previously
+// gated this with requireRole('vendor','admin'), but that broke for users
+// whose profiles.is_seller flag was never set (most existing sellers).
+router.get('/vendor/dashboard', orderController.getVendorOrders)
 
 router.patch(
   '/:id/status',
-  requireRole('vendor', 'admin'),
   validate(updateOrderStatusSchema),
   orderController.updateOrderStatus
 )
