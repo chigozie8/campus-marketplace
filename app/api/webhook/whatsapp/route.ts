@@ -152,14 +152,26 @@ export async function POST(req: NextRequest) {
     let body: any = null
     try { body = JSON.parse(rawBody) } catch { body = {} }
 
+    const evt = body?.event ?? body?.type ?? 'unknown'
+    console.info(`[wa-webhook] event=${evt} keys=${Object.keys(body ?? {}).join(',')}`)
+
+    // Test webhooks from the WaSender dashboard — just ack
+    if (evt === 'webhook.test') {
+      return new NextResponse('OK', { status: 200 })
+    }
+
     // Track session.status events for the admin dashboard
-    if (body?.event === 'session.status' || body?.type === 'session.status') {
-      const status = body?.data?.status ?? body?.status ?? 'unknown'
+    if (evt === 'session.status' || evt === 'session.connected' || evt === 'session.disconnected') {
+      const status = body?.data?.status ?? body?.status ?? evt.replace('session.', '')
       console.info(`[wa-session] status=${status}`)
       await setSessionStatus(String(status))
     }
 
     const parsed = extractMessage(body)
+    if (!parsed) {
+      console.info(`[wa-webhook] no message extracted from event=${evt}; body sample=`,
+        JSON.stringify(body).slice(0, 400))
+    }
     if (parsed) {
       // Fire & forget — must respond 200 quickly so WaSender doesn't retry
       handleMessage(parsed.from, parsed.text).catch(err =>
