@@ -33,6 +33,11 @@ create index if not exists offer_messages_created_at_idx on public.offer_message
 
 alter table public.offer_messages enable row level security;
 
+-- Drop existing policies first so this migration is idempotent
+drop policy if exists "Offer parties can read messages" on public.offer_messages;
+drop policy if exists "Offer parties can post messages" on public.offer_messages;
+drop policy if exists "Buyers can withdraw or counter their offers" on public.offers;
+
 -- Both parties to an offer can read its messages
 create policy "Offer parties can read messages"
   on public.offer_messages for select
