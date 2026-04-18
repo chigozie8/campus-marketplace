@@ -30,34 +30,82 @@ function layout(opts: {
     footerNote = 'You\'re receiving this because of activity on your VendoorX account.',
   } = opts
 
-  return `
-    <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</div>
-    <div style="font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f6f7f9;padding:24px 12px">
-      <div style="max-width:540px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
-        <div style="background:#0a0a0a;padding:32px 32px 24px;text-align:center">
-          <div style="display:inline-block;background:${iconBg};border:1px solid ${iconBorder};border-radius:14px;padding:14px 22px;margin-bottom:18px">
-            <span style="font-size:30px;line-height:1">${iconEmoji}</span>
-          </div>
-          <h1 style="color:#fff;font-size:22px;font-weight:900;margin:0;letter-spacing:-0.5px">${title}</h1>
-          <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:8px 0 0">${subtitle}</p>
-        </div>
-        <div style="padding:28px 32px">
-          ${bodyHtml}
-          ${cta ? `
-            <a href="${cta.href}" style="display:block;background:#16a34a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;margin-top:8px">
-              ${cta.label} →
-            </a>
-          ` : ''}
-        </div>
-        <div style="padding:16px 32px 22px;border-top:1px solid #f3f4f6;text-align:center">
-          <p style="color:#9ca3af;font-size:11px;margin:0 0 4px;line-height:1.6">${footerNote}</p>
-          <p style="color:#9ca3af;font-size:11px;margin:0">
-            VendoorX · Nigeria · <a href="${SITE_URL}" style="color:#16a34a;text-decoration:none">vendoorx.ng</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  `
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <title>${esc(title)}</title>
+  <style>
+    /* Reset for popular clients */
+    body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+    table,td{mso-table-lspace:0;mso-table-rspace:0}
+    img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none}
+    body{margin:0!important;padding:0!important;width:100%!important}
+    a{word-break:break-word}
+    /* Mobile tweaks — narrow phones get tighter padding and smaller headings */
+    @media only screen and (max-width:480px){
+      .vx-card{border-radius:12px!important}
+      .vx-header{padding:24px 18px 20px!important}
+      .vx-body{padding:22px 18px!important}
+      .vx-footer{padding:14px 18px 20px!important}
+      .vx-title{font-size:19px!important;line-height:1.25!important}
+      .vx-subtitle{font-size:12px!important}
+      .vx-cta{font-size:14px!important;padding:13px 16px!important}
+      .vx-row-label{font-size:12px!important}
+      .vx-row-value{font-size:12px!important}
+      .vx-amount{font-size:15px!important}
+      .vx-pw{font-size:18px!important;letter-spacing:1px!important}
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background:#f6f7f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all">${esc(preheader)}</div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f7f9">
+    <tr>
+      <td align="center" style="padding:20px 10px">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="vx-card" style="max-width:540px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb">
+          <!-- Header -->
+          <tr>
+            <td class="vx-header" align="center" style="background:#0a0a0a;padding:32px 28px 24px">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr><td align="center" style="background:${iconBg};border:1px solid ${iconBorder};border-radius:14px;padding:12px 20px">
+                  <span style="font-size:28px;line-height:1">${iconEmoji}</span>
+                </td></tr>
+              </table>
+              <h1 class="vx-title" style="color:#fff;font-size:22px;font-weight:900;margin:16px 0 0;letter-spacing:-0.3px;line-height:1.3">${esc(title)}</h1>
+              <p class="vx-subtitle" style="color:rgba(255,255,255,0.55);font-size:13px;margin:6px 0 0">${esc(subtitle)}</p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td class="vx-body" style="padding:26px 28px">
+              ${bodyHtml}
+              ${cta ? `
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:8px">
+                <tr><td align="center" style="background:#16a34a;border-radius:12px">
+                  <a href="${cta.href}" class="vx-cta" style="display:block;color:#fff;text-align:center;padding:14px 20px;font-size:15px;font-weight:700;text-decoration:none">${esc(cta.label)} &rarr;</a>
+                </td></tr>
+              </table>
+              ` : ''}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td class="vx-footer" align="center" style="padding:16px 28px 22px;border-top:1px solid #f3f4f6">
+              <p style="color:#9ca3af;font-size:11px;margin:0 0 4px;line-height:1.6">${esc(footerNote)}</p>
+              <p style="color:#9ca3af;font-size:11px;margin:0">VendoorX &middot; Nigeria &middot; <a href="${SITE_URL}" style="color:#16a34a;text-decoration:none">vendoorx.ng</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
 }
 
 function ngn(amount: number) {
@@ -275,7 +323,7 @@ export async function sendAdminPasswordResetEmail(
         </p>
         <div style="background:#fffbeb;border:2px dashed #fbbf24;border-radius:12px;padding:20px;margin-bottom:18px;text-align:center">
           <p style="color:#92400e;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 8px">Temporary password</p>
-          <p style="font-family:'Courier New',monospace;font-size:22px;font-weight:900;color:#0a0a0a;letter-spacing:2px;margin:0;word-break:break-all">${esc(tempPassword)}</p>
+          <p class="vx-pw" style="font-family:'Courier New',Consolas,monospace;font-size:22px;font-weight:900;color:#0a0a0a;letter-spacing:2px;margin:0;word-break:break-all;line-height:1.3">${esc(tempPassword)}</p>
         </div>
         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:8px">
           <p style="color:#991b1b;font-size:13px;margin:0;line-height:1.6">
@@ -316,14 +364,20 @@ export async function sendOrderPlacedEmail(
         <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
           We've reserved your order. Complete payment to confirm it — the seller is notified the moment payment lands.
         </p>
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:18px">
-          <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px">${esc(order.productTitle)}</p>
-          <p style="color:#6b7280;font-size:13px;margin:0 0 12px">Quantity: ${esc(order.quantity)}</p>
-          <div style="border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between">
-            <span style="color:#6b7280;font-size:13px">Total</span>
-            <span style="color:#16a34a;font-size:16px;font-weight:900">${ngn(order.total)}</span>
-          </div>
-        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:18px">
+          <tr><td style="padding:16px 18px 0">
+            <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px;line-height:1.4">${esc(order.productTitle)}</p>
+            <p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 14px">Quantity: ${esc(order.quantity)}</p>
+          </td></tr>
+          <tr><td style="padding:0 18px 16px">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #e5e7eb">
+              <tr>
+                <td class="vx-row-label" style="color:#6b7280;font-size:13px;padding-top:12px">Total</td>
+                <td class="vx-amount" align="right" style="color:#16a34a;font-size:16px;font-weight:900;padding-top:12px">${ngn(order.total)}</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
       `,
       cta: { label: 'Complete payment', href: `${SITE_URL}/dashboard/orders` },
     }),
@@ -351,15 +405,21 @@ export async function sendOrderPaidEmail(
         <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
           🎉 Your payment was successful! Your funds are held safely in escrow and will only be released to the seller once you confirm delivery.
         </p>
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:18px">
-          <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px">${esc(order.productTitle)}</p>
-          <p style="color:#6b7280;font-size:13px;margin:0 0 4px">Quantity: ${esc(order.quantity)}</p>
-          ${order.sellerName ? `<p style="color:#6b7280;font-size:13px;margin:0 0 12px">Seller: <strong style="color:#0a0a0a">${esc(order.sellerName)}</strong></p>` : ''}
-          <div style="border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between">
-            <span style="color:#6b7280;font-size:13px">Amount paid</span>
-            <span style="color:#16a34a;font-size:16px;font-weight:900">${ngn(order.total)}</span>
-          </div>
-        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:18px">
+          <tr><td style="padding:16px 18px 0">
+            <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px;line-height:1.4">${esc(order.productTitle)}</p>
+            <p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 4px">Quantity: ${esc(order.quantity)}</p>
+            ${order.sellerName ? `<p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 14px">Seller: <strong style="color:#0a0a0a">${esc(order.sellerName)}</strong></p>` : '<div style="height:10px;line-height:10px;font-size:0">&nbsp;</div>'}
+          </td></tr>
+          <tr><td style="padding:0 18px 16px">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #e5e7eb">
+              <tr>
+                <td class="vx-row-label" style="color:#6b7280;font-size:13px;padding-top:12px">Amount paid</td>
+                <td class="vx-amount" align="right" style="color:#16a34a;font-size:16px;font-weight:900;padding-top:12px">${ngn(order.total)}</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:8px">
           <p style="color:#15803d;font-size:13px;margin:0;line-height:1.6">
             <strong>What's next?</strong> The seller has been notified to ship your order. You'll get an update when it's on the way.
@@ -403,16 +463,22 @@ export async function sendNewPaidOrderToSellerEmail(
         <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
           You have a new paid order. Funds are held in escrow and will be released to your wallet once the buyer confirms delivery. Please ship promptly!
         </p>
-        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:18px 20px;margin-bottom:18px">
-          <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px">${esc(order.productTitle)}</p>
-          <p style="color:#6b7280;font-size:13px;margin:0 0 4px">Quantity: ${esc(order.quantity)}</p>
-          ${order.buyerName ? `<p style="color:#6b7280;font-size:13px;margin:0 0 4px">Buyer: <strong style="color:#0a0a0a">${esc(order.buyerName)}</strong></p>` : ''}
-          ${order.deliveryAddress ? `<p style="color:#6b7280;font-size:13px;margin:0 0 12px">Delivery to: <strong style="color:#0a0a0a">${esc(order.deliveryAddress)}</strong></p>` : ''}
-          <div style="border-top:1px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between">
-            <span style="color:#6b7280;font-size:13px">Order total</span>
-            <span style="color:#16a34a;font-size:16px;font-weight:900">${ngn(order.total)}</span>
-          </div>
-        </div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:18px">
+          <tr><td style="padding:16px 18px 0">
+            <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px;line-height:1.4">${esc(order.productTitle)}</p>
+            <p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 4px">Quantity: ${esc(order.quantity)}</p>
+            ${order.buyerName ? `<p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 4px">Buyer: <strong style="color:#0a0a0a">${esc(order.buyerName)}</strong></p>` : ''}
+            ${order.deliveryAddress ? `<p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 14px;line-height:1.5">Delivery to: <strong style="color:#0a0a0a">${esc(order.deliveryAddress)}</strong></p>` : '<div style="height:10px;line-height:10px;font-size:0">&nbsp;</div>'}
+          </td></tr>
+          <tr><td style="padding:0 18px 16px">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #e5e7eb">
+              <tr>
+                <td class="vx-row-label" style="color:#6b7280;font-size:13px;padding-top:12px">Order total</td>
+                <td class="vx-amount" align="right" style="color:#16a34a;font-size:16px;font-weight:900;padding-top:12px">${ngn(order.total)}</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
       `,
       cta: { label: 'View order & ship', href: `${SITE_URL}/seller-orders` },
     }),
