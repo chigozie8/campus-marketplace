@@ -12,6 +12,8 @@ import { TrustBadge } from '@/components/TrustBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { botWhatsappUrl } from '@/lib/whatsapp-bot'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface ProductCardProps {
   product: Product
@@ -38,6 +40,64 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
   const router = useRouter()
   const whatsappMessage = `Hi VendoorX! I'm interested in "${product.title}" (listing #${product.id}) for ₦${product.price.toLocaleString()}. Is it still available?`
   const whatsappUrl = botWhatsappUrl(whatsappMessage)
+
+  // Self-managed favorite state when parent doesn't pass a handler
+  const selfManaged = !onToggleFavorite
+  const [localFav, setLocalFav] = useState(isFavorited)
+  const [favLoading, setFavLoading] = useState(false)
+
+  useEffect(() => {
+    if (!selfManaged) return
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('product_id', product.id)
+        .maybeSingle()
+        .then(({ data }) => setLocalFav(!!data))
+    })
+  }, [selfManaged, product.id])
+
+  async function handleFavoriteClick(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!selfManaged) {
+      onToggleFavorite?.(product.id)
+      return
+    }
+    if (favLoading) return
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast.error('Sign in to save favourites')
+      router.push(`/auth/sign-in?redirect=/marketplace/${product.id}`)
+      return
+    }
+    const next = !localFav
+    setLocalFav(next) // optimistic
+    setFavLoading(true)
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: product.id }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json().catch(() => ({}))
+      if (typeof data.favorited === 'boolean') setLocalFav(data.favorited)
+      toast.success(next ? '❤️ Saved to favourites' : 'Removed from favourites')
+    } catch {
+      setLocalFav(!next) // revert
+      toast.error('Could not update favourites')
+    } finally {
+      setFavLoading(false)
+    }
+  }
+
+  const showFav = selfManaged ? localFav : isFavorited
 
   function handleWhatsApp(e: React.MouseEvent) {
     e.preventDefault()
@@ -101,14 +161,15 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
         {/* Favourite button */}
         <m.button
           whileTap={{ scale: 0.85 }}
-          onClick={() => onToggleFavorite?.(product.id)}
-          className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-sm"
-          aria-label={isFavorited ? 'Remove from favourites' : 'Add to favourites'}
+          onClick={handleFavoriteClick}
+          disabled={favLoading}
+          className="absolute top-2.5 right-2.5 z-10 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-md disabled:opacity-70"
+          aria-label={showFav ? 'Remove from favourites' : 'Add to favourites'}
         >
           <Heart
             className={cn(
               'w-4 h-4 transition-colors',
-              isFavorited ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
+              showFav ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
             )}
           />
         </m.button>
