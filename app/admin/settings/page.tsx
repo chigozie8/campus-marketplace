@@ -35,11 +35,10 @@ export default async function AdminSettingsPage() {
 
   const settings = await getSiteSettings()
 
-  // Load saved WhatsApp / Gupshup credentials from the DB
+  // Load saved WhatsApp / WaSender credentials from the DB
   const WA_KEYS = [
-    'integration_gupshup_api_key',
-    'integration_gupshup_app_name',
-    'integration_gupshup_phone_number',
+    'integration_wasender_api_key',
+    'integration_wasender_webhook_secret',
   ]
   const sc2 = createServiceClient()
   const { data: waRows } = sc2

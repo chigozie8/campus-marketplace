@@ -7,9 +7,8 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Integrations' }
 
 const WA_KEYS = [
-  'integration_gupshup_api_key',
-  'integration_gupshup_app_name',
-  'integration_gupshup_phone_number',
+  'integration_wasender_api_key',
+  'integration_wasender_webhook_secret',
 ]
 
 export default async function IntegrationsPage() {

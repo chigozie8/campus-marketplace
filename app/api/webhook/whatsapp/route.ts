@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
+
+const WASENDER_BASE = 'https://wasenderapi.com/api'
 
 // ─── Supabase (service role) ─────────────────────────────────────────────────
 function svc() {
@@ -10,45 +13,51 @@ function svc() {
   )
 }
 
-// ─── Gupshup credentials (env or DB) ────────────────────────────────────────
-async function getGupshupCreds(): Promise<{ apiKey: string; appName: string; from: string } | null> {
-  const apiKey  = process.env.GUPSHUP_API_KEY
-  const appName = process.env.GUPSHUP_APP_NAME
-  const from    = process.env.GUPSHUP_PHONE_NUMBER
-  if (apiKey && appName && from) return { apiKey, appName, from }
-
+// ─── WaSender credentials (env or DB) ────────────────────────────────────────
+async function getApiKey(): Promise<string | null> {
+  const envKey = process.env.WASENDER_API_KEY
+  if (envKey) return envKey
   try {
     const { data } = await svc()
       .from('site_settings')
-      .select('key, value')
-      .in('key', ['integration_gupshup_api_key', 'integration_gupshup_app_name', 'integration_gupshup_phone_number'])
-
-    const map = Object.fromEntries((data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]))
-    const k = map['integration_gupshup_api_key']
-    const a = map['integration_gupshup_app_name']
-    const p = map['integration_gupshup_phone_number']
-    if (k && a && p) return { apiKey: k, appName: a, from: p }
-  } catch {}
-  return null
+      .select('value')
+      .eq('key', 'integration_wasender_api_key')
+      .maybeSingle()
+    return (data?.value as string) ?? null
+  } catch {
+    return null
+  }
 }
 
-// ─── Send reply via Gupshup ──────────────────────────────────────────────────
+// ─── Send reply via WaSender ────────────────────────────────────────────────
 async function sendReply(to: string, text: string) {
-  const creds = await getGupshupCreds()
-  if (!creds) return
+  const apiKey = await getApiKey()
+  if (!apiKey) return
 
-  const cleanTo = to.replace(/^\+/, '')
-  await fetch('https://api.gupshup.io/wa/api/v1/msg', {
+  const cleaned = to.replace(/[^\d+]/g, '')
+  const recipient = cleaned.startsWith('+') ? cleaned : `+${cleaned}`
+
+  await fetch(`${WASENDER_BASE}/send-message`, {
     method: 'POST',
-    headers: { apikey: creds.apiKey, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      channel:     'whatsapp',
-      source:      creds.from,
-      destination: cleanTo,
-      message:     JSON.stringify({ isHSM: 'false', type: 'text', text: { body: text } }),
-      'src.name':  creds.appName,
-    }),
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ to: recipient, text }),
   }).catch(() => {})
+}
+
+// ─── Webhook signature verification (optional) ───────────────────────────────
+function verifySignature(rawBody: string, signature: string | null): boolean {
+  const secret = process.env.WASENDER_WEBHOOK_SECRET
+  if (!secret) return true // no secret configured → accept
+  if (!signature) return false
+  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+  } catch {
+    return false
+  }
 }
 
 // ─── Intent detection ────────────────────────────────────────────────────────
@@ -163,22 +172,30 @@ const ERROR_MSG = () =>
 
 // ─── Product search via Supabase ─────────────────────────────────────────────
 async function searchProducts(keyword: string, limit = 5) {
-  const { data } = await svc()
-    .from('listings')
-    .select('id, name, price, description, profiles(full_name)')
-    .ilike('name', `%${keyword}%`)
-    .eq('status', 'active')
-    .limit(limit)
-  return data ?? []
+  try {
+    const { data } = await svc()
+      .from('listings')
+      .select('id, name, price, description, profiles(full_name)')
+      .ilike('name', `%${keyword}%`)
+      .eq('status', 'active')
+      .limit(limit)
+    return data ?? []
+  } catch {
+    return []
+  }
 }
 
 async function getProduct(id: string) {
-  const { data } = await svc()
-    .from('listings')
-    .select('id, name, price, description, profiles(full_name)')
-    .eq('id', id)
-    .single()
-  return data
+  try {
+    const { data } = await svc()
+      .from('listings')
+      .select('id, name, price, description, profiles(full_name)')
+      .eq('id', id)
+      .single()
+    return data
+  } catch {
+    return null
+  }
 }
 
 function buildProductList(products: any[]): string {
@@ -236,24 +253,63 @@ async function handleMessage(from: string, text: string) {
   await sendReply(from, reply)
 }
 
+// ─── Parse WaSender (Baileys-style) webhook payload ──────────────────────────
+function extractFromWasender(body: any): { from: string; text: string } | null {
+  if (!body) return null
+
+  // Format A: { event: 'messages.upsert', data: { messages: [{ key, message, ... }] } }
+  const msg = body?.data?.messages?.[0] ?? body?.messages?.[0]
+  if (msg) {
+    const remoteJid: string = msg?.key?.remoteJid ?? msg?.remoteJid ?? ''
+    const fromMe: boolean = !!msg?.key?.fromMe
+    if (fromMe) return null
+
+    // Phone is the part before "@s.whatsapp.net"
+    const phone = remoteJid.split('@')[0] ?? ''
+    if (!phone) return null
+
+    const m = msg?.message ?? {}
+    const text: string =
+      m?.conversation ??
+      m?.extendedTextMessage?.text ??
+      m?.imageMessage?.caption ??
+      m?.videoMessage?.caption ??
+      m?.buttonsResponseMessage?.selectedDisplayText ??
+      m?.listResponseMessage?.title ??
+      ''
+
+    if (!text) return null
+    return { from: phone, text }
+  }
+
+  // Format B (simpler webhooks): { from, text } or { from, message }
+  const directFrom = body?.from ?? body?.sender ?? body?.phone
+  const directText = body?.text ?? body?.message ?? body?.body
+  if (directFrom && directText) {
+    return { from: String(directFrom), text: String(directText) }
+  }
+
+  return null
+}
+
 // ─── Route handlers ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null) ?? await req.text().then(t => {
-      try { return Object.fromEntries(new URLSearchParams(t)) } catch { return {} }
-    })
+    const rawBody = await req.text()
+    const signature = req.headers.get('x-webhook-signature') ?? req.headers.get('x-wasender-signature')
 
-    if (body?.type === 'message') {
-      const payload = body.payload
-      const from: string = payload?.sender?.phone ?? payload?.source ?? ''
-      const text: string =
-        payload?.type === 'text'         ? (payload?.payload?.text  ?? '')
-        : payload?.type === 'button_response' ? (payload?.payload?.title ?? '')
-        : ''
+    if (!verifySignature(rawBody, signature)) {
+      return new NextResponse('Invalid signature', { status: 401 })
+    }
 
-      if (from && text) {
-        handleMessage(from, text).catch(() => {})
-      }
+    let body: any = null
+    try { body = JSON.parse(rawBody) } catch {
+      try { body = Object.fromEntries(new URLSearchParams(rawBody)) } catch { body = {} }
+    }
+
+    const parsed = extractFromWasender(body)
+    if (parsed) {
+      handleMessage(parsed.from, parsed.text).catch(() => {})
     }
 
     return new NextResponse('OK', { status: 200 })
@@ -263,5 +319,5 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ ok: true, provider: 'gupshup' })
+  return NextResponse.json({ ok: true, provider: 'wasenderapi' })
 }

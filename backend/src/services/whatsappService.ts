@@ -2,111 +2,95 @@ import axios from 'axios'
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
-const GUPSHUP_BASE = 'https://api.gupshup.io/wa/api/v1'
+const WASENDER_BASE = 'https://wasenderapi.com/api'
 
-// ─── Load credentials: env vars first, then DB fallback ──────────────────────
-async function getCredentials(): Promise<{ apiKey: string; appName: string; from: string } | null> {
-  const apiKey  = process.env.GUPSHUP_API_KEY
-  const appName = process.env.GUPSHUP_APP_NAME
-  const from    = process.env.GUPSHUP_PHONE_NUMBER
+interface WasenderCreds {
+  apiKey: string
+}
 
-  if (apiKey && appName && from) return { apiKey, appName, from }
+async function getCredentials(): Promise<WasenderCreds | null> {
+  const apiKey = process.env.WASENDER_API_KEY
+  if (apiKey) return { apiKey }
 
-  // Fallback: read from site_settings table (set via admin settings UI)
   try {
     const { data } = await supabaseAdmin
       .from('site_settings')
       .select('key, value')
-      .in('key', ['integration_gupshup_api_key', 'integration_gupshup_app_name', 'integration_gupshup_phone_number'])
+      .in('key', ['integration_wasender_api_key'])
 
     if (!data?.length) return null
 
     const map = Object.fromEntries(data.map((r: { key: string; value: string }) => [r.key, r.value]))
-    const dbKey    = map['integration_gupshup_api_key']
-    const dbApp    = map['integration_gupshup_app_name']
-    const dbPhone  = map['integration_gupshup_phone_number']
+    const dbKey = map['integration_wasender_api_key']
 
-    if (dbKey && dbApp && dbPhone) return { apiKey: dbKey, appName: dbApp, from: dbPhone }
+    if (dbKey) return { apiKey: dbKey }
   } catch (err) {
-    logger.warn('[WhatsApp] Could not load credentials from DB:', err)
+    logger.warn('[WhatsApp] Could not load WaSender credentials from DB:', err)
   }
 
   return null
 }
 
-// ─── Send a plain text message via Gupshup ───────────────────────────────────
+function normalizePhone(to: string): string {
+  const cleaned = to.replace(/[^\d+]/g, '')
+  return cleaned.startsWith('+') ? cleaned : `+${cleaned}`
+}
+
 export async function sendMessage(to: string, text: string): Promise<void> {
   const creds = await getCredentials()
-  const { apiKey, appName, from } = creds ?? {}
-
-  if (!apiKey || !appName || !from) {
-    logger.warn('[WhatsApp] Gupshup credentials not configured — message skipped.')
+  if (!creds) {
+    logger.warn('[WhatsApp] WaSender credentials not configured — message skipped.')
     return
   }
 
-  // Gupshup requires E.164 without the + sign (e.g. 2348012345678)
-  const cleanTo = to.replace(/^\+/, '')
+  const recipient = normalizePhone(to)
 
   try {
     await axios.post(
-      `${GUPSHUP_BASE}/msg`,
-      new URLSearchParams({
-        channel:     'whatsapp',
-        source:      from,
-        destination: cleanTo,
-        message:     JSON.stringify({ isHSM: 'false', type: 'text', text: { body: text } }),
-        'src.name':  appName,
-      }),
+      `${WASENDER_BASE}/send-message`,
+      { to: recipient, text },
       {
         headers: {
-          apikey:         apiKey,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Bearer ${creds.apiKey}`,
+          'Content-Type': 'application/json',
         },
+        timeout: 15000,
       },
     )
-    logger.info(`[WhatsApp] Message sent to ${cleanTo}`)
+    logger.info(`[WhatsApp] Message sent to ${recipient}`)
   } catch (err: any) {
-    logger.error(`[WhatsApp] Failed to send to ${cleanTo}: ${err?.response?.data?.message ?? err.message}`)
+    const detail = err?.response?.data ?? err.message
+    logger.error(`[WhatsApp] Failed to send to ${recipient}:`, detail)
     throw err
   }
 }
 
-// ─── Send a Gupshup template (HSM) message ───────────────────────────────────
-export async function sendTemplate(
-  to: string,
-  templateId: string,
-  params: string[] = [],
-): Promise<void> {
+export async function sendImage(to: string, imageUrl: string, caption?: string): Promise<void> {
   const creds = await getCredentials()
-  const { apiKey, appName, from } = creds ?? {}
-
-  if (!apiKey || !appName || !from) {
-    logger.warn('[WhatsApp] Gupshup credentials not configured — template skipped.')
-    return
-  }
-
-  const cleanTo = to.replace(/^\+/, '')
-
+  if (!creds) return
+  const recipient = normalizePhone(to)
   try {
     await axios.post(
-      `${GUPSHUP_BASE}/template/msg`,
-      new URLSearchParams({
-        channel:     'whatsapp',
-        source:      from,
-        destination: cleanTo,
-        template:    JSON.stringify({ id: templateId, params }),
-        'src.name':  appName,
-      }),
+      `${WASENDER_BASE}/send-image`,
+      { to: recipient, imageUrl, text: caption ?? '' },
       {
         headers: {
-          apikey:         apiKey,
-          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Bearer ${creds.apiKey}`,
+          'Content-Type': 'application/json',
         },
+        timeout: 20000,
       },
     )
-    logger.info(`[WhatsApp] Template "${templateId}" sent to ${cleanTo}`)
   } catch (err: any) {
-    logger.error(`[WhatsApp] Template failed for ${cleanTo}: ${err?.response?.data?.message ?? err.message}`)
-    throw err
+    logger.error(`[WhatsApp] Failed to send image to ${recipient}:`, err?.response?.data ?? err.message)
   }
+}
+
+export async function sendTemplate(
+  to: string,
+  _templateId: string,
+  params: string[] = [],
+): Promise<void> {
+  const text = params.length ? params.join(' ') : 'Hello from VendoorX'
+  await sendMessage(to, text)
 }

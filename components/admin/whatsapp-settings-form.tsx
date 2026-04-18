@@ -13,23 +13,18 @@ interface Field {
 
 const FIELDS: Field[] = [
   {
-    key:         'integration_gupshup_api_key',
+    key:         'integration_wasender_api_key',
     label:       'API Key',
-    placeholder: 'Paste your Gupshup API key here',
-    hint:        'Found in your Gupshup dashboard → Settings → API Key',
+    placeholder: 'Paste your WaSenderAPI key here',
+    hint:        'Found in WaSenderAPI dashboard → Settings → API Keys',
     secret:      true,
   },
   {
-    key:         'integration_gupshup_app_name',
-    label:       'App Name',
-    placeholder: 'e.g. VendoorX',
-    hint:        'The exact name of your app in the Gupshup dashboard',
-  },
-  {
-    key:         'integration_gupshup_phone_number',
-    label:       'WhatsApp Phone Number',
-    placeholder: 'e.g. 2348012345678',
-    hint:        'Your number without the + sign, with country code',
+    key:         'integration_wasender_webhook_secret',
+    label:       'Webhook Secret (optional)',
+    placeholder: 'For HMAC signature verification',
+    hint:        'Optional — set the same value in WaSender webhook settings to verify incoming requests',
+    secret:      true,
   },
 ]
 
@@ -87,9 +82,9 @@ export function WhatsAppSettingsForm({ initialValues, webhookUrl }: Props) {
           <MessageCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
         </div>
         <div>
-          <h4 className="font-black text-sm text-foreground">WhatsApp — Gupshup</h4>
+          <h4 className="font-black text-sm text-foreground">WhatsApp — WaSenderAPI</h4>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Enter your Gupshup credentials to activate the WhatsApp bot
+            Enter your WaSenderAPI credentials to activate the WhatsApp bot
           </p>
         </div>
       </div>
@@ -136,12 +131,12 @@ export function WhatsAppSettingsForm({ initialValues, webhookUrl }: Props) {
 
         {/* Webhook hint */}
         <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 space-y-1">
-          <p className="text-xs font-bold text-foreground">Webhook URL (paste this in Gupshup)</p>
+          <p className="text-xs font-bold text-foreground">Webhook URL (paste this in WaSenderAPI)</p>
           <p className="text-xs text-muted-foreground font-mono break-all select-all">
             {displayedUrl}
           </p>
           <p className="text-[11px] text-muted-foreground">
-            Gupshup → your app → Webhooks → Add Webhook → Callback URL. Select <strong>Gupshup format (v2)</strong> and tick <strong>Message</strong>.
+            WaSenderAPI dashboard → your session → <strong>Webhooks</strong> → set Webhook URL → enable the <strong>messages.upsert</strong> event.
           </p>
         </div>
 

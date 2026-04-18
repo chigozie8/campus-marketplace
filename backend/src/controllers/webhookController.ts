@@ -4,36 +4,75 @@ import { addMessageJob } from '../queues/messageQueue.js'
 import { AuthRequest } from '../types/index.js'
 import logger from '../utils/logger.js'
 
-// ─── WhatsApp (Gupshup) ──────────────────────────────────────────────────────
+// ─── WhatsApp (WaSenderAPI) ──────────────────────────────────────────────────
 
-// Gupshup does not use a GET verification handshake — this just confirms the
-// endpoint is alive for health checks from the Gupshup dashboard.
-export function verifyWhatsApp(req: Request, res: Response): void {
-  res.status(200).json({ ok: true, provider: 'gupshup' })
+import crypto from 'crypto'
+
+// WaSender uses a simple GET ping for health-checks
+export function verifyWhatsApp(_req: Request, res: Response): void {
+  res.status(200).json({ ok: true, provider: 'wasenderapi' })
+}
+
+function verifyWasenderSignature(rawBody: Buffer | string | undefined, signature: string | undefined): boolean {
+  const secret = process.env.WASENDER_WEBHOOK_SECRET
+  if (!secret) return true
+  if (!rawBody || !signature) return false
+  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+  } catch {
+    return false
+  }
+}
+
+function extractFromWasender(body: any): { from: string; text: string } | null {
+  if (!body) return null
+  const msg = body?.data?.messages?.[0] ?? body?.messages?.[0]
+  if (msg) {
+    if (msg?.key?.fromMe) return null
+    const remoteJid: string = msg?.key?.remoteJid ?? msg?.remoteJid ?? ''
+    const phone = remoteJid.split('@')[0] ?? ''
+    if (!phone) return null
+
+    const m = msg?.message ?? {}
+    const text: string =
+      m?.conversation ??
+      m?.extendedTextMessage?.text ??
+      m?.imageMessage?.caption ??
+      m?.videoMessage?.caption ??
+      m?.buttonsResponseMessage?.selectedDisplayText ??
+      m?.listResponseMessage?.title ??
+      ''
+    if (!text) return null
+    return { from: phone, text }
+  }
+
+  const directFrom = body?.from ?? body?.sender ?? body?.phone
+  const directText = body?.text ?? body?.message ?? body?.body
+  if (directFrom && directText) return { from: String(directFrom), text: String(directText) }
+  return null
 }
 
 export async function whatsAppWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const body = req.body
+    const signature =
+      (req.headers['x-webhook-signature'] as string | undefined) ??
+      (req.headers['x-wasender-signature'] as string | undefined)
+    const rawBody = (req as AuthRequest & { rawBody?: Buffer }).rawBody
 
-    // Gupshup sends type="message" for inbound messages
-    if (body?.type === 'message') {
-      const payload  = body.payload
-      const from: string = payload?.sender?.phone ?? payload?.source ?? ''
-      const text: string =
-        payload?.type === 'text'
-          ? (payload?.payload?.text ?? '')
-          : payload?.type === 'button_response'
-            ? (payload?.payload?.title ?? '')
-            : ''
-
-      if (from && text) {
-        logger.info(`[WhatsApp] Inbound from ${from}: "${text}"`)
-        await addMessageJob({ from, text, platform: 'whatsapp' })
-      }
+    if (!verifyWasenderSignature(rawBody, signature)) {
+      res.status(401).json({ success: false, message: 'Invalid signature.' })
+      return
     }
 
-    // Always respond 200 immediately — Gupshup retries if it doesn't get 200
+    const parsed = extractFromWasender(req.body)
+    if (parsed) {
+      logger.info(`[WhatsApp] Inbound from ${parsed.from}: "${parsed.text}"`)
+      await addMessageJob({ from: parsed.from, text: parsed.text, platform: 'whatsapp' })
+    }
+
+    // Always respond 200 quickly — provider retries if it doesn't get 200
     res.sendStatus(200)
   } catch (err) {
     next(err)
