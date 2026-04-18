@@ -33,6 +33,7 @@ import {
   MessageCircle,
   MapPin,
   ListChecks,
+  Mail,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -62,6 +63,7 @@ const NAV_ITEMS = [
   { label: 'Boost Pricing',   href: '/admin/boost',             icon: Zap },
   { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
+  { label: 'Newsletter',      href: '/admin/newsletter',        icon: Mail },
   { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
   { label: 'Contact Us',      href: '/admin/contact',           icon: Phone },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },

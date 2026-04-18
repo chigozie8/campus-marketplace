@@ -37,6 +37,7 @@ const SPONSORS = [
 ]
 
 function NewsletterForm() {
+  const [firstName, setFirstName] = useState('')
   const [email, setEmail]         = useState('')
   const [status, setStatus]       = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errMsg, setErrMsg]       = useState('')
@@ -50,7 +51,7 @@ function NewsletterForm() {
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, firstName }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -60,6 +61,7 @@ function NewsletterForm() {
       }
       setStatus('success')
       setEmail('')
+      setFirstName('')
     } catch {
       setErrMsg('Network error. Please try again.')
       setStatus('error')
@@ -79,29 +81,39 @@ function NewsletterForm() {
   }
 
   return (
-    <form className="flex flex-col sm:flex-row gap-2.5" onSubmit={handleSubmit}>
-      <div className="flex-1 min-w-0">
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="Enter your email address"
-          required
-          className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
-        />
-        {status === 'error' && (
-          <p className="text-xs text-red-500 mt-1.5">{errMsg}</p>
-        )}
+    <form className="flex flex-col gap-2.5" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={firstName}
+        onChange={e => setFirstName(e.target.value)}
+        placeholder="First name (optional)"
+        maxLength={60}
+        className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
+      />
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="flex-1 min-w-0">
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Enter your email address"
+            required
+            className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
+          />
+          {status === 'error' && (
+            <p className="text-xs text-red-500 mt-1.5">{errMsg}</p>
+          )}
+        </div>
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
+        >
+          {status === 'loading'
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
+            : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
+        </button>
       </div>
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
-      >
-        {status === 'loading'
-          ? <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
-          : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
-      </button>
     </form>
   )
 }

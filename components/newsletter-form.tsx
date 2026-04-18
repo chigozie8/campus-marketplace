@@ -9,6 +9,7 @@ interface NewsletterFormProps {
 }
 
 export function NewsletterForm({ className = '', variant = 'inline' }: NewsletterFormProps) {
+  const [firstName, setFirstName] = useState('')
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
@@ -21,13 +22,14 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, firstName }),
       })
       const data = await res.json()
       if (res.ok) {
         setStatus('success')
         setMessage(data.message || 'Subscribed! Check your email.')
         setEmail('')
+        setFirstName('')
       } else {
         setStatus('error')
         setMessage(data.error || 'Something went wrong.')

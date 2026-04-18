@@ -341,17 +341,26 @@ export async function sendAdminPasswordResetEmail(
 // Newsletter — campus deal alerts
 // ────────────────────────────────────────────────────────────────────────────
 
-export async function sendNewsletterWelcomeEmail(to: string): Promise<SendResult> {
+export async function sendNewsletterWelcomeEmail(
+  to: string,
+  firstName?: string | null,
+): Promise<SendResult> {
+  const cleanName = (firstName || '').trim().split(/\s+/)[0] || ''
+  const greeting = cleanName ? `Hi ${esc(cleanName)} 👋,` : 'Hi there 👋,'
+  const { unsubscribeUrl } = await import('./unsubscribe-token')
+  const unsubUrl = unsubscribeUrl(SITE_URL, to)
   return safeSend({
     to,
-    subject: '🎉 You\'re in! Welcome to VendoorX campus deals',
+    subject: cleanName
+      ? `🎉 Welcome to VendoorX, ${cleanName}!`
+      : '🎉 You\'re in! Welcome to VendoorX campus deals',
     html: layout({
       preheader: 'Weekly campus deals, new student sellers & insider tips — straight to your inbox.',
       iconEmoji: '🎓',
-      title: 'Welcome to VendoorX!',
+      title: cleanName ? `Welcome to VendoorX, ${cleanName}!` : 'Welcome to VendoorX!',
       subtitle: 'Nigeria\'s campus marketplace',
       bodyHtml: `
-        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 14px">Hi there 👋,</p>
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 14px">${greeting}</p>
         <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
           Thanks for joining! You'll be the <strong>first to know</strong> about deals from student sellers,
           new vendor stores opening on your campus, and tips to buy &amp; sell smarter on WhatsApp.
@@ -367,7 +376,45 @@ export async function sendNewsletterWelcomeEmail(to: string): Promise<SendResult
         </table>
       `,
       cta: { label: 'Browse the marketplace', href: `${SITE_URL}/marketplace` },
-      footerNote: 'You signed up at vendoorx.ng. You can unsubscribe anytime.',
+      footerNote: `You signed up at vendoorx.ng. <a href="${unsubUrl}" style="color:#9ca3af;text-decoration:underline">Unsubscribe</a>`,
+    }),
+  })
+}
+
+/**
+ * Plain newsletter broadcast email used by the admin "Send to all
+ * subscribers" page. Plain-text body becomes paragraphs; we always append
+ * an unsubscribe link to satisfy CAN-SPAM / GDPR.
+ */
+export async function sendNewsletterBroadcastEmail(args: {
+  to: string
+  firstName?: string | null
+  subject: string
+  /** Plain text body — newlines become paragraph breaks. */
+  bodyText: string
+}): Promise<SendResult> {
+  const cleanName = (args.firstName || '').trim().split(/\s+/)[0] || ''
+  const greeting = cleanName ? `Hi ${esc(cleanName)},` : 'Hi there,'
+  const paragraphs = args.bodyText
+    .split(/\n{2,}/)
+    .map((p) => `<p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 14px">${esc(p).replace(/\n/g, '<br>')}</p>`)
+    .join('')
+  const { unsubscribeUrl } = await import('./unsubscribe-token')
+  const unsubUrl = unsubscribeUrl(SITE_URL, args.to)
+  return safeSend({
+    to: args.to,
+    subject: args.subject,
+    html: layout({
+      preheader: args.subject,
+      iconEmoji: '📬',
+      title: args.subject,
+      subtitle: 'VendoorX Newsletter',
+      bodyHtml: `
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 14px">${greeting}</p>
+        ${paragraphs}
+      `,
+      cta: { label: 'Visit VendoorX', href: SITE_URL },
+      footerNote: `You're getting this because you subscribed at vendoorx.ng. <a href="${unsubUrl}" style="color:#9ca3af;text-decoration:underline">Unsubscribe</a>`,
     }),
   })
 }
