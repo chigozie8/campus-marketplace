@@ -284,7 +284,23 @@ This project has two services running side-by-side:
 | `UPSTASH_REDIS_REST_URL` | Frontend + Backend | Upstash Redis (used for WhatsApp consent + rate limits) |
 | `UPSTASH_REDIS_REST_TOKEN` | Frontend + Backend | Upstash Redis auth token |
 
-### WhatsApp (WaSenderAPI) — Anti-ban Architecture
+### WhatsApp (WaSenderAPI) — Conversational Commerce Bot
+The bot is a full e-commerce assistant living inside WhatsApp:
+- **Stateful conversations** (Redis, 30 min TTL) — bot remembers what step you're on (browsing, viewing a product, awaiting address, confirming order)
+- **Account linking** — phone number → Supabase profile lookup (tries `whatsapp_number` and `phone` columns with multiple format variants)
+- **Buyer flows**: search products → numeric pick (1-5) → product detail → ORDER → delivery address → confirm → Paystack payment link generated → order created in DB
+- **Order management**: "my orders" lists last 5 with status; "track" shows latest delivery
+- **Seller flows**: "my sales" shows listings + recent sales for sellers
+- **Smart intent detection** — handles greetings, browse, search, order, track, sell, support, plus universal "cancel/back" to exit any flow
+- **Files**: `lib/whatsapp/{state,account,handlers,format,wasender,consent,messages,redis}.ts`
+
+### Admin debug + reset
+- `GET /api/admin/whatsapp/debug?phone=2348012345678` — shows consent + state + linked profile
+- `POST /api/admin/whatsapp/debug` body `{phone, action}` where action is `reset|opt_in|opt_out|test`
+- Auth: `x-admin-key: <INTERNAL_API_KEY>` header OR logged-in admin session
+- `GET /api/webhook/whatsapp` — health check (`{ok, hasKey, hasSecret, env}`)
+
+### WhatsApp Anti-ban Architecture
 The bot ships with these guardrails to keep the connected number safe:
 - **Opt-in flow** (`lib/whatsapp/messages.ts`) — every new contact receives ToS prompt; must reply `YES` before bot responds
 - **Opt-out keywords** — `STOP / UNSUBSCRIBE / CANCEL / QUIT / OPT-OUT / END` permanently silences the bot for that number; `START` re-enables
