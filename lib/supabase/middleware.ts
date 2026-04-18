@@ -67,8 +67,27 @@ export async function updateSession(request: NextRequest) {
 
   if (!isRSC) {
     const pathname = request.nextUrl.pathname
-    const protectedRoutes = ['/dashboard', '/seller', '/profile', '/assistant', '/protected', '/admin']
-    const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
+    // NOTE: prefixes must be specific enough not to catch sibling public routes.
+    // Eg `/seller` (singular) would also match `/sellers/...` (plural, public),
+    // which broke Google indexing. Use trailing slash + explicit `===` checks.
+    const protectedPrefixes = [
+      '/dashboard',
+      '/seller/',     // /seller/new, /seller/edit/...  (NOT /sellers/*)
+      '/profile',
+      '/assistant',
+      '/protected',
+      '/admin',
+      '/orders',
+      '/wallet',
+      '/notifications',
+      '/inbox',
+      '/favorites',
+      '/cart',
+      '/payment',
+    ]
+    const isProtected =
+      pathname === '/seller' ||  // bare /seller page (if any) is also protected
+      protectedPrefixes.some(p => pathname === p || pathname.startsWith(p))
 
     // Not logged in trying to access protected route → login
     if (isProtected && !user) {
