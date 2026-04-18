@@ -6,6 +6,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } from 'lucide-react'
 import type { Product, Profile } from '@/lib/types'
 import { StoreShareWidget } from '@/components/store/store-share-widget'
+import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,9 +109,11 @@ export default async function StorePage({ params }: PageProps) {
   const { seller, products } = result
   const name = seller.full_name || 'Seller'
   const initials = name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
-  const whatsappNumber = seller.whatsapp_number?.replace(/\D/g, '') || ''
-
+  const sellerWhatsapp = seller.whatsapp_number?.replace(/\D/g, '') || ''
   const storeSchemaUrl = `https://vendoorx.ng/store/${slug}`
+  const storeChatUrl = botWhatsappUrl(
+    `Hi VendoorX! I'd like to chat with ${name}'s store (${storeSchemaUrl}).`,
+  )
   const schemaOrg = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -242,9 +245,9 @@ export default async function StorePage({ params }: PageProps) {
 
             {/* Action buttons — full width row on mobile */}
             <div className="flex items-center gap-2 mt-4">
-              {whatsappNumber && (
+              {sellerWhatsapp && (
                 <a
-                  href={`https://wa.me/${whatsappNumber}`}
+                  href={storeChatUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#20bd5a] transition-colors"

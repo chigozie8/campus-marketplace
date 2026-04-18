@@ -11,6 +11,7 @@ import { quickSellerScore } from '@/lib/trust'
 import { TrustBadge } from '@/components/TrustBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 
 interface ProductCardProps {
   product: Product
@@ -35,23 +36,11 @@ const conditionColors = {
 
 export function ProductCard({ product, isFavorited = false, onToggleFavorite, index = 0 }: ProductCardProps) {
   const router = useRouter()
-  const whatsappNumber = product.profiles?.whatsapp_number?.replace(/\D/g, '') || ''
-  const whatsappMessage = `Hi! I'm interested in "${product.title}" listed on VendoorX for ₦${product.price.toLocaleString()}. Is it still available?`
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
-    : ''
+  const whatsappMessage = `Hi VendoorX! I'm interested in "${product.title}" (listing #${product.id}) for ₦${product.price.toLocaleString()}. Is it still available?`
+  const whatsappUrl = botWhatsappUrl(whatsappMessage)
 
   function handleWhatsApp(e: React.MouseEvent) {
     e.preventDefault()
-    if (!whatsappUrl) {
-      toast.info('View the listing to contact this seller', {
-        action: {
-          label: 'View listing',
-          onClick: () => router.push(`/marketplace/${product.id}`),
-        },
-      })
-      return
-    }
     fetch(`/api/products/${product.id}/whatsapp`, { method: 'POST' }).catch(() => {})
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
   }

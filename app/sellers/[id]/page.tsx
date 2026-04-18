@@ -12,6 +12,7 @@ import type { Product } from '@/lib/types'
 import { SellerTierBadge, TrustBadge } from '@/components/TrustBadge'
 import { computeSellerScore, getMilestoneBadge, getSellerTier } from '@/lib/trust'
 import { SellerJsonLd } from '@/components/seo/seller-jsonld'
+import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -126,7 +127,10 @@ export default async function SellerProfilePage({ params }: Props) {
   const initials = profile.full_name
     ?.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase() || '?'
 
-  const whatsappNumber = profile.whatsapp_number?.replace(/\D/g, '') || ''
+  const sellerWhatsapp = profile.whatsapp_number?.replace(/\D/g, '') || ''
+  const sellerChatUrl = botWhatsappUrl(
+    `Hi VendoorX! I found ${profile.full_name || 'this seller'} on VendoorX and would like to chat.`,
+  )
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
@@ -234,9 +238,9 @@ export default async function SellerProfilePage({ params }: Props) {
 
         {/* Social CTAs */}
         <div className="space-y-2 mb-6">
-          {whatsappNumber && (
+          {sellerWhatsapp && (
             <a
-              href={`https://wa.me/${whatsappNumber}?text=Hi! I found you on VendoorX and would like to chat.`}
+              href={sellerChatUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-[#25d366] text-white font-bold text-sm hover:bg-[#1ebe5d] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"

@@ -2,9 +2,10 @@
 
 import { MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 
 interface WhatsAppCTAProps {
-  phoneNumber: string
+  phoneNumber?: string
   productTitle: string
   productPrice?: number
   variant?: 'primary' | 'outline' | 'compact'
@@ -13,20 +14,17 @@ interface WhatsAppCTAProps {
 }
 
 export function WhatsAppCTA({
-  phoneNumber,
   productTitle,
   productPrice,
   variant = 'primary',
   className,
   label,
 }: WhatsAppCTAProps) {
-  const cleanNumber = phoneNumber.replace(/\D/g, '')
-
   const message = productPrice
-    ? `Hi! I'm interested in "${productTitle}" listed for ₦${productPrice.toLocaleString()} on VendoorX. Is it still available?`
-    : `Hi! I'm interested in "${productTitle}" listed on VendoorX. Is it still available?`
+    ? `Hi VendoorX! I'm interested in "${productTitle}" listed for ₦${productPrice.toLocaleString()}. Is it still available?`
+    : `Hi VendoorX! I'm interested in "${productTitle}". Is it still available?`
 
-  const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
+  const url = botWhatsappUrl(message)
 
   if (variant === 'compact') {
     return (

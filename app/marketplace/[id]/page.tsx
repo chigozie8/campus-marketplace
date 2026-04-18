@@ -18,6 +18,7 @@ import { ReviewsSection } from '@/components/marketplace/reviews-section'
 import { MakeOfferDialog } from '@/components/product/make-offer-dialog'
 import { ReportDialog } from '@/components/product/report-dialog'
 import { ProductBuyButton } from '@/components/features/product-buy-button'
+import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -110,11 +111,8 @@ export default async function ProductDetailPage({ params }: Props) {
     initialLiked = !!fav
   }
 
-  const whatsappNumber = p.profiles?.whatsapp_number?.replace(/\D/g, '') || ''
-  const whatsappMessage = `Hi! I'm interested in "${p.title}" listed on VendoorX for ₦${p.price.toLocaleString()}`
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
-    : '#'
+  const whatsappMessage = `Hi VendoorX! I'm interested in "${p.title}" (listing #${p.id}) for ₦${p.price.toLocaleString()}.`
+  const whatsappUrl = botWhatsappUrl(whatsappMessage)
 
   const sellerName = p.profiles?.full_name || 'Unknown Seller'
   const sellerRating = p.profiles?.rating || 0
