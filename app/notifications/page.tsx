@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, Bell, Loader2, CheckCheck,
   ShoppingBag, Star, MessageCircle, Info, Package,
-  BellOff, Sparkles,
+  BellOff, Sparkles, Tag,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -60,6 +60,38 @@ const TYPE_CONFIG: Record<string, {
     dot: 'bg-indigo-500',
     label: 'Listing',
   },
+  offer: {
+    icon: Tag,
+    color: 'text-blue-600',
+    bg: 'bg-blue-500',
+    ring: 'ring-blue-200 dark:ring-blue-800',
+    dot: 'bg-blue-500',
+    label: 'Offer',
+  },
+  new_offer: {
+    icon: Tag,
+    color: 'text-blue-600',
+    bg: 'bg-blue-500',
+    ring: 'ring-blue-200 dark:ring-blue-800',
+    dot: 'bg-blue-500',
+    label: 'New Offer',
+  },
+  offer_accepted: {
+    icon: Tag,
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-500',
+    ring: 'ring-emerald-200 dark:ring-emerald-800',
+    dot: 'bg-emerald-500',
+    label: 'Offer Accepted',
+  },
+  offer_declined: {
+    icon: Tag,
+    color: 'text-red-600',
+    bg: 'bg-red-500',
+    ring: 'ring-red-200 dark:ring-red-800',
+    dot: 'bg-red-500',
+    label: 'Offer Declined',
+  },
   info: {
     icon: Info,
     color: 'text-gray-500',
@@ -104,10 +136,30 @@ export default function NotificationsPage() {
 
   useEffect(() => { fetchNotifications() }, [fetchNotifications])
 
-  async function markAsRead(id: string) {
-    const supabase = createClient()
-    await supabase.from('notifications').update({ read: true }).eq('id', id)
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  async function handleNotificationClick(n: Notification) {
+    // Mark as read in the background — don't block navigation
+    if (!n.read) {
+      const supabase = createClient()
+      supabase.from('notifications').update({ read: true }).eq('id', n.id).then(() => {})
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
+    }
+
+    // Resolve a destination URL: prefer data.url, then fall back to a
+    // sensible page based on the notification type so offer/order/etc.
+    // notifications always land somewhere useful.
+    const explicitUrl = typeof n.data?.url === 'string' ? n.data.url : null
+    const fallbackByType: Record<string, string> = {
+      offer: '/dashboard/offers',
+      new_offer: '/dashboard/offers',
+      offer_accepted: '/dashboard/offers',
+      offer_declined: '/dashboard/offers',
+      order: '/dashboard/orders',
+      review: '/dashboard',
+      message: '/dashboard',
+      listing: '/dashboard',
+    }
+    const target = explicitUrl || fallbackByType[n.type] || null
+    if (target) router.push(target)
   }
 
   async function markAllRead() {
@@ -252,7 +304,7 @@ export default function NotificationsPage() {
               return (
                 <button
                   key={notification.id}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                   className={`w-full text-left group transition-all duration-200 ${
                     notification.read
                       ? 'opacity-60 hover:opacity-80'
