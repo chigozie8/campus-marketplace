@@ -133,18 +133,50 @@ async function safeSend(args: {
   subject: string
   html: string
 }): Promise<SendResult> {
-  if (!resend) return { ok: false, error: 'RESEND_API_KEY not configured' }
+  if (!resend) {
+    console.error('[email] ❌ RESEND_API_KEY not configured — cannot send to', args.to)
+    return { ok: false, error: 'RESEND_API_KEY not configured' }
+  }
   try {
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM,
       to: args.to,
       subject: args.subject,
       html: args.html,
     })
-    if (error) return { ok: false, error: error.message ?? 'send failed' }
+    if (error) {
+      console.error(`[email] ❌ Resend error sending "${args.subject}" to ${args.to}:`, error.name, error.message)
+      return { ok: false, error: error.message ?? 'send failed' }
+    }
+    console.log(`[email] ✅ Sent "${args.subject}" to ${args.to} (id: ${data?.id ?? '?'})`)
     return { ok: true }
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'send failed' }
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error(`[email] ❌ Exception sending "${args.subject}" to ${args.to}:`, msg)
+    return { ok: false, error: msg }
+  }
+}
+
+/**
+ * Fire-and-forget wrapper used by lifecycle emails (order placed, paid,
+ * shipped, login alerts, etc). Never throws — but ALWAYS logs the failure
+ * with the full Resend error so production issues are visible in the logs
+ * instead of silently disappearing.
+ */
+async function fireAndForget(label: string, to: string, builder: () => Promise<{ data: unknown; error: { name?: string; message?: string } | null }>): Promise<void> {
+  if (!resend) {
+    console.error(`[email] ❌ RESEND_API_KEY not configured — skipped "${label}" to ${to}`)
+    return
+  }
+  try {
+    const { data, error } = await builder()
+    if (error) {
+      console.error(`[email] ❌ Resend error on "${label}" to ${to}:`, error.name, error.message)
+      return
+    }
+    console.log(`[email] ✅ Sent "${label}" to ${to} (id: ${(data as { id?: string })?.id ?? '?'})`)
+  } catch (e) {
+    console.error(`[email] ❌ Exception on "${label}" to ${to}:`, e instanceof Error ? e.message : String(e))
   }
 }
 
@@ -153,8 +185,8 @@ async function safeSend(args: {
 // ────────────────────────────────────────────────────────────────────────────
 
 export async function sendConfirmationLinkEmail(to: string, name: string, confirmUrl: string) {
-  if (!resend) return
-  await resend.emails.send({
+  if (!resend) { console.error('[email] ❌ RESEND_API_KEY not configured'); return }
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: 'Confirm your VendoorX account',
@@ -179,12 +211,18 @@ export async function sendConfirmationLinkEmail(to: string, name: string, confir
         </p>
       `,
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 export async function sendVerificationApprovedEmail(to: string, name: string) {
-  if (!resend) return
-  await resend.emails.send({
+  if (!resend) { console.error('[email] ❌ RESEND_API_KEY not configured'); return }
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: '🎉 Your VendoorX verification has been approved!',
@@ -207,12 +245,18 @@ export async function sendVerificationApprovedEmail(to: string, name: string) {
       `,
       cta: { label: 'Go to Dashboard', href: `${SITE_URL}/dashboard` },
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 export async function sendVerificationRejectedEmail(to: string, name: string, reason?: string) {
-  if (!resend) return
-  await resend.emails.send({
+  if (!resend) { console.error('[email] ❌ RESEND_API_KEY not configured'); return }
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: 'Update on your VendoorX verification request',
@@ -240,7 +284,13 @@ export async function sendVerificationRejectedEmail(to: string, name: string, re
       `,
       cta: { label: 'Resubmit Verification', href: `${SITE_URL}/profile` },
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -261,7 +311,7 @@ export async function sendLoginAlertEmail(
   const ip = meta.ip || 'Unknown'
   const ua = meta.userAgent || 'Unknown device'
 
-  await resend.emails.send({
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: 'New sign-in to your VendoorX account',
@@ -293,7 +343,13 @@ export async function sendLoginAlertEmail(
       cta: { label: 'Review account security', href: `${SITE_URL}/profile` },
       footerNote: 'You\'re receiving this for your account security. You cannot disable these alerts.',
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -430,7 +486,7 @@ export async function sendOrderPlacedEmail(
 ) {
   if (!resend) return
   const shortId = order.id.slice(0, 8).toUpperCase()
-  await resend.emails.send({
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: `Order placed — complete payment to confirm (#${shortId})`,
@@ -463,7 +519,13 @@ export async function sendOrderPlacedEmail(
       `,
       cta: { label: 'Complete payment', href: `${SITE_URL}/dashboard/orders` },
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 export async function sendOrderPaidEmail(
@@ -473,7 +535,7 @@ export async function sendOrderPaidEmail(
 ) {
   if (!resend) return
   const shortId = order.id.slice(0, 8).toUpperCase()
-  await resend.emails.send({
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: `Payment confirmed — your order is on the way! (#${shortId})`,
@@ -510,7 +572,13 @@ export async function sendOrderPaidEmail(
       `,
       cta: { label: 'Track your order', href: `${SITE_URL}/dashboard/orders` },
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -531,7 +599,7 @@ export async function sendNewPaidOrderToSellerEmail(
 ) {
   if (!resend) return
   const shortId = order.id.slice(0, 8).toUpperCase()
-  await resend.emails.send({
+  const __r = await resend.emails.send({
     from: FROM,
     to,
     subject: `💰 New paid order: ${order.productTitle} (#${shortId})`,
@@ -564,5 +632,11 @@ export async function sendNewPaidOrderToSellerEmail(
       `,
       cta: { label: 'View order & ship', href: `${SITE_URL}/seller-orders` },
     }),
-  }).catch(() => {})
+  }).then(r => r, (e) => ({ data: null, error: { name: 'ThrownError', message: e instanceof Error ? e.message : String(e) } as { name?: string; message?: string } }))
+  if ((__r as { error?: { name?: string; message?: string } | null })?.error) {
+    const err = (__r as { error: { name?: string; message?: string } }).error
+    console.error(`[email] ❌ Resend rejected send to ${to}:`, err.name ?? '?', err.message ?? '?')
+  } else {
+    console.log(`[email] ✅ Sent to ${to} (id: ${(__r as { data?: { id?: string } | null })?.data?.id ?? '?'})`)
+  }
 }
