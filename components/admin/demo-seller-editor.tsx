@@ -41,11 +41,14 @@ type Profile = {
 
 export function DemoSellerEditor({ onToast }: { onToast: (kind: 'ok' | 'err', text: string) => void }) {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [original, setOriginal] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const dirty = !!profile && !!original && JSON.stringify(profile) !== JSON.stringify(original)
 
   async function load() {
     setLoading(true)
@@ -54,6 +57,7 @@ export function DemoSellerEditor({ onToast }: { onToast: (kind: 'ok' | 'err', te
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not load demo seller.')
       setProfile(json.profile)
+      setOriginal(json.profile)
     } catch (e) {
       onToast('err', (e as Error).message)
     } finally {
@@ -62,6 +66,14 @@ export function DemoSellerEditor({ onToast }: { onToast: (kind: 'ok' | 'err', te
   }
 
   useEffect(() => { void load() }, [])
+
+  // Warn before leaving page with unsaved changes
+  useEffect(() => {
+    if (!dirty) return
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [dirty])
 
   function patch<K extends keyof Profile>(k: K, v: Profile[K]) {
     setProfile((p) => (p ? { ...p, [k]: v } : p))
@@ -119,6 +131,7 @@ export function DemoSellerEditor({ onToast }: { onToast: (kind: 'ok' | 'err', te
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Save failed.')
       setProfile(json.profile)
+      setOriginal(json.profile)
       onToast('ok', 'Demo seller saved.')
     } catch (e) {
       onToast('err', (e as Error).message)
@@ -139,7 +152,34 @@ export function DemoSellerEditor({ onToast }: { onToast: (kind: 'ok' | 'err', te
   const storeUrl = `/store/${profile.id}`
 
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+    <div className={`rounded-2xl border-2 bg-card overflow-hidden transition-colors ${dirty ? 'border-amber-400 dark:border-amber-500 shadow-lg shadow-amber-500/10' : 'border-border'}`}>
+      {/* Sticky save bar — always visible when dirty */}
+      {dirty && (
+        <div className="sticky top-0 z-30 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-300 dark:border-amber-800 px-4 py-2 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            You have unsaved changes
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { if (original) setProfile(original) }}
+              disabled={saving}
+              className="px-3 py-1.5 rounded-lg border border-amber-400 dark:border-amber-700 text-xs font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-950 disabled:opacity-50"
+            >
+              Discard
+            </button>
+            <button
+              onClick={save}
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-black disabled:opacity-60 shadow-sm"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              Save now
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Collapsed header */}
       <button
         onClick={() => setOpen((o) => !o)}
