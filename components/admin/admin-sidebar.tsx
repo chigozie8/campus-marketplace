@@ -34,6 +34,7 @@ import {
   MapPin,
   ListChecks,
   Mail,
+  Sparkles,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -64,6 +65,7 @@ const NAV_ITEMS = [
   { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
   { label: 'Newsletter',      href: '/admin/newsletter',        icon: Mail },
+  { label: 'Dummy Data',      href: '/admin/dummy',             icon: Sparkles },
   { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
   { label: 'Contact Us',      href: '/admin/contact',           icon: Phone },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
