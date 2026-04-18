@@ -142,4 +142,42 @@ export const DUMMY_LISTINGS: DummyItem[] = [
     price: 75000, condition: 'good', categorySlug: 'vehicles', campus: 'COVENANT', image: img('photo-1532298229144-0ec0c57515c7') },
   { slug: 'electric-scooter', title: 'Electric Scooter — 25km Range', description: 'Foldable, lightweight. Ideal for big campuses. Comes with charger.',
     price: 185000, originalPrice: 240000, condition: 'good', categorySlug: 'vehicles', campus: 'UNILAG', image: img('photo-1604868189265-219ba7bf7ea3') },
+
+  // ── TVs & Displays (5) ────────────────────────────────────────────────
+  { slug: 'samsung-43-smart-tv', title: 'Samsung 43" Smart TV (4K UHD)', description: 'Crystal-clear 4K display with built-in Netflix, YouTube and Prime Video. Comes with original remote and stand.',
+    price: 235000, originalPrice: 320000, condition: 'good', categorySlug: 'electronics', campus: 'UNILAG', image: img('photo-1593359677879-a4bb92f829d1') },
+  { slug: 'lg-32-led-tv', title: 'LG 32" LED TV with HDMI', description: 'Compact LED TV — perfect for hostel rooms. Two HDMI ports, USB playback. Lightly used.',
+    price: 110000, condition: 'good', categorySlug: 'electronics', campus: 'OAU', image: img('photo-1461151304267-38535e780c79') },
+  { slug: 'hisense-50-4k-tv', title: 'Hisense 50" 4K Smart TV', description: 'Big-screen 4K experience with Vidaa OS, voice remote and screen mirroring. Box still available.',
+    price: 295000, originalPrice: 380000, condition: 'like_new', categorySlug: 'electronics', campus: 'COVENANT', image: img('photo-1601944179066-29786cb9d32a') },
+  { slug: 'tv-wall-mount', title: 'Universal TV Wall Mount (32–55")', description: 'Heavy-duty tilt-and-swivel mount with all screws included. Brand new in box.',
+    price: 12500, condition: 'new', categorySlug: 'electronics', campus: 'UI', image: img('photo-1567016432779-094069958ea5') },
+  { slug: 'projector-mini-1080p', title: 'Mini Projector — 1080p HDMI', description: 'Movie nights anywhere on campus. Bluetooth speaker support, HDMI + USB inputs. Comes with carry pouch.',
+    price: 95000, originalPrice: 130000, condition: 'like_new', categorySlug: 'electronics', campus: 'ABU', image: img('photo-1626379953822-baec19c3accd') },
+
+  // ── Gadgets (5) ───────────────────────────────────────────────────────
+  { slug: 'apple-watch-se', title: 'Apple Watch SE (40mm) — Midnight', description: 'GPS model with sport band. Battery still excellent. Includes magnetic charger.',
+    price: 165000, originalPrice: 220000, condition: 'good', categorySlug: 'electronics', campus: 'UI', image: img('photo-1546868871-7041f2a55e12') },
+  { slug: 'samsung-galaxy-tab-a8', title: 'Samsung Galaxy Tab A8 — 64GB', description: 'Great for note-taking and streaming. Comes with charger and original box.',
+    price: 145000, condition: 'good', categorySlug: 'electronics', campus: 'BUK', image: img('photo-1561154464-82e9adf32764') },
+  { slug: 'gopro-hero-9', title: 'GoPro HERO 9 Black — 5K', description: 'Action camera with front display. Includes 64GB SD card and chest mount.',
+    price: 215000, originalPrice: 290000, condition: 'good', categorySlug: 'electronics', campus: 'COVENANT', image: img('photo-1526317899612-fc036c5e8a6b') },
+  { slug: 'jbl-flip-5-speaker', title: 'JBL Flip 5 Bluetooth Speaker', description: 'Waterproof portable speaker with 12-hour battery. Loud, punchy bass.',
+    price: 48000, condition: 'like_new', categorySlug: 'electronics', campus: 'UNILORIN', image: img('photo-1608043152269-423dbba4e7e1') },
+  { slug: 'kindle-paperwhite', title: 'Kindle Paperwhite (11th Gen)', description: 'Glare-free 6.8" display, weeks of battery. Loaded with 30+ free books.',
+    price: 78000, condition: 'like_new', categorySlug: 'electronics', campus: 'UNIBEN', image: img('photo-1592434134753-a70baf7979d5') },
+
+  // ── More Clothing (6) ─────────────────────────────────────────────────
+  { slug: 'denim-jacket-blue', title: 'Classic Blue Denim Jacket', description: 'Timeless wash, fits true to size (M). Worn maybe twice — basically new.',
+    price: 14500, condition: 'like_new', categorySlug: 'fashion', campus: 'UI', image: img('photo-1601333144130-8cbb312386b6') },
+  { slug: 'nike-tracksuit-black', title: 'Nike Tracksuit (Black) — Size L', description: 'Full Nike tracksuit set, top + bottom. Great for gym or chill days.',
+    price: 32000, condition: 'good', categorySlug: 'fashion', campus: 'UNILAG', image: img('photo-1556821840-3a63f95609a7') },
+  { slug: 'sneakers-air-force-1', title: 'Nike Air Force 1 — All White (Size 42)', description: 'Iconic AF1s, freshly cleaned. Minor crease on left toe but still very fresh.',
+    price: 52000, originalPrice: 78000, condition: 'good', categorySlug: 'fashion', campus: 'OAU', image: img('photo-1542291026-7eec264c27ff') },
+  { slug: 'oversized-hoodie-grey', title: 'Oversized Heavy Hoodie — Heather Grey', description: 'Premium 400gsm cotton hoodie. Super warm for harmattan season. Size XL.',
+    price: 18500, condition: 'new', categorySlug: 'fashion', campus: 'ABU', image: img('photo-1556821840-3a63f95609a7') },
+  { slug: 'ankara-print-shirt', title: 'Custom Ankara Print Shirt (Men, L)', description: 'Hand-tailored Ankara button-down. Bright statement piece for owambe and outings.',
+    price: 12000, condition: 'new', categorySlug: 'fashion', campus: 'UNILORIN', image: img('photo-1602810318383-e386cc2a3ccf') },
+  { slug: 'leather-belt-brown', title: 'Genuine Leather Belt — Brown', description: 'Real leather, brushed-silver buckle. Adjustable, fits 30–36 waist.',
+    price: 6500, condition: 'new', categorySlug: 'fashion', campus: 'FUTA', image: img('photo-1624222247344-550fb60583dc') },
 ]
