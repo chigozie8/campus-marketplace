@@ -28,32 +28,19 @@ export async function runAutoRelease() {
   try {
     const cutoff = new Date(Date.now() - RELEASE_AFTER_HOURS * 60 * 60 * 1000).toISOString()
 
-    // Try delivered_at first, fall back to updated_at if column doesn't exist
-    let data: Array<{ id: string; buyer_id: string; seller_id: string; total_amount: number }> | null = null
-
-    const byDeliveredAt = await supabaseAdmin
+    // Sellers can no longer mark orders as "delivered" themselves (fraud
+    // prevention) — so the escrow now also releases orders that have been
+    // sitting in "shipped" for >48 h without buyer confirmation. Legacy
+    // "delivered" rows are still picked up so existing orders complete.
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .select('id, buyer_id, seller_id, total_amount')
-      .eq('status', 'delivered')
-      .lt('delivered_at', cutoff)
+      .in('status', ['shipped', 'delivered'])
+      .lt('updated_at', cutoff)
 
-    if (byDeliveredAt.error?.message?.includes('does not exist')) {
-      // delivered_at column missing — fall back to updated_at
-      const byUpdatedAt = await supabaseAdmin
-        .from('orders')
-        .select('id, buyer_id, seller_id, total_amount')
-        .eq('status', 'delivered')
-        .lt('updated_at', cutoff)
-      if (byUpdatedAt.error) {
-        logger.error(`[escrowAutoRelease] Query failed: ${byUpdatedAt.error.message}`)
-        return
-      }
-      data = byUpdatedAt.data
-    } else if (byDeliveredAt.error) {
-      logger.error(`[escrowAutoRelease] Query failed: ${byDeliveredAt.error.message}`)
+    if (error) {
+      logger.error(`[escrowAutoRelease] Query failed: ${error.message}`)
       return
-    } else {
-      data = byDeliveredAt.data
     }
 
     const orders = data
@@ -67,10 +54,25 @@ export async function runAutoRelease() {
 
     for (const order of orders) {
       try {
-        await supabaseAdmin
+        // Status-guarded update: only flip to "completed" if the order is
+        // still in shipped/delivered. If a concurrent buyer-verification has
+        // already completed the order, this update affects 0 rows and we
+        // skip the wallet release so funds aren't double-credited.
+        const { data: claimed, error: claimErr } = await supabaseAdmin
           .from('orders')
           .update({ status: 'completed', updated_at: new Date().toISOString() })
           .eq('id', order.id)
+          .in('status', ['shipped', 'delivered'])
+          .select('id')
+
+        if (claimErr) {
+          logger.error(`[escrowAutoRelease] Claim update failed for ${order.id}: ${claimErr.message}`)
+          continue
+        }
+        if (!claimed || claimed.length === 0) {
+          logger.info(`[escrowAutoRelease] Order ${order.id} already completed by buyer — skipping release.`)
+          continue
+        }
 
         await walletService.releaseSellerEarnings(order.seller_id, order.id)
 

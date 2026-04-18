@@ -99,9 +99,19 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         userId: order.buyer_id,
         type: 'order_shipped',
         title: 'Your Order is on the Way!',
-        body: `"${productTitle}" (Order #${shortId}) has been shipped. Confirm delivery once you receive it.`,
+        body: `"${productTitle}" (Order #${shortId}) has been shipped. We've sent your delivery code by email and SMS — enter it once your item arrives to release payment.`,
         data: { url: '/dashboard/orders', orderId: id },
       }).catch(() => {})
+      // Auto-send delivery OTP to buyer so the seller never controls
+      // delivery confirmation (fraud prevention). Fire-and-forget.
+      ;(async () => {
+        try {
+          const { sendDeliveryOtpToBuyer } = await import('./deliveryOtpService.js')
+          await sendDeliveryOtpToBuyer(id, order.buyer_id, 'both')
+        } catch (err) {
+          logger.warn(`[orderService] Auto delivery-OTP send failed for order ${id}: ${err instanceof Error ? err.message : String(err)}`)
+        }
+      })()
       break
 
     case 'delivered':

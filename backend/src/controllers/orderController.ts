@@ -64,7 +64,20 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
       return
     }
 
-    const order = await orderService.updateOrderStatus(req.params.id, req.body.status)
+    // Fraud prevention: sellers may only mark "shipped" or "cancelled".
+    // Marking "delivered" or "completed" must come from the buyer (delivery
+    // OTP verification) or the escrow auto-release job — never the seller.
+    const requested = req.body.status
+    const sellerAllowed: ReadonlyArray<string> = ['shipped', 'cancelled']
+    if (role !== 'admin' && !sellerAllowed.includes(requested)) {
+      res.status(403).json({
+        success: false,
+        message: 'Sellers can only mark orders as shipped or cancelled. Delivery confirmation is handled by the buyer or the escrow system to protect everyone.',
+      })
+      return
+    }
+
+    const order = await orderService.updateOrderStatus(req.params.id, requested)
     res.status(200).json({ success: true, message: 'Order status updated.', data: order })
   } catch (err) {
     next(err)

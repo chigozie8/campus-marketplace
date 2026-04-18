@@ -42,9 +42,11 @@ async function getBuyerContact(buyerId: string): Promise<{ email: string | null;
 
 // ---------------------------------------------------------------------------
 // POST /api/delivery-otp/:orderId/request?channel=email|sms|both
-// Vendor marks item delivered and chooses how to notify the buyer.
+// ADMIN ONLY. Sellers can no longer mark orders delivered — when they mark
+// "shipped", orderService auto-sends the OTP to the buyer. This endpoint is
+// kept for support staff to manually (re)issue an OTP if delivery failed.
 // ---------------------------------------------------------------------------
-router.post('/:orderId/request', requireRole('vendor', 'admin'), async (req, res, next) => {
+router.post('/:orderId/request', requireRole('admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
     const vendorId = (req as AuthRequest).user.id
@@ -54,15 +56,13 @@ router.post('/:orderId/request', requireRole('vendor', 'admin'), async (req, res
 
     const order = await orderService.getOrderById(orderId)
 
-    if (order.seller_id !== vendorId && (req as AuthRequest).user.role !== 'admin') {
-      res.status(403).json({ success: false, message: 'Only the vendor of this order can request delivery OTP.' })
-      return
-    }
-
-    if (!['paid', 'shipped'].includes(order.status)) {
+    // Admin-only route now (see header). Order must already be shipped —
+    // we no longer flip status to "delivered" from this endpoint, since
+    // sellers cannot influence delivery confirmation under the new flow.
+    if (order.status !== 'shipped' && order.status !== 'delivered') {
       res.status(400).json({
         success: false,
-        message: `Cannot request delivery OTP — order status is "${order.status}". Order must be paid or shipped.`,
+        message: `Cannot send delivery OTP — order status is "${order.status}". Order must be shipped first.`,
       })
       return
     }
@@ -131,7 +131,9 @@ router.post('/:orderId/request', requireRole('vendor', 'admin'), async (req, res
       appwriteUserId: (effectiveChannel === 'email' || effectiveChannel === 'both') ? appwriteUserId : undefined,
     })
 
-    await orderService.updateOrderStatus(orderId, 'delivered')
+    // NOTE: We deliberately do NOT flip status to 'delivered' here anymore.
+    // Status stays "shipped" until the buyer verifies the OTP (→ completed)
+    // or the escrow auto-release job runs (→ completed).
 
     const maskedEmail = email ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') : null
     const maskedPhone = phone ? `${phone.slice(0, 4)}****${phone.slice(-3)}` : null
@@ -174,10 +176,10 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
       return
     }
 
-    if (order.status !== 'delivered') {
+    if (order.status !== 'shipped' && order.status !== 'delivered') {
       res.status(400).json({
         success: false,
-        message: `Cannot verify delivery — order status is "${order.status}". Vendor must mark order as delivered first.`,
+        message: `Cannot verify delivery — order status is "${order.status}". The order must be shipped first.`,
       })
       return
     }
@@ -294,19 +296,13 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
 // POST /api/delivery-otp/:orderId/resend?channel=email|sms|both
 // Vendor resends OTP (optionally changing channel).
 // ---------------------------------------------------------------------------
-router.post('/:orderId/resend', requireRole('vendor', 'admin'), async (req, res, next) => {
+router.post('/:orderId/resend', requireRole('admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
-    const vendorId = (req as AuthRequest).user.id
 
     const order = await orderService.getOrderById(orderId)
 
-    if (order.seller_id !== vendorId && (req as AuthRequest).user.role !== 'admin') {
-      res.status(403).json({ success: false, message: 'Only the vendor of this order can resend the OTP.' })
-      return
-    }
-
-    if (order.status !== 'delivered') {
+    if (order.status !== 'shipped' && order.status !== 'delivered') {
       res.status(400).json({ success: false, message: `Cannot resend OTP — order status is "${order.status}".` })
       return
     }

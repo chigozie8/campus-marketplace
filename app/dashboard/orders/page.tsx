@@ -76,7 +76,7 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
   const inputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null, null, null, null])
   const remaining = useCountdown(order.delivered_at ?? order.updated_at)
 
-  if (confirmed || order.status !== 'delivered') return null
+  if (confirmed || (order.status !== 'delivered' && order.status !== 'shipped')) return null
 
   const otp = digits.join('')
 
