@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Users, MessageCircle, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Users, GraduationCap, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
 
@@ -11,17 +11,17 @@ interface CtaSectionProps {
 }
 
 const PERKS = [
-  'Free to join, free to list',
-  'AI handles buyer conversations',
-  'Verified seller badge',
+  'Free for students',
+  'WhatsApp-native checkout',
+  'Verified campus sellers',
   'Zero commission on sales',
 ]
 
 const STATS = [
-  { end: 50000, fmt: (n: number) => n >= 1000 ? `${Math.floor(n / 1000)}K+` : `${n}+`, label: 'Active Sellers',     icon: Users },
-  { end: 36,    fmt: (n: number) => `${n}+`,                                             label: 'States Covered',   icon: MessageCircle },
-  { end: 2,     fmt: (n: number) => `₦${n}B+`,                                           label: 'Sales Processed',  icon: TrendingUp },
-  { end: 4.9,   fmt: (n: number) => `${n.toFixed(1)}/5`,                                 label: 'Avg Rating',       icon: Star, decimal: true },
+  { end: 50000, fmt: (n: number) => n >= 1000 ? `${Math.floor(n / 1000)}K+` : `${n}+`, label: 'Student Sellers',     icon: Users },
+  { end: 120,   fmt: (n: number) => `${n}+`,                                             label: 'Universities',       icon: GraduationCap },
+  { end: 2,     fmt: (n: number) => `₦${n}B+`,                                           label: 'Campus Sales',       icon: TrendingUp },
+  { end: 4.9,   fmt: (n: number) => `${n.toFixed(1)}/5`,                                 label: 'Avg Rating',         icon: Star, decimal: true },
 ]
 
 function StatCard({
@@ -116,16 +116,16 @@ export function CtaSection({ user }: CtaSectionProps) {
         <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8">
           <Zap className="w-4 h-4 text-[#16a34a]" />
           <span className="text-sm font-semibold text-[#16a34a] tracking-wide">
-            {isAuthed ? 'Your store is live and ready to grow' : 'Nigeria\'s AI-Powered WhatsApp Commerce Platform'}
+            {isAuthed ? 'Your campus store is live and ready to grow' : 'The marketplace built for Nigerian university campuses'}
           </span>
         </div>
 
         {/* Headline */}
         <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight">
           {isAuthed ? (
-            <>Keep growing your{' '}<span className="text-[#16a34a]">business.</span></>
+            <>Keep growing your{' '}<span className="text-[#16a34a]">campus store.</span></>
           ) : (
-            <>Your WhatsApp business{' '}<span className="text-[#16a34a]">starts here.</span></>
+            <>Your campus side-hustle{' '}<span className="text-[#16a34a]">starts here.</span></>
           )}
         </h2>
 
@@ -134,11 +134,11 @@ export function CtaSection({ user }: CtaSectionProps) {
           {isAuthed ? (
             <>
               Everything you need is in your dashboard. Boost your listings, track your orders, and{' '}
-              <span className="text-[#16a34a] font-semibold">keep growing your business</span>.
+              <span className="text-[#16a34a] font-semibold">keep growing your campus store</span>.
             </>
           ) : (
             <>
-              Join <span className="text-white font-bold">50,000+ sellers</span> already making real money on VendoorX.
+              Join <span className="text-white font-bold">50,000+ students</span> already making money selling to classmates on VendoorX.
               It&apos;s{' '}
               <span className="text-[#16a34a] font-semibold">free to join</span>{' '}
               and <span className="text-[#16a34a] font-semibold">free to start selling</span> — right now.
@@ -195,7 +195,7 @@ export function CtaSection({ user }: CtaSectionProps) {
                 asChild
               >
                 <Link href="/auth/sign-up">
-                  Start Selling for Free
+                  Start Selling on Campus
                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
@@ -205,7 +205,7 @@ export function CtaSection({ user }: CtaSectionProps) {
                 className="border-white/20 text-white hover:bg-white/10 hover:border-white/40 h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg font-semibold rounded-2xl bg-transparent w-full sm:w-auto transition-all duration-300"
                 asChild
               >
-                <Link href="/marketplace">Explore the Marketplace</Link>
+                <Link href="/marketplace">Browse Campus Deals</Link>
               </Button>
             </>
           )}
@@ -213,7 +213,7 @@ export function CtaSection({ user }: CtaSectionProps) {
 
         {/* Trust line */}
         <p className="text-white/30 text-sm mt-10 tracking-wide">
-          Trusted by sellers across Nigeria &bull; No credit card required &bull; Cancel anytime
+          Trusted by students at 120+ Nigerian universities &bull; No credit card required &bull; Cancel anytime
         </p>
       </div>
     </section>

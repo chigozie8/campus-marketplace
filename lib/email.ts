@@ -338,6 +338,41 @@ export async function sendAdminPasswordResetEmail(
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Newsletter — campus deal alerts
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function sendNewsletterWelcomeEmail(to: string): Promise<SendResult> {
+  return safeSend({
+    to,
+    subject: '🎉 You\'re in! Welcome to VendoorX campus deals',
+    html: layout({
+      preheader: 'Weekly campus deals, new student sellers & insider tips — straight to your inbox.',
+      iconEmoji: '🎓',
+      title: 'Welcome to VendoorX!',
+      subtitle: 'Nigeria\'s campus marketplace',
+      bodyHtml: `
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 14px">Hi there 👋,</p>
+        <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
+          Thanks for joining! You'll be the <strong>first to know</strong> about deals from student sellers,
+          new vendor stores opening on your campus, and tips to buy &amp; sell smarter on WhatsApp.
+        </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;margin-bottom:18px">
+          <tr><td style="padding:16px 18px">
+            <p style="color:#15803d;font-size:13px;font-weight:800;margin:0 0 10px">What you'll get every week:</p>
+            <p style="color:#166534;font-size:13px;margin:0 0 6px;line-height:1.6">📚 Hottest deals from your campus &amp; nearby unis</p>
+            <p style="color:#166534;font-size:13px;margin:0 0 6px;line-height:1.6">🛍️ New seller spotlights — fresh stores to discover</p>
+            <p style="color:#166534;font-size:13px;margin:0 0 6px;line-height:1.6">💡 Tips for selling on WhatsApp without stress</p>
+            <p style="color:#166534;font-size:13px;margin:0;line-height:1.6">🚀 Early access to new VendoorX features</p>
+          </td></tr>
+        </table>
+      `,
+      cta: { label: 'Browse the marketplace', href: `${SITE_URL}/marketplace` },
+      footerNote: 'You signed up at vendoorx.ng. You can unsubscribe anytime.',
+    }),
+  })
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Order lifecycle — buyer side
 // ────────────────────────────────────────────────────────────────────────────
 

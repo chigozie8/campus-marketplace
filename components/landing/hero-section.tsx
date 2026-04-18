@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Sparkles, ArrowRight, Play, Shield, Zap, Users, LayoutDashboard } from 'lucide-react'
+import { GraduationCap, ArrowRight, Play, Shield, Zap, Users, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
@@ -32,9 +32,9 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
   ]
   const AVATARS = AVATAR_META.map((meta, i) => ({ ...meta, src: avatarSrcs[i] }))
   const FEATURES = [
-    { icon: Shield, text: 'Verified Sellers' },
-    { icon: Zap, text: 'AI-Powered Orders' },
-    { icon: Users, text: `${vendorCount} Active Sellers` },
+    { icon: GraduationCap, text: '120+ Nigerian Universities' },
+    { icon: Shield, text: 'Verified Student Sellers' },
+    { icon: Zap, text: 'WhatsApp-Powered Orders' },
   ]
   const isAuthed = !!user
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
@@ -49,25 +49,24 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
 
         {/* Trust badge pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
-          <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+          <GraduationCap className="w-4 h-4 text-primary flex-shrink-0" />
           {isAuthed && firstName
-            ? `Welcome back, ${firstName}! Your store awaits 🎉`
-            : 'Nigeria\'s AI-Powered WhatsApp Commerce Platform'
+            ? `Welcome back, ${firstName}! Your campus store awaits 🎉`
+            : 'Built for Nigerian university campuses'
           }
         </div>
 
         {/* Headline */}
         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] text-balance">
-          <span className="text-gray-950 dark:text-white">Sell smarter on</span>
+          <span className="text-gray-950 dark:text-white">Your campus</span>
           <br />
-          <span className="text-primary italic">WhatsApp.</span>
+          <span className="text-primary italic">marketplace.</span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
-          Stop tracking orders in chats. VendoorX is a conversational commerce platform where{' '}
-          <span className="text-primary font-semibold">AI handles your customer conversations, product discovery, order flow, and payments</span>{' '}
-          — all on WhatsApp.
+          Buy and sell with classmates from <span className="text-primary font-semibold">UNILAG, ABU, UI, OAU, BUK</span> and 100+ more universities — all powered by{' '}
+          <span className="text-primary font-semibold">WhatsApp</span>. Faster than DMs. Safer than meetups. Free to start.
         </p>
 
         {/* Feature badges */}
