@@ -27,8 +27,28 @@ function svc() {
 }
 
 // ─── Webhook signature verification (HMAC SHA256) ────────────────────────────
-// Fail-closed in production (no secret set → reject), permissive in dev so
-// initial setup isn't blocked.
+// WaSender variants differ in:
+//   • header name  (x-webhook-signature | x-wasender-signature | signature)
+//   • signature can be the raw secret token (no HMAC at all — older WaSender)
+//   • or HMAC-SHA256 of raw body, encoded as hex OR base64, with/without sha256= prefix
+// We accept any of these to stay compatible.  Fail-closed in production when
+// no secret is configured; permissive in dev for initial setup.
+function pickSignature(req: NextRequest): string | null {
+  return (
+    req.headers.get('x-webhook-signature') ??
+    req.headers.get('x-wasender-signature') ??
+    req.headers.get('webhook-signature') ??
+    req.headers.get('signature') ??
+    null
+  )
+}
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  try { return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b)) }
+  catch { return false }
+}
+
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
   if (!secret) {
@@ -36,16 +56,23 @@ function verifySignature(rawBody: string, signature: string | null): boolean {
   }
   if (!signature) return false
 
-  const sig      = signature.replace(/^sha256=/, '').trim()
-  const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+  const sig = signature.replace(/^sha256=/i, '').trim()
 
-  // timingSafeEqual requires equal-length buffers — bail early if they differ
-  if (sig.length !== expected.length) return false
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(sig, 'hex'))
-  } catch {
-    return false
+  // Format A: WaSender sends the raw secret token as the signature
+  if (safeEqual(sig, secret)) return true
+
+  // Format B: HMAC-SHA256(rawBody) hex
+  const hex = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+  if (safeEqual(sig, hex)) return true
+
+  // Format C: HMAC-SHA256(rawBody) base64
+  const b64 = crypto.createHmac('sha256', secret).update(rawBody).digest('base64')
+  if (safeEqual(sig, b64)) return true
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn('[wa-webhook] signature mismatch — got', sig.slice(0, 12) + '…', 'len=', sig.length)
   }
+  return false
 }
 
 // ─── Intent detection ────────────────────────────────────────────────────────
@@ -273,7 +300,7 @@ function extractMessage(body: any): { from: string; text: string } | null {
 export async function POST(req: NextRequest) {
   try {
     const rawBody   = await req.text()
-    const signature = req.headers.get('x-webhook-signature') ?? req.headers.get('x-wasender-signature')
+    const signature = pickSignature(req)
 
     if (!verifySignature(rawBody, signature)) {
       return new NextResponse('Invalid signature', { status: 401 })

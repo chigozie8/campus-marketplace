@@ -13,6 +13,12 @@ export function verifyWhatsApp(_req: Request, res: Response): void {
   res.status(200).json({ ok: true, provider: 'wasenderapi' })
 }
 
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  try { return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b)) }
+  catch { return false }
+}
+
 function verifyWasenderSignature(rawBody: Buffer | string | undefined, signature: string | undefined): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
   if (!secret) {
@@ -21,17 +27,17 @@ function verifyWasenderSignature(rawBody: Buffer | string | undefined, signature
   }
   if (!rawBody || !signature) return false
 
-  const sig      = signature.replace(/^sha256=/, '').trim()
-  const payload  = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
-  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+  const sig     = signature.replace(/^sha256=/i, '').trim()
+  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
 
-  // timingSafeEqual needs equal-length buffers
-  if (sig.length !== expected.length) return false
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(sig, 'hex'))
-  } catch {
-    return false
-  }
+  // A) Raw secret token sent as the signature (older WaSender)
+  if (safeEqual(sig, secret)) return true
+  // B) HMAC-SHA256 hex
+  if (safeEqual(sig, crypto.createHmac('sha256', secret).update(payload).digest('hex'))) return true
+  // C) HMAC-SHA256 base64
+  if (safeEqual(sig, crypto.createHmac('sha256', secret).update(payload).digest('base64'))) return true
+
+  return false
 }
 
 function extractFromWasender(body: any): { from: string; text: string } | null {
@@ -66,7 +72,9 @@ export async function whatsAppWebhook(req: Request, res: Response, next: NextFun
   try {
     const signature =
       (req.headers['x-webhook-signature'] as string | undefined) ??
-      (req.headers['x-wasender-signature'] as string | undefined)
+      (req.headers['x-wasender-signature'] as string | undefined) ??
+      (req.headers['webhook-signature']   as string | undefined) ??
+      (req.headers['signature']           as string | undefined)
     const rawBody = (req as AuthRequest & { rawBody?: Buffer }).rawBody
 
     if (!verifyWasenderSignature(rawBody, signature)) {
