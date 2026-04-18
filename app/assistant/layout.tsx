@@ -15,6 +15,7 @@ export const metadata: Metadata = buildMetadata({
     'conversational commerce assistant',
     'AI-powered WhatsApp seller',
   ],
+  noIndex: true,
 })
 
 export default function AssistantLayout({ children }: { children: React.ReactNode }) {

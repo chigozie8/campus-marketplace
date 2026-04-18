@@ -51,24 +51,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'hourly',
       priority: 0.9,
     },
-    {
-      url: `${SITE_URL}/assistant`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${SITE_URL}/auth/login`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${SITE_URL}/auth/sign-up`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
   ]
 
   const publicPages: MetadataRoute.Sitemap = PUBLIC_PAGES.map(p => ({
