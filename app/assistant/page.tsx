@@ -239,7 +239,7 @@ export default function AssistantPage() {
             { role: 'system', content: SYSTEM_PROMPT },
             ...conversationHistory.current.slice(-10),
           ]
-          const response = await window.puter.ai.chat(aiMessages, { model: 'gpt-4o-mini' })
+          const response = await window.puter.ai.chat(aiMessages, { model: 'claude-sonnet-4-5' })
           responseText =
             typeof response === 'string'
               ? response
@@ -346,7 +346,7 @@ export default function AssistantPage() {
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   <p className="text-[11px] text-green-600">
-                    {puterReady ? 'Online — GPT-4o powered' : 'Connecting…'}
+                    {puterReady ? 'Online — Claude Sonnet 4.5 powered' : 'Connecting…'}
                   </p>
                 </div>
               </div>
