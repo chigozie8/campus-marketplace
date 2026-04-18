@@ -38,7 +38,6 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 
 const NAV_ITEMS = [
   { label: 'Overview',        href: '/admin',                   icon: LayoutDashboard },
