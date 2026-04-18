@@ -99,7 +99,7 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         userId: order.buyer_id,
         type: 'order_shipped',
         title: 'Your Order is on the Way!',
-        body: `"${productTitle}" (Order #${shortId}) has been shipped. We've sent your delivery code by email and SMS — enter it once your item arrives to release payment.`,
+        body: `"${productTitle}" (Order #${shortId}) has been shipped. Your delivery code is in your bell notifications (and also sent by email + SMS) — enter it once your item arrives to release payment.`,
         data: { url: '/dashboard/orders', orderId: id },
       }).catch(() => {})
       // Auto-send delivery OTP to buyer so the seller never controls

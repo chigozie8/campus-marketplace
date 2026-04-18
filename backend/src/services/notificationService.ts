@@ -10,7 +10,35 @@ export type NotificationType =
   | 'order_cancelled'
   | 'refund_processed'
   | 'new_chat_message'
+  | 'delivery_otp'
+  | 'review_request'
+  | 'admin_alert'
   | 'system'
+
+/**
+ * Notify every admin user. Used for ops alerts that require human follow-up
+ * (e.g. delivery OTP failed to send via email AND SMS for an order).
+ */
+export async function notifyAllAdmins(
+  opts: Omit<NotifyOptions, 'userId'>,
+): Promise<void> {
+  try {
+    const { data: admins, error } = await supabaseAdmin
+      .from('admin_roles')
+      .select('user_id')
+    if (error) {
+      logger.warn(`[notifyAllAdmins] failed to load admins: ${error.message}`)
+      return
+    }
+    if (!admins?.length) {
+      logger.warn('[notifyAllAdmins] no admin users found — alert not delivered')
+      return
+    }
+    await Promise.all(admins.map(a => notify({ ...opts, userId: a.user_id })))
+  } catch (err) {
+    logger.warn(`[notifyAllAdmins] unexpected error: ${err}`)
+  }
+}
 
 interface NotifyOptions {
   userId: string
