@@ -2,76 +2,44 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { ArrowRight, Search, ShoppingBag, CreditCard, Shield, Package, Star, MessageCircle, ChevronDown } from 'lucide-react'
+import { getSiteSettings } from '@/lib/site-settings'
+import { parseHelpCategories, parseHelpPopular, type HelpCategory } from '@/lib/site-settings-defaults'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = buildMetadata({
   title: 'Help Center | VendoorX',
-  description: 'Get answers to common questions about buying, selling, payments, account setup, and more on VendoorX — Nigeria\'s WhatsApp commerce platform.',
+  description: "Get answers to common questions about buying, selling, payments, account setup, and more on VendoorX — Nigeria's WhatsApp commerce platform.",
   path: '/help',
   keywords: ['vendoorx help', 'vendoorx faq', 'how to sell on vendoorx', 'whatsapp store help nigeria', 'vendoorx support'],
 })
 
-const CATEGORIES = [
-  {
-    icon: ShoppingBag,
-    title: 'Buying & Browsing',
-    color: 'text-blue-500',
-    bg: 'bg-blue-50 dark:bg-blue-950/30',
-    border: 'border-blue-200 dark:border-blue-900/40',
-    questions: [
-      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your current location.' },
-      { q: 'How do I contact a seller?', a: 'Click the "Chat on WhatsApp" button on any listing. This opens WhatsApp with a pre-filled message to the seller. You can also make an offer directly on the listing page.' },
-      { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
-      { q: 'What if a product is not as described?', a: 'You have 48 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
-    ],
-  },
-  {
-    icon: Package,
-    title: 'Selling & Listings',
-    color: 'text-green-600',
-    bg: 'bg-green-50 dark:bg-green-950/30',
-    border: 'border-green-200 dark:border-green-900/40',
-    questions: [
-      { q: 'How do I post a listing?', a: 'Click "Sell" in the navigation. Fill in your product name, description, price, category, and up to 5 photos or videos. Your listing goes live instantly after submission.' },
-      { q: 'Is it free to list products?', a: 'Yes — listing is 100% free forever. VendoorX only charges a flat ₦100 VAT when a buyer completes a Paystack checkout (not on WhatsApp deals).' },
-      { q: 'How do I boost my listing?', a: 'From your dashboard, click "Boost" next to any listing. Pay ₦500–₦2,000 via Paystack for 7 days of priority placement. Boosted listings show a "Featured" badge.' },
-      { q: 'Can I sell food or services?', a: 'Absolutely! VendoorX supports all legal products and services — food, fashion, electronics, textbooks, tutoring, graphic design, photography, and more.' },
-    ],
-  },
-  {
-    icon: CreditCard,
-    title: 'Payments & Wallets',
-    color: 'text-purple-500',
-    bg: 'bg-purple-50 dark:bg-purple-950/30',
-    border: 'border-purple-200 dark:border-purple-900/40',
-    questions: [
-      { q: 'How does checkout payment work?', a: 'When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 48 hours with no dispute), funds are released to the seller\'s wallet minus the ₦100 VAT.' },
-      { q: 'How do I withdraw my wallet balance?', a: 'Go to Dashboard → Payouts. Connect your bank account, then click "Withdraw." Transfers are processed instantly via Paystack. Minimum withdrawal is ₦500.' },
-      { q: 'What payment methods are accepted?', a: 'Paystack supports debit cards, bank transfers, USSD, and mobile money. For WhatsApp deals, payment is arranged directly between buyer and seller.' },
-      { q: 'Is my payment information secure?', a: 'All payments are processed by Paystack, a PCI-DSS certified payment provider. VendoorX never stores your card details.' },
-    ],
-  },
-  {
-    icon: Shield,
-    title: 'Account & Security',
-    color: 'text-orange-500',
-    bg: 'bg-orange-50 dark:bg-orange-950/30',
-    border: 'border-orange-200 dark:border-orange-900/40',
-    questions: [
-      { q: 'How do I get verified as a seller?', a: 'Sign up with your email address address. Your account is automatically flagged as a seller. Complete your profile with a clear photo to boost trust with buyers.' },
-      { q: 'I forgot my password. What do I do?', a: 'Click "Sign in" then "Forgot password." Enter your email and we\'ll send a password reset link. Check your spam folder if you don\'t see it within 2 minutes.' },
-      { q: 'How do I report a fraudulent seller?', a: 'Click "Report" on any listing or seller profile. Fill in the reason and evidence. Our trust & safety team reviews reports within 24 hours and bans confirmed bad actors.' },
-      { q: 'Can I delete my account?', a: 'Yes. Go to Settings → Account → Delete Account. Note: any active listings will be removed and pending wallet balance will be paid out first.' },
-    ],
-  },
-]
+const ICON_MAP: Record<HelpCategory['icon'], React.ComponentType<{ className?: string }>> = {
+  shopping: ShoppingBag,
+  package: Package,
+  card: CreditCard,
+  shield: Shield,
+  star: Star,
+  message: MessageCircle,
+  chat: MessageCircle,
+}
 
-const POPULAR = [
-  { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 VAT applies only to Paystack checkout orders.' },
-  { q: 'How long does delivery take?', a: 'Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for local orders. Check the listing for the seller\'s delivery details.' },
-  { q: 'Can I sell to buyers in other cities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
-]
+const COLOR_MAP: Record<HelpCategory['color'], { color: string; bg: string; border: string }> = {
+  blue:   { color: 'text-blue-500',    bg: 'bg-blue-50 dark:bg-blue-950/30',       border: 'border-blue-200 dark:border-blue-900/40' },
+  green:  { color: 'text-green-600',   bg: 'bg-green-50 dark:bg-green-950/30',     border: 'border-green-200 dark:border-green-900/40' },
+  purple: { color: 'text-purple-500',  bg: 'bg-purple-50 dark:bg-purple-950/30',   border: 'border-purple-200 dark:border-purple-900/40' },
+  orange: { color: 'text-orange-500',  bg: 'bg-orange-50 dark:bg-orange-950/30',   border: 'border-orange-200 dark:border-orange-900/40' },
+  rose:   { color: 'text-rose-500',    bg: 'bg-rose-50 dark:bg-rose-950/30',       border: 'border-rose-200 dark:border-rose-900/40' },
+  amber:  { color: 'text-amber-500',   bg: 'bg-amber-50 dark:bg-amber-950/30',     border: 'border-amber-200 dark:border-amber-900/40' },
+  cyan:   { color: 'text-cyan-500',    bg: 'bg-cyan-50 dark:bg-cyan-950/30',       border: 'border-cyan-200 dark:border-cyan-900/40' },
+}
 
-export default function HelpPage() {
+export default async function HelpPage() {
+  const settings = await getSiteSettings()
+  const categories = parseHelpCategories(settings.help_categories)
+  const popular = parseHelpPopular(settings.help_popular)
+  const phoneDigits = (settings.help_contact_phone || '').replace(/\D/g, '')
+
   return (
     <div className="bg-background">
 
@@ -82,16 +50,14 @@ export default function HelpPage() {
             <MessageCircle className="w-3.5 h-3.5" />
             Help Center
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-4">How can we help?</h1>
-          <p className="text-muted-foreground text-lg mb-8">
-            Find answers to common questions about buying, selling, payments, and your account.
-          </p>
+          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-4">{settings.help_hero_title}</h1>
+          <p className="text-muted-foreground text-lg mb-8">{settings.help_hero_subtitle}</p>
           {/* Search (decorative) */}
           <div className="flex items-center gap-3 max-w-xl mx-auto px-4 py-3.5 rounded-2xl bg-card border-2 border-border focus-within:border-primary transition-colors shadow-sm">
             <Search className="w-5 h-5 text-muted-foreground shrink-0" />
             <input
               type="text"
-              placeholder="Search for help..."
+              placeholder={settings.help_search_placeholder}
               className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm"
             />
           </div>
@@ -99,46 +65,50 @@ export default function HelpPage() {
       </section>
 
       {/* Popular questions */}
-      <section className="py-14 px-4 border-b border-border">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-6">Most Asked</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {POPULAR.map(({ q, a }) => (
-              <div key={q} className="rounded-2xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-md transition-all">
-                <p className="text-sm font-bold text-foreground mb-2 leading-snug">{q}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{a}</p>
-              </div>
-            ))}
+      {popular.length > 0 && (
+        <section className="py-14 px-4 border-b border-border">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-6">Most Asked</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {popular.map(({ q, a }) => (
+                <div key={q} className="rounded-2xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-md transition-all">
+                  <p className="text-sm font-bold text-foreground mb-2 leading-snug">{q}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{a}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Categories */}
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-10">
-          {CATEGORIES.map(({ icon: Icon, title, color, bg, border, questions }) => (
-            <div key={title} className={`rounded-3xl border-2 ${border} overflow-hidden`}>
-              {/* Category header */}
-              <div className={`${bg} px-6 py-5 flex items-center gap-3 border-b ${border}`}>
-                <div className={`w-10 h-10 rounded-xl bg-white dark:bg-card flex items-center justify-center shadow-sm`}>
-                  <Icon className={`w-5 h-5 ${color}`} />
+          {categories.map(({ icon, title, color, questions }) => {
+            const Icon = ICON_MAP[icon] ?? MessageCircle
+            const c = COLOR_MAP[color] ?? COLOR_MAP.blue
+            return (
+              <div key={title} className={`rounded-3xl border-2 ${c.border} overflow-hidden`}>
+                <div className={`${c.bg} px-6 py-5 flex items-center gap-3 border-b ${c.border}`}>
+                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-card flex items-center justify-center shadow-sm">
+                    <Icon className={`w-5 h-5 ${c.color}`} />
+                  </div>
+                  <h2 className="text-lg font-black text-foreground">{title}</h2>
                 </div>
-                <h2 className="text-lg font-black text-foreground">{title}</h2>
+                <div className="divide-y divide-border">
+                  {questions.map(({ q, a }) => (
+                    <details key={q} className="group px-6 py-5 cursor-pointer">
+                      <summary className="flex items-start justify-between gap-4 list-none">
+                        <span className="text-sm font-semibold text-foreground group-open:text-primary transition-colors leading-snug">{q}</span>
+                        <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-open:rotate-180 transition-transform" />
+                      </summary>
+                      <p className="mt-3 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{a}</p>
+                    </details>
+                  ))}
+                </div>
               </div>
-              {/* Questions */}
-              <div className="divide-y divide-border">
-                {questions.map(({ q, a }) => (
-                  <details key={q} className="group px-6 py-5 cursor-pointer">
-                    <summary className="flex items-start justify-between gap-4 list-none">
-                      <span className="text-sm font-semibold text-foreground group-open:text-primary transition-colors leading-snug">{q}</span>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-open:rotate-180 transition-transform" />
-                    </summary>
-                    <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{a}</p>
-                  </details>
-                ))}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -146,25 +116,27 @@ export default function HelpPage() {
       <section className="py-16 px-4 bg-muted/40 border-t border-border">
         <div className="max-w-2xl mx-auto text-center">
           <Star className="w-10 h-10 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl font-black text-foreground mb-3">Still need help?</h2>
-          <p className="text-muted-foreground mb-8">
-            Our Nigerian support team is available Mon–Sat 8am–10pm WAT. We typically respond within 2 hours.
-          </p>
+          <h2 className="text-2xl font-black text-foreground mb-3">{settings.help_contact_title}</h2>
+          <p className="text-muted-foreground mb-8 whitespace-pre-line">{settings.help_contact_subtitle}</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="tel:07082039250"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-emerald-500/25"
-            >
-              📞 Call 07082039250
-            </a>
-            <a
-              href="https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with..."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-green-500/25"
-            >
-              💬 WhatsApp Us
-            </a>
+            {settings.help_contact_phone && (
+              <a
+                href={`tel:${phoneDigits}`}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-emerald-500/25"
+              >
+                📞 Call {settings.help_contact_phone}
+              </a>
+            )}
+            {settings.help_contact_whatsapp_url && (
+              <a
+                href={settings.help_contact_whatsapp_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm transition-all hover:scale-[1.02] shadow-lg shadow-green-500/25"
+              >
+                💬 WhatsApp Us
+              </a>
+            )}
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-border bg-background hover:bg-muted text-foreground font-bold text-sm transition-all hover:scale-[1.02]"

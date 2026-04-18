@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import { AdminRolesManager } from '@/components/admin/admin-roles-manager'
 import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
+import { HelpCenterEditor } from '@/components/admin/help-center-editor'
 import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
 import { PlatformFeeEditor } from '@/components/admin/platform-fee-editor'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -73,6 +74,11 @@ export default async function AdminSettingsPage() {
       <div>
         <h3 className="text-sm font-black text-foreground mb-4">Site Content</h3>
         <SiteSettingsEditor initialSettings={settings} />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">📚 Help Center</h3>
+        <HelpCenterEditor initialSettings={settings} />
       </div>
 
       <div>

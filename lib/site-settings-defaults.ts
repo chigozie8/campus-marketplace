@@ -65,6 +65,17 @@ export type SiteSettings = {
   homepage_hiw_steps: string
   homepage_faqs: string
   homepage_testimonials: string
+  /* ── Help Center ── */
+  help_hero_title: string
+  help_hero_subtitle: string
+  help_search_placeholder: string
+  help_categories: string
+  help_popular: string
+  help_contact_title: string
+  help_contact_subtitle: string
+  help_contact_phone: string
+  help_contact_whatsapp_url: string
+  help_contact_email: string
 }
 
 /* ── Typed shapes for JSON array fields ── */
@@ -220,6 +231,17 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   homepage_hiw_steps: '',
   homepage_faqs: '',
   homepage_testimonials: '',
+  /* help center */
+  help_hero_title: 'How can we help?',
+  help_hero_subtitle: 'Find answers to common questions about buying, selling, payments, and your account.',
+  help_search_placeholder: 'Search for help…',
+  help_categories: '',
+  help_popular: '',
+  help_contact_title: 'Still need help?',
+  help_contact_subtitle: 'Our Nigerian support team is available Mon–Sat 8am–10pm WAT. We typically respond within 2 hours.',
+  help_contact_phone: '07082039250',
+  help_contact_whatsapp_url: 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
+  help_contact_email: 'support@vendoorx.ng',
 }
 
 /* ── Helpers ── */
@@ -246,4 +268,82 @@ const DEFAULT_CONTACT_SUBJECTS = [
 export function parseContactSubjects(raw: string): string[] {
   if (!raw) return DEFAULT_CONTACT_SUBJECTS
   try { return JSON.parse(raw) as string[] } catch { return DEFAULT_CONTACT_SUBJECTS }
+}
+
+/* ── Help Center ── */
+export type HelpQuestion = { q: string; a: string }
+export type HelpCategory = {
+  title: string
+  icon: 'shopping' | 'package' | 'card' | 'shield' | 'star' | 'message' | 'chat'
+  color: 'blue' | 'green' | 'purple' | 'orange' | 'rose' | 'amber' | 'cyan'
+  questions: HelpQuestion[]
+}
+
+export const DEFAULT_HELP_CATEGORIES: HelpCategory[] = [
+  {
+    title: 'Buying & Browsing',
+    icon: 'shopping',
+    color: 'blue',
+    questions: [
+      { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your current location.' },
+      { q: 'How do I contact a seller?', a: 'Click the "Chat on WhatsApp" button on any listing. This opens WhatsApp with a pre-filled message to the seller. You can also make an offer directly on the listing page.' },
+      { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
+      { q: 'What if a product is not as described?', a: 'You have 48 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
+    ],
+  },
+  {
+    title: 'Selling & Listings',
+    icon: 'package',
+    color: 'green',
+    questions: [
+      { q: 'How do I post a listing?', a: 'Click "Sell" in the navigation. Fill in your product name, description, price, category, and up to 5 photos or videos. Your listing goes live instantly after submission.' },
+      { q: 'Is it free to list products?', a: 'Yes — listing is 100% free forever. VendoorX only charges a flat ₦100 VAT when a buyer completes a Paystack checkout (not on WhatsApp deals).' },
+      { q: 'How do I boost my listing?', a: 'From your dashboard, click "Boost" next to any listing. Pay ₦500–₦2,000 via Paystack for 7 days of priority placement. Boosted listings show a "Featured" badge.' },
+      { q: 'Can I sell food or services?', a: 'Absolutely! VendoorX supports all legal products and services — food, fashion, electronics, textbooks, tutoring, graphic design, photography, and more.' },
+    ],
+  },
+  {
+    title: 'Payments & Wallets',
+    icon: 'card',
+    color: 'purple',
+    questions: [
+      { q: 'How does checkout payment work?', a: "When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 48 hours with no dispute), funds are released to the seller's wallet minus the ₦100 VAT." },
+      { q: 'How do I withdraw my wallet balance?', a: 'Go to Dashboard → Payouts. Connect your bank account, then click "Withdraw." Transfers are processed instantly via Paystack. Minimum withdrawal is ₦500.' },
+      { q: 'What payment methods are accepted?', a: 'Paystack supports debit cards, bank transfers, USSD, and mobile money. For WhatsApp deals, payment is arranged directly between buyer and seller.' },
+      { q: 'Is my payment information secure?', a: 'All payments are processed by Paystack, a PCI-DSS certified payment provider. VendoorX never stores your card details.' },
+    ],
+  },
+  {
+    title: 'Account & Security',
+    icon: 'shield',
+    color: 'orange',
+    questions: [
+      { q: 'How do I get verified as a seller?', a: 'Sign up with your email address. Your account is automatically flagged as a seller. Complete your profile with a clear photo to boost trust with buyers.' },
+      { q: 'I forgot my password. What do I do?', a: "Click \"Sign in\" then \"Forgot password.\" Enter your email and we'll send a password reset link. Check your spam folder if you don't see it within 2 minutes." },
+      { q: 'How do I report a fraudulent seller?', a: 'Click "Report" on any listing or seller profile. Fill in the reason and evidence. Our trust & safety team reviews reports within 24 hours and bans confirmed bad actors.' },
+      { q: 'Can I delete my account?', a: 'Yes. Go to Settings → Account → Delete Account. Note: any active listings will be removed and pending wallet balance will be paid out first.' },
+    ],
+  },
+]
+
+export const DEFAULT_HELP_POPULAR: HelpQuestion[] = [
+  { q: 'Is VendoorX completely free?', a: 'Joining is free. Listing is free. WhatsApp deals are free. A small ₦100 VAT applies only to Paystack checkout orders.' },
+  { q: 'How long does delivery take?', a: "Delivery times vary by seller and location. Most sellers deliver within 1–3 hours for local orders. Check the listing for the seller's delivery details." },
+  { q: 'Can I sell to buyers in other cities?', a: 'Yes! Your listings are visible to all users across Nigeria. You set your own delivery range and can ship nationwide.' },
+]
+
+export function parseHelpCategories(raw: string): HelpCategory[] {
+  if (!raw) return DEFAULT_HELP_CATEGORIES
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? (parsed as HelpCategory[]) : DEFAULT_HELP_CATEGORIES
+  } catch { return DEFAULT_HELP_CATEGORIES }
+}
+
+export function parseHelpPopular(raw: string): HelpQuestion[] {
+  if (!raw) return DEFAULT_HELP_POPULAR
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? (parsed as HelpQuestion[]) : DEFAULT_HELP_POPULAR
+  } catch { return DEFAULT_HELP_POPULAR }
 }

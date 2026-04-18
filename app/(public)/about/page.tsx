@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Target, Heart, Zap, Shield, Users, Globe, TrendingUp, CheckCircle2 } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { buildMetadata } from '@/lib/seo'
+import { CountUp } from '@/components/ui/count-up'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,7 +109,7 @@ export default async function AboutPage() {
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-1">
                 <Icon className="w-6 h-6 text-primary" />
               </div>
-              <p className="text-3xl sm:text-4xl font-black text-foreground">{value}</p>
+              <CountUp value={value} className="text-3xl sm:text-4xl font-black text-foreground" />
               <p className="text-sm text-muted-foreground font-medium">{label}</p>
             </div>
           ))}
@@ -191,7 +192,7 @@ export default async function AboutPage() {
             <span className="text-primary">the movement?</span>
           </h2>
           <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-            Join {settings.stat_active_vendors} sellers already building their businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
+            Join <CountUp value={settings.stat_active_vendors} /> sellers already building their businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
           </p>
           <Link
             href="/auth/sign-up"
