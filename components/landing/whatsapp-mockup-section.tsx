@@ -330,12 +330,12 @@ export function WhatsappMockupSection() {
               <div
                 style={{
                   background: '#ECE5DD',
-                  minHeight: 430,
+                  height: 470,
                   padding: '10px 8px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 6,
-                  overflowY: 'hidden',
+                  overflow: 'hidden',
                 }}
               >
                 {/* Date chip */}
