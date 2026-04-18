@@ -405,21 +405,21 @@ function EditModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
-      <div className="bg-card border border-border w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl shadow-2xl my-0 sm:my-8">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+      <div className="bg-card border border-border w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[100dvh] sm:max-h-[90vh] h-[92dvh] sm:h-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-card rounded-t-3xl sm:rounded-t-2xl">
-          <div>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card rounded-t-3xl sm:rounded-t-2xl shrink-0">
+          <div className="min-w-0">
             <h3 className="text-base font-bold text-foreground">Edit dummy listing</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Slug: <span className="font-mono">{item.slug}</span></p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">Slug: <span className="font-mono">{item.slug}</span></p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 pb-8">
           {/* Image preview + upload + URL */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Image</label>
@@ -536,32 +536,64 @@ function EditModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex flex-col sm:flex-row gap-2 px-5 py-4 border-t border-border bg-muted/30 rounded-b-3xl sm:rounded-b-2xl">
-          <button
-            onClick={resetToDefault}
-            disabled={saving || resetting}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground text-xs font-bold disabled:opacity-60"
-          >
-            {resetting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
-            Reset to default
-          </button>
-          <div className="flex-1" />
-          <button
-            onClick={onClose}
-            disabled={saving || resetting}
-            className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-bold disabled:opacity-60"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={save}
-            disabled={saving || resetting}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold disabled:opacity-60"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-            Save changes
-          </button>
+        {/* Footer — always pinned to bottom of modal */}
+        <div className="shrink-0 px-4 py-3 sm:px-5 sm:py-4 border-t border-border bg-card rounded-b-3xl sm:rounded-b-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {/* Mobile: big primary Save on top, secondary row below */}
+          <div className="flex flex-col gap-2 sm:hidden">
+            <button
+              onClick={save}
+              disabled={saving || resetting}
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-black disabled:opacity-60 shadow-lg shadow-primary/30"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              Save changes
+            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={onClose}
+                disabled={saving || resetting}
+                className="px-3 py-2.5 rounded-xl border border-border bg-background hover:bg-muted text-sm font-bold disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={resetToDefault}
+                disabled={saving || resetting}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-border bg-background hover:bg-muted text-muted-foreground text-xs font-bold disabled:opacity-60"
+              >
+                {resetting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop layout */}
+          <div className="hidden sm:flex flex-row gap-2 items-center">
+            <button
+              onClick={resetToDefault}
+              disabled={saving || resetting}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-muted-foreground text-xs font-bold disabled:opacity-60"
+            >
+              {resetting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+              Reset to default
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={onClose}
+              disabled={saving || resetting}
+              className="px-4 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-bold disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={save}
+              disabled={saving || resetting}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold disabled:opacity-60"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              Save changes
+            </button>
+          </div>
         </div>
       </div>
     </div>
