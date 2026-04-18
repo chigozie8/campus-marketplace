@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
-import { Plus, Minus, Loader2, Trash2, CheckCircle2, AlertCircle, Zap, Pencil, X, RotateCcw } from 'lucide-react'
+import { useEffect, useRef, useState, useTransition } from 'react'
+import { Plus, Minus, Loader2, Trash2, CheckCircle2, AlertCircle, Zap, Pencil, X, RotateCcw, Camera, Upload } from 'lucide-react'
+import { DemoSellerEditor } from './demo-seller-editor'
 
 type CatalogItem = {
   slug: string
@@ -159,6 +160,9 @@ export function DummyCatalog() {
 
   return (
     <div className="space-y-5">
+      {/* Demo seller editor */}
+      <DemoSellerEditor onToast={(kind, text) => setToast({ kind, text })} />
+
       {/* Bulk action bar */}
       <div className="rounded-2xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div className="text-sm">
@@ -315,7 +319,27 @@ function EditModal({
   })
   const [saving, setSaving] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState(item.image)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function uploadFile(file: File) {
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Upload failed.')
+      set('image', json.url)
+      setImagePreview(json.url)
+    } catch (e) {
+      onError((e as Error).message)
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }))
@@ -396,22 +420,44 @@ function EditModal({
 
         {/* Body */}
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-          {/* Image preview + URL */}
+          {/* Image preview + upload + URL */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Image</label>
-            <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-muted border border-border">
+            <div className="aspect-[4/3] w-full rounded-xl overflow-hidden bg-muted border border-border relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imagePreview} alt="" className="w-full h-full object-cover" onError={() => setImagePreview('')} />
+              {uploading && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-bold gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" /> Uploading…
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-bold disabled:opacity-60"
+              >
+                <Camera className="w-3.5 h-3.5" /> Upload from gallery
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadFile(f) }}
+              />
             </div>
             <input
               type="url"
               value={form.image}
               onChange={(e) => { set('image', e.target.value); setImagePreview(e.target.value) }}
-              placeholder="https://images.unsplash.com/…"
+              placeholder="…or paste an image URL"
               className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm font-mono"
             />
             <p className="text-[11px] text-muted-foreground">
-              Paste any direct image URL. Tip: from Unsplash, right-click the image → "Copy image address".
+              Pick a photo from your phone or computer, or paste any direct image URL.
             </p>
           </div>
 
