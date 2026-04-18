@@ -16,7 +16,9 @@ import { NetworkToast } from '@/components/network-toast'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
 import { AuthHashHandler } from '@/components/auth-hash-handler'
+import { AosProvider } from '@/components/aos-provider'
 import './globals.css'
+import './animations.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' })
@@ -429,6 +431,7 @@ export default function RootLayout({
             <NetworkToast />
             <SplashScreen />
             <NavigationProgress />
+            <AosProvider />
             {children}
             <FloatingNav />
             <ServiceWorkerRegistration />
