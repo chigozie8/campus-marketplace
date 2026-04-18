@@ -37,10 +37,13 @@ export const metadata: Metadata = {
   formatDetection: { email: false, address: false, telephone: false },
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon-light-32x32.png', type: 'image/png', sizes: '32x32' },
     ],
-    apple: [{ url: '/icon-192', sizes: '180x180' }],
+    shortcut: [{ url: '/favicon.ico' }],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/manifest.webmanifest',
   openGraph: {
