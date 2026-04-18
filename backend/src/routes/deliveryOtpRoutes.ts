@@ -5,6 +5,7 @@ import * as orderService from '../services/orderService.js'
 import * as otpService from '../services/otpService.js'
 import * as appwriteEmail from '../services/appwriteEmailService.js'
 import * as smsService from '../services/smsService.js'
+import { sendDeliveryOtpToBuyer } from '../services/deliveryOtpService.js'
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
@@ -49,16 +50,15 @@ async function getBuyerContact(buyerId: string): Promise<{ email: string | null;
 router.post('/:orderId/request', requireRole('admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
-    const vendorId = (req as AuthRequest).user.id
+    const adminId = (req as AuthRequest).user.id
     const channel = (['email', 'sms', 'both'].includes(req.query.channel as string)
       ? req.query.channel as otpService.OtpChannel
       : 'both')
 
     const order = await orderService.getOrderById(orderId)
 
-    // Admin-only route now (see header). Order must already be shipped —
-    // we no longer flip status to "delivered" from this endpoint, since
-    // sellers cannot influence delivery confirmation under the new flow.
+    // Order must already be shipped — we no longer flip status to "delivered"
+    // from this endpoint, since sellers cannot influence delivery confirmation.
     if (order.status !== 'shipped' && order.status !== 'delivered') {
       res.status(400).json({
         success: false,
@@ -67,87 +67,28 @@ router.post('/:orderId/request', requireRole('admin'), async (req, res, next) =>
       return
     }
 
-    const { email, phone } = await getBuyerContact(order.buyer_id)
+    // Delegate to the shared sender — same code path as the auto-trigger when
+    // a seller marks shipped. Admin-issued OTPs therefore also land in the
+    // buyer's in-app bell (guaranteed fallback) and follow the same logging /
+    // admin-alert rules if external channels fail.
+    const result = await sendDeliveryOtpToBuyer(orderId, order.buyer_id, channel)
 
-    // Validate required contacts per channel
-    if ((channel === 'email' || channel === 'both') && !email) {
-      res.status(400).json({ success: false, message: 'Buyer has no email on file. Use SMS channel instead.' })
-      return
-    }
-    if ((channel === 'sms' || channel === 'both') && !phone) {
-      res.status(400).json({ success: false, message: 'Buyer has no phone number on file. Use Email channel instead.' })
-      return
-    }
-
-    const appwriteUserId = orderId  // deterministic, isolated per order
-    let smsSent = false
-    let emailSent = false
-    let rawOtp: string | null = null
-    let otpHash: string | null = null
-
-    // --- SMS: generate local OTP, send via Termii ---
-    if (channel === 'sms' || channel === 'both') {
-      rawOtp = otpService.generateRawOtp()
-      otpHash = otpService.hashRawOtp(rawOtp)
-      smsSent = await smsService.sendOtpSms(phone!, rawOtp, orderId, 'generic')
-      if (!smsSent) {
-        if (channel === 'sms') {
-          res.status(502).json({ success: false, message: 'Failed to send SMS OTP. Please retry.' })
-          return
-        }
-        logger.warn(`[deliveryOtp] SMS failed for order ${orderId}, continuing with email-only`)
-      }
-    }
-
-    // --- Email: send via Appwrite ---
-    if (channel === 'email' || channel === 'both') {
-      emailSent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, email!, orderId)
-      if (!emailSent) {
-        if (channel === 'email') {
-          res.status(502).json({ success: false, message: 'Failed to send email OTP via Appwrite. Please retry.' })
-          return
-        }
-        logger.warn(`[deliveryOtp] Email failed for order ${orderId}, continuing with SMS-only`)
-      }
-    }
-
-    // At least one must have succeeded for 'both'
-    if (channel === 'both' && !smsSent && !emailSent) {
-      res.status(502).json({ success: false, message: 'Failed to send delivery OTP via both channels. Please retry.' })
+    if (!result.success) {
+      res.status(502).json({
+        success: false,
+        message: 'Failed to send delivery OTP. Please retry or check buyer contact details.',
+      })
       return
     }
 
-    // Determine effective channel to store (handles partial failures in 'both' mode)
-    const effectiveChannel: otpService.OtpChannel =
-      channel === 'both'
-        ? smsSent && emailSent ? 'both' : smsSent ? 'sms' : 'email'
-        : channel
-
-    await otpService.createOtpRecord({
-      orderId,
-      channel: effectiveChannel,
-      phone: phone ?? undefined,
-      otpHash: otpHash ?? undefined,
-      appwriteUserId: (effectiveChannel === 'email' || effectiveChannel === 'both') ? appwriteUserId : undefined,
-    })
-
-    // NOTE: We deliberately do NOT flip status to 'delivered' here anymore.
-    // Status stays "shipped" until the buyer verifies the OTP (→ completed)
-    // or the escrow auto-release job runs (→ completed).
-
-    const maskedEmail = email ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') : null
-    const maskedPhone = phone ? `${phone.slice(0, 4)}****${phone.slice(-3)}` : null
-
-    const destinations: string[] = []
-    if ((effectiveChannel === 'email' || effectiveChannel === 'both') && maskedEmail) destinations.push(`email (${maskedEmail})`)
-    if ((effectiveChannel === 'sms' || effectiveChannel === 'both') && maskedPhone) destinations.push(`SMS (${maskedPhone})`)
-
-    logger.info(`[deliveryOtp] OTP sent to buyer ${order.buyer_id} via ${effectiveChannel} for order ${orderId}`)
+    logger.info(`[deliveryOtp] Admin ${adminId} issued OTP for order ${orderId} via ${result.channel}`)
 
     res.status(200).json({
       success: true,
-      channel: effectiveChannel,
-      message: `Delivery OTP sent to buyer via ${destinations.join(' and ')}.`,
+      channel: result.channel,
+      message: result.channel === 'in_app_only'
+        ? 'External channels failed — code delivered to buyer\'s in-app notifications only.'
+        : `Delivery OTP sent to buyer via ${result.channel} + in-app bell notification.`,
     })
   } catch (err) {
     next(err)
@@ -299,6 +240,7 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
 router.post('/:orderId/resend', requireRole('admin'), async (req, res, next) => {
   try {
     const { orderId } = req.params
+    const adminId = (req as AuthRequest).user.id
 
     const order = await orderService.getOrderById(orderId)
 
@@ -313,54 +255,21 @@ router.post('/:orderId/resend', requireRole('admin'), async (req, res, next) => 
       ? req.query.channel as otpService.OtpChannel
       : existingRecord?.channel ?? 'both')
 
-    const { email, phone } = await getBuyerContact(order.buyer_id)
+    const result = await sendDeliveryOtpToBuyer(orderId, order.buyer_id, channel)
 
-    if ((channel === 'email' || channel === 'both') && !email) {
-      res.status(400).json({ success: false, message: 'Buyer has no email on file.' })
-      return
-    }
-    if ((channel === 'sms' || channel === 'both') && !phone) {
-      res.status(400).json({ success: false, message: 'Buyer has no phone number on file.' })
+    if (!result.success) {
+      res.status(502).json({ success: false, message: 'Failed to resend OTP. Please retry or check buyer contact details.' })
       return
     }
 
-    const appwriteUserId = orderId
-    let smsSent = false
-    let emailSent = false
-    let otpHash: string | null = null
-
-    if (channel === 'sms' || channel === 'both') {
-      const rawOtp = otpService.generateRawOtp()
-      otpHash = otpService.hashRawOtp(rawOtp)
-      smsSent = await smsService.sendOtpSms(phone!, rawOtp, orderId, 'generic')
-    }
-
-    if (channel === 'email' || channel === 'both') {
-      emailSent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, email!, orderId)
-    }
-
-    if (!smsSent && !emailSent) {
-      res.status(502).json({ success: false, message: 'Failed to resend OTP. Please retry.' })
-      return
-    }
-
-    const effectiveChannel: otpService.OtpChannel =
-      channel === 'both'
-        ? smsSent && emailSent ? 'both' : smsSent ? 'sms' : 'email'
-        : channel
-
-    await otpService.createOtpRecord({
-      orderId,
-      channel: effectiveChannel,
-      phone: phone ?? undefined,
-      otpHash: otpHash ?? undefined,
-      appwriteUserId: (effectiveChannel === 'email' || effectiveChannel === 'both') ? appwriteUserId : undefined,
-    })
+    logger.info(`[deliveryOtp] Admin ${adminId} resent OTP for order ${orderId} via ${result.channel}`)
 
     res.status(200).json({
       success: true,
-      channel: effectiveChannel,
-      message: `Delivery OTP resent to buyer via ${effectiveChannel}.`,
+      channel: result.channel,
+      message: result.channel === 'in_app_only'
+        ? 'External channels failed — code delivered to buyer\'s in-app notifications only.'
+        : `Delivery OTP resent to buyer via ${result.channel} + in-app bell notification.`,
     })
   } catch (err) {
     next(err)

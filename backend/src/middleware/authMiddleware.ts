@@ -21,17 +21,28 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       return
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('is_seller')
-      .eq('id', user.id)
-      .single()
+    const [profileResult, adminResult] = await Promise.all([
+      supabaseAdmin
+        .from('profiles')
+        .select('is_seller')
+        .eq('id', user.id)
+        .single(),
+      supabaseAdmin
+        .from('admin_roles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+    ])
 
-    if (profileError) {
-      logger.warn(`Profile fetch failed for user ${user.id}: ${profileError.message}`)
+    const profile = profileResult.data
+    if (profileResult.error) {
+      logger.warn(`Profile fetch failed for user ${user.id}: ${profileResult.error.message}`)
     }
 
-    const role: 'buyer' | 'vendor' | 'admin' = profile?.is_seller ? 'vendor' : 'buyer'
+    // Admin role takes precedence over seller/buyer. Source of truth is the
+    // admin_roles table (matches the rest of the backend + RLS policies).
+    const role: 'buyer' | 'vendor' | 'admin' =
+      adminResult.data ? 'admin' : profile?.is_seller ? 'vendor' : 'buyer'
 
     ;(req as AuthRequest).user = {
       ...user,
