@@ -5,7 +5,7 @@ import {
   Search, BadgeCheck, Trash2, Store, Loader2,
   Bell, Ban, Download, X, Send, CheckCircle2, Eye,
   ShoppingBag, Wallet, Copy, Check,
-  Shield, ClipboardList, AlertTriangle, ShieldOff,
+  Shield, ClipboardList, AlertTriangle, ShieldOff, KeyRound, Mail,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useConfirm } from '@/components/ui/confirm-dialog'
@@ -171,6 +171,13 @@ export function AdminUsersTable({ users }: Props) {
   const [blockedIds, setBlockedIds] = useState<Set<string>>(
     () => new Set(users.filter(u => u.is_blocked).map(u => u.id))
   )
+  const [resetPwId, setResetPwId] = useState<string | null>(null)
+  const [resetResult, setResetResult] = useState<{
+    name: string
+    email: string
+    tempPassword: string
+    emailSent: boolean
+  } | null>(null)
   const [confirmDialog, confirm] = useConfirm()
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
@@ -281,6 +288,40 @@ export function AdminUsersTable({ users }: Props) {
       }
     } finally {
       setBlockingId(null)
+    }
+  }
+
+  async function resetUserPassword(user: User) {
+    const ok = await confirm({
+      title: `Reset password for ${user.full_name ?? 'this user'}?`,
+      message: 'A new temporary password will be generated and emailed to the user. Their current password will stop working immediately. Use this only when a user has lost access and you can verify their identity.',
+      confirmText: 'Generate new password',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    })
+    if (!ok) return
+    setResetPwId(user.id)
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/reset-password`, { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok || !json.tempPassword) {
+        await confirm({
+          title: 'Reset failed',
+          message: json.error ?? 'Could not reset the password. Please try again.',
+          confirmText: 'OK',
+          cancelText: '',
+          variant: 'default',
+        })
+        return
+      }
+      setResetResult({
+        name: user.full_name ?? 'User',
+        email: json.email,
+        tempPassword: json.tempPassword,
+        emailSent: !!json.emailSent,
+      })
+    } finally {
+      setResetPwId(null)
     }
   }
 
@@ -551,6 +592,14 @@ export function AdminUsersTable({ users }: Props) {
                             title={isBanned ? 'Unban (restore sign-in)' : 'Ban (full sign-in lockout)'}
                           >
                             {banningId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => resetUserPassword(u)}
+                            disabled={resetPwId === u.id}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:text-purple-600 hover:bg-purple-500/10 transition-all disabled:opacity-40"
+                            title="Reset password (send new temporary password by email)"
+                          >
+                            {resetPwId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
                           </button>
                           <button
                             onClick={() => deleteUser(u.id)}
@@ -951,6 +1000,83 @@ export function AdminUsersTable({ users }: Props) {
           </div>
         )}
       </div>
+
+      {/* Reset password result modal */}
+      {resetResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm text-foreground">Password reset</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">For: {resetResult.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setResetResult(null)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className={`flex items-start gap-2.5 p-3 rounded-xl ${resetResult.emailSent ? 'bg-green-500/10 border border-green-500/20' : 'bg-amber-500/10 border border-amber-500/20'}`}>
+                <Mail className={`w-4 h-4 flex-shrink-0 mt-0.5 ${resetResult.emailSent ? 'text-green-600' : 'text-amber-600'}`} />
+                <div className="text-xs leading-relaxed">
+                  {resetResult.emailSent ? (
+                    <p className="text-green-700 dark:text-green-400">
+                      Email with the new password sent to <strong>{resetResult.email}</strong>.
+                    </p>
+                  ) : (
+                    <p className="text-amber-700 dark:text-amber-400">
+                      Email delivery failed. <strong>Copy the password below and share it with the user securely</strong> (e.g. WhatsApp).
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">
+                  Temporary password
+                </label>
+                <div className="flex items-stretch gap-2">
+                  <div className="flex-1 px-4 py-3 bg-muted border border-border rounded-xl font-mono text-sm font-bold text-foreground tracking-wider break-all select-all">
+                    {resetResult.tempPassword}
+                  </div>
+                  <button
+                    onClick={() => copyText('temp-pw', resetResult.tempPassword)}
+                    className="px-3 rounded-xl border border-border bg-background hover:bg-accent transition-all flex items-center justify-center"
+                    title="Copy to clipboard"
+                  >
+                    {copiedKey === 'temp-pw' ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-xl border border-border">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  The user's old password no longer works. Tell them to sign in with this temporary password and change it immediately from <strong className="text-foreground">Profile → Security</strong>.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setResetResult(null)}
+                className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Send Notification modal */}
       {notifyUser && (

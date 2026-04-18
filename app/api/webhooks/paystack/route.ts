@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { sendOrderPaidEmail, sendNewPaidOrderToSellerEmail } from '@/lib/email'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!
 
@@ -54,7 +55,10 @@ export async function POST(req: NextRequest) {
       }
 
       if (orderId) {
-        await admin
+        // Only proceed if the update actually flips a pending order to paid.
+        // .select() returns the updated row(s) so we can guard against double-emails
+        // when Paystack retries the webhook.
+        const { data: updated } = await admin
           .from('orders')
           .update({
             status: 'paid',
@@ -64,6 +68,53 @@ export async function POST(req: NextRequest) {
           })
           .eq('id', orderId)
           .eq('status', 'pending')
+          .select('id, buyer_id, seller_id, quantity, total_amount, delivery_address, products(title)')
+
+        const row = Array.isArray(updated) ? updated[0] : null
+        if (row) {
+          // Look up buyer + seller emails/names in parallel
+          const [
+            { data: buyerAuth },
+            { data: sellerAuth },
+            { data: buyerProfile },
+            { data: sellerProfile },
+          ] = await Promise.all([
+            admin.auth.admin.getUserById(row.buyer_id as string),
+            admin.auth.admin.getUserById(row.seller_id as string),
+            admin.from('profiles').select('full_name').eq('id', row.buyer_id).maybeSingle(),
+            admin.from('profiles').select('full_name').eq('id', row.seller_id).maybeSingle(),
+          ])
+
+          const productTitle =
+            (Array.isArray(row.products) ? row.products[0] : row.products)?.title ?? 'your order'
+          const buyerEmail = buyerAuth?.user?.email ?? null
+          const sellerEmail = sellerAuth?.user?.email ?? null
+          const buyerName = buyerProfile?.full_name ?? 'there'
+          const sellerName = sellerProfile?.full_name ?? 'there'
+
+          // Buyer confirmation
+          if (buyerEmail) {
+            sendOrderPaidEmail(buyerEmail, buyerName, {
+              id: row.id as string,
+              productTitle,
+              quantity: row.quantity as number,
+              total: row.total_amount as number,
+              sellerName,
+            }).catch(() => {})
+          }
+
+          // Seller "you've got a paid order" notification
+          if (sellerEmail) {
+            sendNewPaidOrderToSellerEmail(sellerEmail, sellerName, {
+              id: row.id as string,
+              productTitle,
+              quantity: row.quantity as number,
+              total: row.total_amount as number,
+              buyerName,
+              deliveryAddress: row.delivery_address as string | undefined,
+            }).catch(() => {})
+          }
+        }
       }
     }
 

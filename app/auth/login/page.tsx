@@ -73,6 +73,10 @@ export default function LoginPage() {
     }
     toast.dismiss(toastId)
     toast.success('Welcome back!', { description: 'Redirecting to your dashboard...' })
+
+    // Fire a security alert email — best-effort, never blocks the redirect.
+    fetch('/api/auth/login-alert', { method: 'POST' }).catch(() => {})
+
     router.push('/dashboard')
     router.refresh()
   }

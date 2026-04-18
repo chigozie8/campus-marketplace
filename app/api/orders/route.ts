@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 import { sendNotification } from '@/lib/send-notification'
+import { sendOrderPlacedEmail } from '@/lib/email'
 
 function db() {
   return createAdmin(
@@ -111,6 +112,19 @@ export async function POST(req: Request) {
       body: `Your order for "${product.title}" is placed. Complete payment to confirm.`,
       data: { url: '/dashboard/orders', orderId: order.id },
     }).catch(() => {})
+
+    // Email the buyer that their order is placed (awaiting payment).
+    // Fire and forget — never block the order response on email delivery.
+    if (user.email) {
+      const buyerName =
+        (user.user_metadata as { full_name?: string } | null)?.full_name || 'there'
+      sendOrderPlacedEmail(user.email, buyerName, {
+        id: order.id,
+        productTitle: product.title,
+        quantity,
+        total: totalAmount,
+      }).catch(() => {})
+    }
 
     return NextResponse.json({ success: true, data: { ...order, product } })
   } catch (err) {
