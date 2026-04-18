@@ -2,7 +2,7 @@ import axios from 'axios'
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
-const WASENDER_BASE = 'https://wasenderapi.com/api'
+const WASENDER_BASE = 'https://www.wasenderapi.com/api'
 
 interface WasenderCreds {
   apiKey: string

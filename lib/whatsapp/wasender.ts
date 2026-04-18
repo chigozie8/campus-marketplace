@@ -21,7 +21,7 @@ import {
   isValidPhone,
 } from './consent'
 
-const WASENDER_BASE = 'https://wasenderapi.com/api'
+const WASENDER_BASE = 'https://www.wasenderapi.com/api'
 
 interface SendOptions {
   /** Skip the human-like random delay (use sparingly, eg health pings). */
