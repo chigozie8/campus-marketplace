@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-
-const WASENDER_BASE = 'https://wasenderapi.com/api'
+import { sendWhatsApp } from '@/lib/whatsapp/wasender'
+import {
+  getConsent,
+  setConsent,
+  setSessionStatus,
+} from '@/lib/whatsapp/consent'
+import {
+  TOS_PROMPT_MSG,
+  TOS_ACCEPTED_MSG,
+  OPTED_OUT_MSG,
+  OPT_IN_AGAIN_MSG,
+  isOptOutKeyword,
+  isOptInKeyword,
+  isYesKeyword,
+} from '@/lib/whatsapp/messages'
 
 // ─── Supabase (service role) ─────────────────────────────────────────────────
 function svc() {
@@ -13,48 +26,23 @@ function svc() {
   )
 }
 
-// ─── WaSender credentials (env or DB) ────────────────────────────────────────
-async function getApiKey(): Promise<string | null> {
-  const envKey = process.env.WASENDER_API_KEY
-  if (envKey) return envKey
-  try {
-    const { data } = await svc()
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'integration_wasender_api_key')
-      .maybeSingle()
-    return (data?.value as string) ?? null
-  } catch {
-    return null
-  }
-}
-
-// ─── Send reply via WaSender ────────────────────────────────────────────────
-async function sendReply(to: string, text: string) {
-  const apiKey = await getApiKey()
-  if (!apiKey) return
-
-  const cleaned = to.replace(/[^\d+]/g, '')
-  const recipient = cleaned.startsWith('+') ? cleaned : `+${cleaned}`
-
-  await fetch(`${WASENDER_BASE}/send-message`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ to: recipient, text }),
-  }).catch(() => {})
-}
-
-// ─── Webhook signature verification (optional) ───────────────────────────────
+// ─── Webhook signature verification (HMAC SHA256) ────────────────────────────
+// Fail-closed in production (no secret set → reject), permissive in dev so
+// initial setup isn't blocked.
 function verifySignature(rawBody: string, signature: string | null): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
-  if (!secret) return true // no secret configured → accept
+  if (!secret) {
+    return process.env.NODE_ENV !== 'production'
+  }
   if (!signature) return false
+
+  const sig      = signature.replace(/^sha256=/, '').trim()
   const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
+
+  // timingSafeEqual requires equal-length buffers — bail early if they differ
+  if (sig.length !== expected.length) return false
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(sig, 'hex'))
   } catch {
     return false
   }
@@ -94,81 +82,41 @@ function detectIntent(raw: string) {
 }
 
 // ─── Response builders ───────────────────────────────────────────────────────
-const URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vendoorx.ng'
+const URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.vendoorx.ng'
 
 const GREETING_MSG = () =>
   `👋 Hi! Welcome to *VendoorX* — Nigeria's AI-powered WhatsApp commerce platform.\n\n` +
   `Here's what I can help you with:\n\n` +
-  `🔍 *1* — Search for products\n` +
-  `📦 *2* — Track / check your order\n` +
-  `↩️ *3* — Returns & refunds\n` +
-  `🏪 *4* — Contact a seller\n` +
-  `❓ *5* — How VendoorX works\n` +
-  `🙋 *6* — Talk to a human agent\n\n` +
-  `Just type a number or ask me anything! 😊`
+  `🔍 *1* — Search for products\n📦 *2* — Track / check your order\n↩️ *3* — Returns & refunds\n` +
+  `🏪 *4* — Contact a seller\n❓ *5* — How VendoorX works\n🙋 *6* — Talk to a human agent\n\n` +
+  `Just type a number or ask me anything! 😊\n\n_Reply *STOP* anytime to opt out._`
 
 const ORDER_STATUS_MSG = () =>
-  `📦 *Check Your Order Status*\n\n` +
-  `To view your order status, tracking and updates:\n\n` +
-  `🔗 ${URL}/dashboard/orders\n\n` +
-  `Need more help? Reply *track* for delivery info or *6* to speak with a human agent.`
+  `📦 *Check Your Order Status*\n\n🔗 ${URL}/dashboard/orders\n\nReply *track* for delivery info or *6* for a human agent.`
 
 const TRACK_MSG = () =>
-  `🚚 *Track Your Delivery*\n\n` +
-  `1️⃣ Log into your VendoorX account\n` +
-  `2️⃣ Go to *My Orders*\n` +
-  `3️⃣ Click on your order to see delivery updates\n\n` +
-  `🔗 ${URL}/dashboard/orders\n\n` +
-  `If it's been more than 3 days without an update, reply *3* to raise a dispute.`
+  `🚚 *Track Your Delivery*\n\n1️⃣ Log in\n2️⃣ Go to *My Orders*\n3️⃣ Tap your order\n\n🔗 ${URL}/dashboard/orders\n\nNo update for 3+ days? Reply *3* to raise a dispute.`
 
 const REFUND_MSG = () =>
-  `↩️ *Returns & Refunds*\n\n` +
-  `• Your payment is held in *escrow* until you confirm delivery\n` +
-  `• Raise a dispute within *48 hours* of delivery if there's an issue\n` +
-  `• Our team resolves within *24–48 hours*\n\n` +
-  `To raise a dispute:\n🔗 ${URL}/dashboard/orders\n\n` +
-  `Select the order → tap *Raise Dispute*.\n\nUrgent? Reply *6* for a human agent.`
+  `↩️ *Returns & Refunds*\n\n• Payment is held in *escrow* until you confirm delivery\n• Raise disputes within *48 hours* of delivery\n• Resolved within *24–48 hours*\n\n🔗 ${URL}/dashboard/orders`
 
 const CONTACT_SELLER_MSG = () =>
-  `🏪 *Contact a Seller*\n\n` +
-  `1️⃣ Go to the product listing\n` +
-  `2️⃣ Tap *Chat with Seller*\n\n` +
-  `🔗 ${URL}/marketplace\n\n` +
-  `Never pay outside VendoorX — your money is only safe in our escrow system.`
+  `🏪 *Contact a Seller*\n\n1️⃣ Open the product\n2️⃣ Tap *Chat with Seller*\n\n🔗 ${URL}/marketplace\n\n⚠️ Never pay outside VendoorX — escrow protects you.`
 
 const HOW_IT_WORKS_MSG = () =>
-  `💡 *How VendoorX Works*\n\n` +
-  `🛍️ *Buyers* — Browse, buy & pay securely. Money held in escrow until you receive your item.\n\n` +
-  `🏪 *Sellers* — List for free, receive orders, get paid to your wallet.\n\n` +
-  `🔒 Every transaction is protected. No scams, no fake sellers.\n\n` +
-  `🔗 ${URL}\n\nQuestions? Reply *6* for human support.`
+  `💡 *How VendoorX Works*\n\n🛍️ Buyers — pay safely, money held in escrow\n🏪 Sellers — list free, get paid to wallet\n🔒 Every transaction protected\n\n🔗 ${URL}`
 
 const HUMAN_MSG = () =>
-  `🙋 *Connecting you to our support team…*\n\n` +
-  `Available *Mon–Sat, 8am–8pm*.\n\n` +
-  `📧 support@vendoorx.ng\n` +
-  `🌐 ${URL}/help\n\n` +
-  `We typically respond within *1–2 hours*. Thank you for your patience! 🙏`
+  `🙋 *Connecting you to support…*\n\nMon–Sat, 8am–8pm\n📧 support@vendoorx.ng\n🌐 ${URL}/help\n\nResponse within 1–2 hours.`
 
 const BUY_PROMPT_MSG = () =>
-  `🛍️ To buy a product:\n\n` +
-  `1️⃣ Search for it first — type a keyword (e.g. "phone", "shoes")\n` +
-  `2️⃣ Find what you like in the results\n` +
-  `3️⃣ Reply *BUY <product-id>*\n\n` +
-  `Or browse: 🔗 ${URL}/marketplace`
+  `🛍️ To buy:\n1️⃣ Search a keyword (e.g. "phone")\n2️⃣ Find what you like\n3️⃣ Reply *BUY <product-id>*\n\nOr browse: 🔗 ${URL}/marketplace`
 
 const HELP_MSG = () =>
-  `🤔 I didn't quite catch that.\n\n` +
-  `🔍 Type a product name to search (e.g. *"iPhone"*, *"Adidas shoes"*)\n` +
-  `📦 Type *order* to check your order\n` +
-  `↩️ Type *refund* for returns help\n` +
-  `🙋 Type *agent* to talk to a human\n` +
-  `👋 Type *hi* to see the full menu\n\n` +
-  `🔗 ${URL}`
+  `🤔 I didn't quite catch that.\n\n🔍 Type a product name to search\n📦 Type *order* for orders\n↩️ Type *refund* for returns\n🙋 Type *agent* for a human\n👋 Type *hi* for the menu\n\n🔗 ${URL}`
 
 const ERROR_MSG = () =>
-  `😓 Something went wrong on our end. Please try again in a moment.\n\n` +
-  `🔗 ${URL}\n\nFor urgent help, reply *agent*.`
+  `😓 Something went wrong. Please try again in a moment.\n\nFor urgent help, reply *agent*.`
 
 // ─── Product search via Supabase ─────────────────────────────────────────────
 async function searchProducts(keyword: string, limit = 5) {
@@ -180,9 +128,7 @@ async function searchProducts(keyword: string, limit = 5) {
       .eq('status', 'active')
       .limit(limit)
     return data ?? []
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 async function getProduct(id: string) {
@@ -193,21 +139,17 @@ async function getProduct(id: string) {
       .eq('id', id)
       .single()
     return data
-  } catch {
-    return null
-  }
+  } catch { return null }
 }
 
 function buildProductList(products: any[]): string {
-  if (!products.length) {
-    return `😕 No products found for that search.\n\nTry a different keyword or browse:\n🔗 ${URL}/marketplace`
-  }
+  if (!products.length) return `😕 No products found.\n\nTry another keyword or browse:\n🔗 ${URL}/marketplace`
   const lines = products.map((p, i) => {
     const vendor = (p.profiles as any)?.full_name ?? 'Unknown Vendor'
     const price  = Number(p.price).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })
-    return `*${i + 1}. ${p.name}*\n💰 ${price}  |  🏪 ${vendor}\n${String(p.description ?? '').substring(0, 80).trimEnd()}…\n👉 Reply *BUY ${p.id}* to order`
+    return `*${i + 1}. ${p.name}*\n💰 ${price}  |  🏪 ${vendor}\n${String(p.description ?? '').substring(0, 80).trimEnd()}…\n👉 *BUY ${p.id}*`
   })
-  return `🛍️ Here are the top results:\n\n` + lines.join('\n\n─────────────\n\n') + `\n\n🔗 See more: ${URL}/marketplace`
+  return `🛍️ Top results:\n\n` + lines.join('\n\n─────────────\n\n') + `\n\n🔗 More: ${URL}/marketplace`
 }
 
 function buildSingleProduct(p: any): string {
@@ -216,55 +158,95 @@ function buildSingleProduct(p: any): string {
   return `🛍️ *${p.name}*\n\n💰 ${price}\n🏪 ${vendor}\n📝 ${p.description ?? ''}\n\n✅ Reply *BUY ${p.id}* to order\n🔗 ${URL}/listings/${p.id}`
 }
 
-// ─── Main message handler ────────────────────────────────────────────────────
-async function handleMessage(from: string, text: string) {
+// ─── Main intent handler ─────────────────────────────────────────────────────
+async function handleIntent(text: string): Promise<string> {
   const { intent, keyword } = detectIntent(text)
-  let reply: string
-
   try {
     switch (intent) {
-      case 'greeting':       reply = GREETING_MSG();       break
-      case 'order_status':   reply = ORDER_STATUS_MSG();   break
-      case 'track_order':    reply = TRACK_MSG();           break
-      case 'return_refund':  reply = REFUND_MSG();          break
-      case 'contact_seller': reply = CONTACT_SELLER_MSG(); break
-      case 'how_it_works':   reply = HOW_IT_WORKS_MSG();   break
-      case 'human':          reply = HUMAN_MSG();           break
-      case 'buy_prompt':     reply = BUY_PROMPT_MSG();     break
-
+      case 'greeting':       return GREETING_MSG()
+      case 'order_status':   return ORDER_STATUS_MSG()
+      case 'track_order':    return TRACK_MSG()
+      case 'return_refund':  return REFUND_MSG()
+      case 'contact_seller': return CONTACT_SELLER_MSG()
+      case 'how_it_works':   return HOW_IT_WORKS_MSG()
+      case 'human':          return HUMAN_MSG()
+      case 'buy_prompt':     return BUY_PROMPT_MSG()
       case 'buy': {
         const product = await getProduct(keyword)
-        reply = product ? buildSingleProduct(product) : `❌ Couldn't find that product. Try searching first.`
-        break
+        return product ? buildSingleProduct(product) : `❌ Couldn't find that product.`
       }
-
       case 'search': {
         const products = await searchProducts(keyword)
-        reply = buildProductList(products)
-        break
+        return buildProductList(products)
       }
-
-      default: reply = HELP_MSG()
+      default: return HELP_MSG()
     }
-  } catch {
-    reply = ERROR_MSG()
-  }
-
-  await sendReply(from, reply)
+  } catch { return ERROR_MSG() }
 }
 
-// ─── Parse WaSender (Baileys-style) webhook payload ──────────────────────────
-function extractFromWasender(body: any): { from: string; text: string } | null {
-  if (!body) return null
+// ─── Master message handler with consent flow ────────────────────────────────
+async function handleMessage(from: string, text: string) {
+  const consent = await getConsent(from)
 
-  // Format A: { event: 'messages.upsert', data: { messages: [{ key, message, ... }] } }
+  // 1) Opt-out keyword always wins
+  if (isOptOutKeyword(text)) {
+    await setConsent(from, 'opted_out')
+    await sendWhatsApp(from, OPTED_OUT_MSG(), { bypassSafety: true })
+    return
+  }
+
+  // 2) Opt-back-in
+  if (consent === 'opted_out') {
+    if (isOptInKeyword(text) || isYesKeyword(text)) {
+      await setConsent(from, 'accepted')
+      await sendWhatsApp(from, OPT_IN_AGAIN_MSG(), { bypassSafety: true })
+    }
+    // Anyone else's messages while opted out are silently ignored
+    return
+  }
+
+  // 3) First-time user — send ToS, ask for YES
+  if (consent === 'none') {
+    await setConsent(from, 'pending')
+    await sendWhatsApp(from, TOS_PROMPT_MSG(), { bypassSafety: true })
+    return
+  }
+
+  // 4) Pending — they need to accept ToS first
+  if (consent === 'pending') {
+    if (isYesKeyword(text)) {
+      await setConsent(from, 'accepted')
+      await sendWhatsApp(from, TOS_ACCEPTED_MSG())
+      return
+    }
+    // Don't loop the full ToS — send a short nudge
+    await sendWhatsApp(
+      from,
+      `🙏 Before we can chat, I need you to accept our terms.\n\n` +
+      `Reply *YES* to continue, *STOP* to opt out, or read the full terms here:\n` +
+      `${URL}/legal/whatsapp-terms`,
+    )
+    return
+  }
+
+  // 5) Accepted — normal bot flow (with full safety)
+  const reply = await handleIntent(text)
+  await sendWhatsApp(from, reply)
+}
+
+// ─── Parse WaSender (Baileys-style) webhook ──────────────────────────────────
+function extractMessage(body: any): { from: string; text: string } | null {
+  if (!body) return null
   const msg = body?.data?.messages?.[0] ?? body?.messages?.[0]
   if (msg) {
+    if (msg?.key?.fromMe) return null
     const remoteJid: string = msg?.key?.remoteJid ?? msg?.remoteJid ?? ''
-    const fromMe: boolean = !!msg?.key?.fromMe
-    if (fromMe) return null
 
-    // Phone is the part before "@s.whatsapp.net"
+    // Skip groups, broadcasts, channels
+    if (remoteJid.includes('@g.us') || remoteJid.includes('@broadcast') || remoteJid.includes('@newsletter')) {
+      return null
+    }
+
     const phone = remoteJid.split('@')[0] ?? ''
     if (!phone) return null
 
@@ -277,25 +259,20 @@ function extractFromWasender(body: any): { from: string; text: string } | null {
       m?.buttonsResponseMessage?.selectedDisplayText ??
       m?.listResponseMessage?.title ??
       ''
-
     if (!text) return null
     return { from: phone, text }
   }
 
-  // Format B (simpler webhooks): { from, text } or { from, message }
   const directFrom = body?.from ?? body?.sender ?? body?.phone
   const directText = body?.text ?? body?.message ?? body?.body
-  if (directFrom && directText) {
-    return { from: String(directFrom), text: String(directText) }
-  }
-
+  if (directFrom && directText) return { from: String(directFrom), text: String(directText) }
   return null
 }
 
 // ─── Route handlers ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const rawBody = await req.text()
+    const rawBody   = await req.text()
     const signature = req.headers.get('x-webhook-signature') ?? req.headers.get('x-wasender-signature')
 
     if (!verifySignature(rawBody, signature)) {
@@ -303,15 +280,20 @@ export async function POST(req: NextRequest) {
     }
 
     let body: any = null
-    try { body = JSON.parse(rawBody) } catch {
-      try { body = Object.fromEntries(new URLSearchParams(rawBody)) } catch { body = {} }
+    try { body = JSON.parse(rawBody) } catch { body = {} }
+
+    // Track session.status events for the admin dashboard
+    if (body?.event === 'session.status' || body?.type === 'session.status') {
+      const status = body?.data?.status ?? body?.status ?? 'unknown'
+      await setSessionStatus(String(status))
     }
 
-    const parsed = extractFromWasender(body)
+    const parsed = extractMessage(body)
     if (parsed) {
       handleMessage(parsed.from, parsed.text).catch(() => {})
     }
 
+    // Always 200 quickly so WaSender doesn't retry
     return new NextResponse('OK', { status: 200 })
   } catch {
     return new NextResponse('OK', { status: 200 })

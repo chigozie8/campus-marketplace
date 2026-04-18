@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
+import { WhatsAppStatusCard } from '@/components/admin/whatsapp-status-card'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Integrations' }
@@ -42,6 +43,7 @@ export default async function IntegrationsPage() {
         </p>
       </div>
 
+      <WhatsAppStatusCard />
       <WhatsAppSettingsForm initialValues={saved} webhookUrl={webhookUrl} />
     </div>
   )

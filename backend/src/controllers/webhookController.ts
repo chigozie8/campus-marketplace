@@ -15,12 +15,20 @@ export function verifyWhatsApp(_req: Request, res: Response): void {
 
 function verifyWasenderSignature(rawBody: Buffer | string | undefined, signature: string | undefined): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
-  if (!secret) return true
+  if (!secret) {
+    // Fail-closed in production, permissive in dev for initial setup
+    return process.env.NODE_ENV !== 'production'
+  }
   if (!rawBody || !signature) return false
-  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
+
+  const sig      = signature.replace(/^sha256=/, '').trim()
+  const payload  = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
   const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+
+  // timingSafeEqual needs equal-length buffers
+  if (sig.length !== expected.length) return false
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(sig, 'hex'))
   } catch {
     return false
   }

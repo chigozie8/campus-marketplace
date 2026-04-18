@@ -279,9 +279,26 @@ This project has two services running side-by-side:
 | `FRONTEND_URL` | Backend | Paystack payment callback redirects here |
 | `PAYSTACK_SECRET_KEY` | Backend only | Payment processing (optional for dev) |
 | `PAYSTACK_WEBHOOK_SECRET` | Backend only | Webhook signature verification |
-| `WHATSAPP_TOKEN` | Backend only | WhatsApp messaging |
-| `WHATSAPP_PHONE_NUMBER_ID` | Backend only | WhatsApp phone number ID |
-| `WHATSAPP_VERIFY_TOKEN` | Backend only | Webhook verification token |
+| `WASENDER_API_KEY` | Frontend + Backend | WaSenderAPI WhatsApp send/receive |
+| `WASENDER_WEBHOOK_SECRET` | Frontend + Backend | HMAC SHA256 verification for incoming webhooks |
+| `UPSTASH_REDIS_REST_URL` | Frontend + Backend | Upstash Redis (used for WhatsApp consent + rate limits) |
+| `UPSTASH_REDIS_REST_TOKEN` | Frontend + Backend | Upstash Redis auth token |
+
+### WhatsApp (WaSenderAPI) — Anti-ban Architecture
+The bot ships with these guardrails to keep the connected number safe:
+- **Opt-in flow** (`lib/whatsapp/messages.ts`) — every new contact receives ToS prompt; must reply `YES` before bot responds
+- **Opt-out keywords** — `STOP / UNSUBSCRIBE / CANCEL / QUIT / OPT-OUT / END` permanently silences the bot for that number; `START` re-enables
+- **Per-recipient rate limit** — ≤ 30 messages / hour / number (Redis counter, 1 h TTL)
+- **Global daily cap** — ≤ 1000 bot replies / day across all users
+- **Dedup window** — identical reply text within 30 s is dropped
+- **Human-like jitter** — 800–2400 ms randomised delay before each send
+- **Group/broadcast/channel filter** — webhook ignores `@g.us`, `@broadcast`, `@newsletter` JIDs
+- **Webhook signature** — HMAC SHA256 verification when `WASENDER_WEBHOOK_SECRET` is set
+- **Public ToS** at `/legal/whatsapp-terms` — referenced from every consent prompt
+
+Files: `lib/whatsapp/{redis,consent,messages,wasender}.ts`, `app/api/webhook/whatsapp/route.ts`, `components/admin/whatsapp-status-card.tsx`, `app/legal/whatsapp-terms/page.tsx`.
+
+Webhook URL (paste in WaSender dashboard): `https://www.vendoorx.ng/api/webhook/whatsapp`. Enable only `messages.upsert` + `session.status` events. In Advanced Settings: `Always Online = OFF`, ignore groups/broadcasts/channels.
 
 ## Features Added (Post-Migration)
 
