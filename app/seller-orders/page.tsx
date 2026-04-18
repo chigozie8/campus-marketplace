@@ -162,6 +162,42 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
         <ChevronRight className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform mt-1 ${expanded ? 'rotate-90' : ''}`} />
       </button>
 
+      {/* Always-visible primary action — so seller never has to expand to find it */}
+      {(order.status === 'paid' || order.status === 'shipped') && (
+        <div className="px-4 sm:px-5 pb-4 -mt-1">
+          {order.status === 'paid' && (
+            <button
+              onClick={(e) => { e.stopPropagation(); markStatus('shipped') }}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold transition-all disabled:opacity-60 shadow-md shadow-violet-500/25"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
+              Mark as Shipped
+            </button>
+          )}
+          {order.status === 'shipped' && (
+            <button
+              onClick={(e) => { e.stopPropagation(); sendDeliveryOtp(false) }}
+              disabled={sendingOtp}
+              className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold transition-all disabled:opacity-60 shadow-md shadow-teal-500/25"
+            >
+              {sendingOtp
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Sending…</>
+                : <><CheckCircle2 className="w-4 h-4" />Mark Delivered &amp; Send Code</>
+              }
+            </button>
+          )}
+          {!expanded && (
+            <button
+              onClick={() => setExpanded(true)}
+              className="block mx-auto mt-2 text-[11px] text-muted-foreground hover:text-foreground font-semibold underline-offset-2 hover:underline"
+            >
+              More options
+            </button>
+          )}
+        </div>
+      )}
+
       <AnimatePresence>
         {expanded && (
           <m.div
