@@ -4,18 +4,11 @@ import { SITE_URL } from '@/lib/seo'
 
 export const revalidate = 3600
 
-const CATEGORY_SLUGS = [
-  'electronics',
-  'textbooks',
-  'clothing',
-  'food',
-  'services',
-  'accommodation',
-  'furniture',
-  'sports',
-  'beauty',
-  'others',
-]
+// NOTE: Category URLs (/marketplace?category=X) were removed from the
+// sitemap because Google treats query-param duplicates as near-duplicates
+// of /marketplace and refuses to index them ("Discovered, not indexed").
+// When proper category landing pages exist at /marketplace/category/{slug}
+// with unique content + canonical tags, add them back here.
 
 const PUBLIC_PAGES = [
   { path: '/about',        priority: 0.8, changeFrequency: 'monthly' as const },
@@ -60,16 +53,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: p.priority,
   }))
 
-  const categoryPages: MetadataRoute.Sitemap = CATEGORY_SLUGS.map(slug => ({
-    url: `${SITE_URL}/marketplace?category=${slug}`,
-    lastModified: now,
-    changeFrequency: 'daily' as const,
-    priority: 0.85,
-  }))
-
   try {
     const supabase = await createClient()
-    if (!supabase) return [...staticPages, ...publicPages, ...categoryPages]
+    if (!supabase) return [...staticPages, ...publicPages]
 
     const [productsRes, blogsRes, storesRes] = await Promise.all([
       supabase
@@ -117,12 +103,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...staticPages,
       ...publicPages,
-      ...categoryPages,
       ...productPages,
       ...blogPages,
       ...storePages,
     ]
   } catch {
-    return [...staticPages, ...publicPages, ...categoryPages]
+    return [...staticPages, ...publicPages]
   }
 }
