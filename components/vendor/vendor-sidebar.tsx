@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
   LayoutDashboard, Inbox, Package, ShoppingBag,
   Settings, LogOut, Bell, Store, BookOpen, ClipboardList, BarChart2,
-  Heart, Gift,
+  Heart, Gift, Loader2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -34,11 +35,18 @@ interface Props {
 export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Props) {
   const pathname = usePathname()
   const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/auth/login')
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/auth/login')
+    } catch {
+      setSigningOut(false)
+    }
   }
 
   return (
@@ -111,10 +119,11 @@ export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Pr
         </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2.5 text-xs text-gray-500 hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all font-medium"
+          disabled={signingOut}
+          className="flex items-center gap-2.5 text-xs text-gray-500 hover:text-red-600 dark:text-muted-foreground dark:hover:text-red-400 w-full px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all font-medium disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <LogOut className="w-3.5 h-3.5" />
-          Sign out
+          {signingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+          {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
       </div>
     </aside>

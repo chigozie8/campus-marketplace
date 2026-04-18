@@ -119,6 +119,7 @@ export default function ProfilePage() {
   const [deletingAccount, setDeletingAccount] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [exportingData, setExportingData] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [idBackUrl, setIdBackUrl] = useState('')
   const [selfieUrl, setSelfieUrl] = useState('')
   const idFrontRef = useRef<HTMLInputElement>(null)
@@ -522,10 +523,16 @@ export default function ProfilePage() {
   }
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    toast.success('Signed out successfully')
-    router.push('/')
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      toast.success('Signed out successfully')
+      router.push('/')
+    } catch {
+      setSigningOut(false)
+    }
   }
 
   async function handleExportData() {
@@ -943,16 +950,17 @@ export default function ProfilePage() {
 
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 transition-all group"
+              disabled={signingOut}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
-                <LogOut className="w-5 h-5 text-red-500" />
+                {signingOut ? <Loader2 className="w-5 h-5 text-red-500 animate-spin" /> : <LogOut className="w-5 h-5 text-red-500" />}
               </div>
               <div className="flex-1 text-left">
-                <p className="font-bold text-sm text-red-600 dark:text-red-400">Sign Out</p>
+                <p className="font-bold text-sm text-red-600 dark:text-red-400">{signingOut ? 'Signing out…' : 'Sign Out'}</p>
                 <p className="text-xs text-red-400">Sign out of your VendoorX account</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-0.5 transition-transform" />
+              {!signingOut && <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-0.5 transition-transform" />}
             </button>
 
             {/* Danger Zone */}

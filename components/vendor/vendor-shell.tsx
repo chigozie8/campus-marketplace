@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { Plus, LogOut, Inbox } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Plus, LogOut, Inbox, Loader2 } from 'lucide-react'
 import { VendorSidebar } from './vendor-sidebar'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { createClient } from '@/lib/supabase/client'
@@ -24,11 +24,18 @@ export function VendorShell({
 }: Props) {
   const pathname = usePathname()
   const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/auth/login')
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/auth/login')
+    } catch {
+      setSigningOut(false)
+    }
   }
 
   useEffect(() => {
@@ -64,8 +71,13 @@ export function VendorShell({
           <Link href="/seller/new" className="flex items-center gap-1 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg">
             <Plus className="w-3.5 h-3.5" /> Sell
           </Link>
-          <button onClick={handleSignOut} className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all">
-            <LogOut className="w-4 h-4" />
+          <button
+            onClick={handleSignOut}
+            disabled={signingOut}
+            aria-label="Sign out"
+            className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {signingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
           </button>
         </div>
       </div>

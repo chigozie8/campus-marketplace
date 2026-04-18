@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Users,
@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  Loader2,
   ChevronRight,
   Shield,
   BarChart3,
@@ -77,11 +78,18 @@ export function AdminSidebar({ role, userEmail }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
 
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/auth/login')
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/auth/login')
+    } catch {
+      setSigningOut(false)
+    }
   }
 
   const SidebarContent = () => (
@@ -149,10 +157,11 @@ export function AdminSidebar({ role, userEmail }: Props) {
         </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          disabled={signingOut}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <LogOut className="w-4 h-4" />
-          Sign Out
+          {signingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+          {signingOut ? 'Signing out…' : 'Sign Out'}
         </button>
       </div>
     </div>
