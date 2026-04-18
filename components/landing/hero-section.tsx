@@ -57,32 +57,20 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
         </div>
 
         {/* Headline */}
-        <h1
-          data-aos="fade-up"
-          data-aos-duration="800"
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] text-balance"
-        >
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] text-balance">
           <span className="text-gray-950 dark:text-white">Your campus</span>
           <br />
-          <span className="vx-gradient-text italic">marketplace.</span>
+          <span className="text-primary italic">marketplace.</span>
         </h1>
 
         {/* Subtitle */}
-        <p
-          data-aos="fade-up"
-          data-aos-delay="120"
-          className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl"
-        >
+        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
           Buy and sell with classmates from <span className="text-primary font-semibold">UNILAG, ABU, UI, OAU, BUK</span> and 100+ more universities — all powered by{' '}
           <span className="text-primary font-semibold">WhatsApp</span>. Faster than DMs. Safer than meetups. Free to start.
         </p>
 
         {/* Feature badges */}
-        <div
-          data-aos="fade-up"
-          data-aos-delay="220"
-          className="flex flex-wrap justify-center gap-3 mt-2"
-        >
+        <div className="flex flex-wrap justify-center gap-3 mt-2">
           {FEATURES.map((feature) => {
             const Icon = feature.icon
             return (
@@ -98,11 +86,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
         </div>
 
         {/* CTA Buttons */}
-        <div
-          data-aos="fade-up"
-          data-aos-delay="320"
-          className="flex flex-col sm:flex-row items-center gap-4 mt-4"
-        >
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
           {isAuthed ? (
             <>
               <Link href="/dashboard">

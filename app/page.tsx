@@ -178,23 +178,21 @@ export default async function Home() {
       />
       <LandingNav user={user} />
       <HeroSection user={user} settings={settings} />
-      <div data-aos="fade-up">
-        <StatsBar stats={[
-          { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
-          { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
-          { value: settings.stat_transactions,    label: 'Sales Processed',   sublabel: settings.stat_transactions_sub },
-          { value: settings.stat_rating,          label: 'Average Rating',    sublabel: settings.stat_rating_sub },
-        ]} />
-      </div>
-      <div data-aos="fade-up"><TrustedBySection /></div>
-      <div data-aos="fade-up"><ProblemSolutionSection /></div>
-      <div data-aos="zoom-in-up" data-aos-duration="800"><WhatsappMockupSection /></div>
-      <div data-aos="fade-up"><HowItWorksSection /></div>
-      <div data-aos="fade-up"><Features /></div>
-      <div data-aos="fade-up"><IntegrationsSection /></div>
-      <div data-aos="fade-up"><TrustSection /></div>
-      <div data-aos="fade-up"><FaqSection /></div>
-      <div data-aos="zoom-in-up" data-aos-duration="800"><CtaSection user={user} /></div>
+      <StatsBar stats={[
+        { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
+        { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
+        { value: settings.stat_transactions,    label: 'Sales Processed',   sublabel: settings.stat_transactions_sub },
+        { value: settings.stat_rating,          label: 'Average Rating',    sublabel: settings.stat_rating_sub },
+      ]} />
+      <TrustedBySection />
+      <ProblemSolutionSection />
+      <WhatsappMockupSection />
+      <HowItWorksSection />
+      <Features />
+      <IntegrationsSection />
+      <TrustSection />
+      <FaqSection />
+      <CtaSection user={user} />
       <LandingFooter settings={settings} />
     </main>
   )
