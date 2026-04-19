@@ -53,6 +53,29 @@ export async function POST(req: Request) {
     )
   }
 
+  // ── Detect duplicate email (Supabase anti-enumeration behaviour) ──────────
+  // When "Confirm email" is ON, supabase.auth.signUp() does NOT throw an error
+  // for an already-registered email — it returns a placeholder user object
+  // with an EMPTY `identities` array to prevent attackers from probing the
+  // user list. We MUST check for this explicitly, otherwise duplicates get a
+  // false "success" message and never receive a confirmation email.
+  // Reference: https://supabase.com/docs/reference/javascript/auth-signup
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return NextResponse.json(
+      { error: 'This email is already registered. Please sign in or reset your password.' },
+      { status: 409 },
+    )
+  }
+
+  // Defensive: a fully-confirmed user with no session means signUp returned
+  // an existing confirmed account (older Supabase versions). Treat as dupe.
+  if (data.user && data.user.email_confirmed_at && !data.session) {
+    return NextResponse.json(
+      { error: 'This email is already registered. Please sign in or reset your password.' },
+      { status: 409 },
+    )
+  }
+
   if (data.user) {
     await adminClient.from('profiles').upsert(
       {
