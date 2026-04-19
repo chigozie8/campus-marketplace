@@ -359,6 +359,56 @@ export async function sendAdminPasswordResetEmail(
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Delivery OTP — sent to the buyer once the seller marks an order as shipped
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Send the buyer their delivery confirmation code. The `code` here is the
+ * SAME raw 6-digit code that is hashed into `delivery_otps` and shown in the
+ * buyer's in-app bell, so verification works regardless of whether the buyer
+ * grabs it from their email or from the bell.
+ */
+export async function sendDeliveryOtpEmail(args: {
+  to: string
+  name?: string | null
+  code: string
+  orderShortId: string
+}): Promise<SendResult> {
+  const cleanName = (args.name || '').trim().split(/\s+/)[0] || ''
+  const greeting = cleanName ? `Hi <strong>${esc(cleanName)}</strong>,` : 'Hi there,'
+  return safeSend({
+    to: args.to,
+    subject: `🔐 Your VendoorX delivery code (Order #${args.orderShortId})`,
+    html: layout({
+      preheader: `Your delivery confirmation code for Order #${args.orderShortId}.`,
+      iconEmoji: '🔐',
+      iconBg: '#16a34a22',
+      iconBorder: '#16a34a44',
+      title: 'Your delivery code',
+      subtitle: `Order #${esc(args.orderShortId)}`,
+      bodyHtml: `
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 14px">${greeting}</p>
+        <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">
+          Your seller has shipped your order. When your item arrives, share this code with the courier or enter it in the VendoorX app to confirm delivery and release payment to the seller.
+        </p>
+        <div style="background:#f0fdf4;border:2px dashed #16a34a;border-radius:14px;padding:22px;margin-bottom:18px;text-align:center">
+          <p style="color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 10px">Delivery code</p>
+          <p class="vx-pw" style="font-family:'Courier New',Consolas,monospace;font-size:32px;font-weight:900;color:#0a0a0a;letter-spacing:6px;margin:0;line-height:1.1">${esc(args.code)}</p>
+          <p style="color:#15803d;font-size:11px;margin:10px 0 0">Expires in 10 minutes</p>
+        </div>
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:8px">
+          <p style="color:#991b1b;font-size:13px;margin:0;line-height:1.6">
+            <strong>⚠️ Only enter this code AFTER your item arrives</strong> and you've confirmed it matches the listing. Once entered, your payment is released to the seller.
+          </p>
+        </div>
+      `,
+      cta: { label: 'Open my orders', href: `${SITE_URL}/dashboard/orders` },
+      footerNote: 'You can also retrieve this code from the bell icon inside the VendoorX app.',
+    }),
+  })
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Newsletter — campus deal alerts
 // ────────────────────────────────────────────────────────────────────────────
 

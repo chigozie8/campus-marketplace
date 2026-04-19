@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
       subject: `[TEST] ${subject}`,
       bodyText,
     })
-    if (!r.ok) return NextResponse.json({ error: r.error || 'Send failed' }, { status: 500 })
+    if (!r.ok) {
+      console.error(`[newsletter] ❌ Test send to ${user.email} failed: ${r.error}`)
+      return NextResponse.json({ error: r.error || 'Send failed' }, { status: 500 })
+    }
     return NextResponse.json({ ok: true, sent: 1, failed: 0, mode: 'test' })
   }
 
@@ -58,15 +61,20 @@ export async function POST(req: NextRequest) {
     .select('email, first_name')
     .eq('unsubscribed', false)
 
-  if (subsErr) return NextResponse.json({ error: subsErr.message }, { status: 500 })
+  if (subsErr) {
+    console.error(`[newsletter] ❌ Subscriber query failed: ${subsErr.message}`)
+    return NextResponse.json({ error: subsErr.message }, { status: 500 })
+  }
   if (!subs || subs.length === 0) {
-    return NextResponse.json({ ok: true, sent: 0, failed: 0, mode: 'broadcast' })
+    return NextResponse.json({ ok: true, sent: 0, failed: 0, total: 0, mode: 'broadcast', empty: true })
   }
 
   // Send in waves so we don't blow Mailtrap's per-second rate limit.
   const BATCH = 10
   let sent = 0
   let failed = 0
+  let firstError: string | null = null
+
   for (let i = 0; i < subs.length; i += BATCH) {
     const slice = subs.slice(i, i + BATCH)
     const results = await Promise.allSettled(
@@ -76,12 +84,19 @@ export async function POST(req: NextRequest) {
           firstName: s.first_name,
           subject,
           bodyText,
-        }),
+        }).then((r) => ({ ...r, to: s.email })),
       ),
     )
     for (const r of results) {
-      if (r.status === 'fulfilled' && r.value.ok) sent++
-      else failed++
+      if (r.status === 'fulfilled' && r.value.ok) {
+        sent++
+      } else {
+        failed++
+        const errMsg = r.status === 'fulfilled' ? r.value.error : (r.reason instanceof Error ? r.reason.message : String(r.reason))
+        const recipient = r.status === 'fulfilled' ? r.value.to : 'unknown'
+        console.error(`[newsletter] ❌ Send to ${recipient} failed: ${errMsg}`)
+        if (!firstError) firstError = errMsg ?? 'Unknown error'
+      }
     }
     // Tiny pause between waves — keeps us comfortably under Mailtrap's send rate limits.
     if (i + BATCH < subs.length) {
@@ -89,5 +104,14 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, sent, failed, total: subs.length, mode: 'broadcast' })
+  console.log(`[newsletter] Broadcast complete — sent=${sent} failed=${failed} total=${subs.length}`)
+
+  return NextResponse.json({
+    ok: true,
+    sent,
+    failed,
+    total: subs.length,
+    mode: 'broadcast',
+    firstError: firstError ?? undefined,
+  })
 }

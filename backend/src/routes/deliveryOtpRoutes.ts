@@ -3,8 +3,6 @@ import { authenticate, requireRole } from '../middleware/authMiddleware.js'
 import { AuthRequest } from '../types/index.js'
 import * as orderService from '../services/orderService.js'
 import * as otpService from '../services/otpService.js'
-import * as appwriteEmail from '../services/appwriteEmailService.js'
-import * as smsService from '../services/smsService.js'
 import { sendDeliveryOtpToBuyer } from '../services/deliveryOtpService.js'
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
@@ -28,17 +26,6 @@ async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller'): 
   } catch (err) {
     logger.warn(`[milestones] trigger error for ${userId}: ${err}`)
   }
-}
-
-/** Fetch buyer email + phone from Supabase in one go */
-async function getBuyerContact(buyerId: string): Promise<{ email: string | null; phone: string | null }> {
-  const [profileResult, authResult] = await Promise.all([
-    supabaseAdmin.from('profiles').select('email, phone_number').eq('id', buyerId).single(),
-    supabaseAdmin.auth.admin.getUserById(buyerId),
-  ])
-  const email = profileResult.data?.email ?? authResult.data?.user?.email ?? null
-  const phone = profileResult.data?.phone_number ?? null
-  return { email, phone }
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +84,9 @@ router.post('/:orderId/request', requireRole('admin'), async (req, res, next) =>
 
 // ---------------------------------------------------------------------------
 // POST /api/delivery-otp/:orderId/verify
-// Buyer submits their 6-digit code. Verification method depends on channel.
+// Buyer submits their 6-digit code. Every channel (SMS, email, bell) carries
+// the SAME code — verification is a simple hash check against the stored
+// `otp_hash` regardless of where the buyer pulled it from.
 // ---------------------------------------------------------------------------
 router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, next) => {
   try {
@@ -131,87 +120,21 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
       res.status(400).json({ success: false, message: 'No delivery OTP found for this order. Ask the vendor to resend.' })
       return
     }
-    if (record.used) {
-      res.status(400).json({ success: false, message: 'This OTP has already been used.' })
-      return
-    }
-    if (new Date() > new Date(record.expires_at)) {
+
+    const verifyResult = await otpService.verifyHashOtp(record, otp.trim())
+    if (!verifyResult.success) {
+      const messages: Record<string, string> = {
+        not_found: 'No OTP found. Ask the vendor to resend.',
+        expired: 'OTP has expired. Ask the vendor to generate a new one.',
+        used: 'This OTP has already been used.',
+        invalid: 'Invalid code. Check your email, SMS, or in-app bell and try again.',
+        max_attempts: 'Too many failed attempts. Ask the vendor to generate a new OTP.',
+      }
       res.status(400).json({
         success: false,
-        message: 'OTP has expired. Please ask the vendor to generate a new one.',
-        reason: 'expired',
+        message: messages[verifyResult.reason] ?? 'OTP verification failed.',
+        reason: verifyResult.reason,
       })
-      return
-    }
-
-    let verified = false
-
-    if (record.channel === 'email') {
-      // --- Email-only: verify via Appwrite ---
-      if (!record.appwrite_user_id) {
-        res.status(500).json({ success: false, message: 'OTP record corrupted. Ask the vendor to resend.' })
-        return
-      }
-      const result = await appwriteEmail.verifyDeliveryOtpEmail(record.appwrite_user_id, otp.trim())
-      if (!result.success) {
-        const messages: Record<string, string> = {
-          invalid: 'Invalid code. Check your email and try again.',
-          used: 'This code has already been used.',
-          error: 'Verification failed. Ask the vendor to resend.',
-        }
-        res.status(400).json({
-          success: false,
-          message: messages[result.reason ?? 'error'] ?? 'OTP verification failed.',
-          reason: result.reason,
-        })
-        return
-      }
-      verified = true
-
-    } else if (record.channel === 'sms') {
-      // --- SMS-only: verify by hash ---
-      const result = await otpService.verifyHashOtp(record, otp.trim())
-      if (!result.success) {
-        const messages: Record<string, string> = {
-          not_found: 'No OTP found. Ask the vendor to resend.',
-          expired: 'OTP has expired. Ask the vendor to generate a new one.',
-          used: 'This OTP has already been used.',
-          invalid: 'Invalid code. Check your SMS and try again.',
-          max_attempts: 'Too many failed attempts. Ask the vendor to generate a new OTP.',
-        }
-        res.status(400).json({
-          success: false,
-          message: messages[result.reason] ?? 'OTP verification failed.',
-          reason: result.reason,
-        })
-        return
-      }
-      verified = true
-
-    } else if (record.channel === 'both') {
-      // --- Both channels: accept whichever code is entered ---
-      // Try email (Appwrite) first if available
-      if (record.appwrite_user_id) {
-        const emailResult = await appwriteEmail.verifyDeliveryOtpEmail(record.appwrite_user_id, otp.trim())
-        if (emailResult.success) verified = true
-      }
-      // Try SMS hash if email didn't match (or wasn't used)
-      if (!verified && record.otp_hash) {
-        const smsResult = await otpService.verifyHashOtp(record, otp.trim())
-        if (smsResult.success) verified = true
-      }
-      if (!verified) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid code. Check your email or SMS and try again.',
-          reason: 'invalid',
-        })
-        return
-      }
-    }
-
-    if (!verified) {
-      res.status(400).json({ success: false, message: 'OTP verification failed.' })
       return
     }
 

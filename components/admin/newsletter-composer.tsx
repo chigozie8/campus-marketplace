@@ -9,6 +9,7 @@ export function NewsletterComposer({ activeCount }: { activeCount: number }) {
   const [sending, setSending] = useState<'idle' | 'test' | 'broadcast'>('idle')
   const [result, setResult] = useState<
     | { kind: 'ok'; message: string }
+    | { kind: 'warn'; message: string }
     | { kind: 'err'; message: string }
     | null
   >(null)
@@ -36,16 +37,33 @@ export function NewsletterComposer({ activeCount }: { activeCount: number }) {
       if (!res.ok) {
         setResult({ kind: 'err', message: json.error || 'Failed to send.' })
       } else if (testOnly) {
-        setResult({ kind: 'ok', message: 'Test email sent to your address. Check your inbox.' })
-      } else {
+        setResult({ kind: 'ok', message: 'Test email sent to your address. Check your inbox (and spam folder).' })
+      } else if (json.empty) {
         setResult({
-          kind: 'ok',
-          message: `Sent to ${json.sent} of ${json.total ?? json.sent} subscribers${json.failed ? ` · ${json.failed} failed` : ''}.`,
+          kind: 'warn',
+          message: 'No active subscribers yet — nothing was sent. Once people subscribe from the homepage footer they\'ll appear here.',
+        })
+      } else if (json.sent === 0 && json.failed > 0) {
+        setResult({
+          kind: 'err',
+          message: `All ${json.failed} sends failed. ${json.firstError ? `First error: ${json.firstError}` : ''} Check the server logs for details.`,
+        })
+      } else if (json.failed > 0) {
+        setResult({
+          kind: 'warn',
+          message: `Sent to ${json.sent} of ${json.total} — ${json.failed} failed.${json.firstError ? ` First error: ${json.firstError}` : ''}`,
         })
         if (json.sent > 0) {
           setSubject('')
           setBodyText('')
         }
+      } else {
+        setResult({
+          kind: 'ok',
+          message: `Sent to ${json.sent} of ${json.total} subscribers.`,
+        })
+        setSubject('')
+        setBodyText('')
       }
     } catch {
       setResult({ kind: 'err', message: 'Network error. Please try again.' })
@@ -53,6 +71,13 @@ export function NewsletterComposer({ activeCount }: { activeCount: number }) {
       setSending('idle')
     }
   }
+
+  const resultStyles =
+    result?.kind === 'ok'
+      ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+      : result?.kind === 'warn'
+      ? 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+      : 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300'
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
@@ -89,11 +114,7 @@ export function NewsletterComposer({ activeCount }: { activeCount: number }) {
       </div>
 
       {result && (
-        <div className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
-          result.kind === 'ok'
-            ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-            : 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300'
-        }`}>
+        <div className={`flex items-start gap-2 p-3 rounded-lg text-sm ${resultStyles}`}>
           {result.kind === 'ok' ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
           <p>{result.message}</p>
         </div>

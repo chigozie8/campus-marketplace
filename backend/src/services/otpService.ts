@@ -21,7 +21,6 @@ export interface OtpRecord {
   order_id: string
   phone: string | null
   otp_hash: string | null
-  appwrite_user_id: string | null
   channel: OtpChannel
   expires_at: string
   attempts: number
@@ -34,7 +33,6 @@ interface CreateOtpRecordOptions {
   channel: OtpChannel
   phone?: string
   otpHash?: string
-  appwriteUserId?: string
 }
 
 export async function createOtpRecord(opts: CreateOtpRecordOptions): Promise<void> {
@@ -48,7 +46,6 @@ export async function createOtpRecord(opts: CreateOtpRecordOptions): Promise<voi
     channel: opts.channel,
     phone: opts.phone ?? null,
     otp_hash: opts.otpHash ?? null,
-    appwrite_user_id: opts.appwriteUserId ?? null,
     expires_at: expiresAt,
   })
 

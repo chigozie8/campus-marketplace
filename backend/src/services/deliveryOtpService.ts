@@ -1,6 +1,5 @@
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import * as otpService from './otpService.js'
-import * as appwriteEmail from './appwriteEmailService.js'
 import * as smsService from './smsService.js'
 import { notify, notifyAllAdmins } from './notificationService.js'
 import logger from '../utils/logger.js'
@@ -11,14 +10,60 @@ export type SendDeliveryOtpResult = {
   reason?: string
 }
 
-async function getBuyerContact(buyerId: string): Promise<{ email: string | null; phone: string | null }> {
+async function getBuyerContact(buyerId: string): Promise<{
+  email: string | null
+  phone: string | null
+  name: string | null
+}> {
   const [profileResult, authResult] = await Promise.all([
-    supabaseAdmin.from('profiles').select('email, phone_number').eq('id', buyerId).single(),
+    supabaseAdmin.from('profiles').select('email, phone_number, full_name').eq('id', buyerId).single(),
     supabaseAdmin.auth.admin.getUserById(buyerId),
   ])
   const email = profileResult.data?.email ?? authResult.data?.user?.email ?? null
   const phone = profileResult.data?.phone_number ?? null
-  return { email, phone }
+  const name =
+    profileResult.data?.full_name ??
+    (authResult.data?.user?.user_metadata?.full_name as string | undefined) ??
+    null
+  return { email, phone, name }
+}
+
+/**
+ * POST the OTP to our Next.js internal email endpoint. Keeps the backend free
+ * of email-template code; the Next.js side owns Mailtrap + the branded layout.
+ */
+async function sendOtpEmailViaApp(args: {
+  to: string
+  name: string | null
+  code: string
+  orderShortId: string
+}): Promise<boolean> {
+  const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
+  const internalKey = process.env.INTERNAL_API_KEY ?? ''
+  if (!internalKey) {
+    logger.error('[deliveryOtp] INTERNAL_API_KEY not set — cannot send delivery OTP email')
+    return false
+  }
+  try {
+    const res = await fetch(`${appUrl}/api/internal/send-delivery-otp-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': internalKey,
+      },
+      body: JSON.stringify(args),
+      signal: AbortSignal.timeout(8000),
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      logger.error(`[deliveryOtp] Email send failed: HTTP ${res.status} ${body}`)
+      return false
+    }
+    return true
+  } catch (err) {
+    logger.error(`[deliveryOtp] Email send threw: ${err}`)
+    return false
+  }
 }
 
 /**
@@ -26,8 +71,12 @@ async function getBuyerContact(buyerId: string): Promise<{ email: string | null;
  * up to THREE independent channels:
  *
  *   1. SMS  — provider call (best effort)
- *   2. Email — Appwrite Email Token (best effort, generates its own code)
- *   3. In-app bell notification — ALWAYS fired, contains the same code as SMS
+ *   2. Email — branded Mailtrap email containing the SAME raw code (best effort)
+ *   3. In-app bell notification — ALWAYS fired, contains the same code
+ *
+ * All three channels carry the SAME 6-digit code, which is hashed and stored
+ * in `delivery_otps`. The verify endpoint accepts that code regardless of
+ * which channel the buyer pulled it from.
  *
  * The in-app bell is the guaranteed fallback: it works even when both email
  * and SMS providers are down. The buyer is logged in to confirm delivery
@@ -46,17 +95,16 @@ export async function sendDeliveryOtpToBuyer(
   buyerId: string,
   preferredChannel: otpService.OtpChannel = 'both',
 ): Promise<SendDeliveryOtpResult> {
-  const { email, phone } = await getBuyerContact(buyerId)
+  const { email, phone, name } = await getBuyerContact(buyerId)
 
   const wantEmail = (preferredChannel === 'email' || preferredChannel === 'both') && !!email
   const wantSms = (preferredChannel === 'sms' || preferredChannel === 'both') && !!phone
 
-  // Always generate a raw OTP — used by SMS, the in-app bell notification,
-  // and stored (hashed) so the verify endpoint accepts this code regardless
-  // of which external channel(s) actually delivered.
+  // Always generate a raw OTP — used by SMS, the Mailtrap email, and the
+  // in-app bell. Stored hashed so the verify endpoint accepts this code from
+  // whichever surface the buyer grabbed it from.
   const rawOtp = otpService.generateRawOtp()
   const otpHash = otpService.hashRawOtp(rawOtp)
-  const appwriteUserId = orderId
   const shortOrderId = orderId.split('-')[0].toUpperCase()
 
   let smsSent = false
@@ -68,7 +116,12 @@ export async function sendDeliveryOtpToBuyer(
   }
 
   if (wantEmail) {
-    emailSent = await appwriteEmail.sendDeliveryOtpEmail(appwriteUserId, email!, orderId)
+    emailSent = await sendOtpEmailViaApp({
+      to: email!,
+      name,
+      code: rawOtp,
+      orderShortId: shortOrderId,
+    })
     if (!emailSent) logger.warn(`[deliveryOtp] Email failed for order ${orderId}`)
   }
 
@@ -79,7 +132,6 @@ export async function sendDeliveryOtpToBuyer(
     channel: 'both',
     phone: phone ?? undefined,
     otpHash,
-    appwriteUserId: wantEmail ? appwriteUserId : undefined,
   })
 
   // Channel #3 — always-on in-app bell. Guaranteed delivery surface.
