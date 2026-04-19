@@ -273,19 +273,32 @@ export function AdminOrdersTable({ orders }: Props) {
         </div>
       </div>
 
-      {/* Detail panel */}
+      {/* Detail panel — sticky side panel on desktop, full-screen drawer on mobile/tablet */}
       {selected && (
-        <div className="hidden lg:flex flex-col w-[340px] flex-shrink-0 bg-card border border-border rounded-2xl overflow-hidden h-fit sticky top-4">
+        <>
+          {/* Mobile/tablet backdrop */}
+          <div
+            onClick={() => setSelected(null)}
+            className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+        <div className="
+          flex flex-col bg-card border border-border overflow-hidden
+          fixed inset-x-0 bottom-0 z-50 max-h-[92vh] rounded-t-2xl shadow-2xl
+          lg:static lg:z-auto lg:max-h-none lg:rounded-2xl lg:shadow-none
+          lg:w-[340px] lg:flex-shrink-0 lg:h-fit lg:sticky lg:top-4
+        ">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h3 className="font-black text-sm text-foreground">Order Details</h3>
             <button
               onClick={() => setSelected(null)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="p-5 space-y-4 overflow-y-auto max-h-[80vh]">
+          <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(92vh-60px)] lg:max-h-[80vh]">
             {/* Product */}
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-muted overflow-hidden flex-shrink-0">
@@ -464,6 +477,7 @@ export function AdminOrdersTable({ orders }: Props) {
             </div>
           </div>
         </div>
+        </>
       )}
     </div>
   )
