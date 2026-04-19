@@ -91,7 +91,7 @@ export async function POST(
     )
   }
 
-  // Email the user the new password. We don't fail the request if Resend is down —
+  // Email the user the new password. We don't fail the request if Mailtrap is down —
   // the admin still gets the password back in the response and can share it manually.
   // sendAdminPasswordResetEmail returns { ok, error } so we report the real status
   // (the helper already swallows internal exceptions).

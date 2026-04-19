@@ -7,7 +7,7 @@ const adminClient = createServiceClient()!
 
 /**
  * Called from the login page right after a successful sign-in.
- * Fires off a Resend email to the user so they're notified of the new sign-in.
+ * Fires off an email via Mailtrap to the user so they're notified of the new sign-in.
  *
  * Auth-protected: only an authenticated user can trigger an alert for themselves.
  * (We rely on the server-side session, NOT a userId from the client body.)

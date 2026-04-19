@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, sent: 0, failed: 0, mode: 'broadcast' })
   }
 
-  // Send in waves so we don't blow Resend's per-second rate limit.
+  // Send in waves so we don't blow Mailtrap's per-second rate limit.
   const BATCH = 10
   let sent = 0
   let failed = 0
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
       if (r.status === 'fulfilled' && r.value.ok) sent++
       else failed++
     }
-    // Tiny pause between waves — Resend free tier is 2 req/s, paid is 10 req/s.
+    // Tiny pause between waves — keeps us comfortably under Mailtrap's send rate limits.
     if (i + BATCH < subs.length) {
       await new Promise((res) => setTimeout(res, 1100))
     }

@@ -14,7 +14,7 @@ function db() {
 export async function POST(req: Request) {
   try {
     // Rate limit: 5 signups per IP per 10 minutes — stops subscription bombing
-    // and protects our Resend quota. Falls open if Upstash is unavailable.
+    // and protects our Mailtrap send quota. Falls open if Upstash is unavailable.
     const ip = clientIp(req)
     const { allowed } = await rateLimit({
       key: `newsletter:${ip}`,
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
       )
     }
 
-    // Welcome email — only on first subscribe. Fire-and-forget so a Resend
+    // Welcome email — only on first subscribe. Fire-and-forget so a Mailtrap
     // outage never blocks the form. We've already persisted the email.
     if (isNew) {
       sendNewsletterWelcomeEmail(email, savedFirstName).catch((e) =>

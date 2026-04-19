@@ -40,7 +40,7 @@ export default async function AdminNewsletterPage() {
       <div>
         <h1 className="text-2xl font-black tracking-tight text-foreground">Newsletter</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Write a newsletter and send it to every subscriber via Resend. Each email is personalised with the subscriber's first name and includes a one-click unsubscribe link.
+          Write a newsletter and send it to every subscriber via Mailtrap. Each email is personalised with the subscriber's first name and includes a one-click unsubscribe link.
         </p>
       </div>
 
