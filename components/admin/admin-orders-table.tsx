@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Search, Package, Eye, X, Loader2, Download, CheckCircle2, RotateCcw } from 'lucide-react'
+import { Search, Package, Eye, X, Loader2, Download, CheckCircle2, RotateCcw, KeyRound } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -50,6 +50,26 @@ export function AdminOrdersTable({ orders }: Props) {
   const [refundTo, setRefundTo] = useState<'buyer' | 'seller'>('buyer')
   const [refundReason, setRefundReason] = useState('')
   const [refunding, setRefunding] = useState(false)
+  const [sendingOtp, setSendingOtp] = useState(false)
+
+  async function handleSendDeliveryOtp(orderId: string) {
+    setSendingOtp(true)
+    try {
+      const res = await fetch(`/api/backend/delivery-otp/${orderId}/request?channel=both`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to send delivery code')
+      }
+      toast.success(data.message ?? 'Delivery code sent to buyer')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send delivery code')
+    } finally {
+      setSendingOtp(false)
+    }
+  }
 
   const filtered = orders.filter(o => {
     const q = search.toLowerCase()
@@ -317,6 +337,26 @@ export function AdminOrdersTable({ orders }: Props) {
             )}
 
             <div className="h-px bg-border" />
+
+            {/* Send / resend delivery OTP — only meaningful once shipped */}
+            {(selected.status === 'shipped' || selected.status === 'delivered') && (
+              <div className="rounded-xl border border-blue-200 dark:border-blue-800/40 bg-blue-50 dark:bg-blue-950/20 p-3">
+                <p className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mb-2">Delivery Code</p>
+                <p className="text-[11px] text-blue-800 dark:text-blue-300 mb-3 leading-relaxed">
+                  Generate a new code and send it to the buyer via email, SMS, and their in-app bell. Use this if the buyer says they never received the original code.
+                </p>
+                <button
+                  onClick={() => handleSendDeliveryOtp(selected.id)}
+                  disabled={sendingOtp}
+                  className="flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all disabled:opacity-50"
+                >
+                  {sendingOtp
+                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending…</>
+                    : <><KeyRound className="w-3.5 h-3.5" /> Send Delivery Code to Buyer</>
+                  }
+                </button>
+              </div>
+            )}
 
             {/* Manual completion for delivered orders (dispute resolution) */}
             {selected.status === 'delivered' && (
