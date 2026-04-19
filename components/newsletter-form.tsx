@@ -1,35 +1,88 @@
 'use client'
 
-import { useState } from 'react'
-import { Send, CheckCircle2, Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Send, CheckCircle2, Loader2, Lock, Mail } from 'lucide-react'
+import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface NewsletterFormProps {
   className?: string
   variant?: 'inline' | 'card'
 }
 
+type AuthState =
+  | { kind: 'loading' }
+  | { kind: 'guest' }
+  | { kind: 'user'; email: string; firstName: string | null }
+
 export function NewsletterForm({ className = '', variant = 'inline' }: NewsletterFormProps) {
-  const [firstName, setFirstName] = useState('')
-  const [email, setEmail] = useState('')
+  const [auth, setAuth] = useState<AuthState>({ kind: 'loading' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
+  useEffect(() => {
+    let cancelled = false
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient()
+    } catch (e) {
+      // Supabase env missing or misconfigured — degrade to guest so the user
+      // gets a clear "log in" CTA instead of a blank/broken form.
+      console.error('[newsletter-form] supabase client init failed', e)
+      setAuth({ kind: 'guest' })
+      return
+    }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (cancelled) return
+      if (!user?.email) {
+        setAuth({ kind: 'guest' })
+        return
+      }
+      const meta = (user.user_metadata || {}) as Record<string, unknown>
+      const fullName =
+        (typeof meta.full_name === 'string' && meta.full_name) ||
+        (typeof meta.name === 'string' && meta.name) ||
+        ''
+      const firstName = fullName.trim().split(/\s+/)[0] || null
+      setAuth({ kind: 'user', email: user.email, firstName })
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return
+      const user = session?.user
+      if (!user?.email) { setAuth({ kind: 'guest' }); return }
+      const meta = (user.user_metadata || {}) as Record<string, unknown>
+      const fullName =
+        (typeof meta.full_name === 'string' && meta.full_name) ||
+        (typeof meta.name === 'string' && meta.name) ||
+        ''
+      const firstName = fullName.trim().split(/\s+/)[0] || null
+      setAuth({ kind: 'user', email: user.email, firstName })
+    })
+    return () => { cancelled = true; sub.subscription.unsubscribe() }
+  }, [])
+
+  function handleGuestClick(e: React.MouseEvent | React.FormEvent) {
+    e.preventDefault()
+    toast.error('Please log in to subscribe to our newsletter — we only allow verified accounts to subscribe to keep things spam-free. 🛡️', {
+      action: { label: 'Log in', onClick: () => { window.location.href = '/auth/login' } },
+    })
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
+    if (auth.kind !== 'user') { handleGuestClick(e); return }
     setStatus('loading')
     try {
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName }),
+        body: JSON.stringify({ firstName: auth.firstName }),
       })
       const data = await res.json()
       if (res.ok) {
         setStatus('success')
         setMessage(data.message || 'Subscribed! Check your email.')
-        setEmail('')
-        setFirstName('')
       } else {
         setStatus('error')
         setMessage(data.error || 'Something went wrong.')
@@ -49,64 +102,106 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
     )
   }
 
+  // ─── CARD VARIANT ──────────────────────────────────────────────────────────
   if (variant === 'card') {
     return (
       <div className={`rounded-2xl bg-[#0a0a0a] p-6 text-white ${className}`}>
         <h3 className="text-lg font-black mb-1">Stay in the loop</h3>
         <p className="text-sm text-white/60 mb-4">
-          exclusive deals, new features & seller tips — straight to your inbox.
+          Exclusive deals, new features &amp; seller tips — straight to your inbox.
         </p>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            required
-            className="flex-1 bg-white/10 border border-white/20 text-white placeholder:text-white/40 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#16a34a] transition-colors"
-          />
-          <button
-            type="submit"
-            disabled={status === 'loading'}
-            className="flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60 flex-shrink-0"
-          >
-            {status === 'loading' ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
+
+        {auth.kind === 'loading' && (
+          <div className="flex items-center gap-2 text-white/60 text-sm py-2">
+            <Loader2 className="w-4 h-4 animate-spin" /> Checking your account…
+          </div>
+        )}
+
+        {auth.kind === 'guest' && (
+          <div>
+            <Link
+              href="/auth/login"
+              onClick={handleGuestClick}
+              className="flex items-center justify-center gap-2 w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-3 rounded-xl text-sm transition-colors"
+            >
+              <Lock className="w-4 h-4" />
+              Log in to subscribe
+            </Link>
+            <p className="mt-2 text-xs text-white/50 text-center">
+              We only accept subscriptions from verified accounts to prevent spam.
+            </p>
+          </div>
+        )}
+
+        {auth.kind === 'user' && (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/15 rounded-xl px-3 py-2.5">
+              <Mail className="w-4 h-4 text-white/60 flex-shrink-0" />
+              <span className="text-sm text-white/90 truncate" title={auth.email}>{auth.email}</span>
+            </div>
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="flex items-center justify-center gap-2 w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60"
+            >
+              {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Subscribe
+            </button>
+            {status === 'error' && (
+              <p className="text-xs text-red-400">{message}</p>
             )}
-            Subscribe
-          </button>
-        </form>
-        {status === 'error' && (
-          <p className="mt-2 text-xs text-red-400">{message}</p>
+          </form>
         )}
       </div>
     )
   }
 
+  // ─── INLINE VARIANT ────────────────────────────────────────────────────────
+  if (auth.kind === 'loading') {
+    return (
+      <div className={`flex items-center gap-2 text-white/60 text-sm ${className}`}>
+        <Loader2 className="w-4 h-4 animate-spin" /> Checking your account…
+      </div>
+    )
+  }
+
+  if (auth.kind === 'guest') {
+    return (
+      <div className={`flex flex-col gap-2 ${className}`}>
+        <Link
+          href="/auth/login"
+          onClick={handleGuestClick}
+          className="flex items-center justify-center gap-2 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all hover:scale-105 active:scale-95"
+        >
+          <Lock className="w-4 h-4" />
+          Log in to subscribe
+        </Link>
+        <p className="text-xs text-white/60">
+          Verified accounts only — keeps our list spam-free.
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <form onSubmit={handleSubmit} className={`flex gap-2 ${className}`}>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        required
-        className="flex-1 bg-white/10 border border-white/20 text-white placeholder:text-white/50 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#16a34a] transition-colors min-w-0"
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-60 flex-shrink-0"
-      >
-        {status === 'loading' ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Send className="w-4 h-4" />
-        )}
-        <span className="hidden sm:inline">Subscribe</span>
-      </button>
+    <form onSubmit={handleSubmit} className={`flex flex-col gap-2 ${className}`}>
+      <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-3 py-2.5">
+          <Mail className="w-4 h-4 text-white/60 flex-shrink-0" />
+          <span className="text-sm text-white truncate" title={auth.email}>{auth.email}</span>
+        </div>
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-60 flex-shrink-0"
+        >
+          {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          <span className="hidden sm:inline">Subscribe</span>
+        </button>
+      </div>
+      {status === 'error' && (
+        <p className="text-xs text-red-400">{message}</p>
+      )}
     </form>
   )
 }
