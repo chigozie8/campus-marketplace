@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 // In production (Vercel), BACKEND_URL points to the Railway backend.
 // In development (Replit), fall back to localhost:3001.
@@ -12,8 +13,26 @@ async function proxy(req: NextRequest, { params }: { params: Promise<{ path: str
   const target = `${BACKEND_INTERNAL}/api/${pathStr}${search}`
 
   const headers = new Headers()
+
+  // Forward an explicit Authorization header if the caller already set one
+  // (e.g. server-to-server). Otherwise, read the Supabase session from the
+  // browser cookies and forward the access token as a Bearer — this is what
+  // makes admin/buyer/seller UI buttons work without each component having to
+  // manually attach the token.
   const auth = req.headers.get('authorization')
-  if (auth) headers.set('authorization', auth)
+  if (auth) {
+    headers.set('authorization', auth)
+  } else {
+    try {
+      const supabase = await createClient()
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (token) headers.set('authorization', `Bearer ${token}`)
+    } catch {
+      // No session available — request will be rejected by the backend, which
+      // is the correct behaviour for unauthenticated callers.
+    }
+  }
 
   const contentType = req.headers.get('content-type')
   if (contentType) headers.set('content-type', contentType)
