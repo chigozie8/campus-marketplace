@@ -2,6 +2,7 @@
 
 import { Shield, Lock, RotateCcw, BadgeCheck, Landmark, Headphones, Phone, MessageCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { Reveal } from '@/components/ui/reveal'
 
 const TRUST_PILLARS = [
   {
@@ -131,7 +132,7 @@ export function TrustSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <Reveal as="div" className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 mb-4">
             <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">
@@ -148,10 +149,10 @@ export function TrustSection() {
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Trust is earned, not demanded. Every naira on VendoorX is protected from the moment you pay to the moment your item arrives — or you get it back, period.
           </p>
-        </div>
+        </Reveal>
 
         {/* Escrow flow explainer */}
-        <div className="mb-16 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-white dark:bg-gray-900 p-6 sm:p-8 shadow-sm">
+        <Reveal as="div" className="mb-16 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-white dark:bg-gray-900 p-6 sm:p-8 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center">
               <Landmark className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -175,10 +176,10 @@ export function TrustSection() {
             <span className="font-bold text-emerald-600 dark:text-emerald-400">100% refund</span>{' '}
             — no questions asked, no drama.
           </p>
-        </div>
+        </Reveal>
 
         {/* Trust pillars grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+        <Reveal as="div" stagger staggerAmount={0.08} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
           {TRUST_PILLARS.map(({ icon: Icon, color, bg, border, title, body, badge, badgeColor }) => (
             <div
               key={title}
@@ -198,7 +199,7 @@ export function TrustSection() {
               </div>
             </div>
           ))}
-        </div>
+        </Reveal>
 
         {/* Compliance badge strip */}
         <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-8 mb-12">

@@ -1,6 +1,7 @@
 'use client'
 
 import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { Reveal } from '@/components/ui/reveal'
 
 const STEPS = [
   {
@@ -43,7 +44,7 @@ export function HowItWorksSection() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16 sm:mb-20">
+        <Reveal as="div" className="text-center mb-16 sm:mb-20">
           <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <CheckCircle2 className="w-4 h-4" />
             How it works
@@ -55,10 +56,10 @@ export function HowItWorksSection() {
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
             No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale — powered by AI on WhatsApp.
           </p>
-        </div>
+        </Reveal>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Reveal as="div" stagger staggerAmount={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((step, index) => {
             const Icon = step.icon
             return (
@@ -95,7 +96,7 @@ export function HowItWorksSection() {
               </div>
             )
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   )
