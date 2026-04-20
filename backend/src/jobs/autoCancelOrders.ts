@@ -3,11 +3,11 @@ import { notify } from '../services/notificationService.js'
 import { reversePendingCredit } from '../services/walletService.js'
 import logger from '../utils/logger.js'
 
-const CANCEL_AFTER_DAYS = 5
+const CANCEL_AFTER_HOURS = 24
 
 async function runAutoCancel() {
   try {
-    const cutoff = new Date(Date.now() - CANCEL_AFTER_DAYS * 24 * 60 * 60 * 1000).toISOString()
+    const cutoff = new Date(Date.now() - CANCEL_AFTER_HOURS * 60 * 60 * 1000).toISOString()
 
     // Find paid orders older than CANCEL_AFTER_DAYS with no ship date
     const { data: orders, error } = await supabaseAdmin
@@ -51,12 +51,12 @@ async function runAutoCancel() {
         const productTitle = (order.products as any)?.title ?? 'your item'
         const shortId = order.id.split('-')[0].toUpperCase()
 
-        // Notify buyer — refund will be processed
+        // Notify buyer — payment reversed
         await notify({
           userId: order.buyer_id,
           type: 'order_cancelled',
-          title: 'Order Auto-Cancelled',
-          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${CANCEL_AFTER_DAYS} days. A refund is being processed.`,
+          title: 'Payment Reversed',
+          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${CANCEL_AFTER_HOURS} hours. Your payment has been reversed and refunded to your wallet.`,
           data: { url: '/dashboard/orders', orderId: order.id },
         })
 
@@ -64,8 +64,8 @@ async function runAutoCancel() {
         await notify({
           userId: order.seller_id,
           type: 'order_cancelled',
-          title: 'Order Cancelled (Not Shipped)',
-          body: `Order #${shortId} for "${productTitle}" was automatically cancelled because it was not shipped within ${CANCEL_AFTER_DAYS} days of payment.`,
+          title: 'Order Cancelled — Payment Reversed',
+          body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${CANCEL_AFTER_HOURS} hours of payment.`,
           data: { url: '/seller-orders', orderId: order.id },
         })
 
@@ -79,8 +79,8 @@ async function runAutoCancel() {
   }
 }
 
-export function startAutoCancelJob(intervalMs = 6 * 60 * 60 * 1000) {
-  logger.info('[autoCancelOrders] Starting auto-cancel job (every 6 hours)')
+export function startAutoCancelJob(intervalMs = 60 * 60 * 1000) {
+  logger.info('[autoCancelOrders] Starting auto-cancel job (every 1 hour)')
   runAutoCancel()
   return setInterval(runAutoCancel, intervalMs)
 }

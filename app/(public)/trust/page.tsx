@@ -59,7 +59,7 @@ const ESCROW_STEPS = [
     borderColor: 'border-purple-200 dark:border-purple-800',
     bg: 'bg-purple-50 dark:bg-purple-950/30',
     title: 'You Confirm Safe Receipt',
-    desc: 'Once you receive your item, you go to Dashboard → Orders and tap "Confirm Delivery." This triggers the escrow release. You have 48 hours to raise any issues first.',
+    desc: 'Once you receive your item, you go to Dashboard → Orders and tap "Confirm Delivery." This triggers the escrow release. You have 24 hours to raise any issues first.',
   },
   {
     step: '04',
@@ -69,7 +69,7 @@ const ESCROW_STEPS = [
     borderColor: 'border-orange-200 dark:border-orange-800',
     bg: 'bg-orange-50 dark:bg-orange-950/30',
     title: 'Escrow Releases to Seller',
-    desc: 'After you confirm delivery (or 48 hours with no dispute), we release funds to the seller\'s wallet. If there\'s a dispute, funds are held until resolved.',
+    desc: 'After you confirm delivery (or 24 hours with no dispute), we release funds to the seller\'s wallet. If there\'s a dispute, funds are held until resolved.',
   },
 ]
 
@@ -127,18 +127,18 @@ const GUARANTEES = [
 const REFUND_CASES = [
   'Item was never delivered after payment',
   'Item is significantly different from the listing',
-  'Item arrived damaged (reported within 48 hours)',
+  'Item arrived damaged (reported within 24 hours)',
   'Seller is unresponsive for 72+ hours after payment',
   'Counterfeit or fake product delivered',
   'Order cancelled before shipment confirmation',
 ]
 
 const TIMELINES = [
-  { label: 'Dispute window (after delivery)', value: '48 hours' },
+  { label: 'Dispute window (after delivery)', value: '24 hours' },
   { label: 'First response from support', value: '< 2 hours' },
   { label: 'Dispute resolution target', value: '72 hours' },
   { label: 'Refund processing time', value: '3–5 business days' },
-  { label: 'Auto escrow release (no dispute)', value: '48 hrs after delivery' },
+  { label: 'Auto escrow release (no dispute)', value: '24 hrs after delivery' },
 ]
 
 export default function TrustPage() {

@@ -288,7 +288,7 @@ export const DEFAULT_HELP_CATEGORIES: HelpCategory[] = [
       { q: 'How do I find products on VendoorX?', a: 'Use the search bar at the top of the marketplace page. You can filter by category, price range, city, and condition. The "Nearest" filter shows listings closest to your current location.' },
       { q: 'How do I contact a seller?', a: 'Click the "Chat on WhatsApp" button on any listing. This opens WhatsApp with a pre-filled message to the seller. You can also make an offer directly on the listing page.' },
       { q: 'Is it safe to buy on VendoorX?', a: 'Yes! All sellers are verified with email addresses. For checkout payments, funds are held in escrow and only released when you confirm delivery. Always check seller ratings before buying.' },
-      { q: 'What if a product is not as described?', a: 'You have 48 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
+      { q: 'What if a product is not as described?', a: 'You have 24 hours after delivery to raise a dispute. Go to your order, click "Report a Problem," and our team will mediate. If the dispute is valid, you receive a full refund.' },
     ],
   },
   {
@@ -307,7 +307,7 @@ export const DEFAULT_HELP_CATEGORIES: HelpCategory[] = [
     icon: 'card',
     color: 'purple',
     questions: [
-      { q: 'How does checkout payment work?', a: "When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 48 hours with no dispute), funds are released to the seller's wallet minus the ₦100 VAT." },
+      { q: 'How does checkout payment work?', a: "When a buyer pays via Paystack, the money goes into escrow. After delivery is confirmed (or 24 hours with no dispute), funds are released to the seller's wallet minus the ₦100 VAT." },
       { q: 'How do I withdraw my wallet balance?', a: 'Go to Dashboard → Payouts. Connect your bank account, then click "Withdraw." Transfers are processed instantly via Paystack. Minimum withdrawal is ₦500.' },
       { q: 'What payment methods are accepted?', a: 'Paystack supports debit cards, bank transfers, USSD, and mobile money. For WhatsApp deals, payment is arranged directly between buyer and seller.' },
       { q: 'Is my payment information secure?', a: 'All payments are processed by Paystack, a PCI-DSS certified payment provider. VendoorX never stores your card details.' },

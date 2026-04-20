@@ -162,7 +162,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   },
   {
     patterns: ['return.*item', 'return.*product', 'send.*back', 'return.*policy'],
-    answer: "Here's our return policy 📦\n\n**Returns accepted when:**\n• Item is significantly different from the listing description\n• Item is damaged or defective\n• Wrong item was sent\n\n**Process:**\n1. Open a dispute within **48 hours** of receiving the item\n2. Provide photos as evidence\n3. Our team will mediate between you and the seller\n4. If approved, the seller arranges return pickup or you send it back\n5. Refund is processed once item is confirmed returned\n\nFor perishables (food items), please inspect on delivery!",
+    answer: "Here's our return policy 📦\n\n**Returns accepted when:**\n• Item is significantly different from the listing description\n• Item is damaged or defective\n• Wrong item was sent\n\n**Process:**\n1. Open a dispute within **24 hours** of receiving the item\n2. Provide photos as evidence\n3. Our team will mediate between you and the seller\n4. If approved, the seller arranges return pickup or you send it back\n5. Refund is processed once item is confirmed returned\n\nFor perishables (food items), please inspect on delivery!",
   },
 
   // ── Social Media Integration ──
@@ -388,7 +388,7 @@ const FAQ: Array<{ patterns: string[]; answer: string }> = [
   // ── Wrong / Damaged Item ──
   {
     patterns: ['wrong.*item', 'different.*item', 'not.*what.*order', 'received.*wrong', 'damaged.*item', 'broken.*item', 'item.*damaged', 'item.*broken', 'defective.*product'],
-    answer: "Received the wrong or damaged item? That's unacceptable and we'll fix it! 😤\n\n**Act quickly — within 48 hours of delivery:**\n1. Take clear photos of what you received\n2. Go to **Dashboard → Orders → Report Issue**\n3. Describe the problem and upload your photos\n4. Our team reviews within 24 hours\n\nYou're entitled to either:\n• ✅ The correct item sent to you\n• 💰 A full refund\n\nFor urgent cases, message us directly on WhatsApp **+1 (579) 258-3013** with photos — we'll fast-track your case! 🚀",
+    answer: "Received the wrong or damaged item? That's unacceptable and we'll fix it! 😤\n\n**Act quickly — within 24 hours of delivery:**\n1. Take clear photos of what you received\n2. Go to **Dashboard → Orders → Report Issue**\n3. Describe the problem and upload your photos\n4. Our team reviews within 24 hours\n\nYou're entitled to either:\n• ✅ The correct item sent to you\n• 💰 A full refund\n\nFor urgent cases, message us directly on WhatsApp **+1 (579) 258-3013** with photos — we'll fast-track your case! 🚀",
   },
 
   // ── Price Change After Order ──

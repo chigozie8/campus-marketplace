@@ -2,7 +2,7 @@ import { supabaseAdmin } from '../config/supabaseClient.js'
 import * as walletService from '../services/walletService.js'
 import logger from '../utils/logger.js'
 
-const RELEASE_AFTER_HOURS = 48
+const RELEASE_AFTER_HOURS = 24
 
 async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller' | 'both') {
   try {
@@ -79,7 +79,7 @@ export async function runAutoRelease() {
         await supabaseAdmin.from('notifications').insert({
           user_id: order.seller_id,
           title: 'Payment Released',
-          body: `Your payment for order #${order.id.split('-')[0]} has been automatically released after 48 hours.`,
+          body: `Your payment for order #${order.id.split('-')[0]} has been automatically released after ${RELEASE_AFTER_HOURS} hours.`,
           type: 'system',
         }).catch(() => {})
 

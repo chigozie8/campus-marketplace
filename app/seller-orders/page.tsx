@@ -16,7 +16,6 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { TrustBadge } from '@/components/TrustBadge'
 import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
 import { OrderChat } from '@/components/features/order-chat'
-import { LocationTracker } from '@/components/features/location-tracker'
 
 async function getToken() {
   const supabase = createClient()
@@ -154,7 +153,7 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
               </p>
               <p className="text-[11px] text-teal-700/80 dark:text-teal-400/80 leading-relaxed">
                 The buyer received their delivery code by email and SMS when you marked this shipped.
-                Your money is released the moment they confirm receipt — or automatically after 48 hours if they don&apos;t.
+                Your money is released the moment they confirm receipt — or automatically after 24 hours if they don&apos;t.
               </p>
             </div>
           </div>
@@ -295,7 +294,6 @@ export default function SellerOrdersPage() {
             <p className="text-xs text-muted-foreground">Manage orders for your listings</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <LocationTracker showBadge mandatory pageLabel="Seller Orders" />
             <button
               onClick={() => refetch()}
               className="p-2 rounded-xl hover:bg-muted transition-colors"
@@ -390,7 +388,7 @@ export default function SellerOrdersPage() {
             <div>
               <p className="text-sm font-bold text-foreground mb-1">Escrow Protection</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                All payments are held in escrow. Mark orders as <strong>Shipped</strong> then <strong>Delivered</strong> — buyers confirm receipt to release your funds. If a buyer doesn't confirm within 48 hours of delivery, funds are automatically released to you.
+                All payments are held in escrow. Mark orders as <strong>Shipped</strong> then <strong>Delivered</strong> — buyers confirm receipt to release your funds. If a buyer doesn't confirm within 24 hours of delivery, funds are automatically released to you.
               </p>
             </div>
           </div>

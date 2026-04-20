@@ -120,7 +120,7 @@ export function OrderStatusTracker({ status, compact = false }: OrderStatusTrack
         <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
           <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-            <span className="font-bold">Item delivered.</span> Escrow will auto-release to the seller in 48 hours if no dispute is raised. Happy with your order? Confirm delivery to release payment now.
+            <span className="font-bold">Item delivered.</span> Escrow will auto-release to the seller in 24 hours if no dispute is raised. Happy with your order? Confirm delivery to release payment now.
           </p>
         </div>
       )}

@@ -2,7 +2,7 @@
 // We hit the REST endpoint directly with fetch() so no SDK is needed.
 const MAILTRAP_TOKEN = process.env.MAILTRAP_API_TOKEN
 const MAILTRAP_ENDPOINT = 'https://send.api.mailtrap.io/api/send'
-const FROM_EMAIL = 'notifications@vendoorx.ng'
+const FROM_EMAIL = process.env.MAILTRAP_SENDER_EMAIL || 'notifications@vendoorx.ng'
 const FROM_NAME = 'VendoorX'
 const SITE_URL = 'https://vendoorx.ng'
 

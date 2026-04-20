@@ -94,7 +94,7 @@ export function buildReturnRefund(): string {
     `↩️ *Returns & Refunds*\n\n` +
     `We've got you covered! Here's how it works:\n\n` +
     `• Your payment is held in *escrow* until you confirm delivery\n` +
-    `• If there's an issue, raise a dispute within *48 hours* of delivery\n` +
+    `• If there's an issue, raise a dispute within *24 hours* of delivery\n` +
     `• Our team reviews and resolves within *24–48 hours*\n\n` +
     `To raise a dispute:\n` +
     `🔗 ${APP_URL}/dashboard/orders\n\n` +

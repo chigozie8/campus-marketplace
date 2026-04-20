@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const LAST_UPDATED = 'April 1, 2026'
 
 const STEPS = [
-  { icon: AlertCircle, step: '1', title: 'Report the Problem', desc: 'Go to your order in the Dashboard → Orders tab. Click "Report a Problem" within 48 hours of confirmed delivery.' },
+  { icon: AlertCircle, step: '1', title: 'Report the Problem', desc: 'Go to your order in the Dashboard → Orders tab. Click "Report a Problem" within 24 hours of confirmed delivery.' },
   { icon: RefreshCw, step: '2', title: 'Investigation Begins', desc: 'Our Trust & Safety team reviews your report and contacts both buyer and seller within 24 hours for additional evidence.' },
   { icon: Shield, step: '3', title: 'Mediation', desc: 'We attempt to resolve the dispute by reviewing photos, chat logs, and evidence provided. Most disputes are resolved within 72 hours.' },
   { icon: CheckCircle2, step: '4', title: 'Resolution & Refund', desc: 'If the dispute is resolved in the buyer\'s favour, a full refund is issued to the original payment method within 3–5 business days.' },
@@ -20,7 +20,7 @@ const REFUNDABLE = [
   'Item not delivered after confirmed payment',
   'Item significantly different from the listing description',
   'Item is counterfeit or not as advertised',
-  'Item arrives damaged (must be reported within 48 hours)',
+  'Item arrives damaged (must be reported within 24 hours)',
   'Seller does not respond for 72+ hours after payment',
   'Order cancelled before delivery confirmation',
 ]
@@ -28,7 +28,7 @@ const REFUNDABLE = [
 const NOT_REFUNDABLE = [
   'Buyer changes their mind after delivery (change of mind)',
   'WhatsApp direct deals made outside VendoorX checkout',
-  'Disputes raised after the 48-hour window',
+  'Disputes raised after the 24-hour window',
   'Items returned in a different condition than delivered',
   'Digital products that have been downloaded or used',
 ]
@@ -68,7 +68,7 @@ export default function RefundPage() {
                 <ul className="flex flex-col gap-2">
                   {[
                     'The buyer clicks "Confirm Delivery" — funds are released to the seller immediately.',
-                    '48 hours pass after the stated delivery date with no dispute raised — funds are released automatically.',
+                    '24 hours pass after the stated delivery date with no dispute raised — funds are released automatically.',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -143,11 +143,11 @@ export default function RefundPage() {
             <h2 className="text-xl font-black text-foreground mb-4">Key Timelines</h2>
             <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
               {[
-                { label: 'Window to raise a dispute', value: '48 hours after delivery' },
+                { label: 'Window to raise a dispute', value: '24 hours after delivery' },
                 { label: 'Initial response from support', value: 'Within 24 hours' },
                 { label: 'Dispute resolution target', value: '72 hours' },
                 { label: 'Refund processing time', value: '3–5 business days' },
-                { label: 'Auto-release of escrow (no dispute)', value: '48 hours after delivery date' },
+                { label: 'Auto-release of escrow (no dispute)', value: '24 hours after delivery date' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between px-5 py-3.5 gap-4">
                   <div className="flex items-center gap-2">
