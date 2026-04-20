@@ -53,8 +53,8 @@ export function VendorShell({
         unreadInbox={unreadInbox}
       />
 
-      {/* ── Mobile topbar ── */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-40 bg-white dark:bg-background border-b border-gray-100 dark:border-border h-14 flex items-center justify-between px-4">
+      {/* ── Mobile + tablet topbar (≤1023px). Sidebar takes over at lg. ── */}
+      <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-white dark:bg-background border-b border-gray-100 dark:border-border h-14 flex items-center justify-between px-4">
         <Link href="/" className="select-none">
           <span className="text-xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
             Vendoor<span className="text-primary">X</span>
@@ -83,9 +83,9 @@ export function VendorShell({
       </div>
 
       {/* ── Main content — uses native document scroll ── */}
-      <main className="md:ml-60 pt-14 md:pt-0 min-h-screen">
+      <main className="lg:ml-60 pt-14 lg:pt-0 min-h-screen">
         {pageTitle && (
-          <div className="sticky top-0 z-20 bg-white/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-100 dark:border-border hidden md:flex items-center justify-between px-6 h-14">
+          <div className="sticky top-0 z-20 bg-white/80 dark:bg-card/80 backdrop-blur-md border-b border-gray-100 dark:border-border hidden lg:flex items-center justify-between px-6 h-14">
             <h1 className="text-base font-bold text-gray-950 dark:text-white">{pageTitle}</h1>
             <div className="flex items-center gap-2">
               {pageAction}

@@ -49,7 +49,7 @@ export function ProductsClient({ products, initials, fullName, email }: Props) {
 
   return (
     <VendorShell initials={initials} fullName={fullName} email={email} pageTitle="Products" pageAction={addBtn}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-10">
 
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">

@@ -77,7 +77,7 @@ export default async function DashboardPage() {
       <Suspense fallback={null}>
         <BoostCallbackToast />
       </Suspense>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-10 space-y-5">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-10 space-y-5">
 
         {/* ── Greeting ── */}
         <div className="flex items-start justify-between">

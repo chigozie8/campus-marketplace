@@ -104,7 +104,7 @@ export default function OrdersPage() {
 
   return (
     <VendorShell initials={initials} fullName={fullName} email={email} pageTitle="My Orders">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 md:pb-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-10">
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-6">

@@ -52,7 +52,7 @@ export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Pr
   }
 
   return (
-    <aside className="hidden md:flex flex-col w-60 bg-white dark:bg-sidebar border-r border-gray-100 dark:border-sidebar-border fixed h-full z-30">
+    <aside className="hidden lg:flex flex-col w-60 bg-white dark:bg-sidebar border-r border-gray-100 dark:border-sidebar-border fixed h-full z-30">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-100 dark:border-sidebar-border">
         <Link href="/" className="group select-none flex items-center gap-2">
