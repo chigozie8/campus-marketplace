@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createPublicClient } from '@/lib/supabase/public'
+import { mintVerifyPollToken } from '@/lib/auth-tokens'
 
 export async function POST(req: Request) {
   const {
@@ -91,5 +92,15 @@ export async function POST(req: Request) {
     )
   }
 
-  return NextResponse.json({ success: true })
+  // Mint a short-lived (30 min) HMAC token bound to this email so the
+  // verify page can poll /api/auth/check-confirmation without exposing the
+  // confirmation-status lookup to unauthenticated callers.
+  let verifyToken: string | null = null
+  try {
+    verifyToken = mintVerifyPollToken(email)
+  } catch (err) {
+    console.warn('[register] could not mint verify poll token:', err)
+  }
+
+  return NextResponse.json({ success: true, verifyToken })
 }

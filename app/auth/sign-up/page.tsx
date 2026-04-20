@@ -24,15 +24,17 @@ function PasswordStrength({ password }: { password: string }) {
     { label: 'Symbol', pass: /[^A-Za-z0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  // score 0 → none, 1 → Weak, 2 → Medium, 3 → Strong, 4 → Perfect
+  // score 0 → none, 1 → Weak, 2 → Medium, 3 → Strong, 4 → Perfect (all required reqs met)
   const tiers = [
     { label: '', textColor: '' },
     { label: 'Weak', textColor: 'text-red-500' },
     { label: 'Medium', textColor: 'text-orange-500' },
     { label: 'Strong', textColor: 'text-amber-500' },
-    { label: 'Perfect', textColor: 'text-[#16a34a]' },
+    { label: 'Perfect', textColor: 'text-green-600' },
   ]
-  const barColor = ['bg-red-400', 'bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-[#16a34a]'][score]
+  // Use standard Tailwind palette so JIT picks these up reliably (arbitrary
+  // hex values inside dynamic arrays can fall through the content scanner).
+  const barColor = ['bg-red-400', 'bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-green-500'][score]
   const tier = tiers[score]
   if (!password) return null
   return (
@@ -135,7 +137,8 @@ function SignUpPageInner() {
 
     toast.dismiss(toastId)
     toast.success('Account created! Check your email for a confirmation link.')
-    router.push(`/auth/verify?email=${encodeURIComponent(email)}&name=${encodeURIComponent(fullName)}`)
+    const tokenParam = result.verifyToken ? `&token=${encodeURIComponent(result.verifyToken)}` : ''
+    router.push(`/auth/verify?email=${encodeURIComponent(email)}&name=${encodeURIComponent(fullName)}${tokenParam}`)
   }
 
   return (
