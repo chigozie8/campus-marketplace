@@ -3,11 +3,11 @@ import { notify } from '../services/notificationService.js'
 import { reversePendingCredit } from '../services/walletService.js'
 import logger from '../utils/logger.js'
 
-const CANCEL_AFTER_HOURS = 24
+const CANCEL_AFTER_DAYS = 5
 
 async function runAutoCancel() {
   try {
-    const cutoff = new Date(Date.now() - CANCEL_AFTER_HOURS * 60 * 60 * 1000).toISOString()
+    const cutoff = new Date(Date.now() - CANCEL_AFTER_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
     // Find paid orders older than CANCEL_AFTER_DAYS with no ship date
     const { data: orders, error } = await supabaseAdmin
@@ -56,7 +56,7 @@ async function runAutoCancel() {
           userId: order.buyer_id,
           type: 'order_cancelled',
           title: 'Payment Reversed',
-          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${CANCEL_AFTER_HOURS} hours. Your payment has been reversed and refunded to your wallet.`,
+          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${CANCEL_AFTER_DAYS} days. Your payment has been reversed and refunded to your wallet.`,
           data: { url: '/dashboard/orders', orderId: order.id },
         })
 
@@ -65,7 +65,7 @@ async function runAutoCancel() {
           userId: order.seller_id,
           type: 'order_cancelled',
           title: 'Order Cancelled — Payment Reversed',
-          body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${CANCEL_AFTER_HOURS} hours of payment.`,
+          body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${CANCEL_AFTER_DAYS} days of payment.`,
           data: { url: '/seller-orders', orderId: order.id },
         })
 
@@ -79,8 +79,8 @@ async function runAutoCancel() {
   }
 }
 
-export function startAutoCancelJob(intervalMs = 60 * 60 * 1000) {
-  logger.info('[autoCancelOrders] Starting auto-cancel job (every 1 hour)')
+export function startAutoCancelJob(intervalMs = 6 * 60 * 60 * 1000) {
+  logger.info('[autoCancelOrders] Starting auto-cancel job (every 6 hours)')
   runAutoCancel()
   return setInterval(runAutoCancel, intervalMs)
 }

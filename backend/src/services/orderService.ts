@@ -89,8 +89,16 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         userId: order.seller_id,
         type: 'order_paid',
         title: 'New Order — Action Required',
-        body: `A buyer paid for "${productTitle}" (Order #${shortId}). Please ship as soon as possible.`,
+        body: `A buyer paid for "${productTitle}" (Order #${shortId}). Please ship within 5 days, or the order will be auto-cancelled and refunded.`,
         data: { url: '/seller-orders', orderId: id },
+      }).catch(() => {})
+      // Tell the buyer their payment went through and when to expect shipment
+      notify({
+        userId: order.buyer_id,
+        type: 'order_paid',
+        title: 'Payment Confirmed — Awaiting Shipment',
+        body: `Your payment for "${productTitle}" (Order #${shortId}) is held safely in escrow. Your seller has 5 days to ship — you'll be notified the moment it's on the way. If they don't ship in time, your payment is automatically reversed.`,
+        data: { url: '/dashboard/orders', orderId: id },
       }).catch(() => {})
       break
 
