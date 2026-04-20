@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { VendorShell } from '@/components/vendor/vendor-shell'
+import { CopyButton } from '@/components/ui/copy-button'
+import { OrderListSkeleton } from '@/components/orders/order-skeleton'
 
 interface Order {
   id: string
@@ -118,8 +120,8 @@ export default function OrdersPage() {
           ))}
         </div>
 
-        {/* Search + tabs */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        {/* Search + tabs (sticky on scroll) */}
+        <div className="sticky top-14 md:top-16 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-3 bg-[#f8f9fa]/95 dark:bg-background/95 backdrop-blur-md border-b border-gray-100 dark:border-border flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -140,9 +142,7 @@ export default function OrdersPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          </div>
+          <OrderListSkeleton variant="table" count={5} />
         ) : filtered.length === 0 ? (
           <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm text-center py-16 px-6">
             <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mx-auto mb-4">
@@ -189,7 +189,10 @@ export default function OrdersPage() {
                             <p className="font-semibold text-gray-900 dark:text-white text-xs truncate max-w-[120px]">
                               {order.products?.title || 'Product'}
                             </p>
-                            <p className="text-[10px] text-gray-400">#{order.id.slice(0, 8).toUpperCase()}</p>
+                            <div className="flex items-center gap-0.5">
+                              <p className="text-[10px] text-gray-400 font-mono">#{order.id.slice(0, 8).toUpperCase()}</p>
+                              <CopyButton value={order.id} size="xs" label="" />
+                            </div>
                           </div>
                         </div>
                       </td>

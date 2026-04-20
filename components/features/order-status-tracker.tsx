@@ -21,12 +21,34 @@ const ORDER_INDEX: Record<OrderStatus, number> = {
   cancelled: -1,
 }
 
+export interface OrderStatusTimestamps {
+  pending?: string | null
+  paid?: string | null
+  shipped?: string | null
+  delivered?: string | null
+  completed?: string | null
+}
+
 interface OrderStatusTrackerProps {
   status: OrderStatus
   compact?: boolean
+  timestamps?: OrderStatusTimestamps
 }
 
-export function OrderStatusTracker({ status, compact = false }: OrderStatusTrackerProps) {
+function fmtTime(value?: string | null) {
+  if (!value) return null
+  try {
+    const d = new Date(value)
+    return d.toLocaleString('en-NG', {
+      day: 'numeric', month: 'short',
+      hour: '2-digit', minute: '2-digit',
+    })
+  } catch {
+    return null
+  }
+}
+
+export function OrderStatusTracker({ status, compact = false, timestamps }: OrderStatusTrackerProps) {
   if (status === 'cancelled') {
     return (
       <div className="flex items-center gap-2 text-destructive">
@@ -75,6 +97,7 @@ export function OrderStatusTracker({ status, compact = false }: OrderStatusTrack
           const Icon = step.icon
           const done = i < currentIndex
           const active = i === currentIndex
+          const stamp = fmtTime(timestamps?.[step.status as keyof OrderStatusTimestamps])
 
           return (
             <div key={step.status} className="flex flex-col items-center gap-2 z-10 flex-1">
@@ -95,7 +118,12 @@ export function OrderStatusTracker({ status, compact = false }: OrderStatusTrack
                 )}>
                   {step.label}
                 </p>
-                {active && (
+                {stamp && (done || active) && (
+                  <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight tabular-nums">
+                    {stamp}
+                  </p>
+                )}
+                {active && !stamp && (
                   <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block leading-tight">
                     {step.description}
                   </p>

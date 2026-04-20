@@ -6,14 +6,42 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Package, Loader2, CheckCircle2, AlertOctagon,
-  Wallet, Truck, Clock, ExternalLink,
+  Wallet, Truck, Clock, ExternalLink, Receipt,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ordersApi, type BackendOrder } from '@/lib/api'
-import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
+import { OrderStatusTracker, OrderStatusBadge, type OrderStatusTimestamps } from '@/components/features/order-status-tracker'
 import { OrderChat } from '@/components/features/order-chat'
 import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/ui/copy-button'
 import { createClient } from '@/lib/supabase/client'
+
+const PLATFORM_FEE_NAIRA = 100
+
+function buildTimestamps(order: BackendOrder): OrderStatusTimestamps {
+  // We don't have explicit per-step timestamps in the schema, so we derive
+  // the best estimate: created_at = pending; updated_at = current step;
+  // delivered_at = delivered. Future statuses are left blank.
+  const o = order as BackendOrder & { delivered_at?: string | null }
+  const ts: OrderStatusTimestamps = { pending: order.created_at }
+  const status = order.status
+  const updated = order.updated_at || order.created_at
+  if (['paid', 'shipped', 'delivered', 'completed'].includes(status)) {
+    if (status === 'paid') ts.paid = updated
+    else ts.paid = order.created_at // best estimate when later step
+  }
+  if (['shipped', 'delivered', 'completed'].includes(status)) {
+    if (status === 'shipped') ts.shipped = updated
+    else ts.shipped = updated
+  }
+  if (['delivered', 'completed'].includes(status)) {
+    ts.delivered = o.delivered_at || updated
+  }
+  if (status === 'completed') {
+    ts.completed = updated
+  }
+  return ts
+}
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -101,7 +129,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="min-w-0 flex-1">
-            <h1 className="text-base sm:text-lg font-black text-foreground truncate">Order #{shortId}</h1>
+            <div className="flex items-center gap-1">
+              <h1 className="text-base sm:text-lg font-black text-foreground truncate">Order #{shortId}</h1>
+              <CopyButton value={order.id} label="" size="xs" />
+            </div>
             <p className="text-xs text-muted-foreground">
               {new Date(order.created_at).toLocaleDateString('en-NG', {
                 day: 'numeric', month: 'long', year: 'numeric',
@@ -137,11 +168,51 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
 
-        {/* Status tracker */}
+        {/* Status tracker with timestamps */}
         <div className="rounded-2xl border border-border bg-card p-4 mb-4">
           <p className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">Order Progress</p>
-          <OrderStatusTracker status={order.status} />
+          <OrderStatusTracker
+            status={order.status}
+            timestamps={buildTimestamps(order)}
+          />
         </div>
+
+        {/* Transaction breakdown (buyer-facing) */}
+        {isBuyer && (
+          <div className="rounded-2xl border border-border bg-card p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Receipt className="w-4 h-4 text-muted-foreground" />
+              <p className="text-xs font-bold text-foreground uppercase tracking-wider">Payment Breakdown</p>
+            </div>
+            {(() => {
+              const total = Number(order.total_amount) || 0
+              const platformFee = order.status === 'pending' || order.status === 'cancelled' ? 0 : PLATFORM_FEE_NAIRA
+              const itemSubtotal = total
+              const grandTotal = total + platformFee
+              return (
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Item subtotal (Qty {order.quantity})</span>
+                    <span className="font-semibold tabular-nums">₦{itemSubtotal.toLocaleString()}</span>
+                  </div>
+                  {platformFee > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        Platform fee
+                        <span className="text-[10px] text-muted-foreground/70">(escrow protection)</span>
+                      </span>
+                      <span className="font-semibold tabular-nums">₦{platformFee.toLocaleString()}</span>
+                    </div>
+                  )}
+                  <div className="border-t border-border pt-2 mt-2 flex items-center justify-between">
+                    <span className="font-bold text-foreground">{platformFee > 0 ? 'Total charged' : 'Total'}</span>
+                    <span className="font-black text-primary text-base tabular-nums">₦{grandTotal.toLocaleString()}</span>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        )}
 
         {/* Pay action for pending orders */}
         {showPay && (

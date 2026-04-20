@@ -102,7 +102,7 @@ export default async function DashboardPage() {
         />
 
         {/* ── 4 Stat Cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 [&>*]:min-w-0">
           {[
             {
               icon: Package, label: 'Active Listings', value: activeCount,

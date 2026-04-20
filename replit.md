@@ -368,3 +368,26 @@ Webhook URL (paste in WaSender dashboard): `https://www.vendoorx.ng/api/webhook/
 - Backend port changed from 5000 → 3001 to avoid conflict with Next.js
 - Backend Supabase config falls back to `NEXT_PUBLIC_SUPABASE_*` env vars if `SUPABASE_*` are not set separately
 - Paystack config warns instead of crashing if key is missing (so dev server can start without payment keys)
+
+## Dashboard & Orders v2 Pass (April 2026)
+
+A focused UX improvement pass on the buyer + seller orders surfaces.
+
+### Frontend changes
+- **`/seller-orders`** — added full-text search (buyer/product/order ID), sticky search+filter bar with per-filter counts, CSV export of filtered orders, repeat-buyer badge in trust panel, richer empty states with contextual CTAs, skeleton loaders.
+- **`/orders`** — sticky search+filter bar, table-skeleton loader, copy-order-ID button on each row.
+- **`/dashboard/orders/[id]`** — copy-order-ID button on header, payment breakdown card (item subtotal + platform fee + total), `OrderStatusTracker` now shows timestamps under each completed/active step.
+- **`/dashboard`** — mobile horizontal-overflow fix on the 4-stat grid (added `[&>*]:min-w-0` and tighter mobile gap).
+
+### New shared components
+| Component | Path | Purpose |
+|---|---|---|
+| `CopyButton` | `components/ui/copy-button.tsx` | Reusable copy-to-clipboard button with copied-state feedback |
+| `OrderListSkeleton` / `OrderRowSkeleton` / `OrderTableRowSkeleton` | `components/orders/order-skeleton.tsx` | Replaces spinners in orders pages with content-shaped placeholders |
+
+### Modified components
+- `components/features/order-status-tracker.tsx` — `OrderStatusTracker` now accepts an optional `timestamps` prop (`OrderStatusTimestamps`) and renders the stamp under each step. Backwards compatible — calls without `timestamps` keep prior behaviour.
+
+### Notes for future work (deferred this round)
+- Tracking number, delivery-OTP buyer-input UI, and saved addresses require new DB columns/tables and are queued for the next backend pass.
+- Full in-app dispute flow, time-series analytics, bulk actions, and refund-request UI are larger features that need their own design passes.
