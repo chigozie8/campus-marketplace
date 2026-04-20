@@ -11,9 +11,10 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { LottiePlayer } from '@/components/ui/lottie-player'
 
-// Hosted on LottieFiles' CDN. If the URL ever fails, the static <BellOff/>
-// fallback below is rendered instead — the empty state always works.
-const EMPTY_BELL_LOTTIE = 'https://assets3.lottiefiles.com/packages/lf20_jbrw3hcz.json'
+// Bundled locally in /public/lottie/ — avoids the LottieFiles CDN's missing
+// CORS header. If anything ever goes wrong, the static <BellOff/> fallback
+// below renders instead, so the empty state always works.
+const EMPTY_BELL_LOTTIE = '/lottie/empty-notifications.json'
 
 interface Notification {
   id: string
