@@ -6,7 +6,7 @@ import {
   Package, Truck, CheckCircle2, Clock, AlertCircle,
   ArrowLeft, Loader2, Store, ChevronRight,
   ShieldCheck, Banknote, RefreshCw, Search, Download,
-  Repeat,
+  Repeat, X, CheckSquare, Square,
 } from 'lucide-react'
 import { useVendorOrders } from '@/hooks/use-orders'
 import { type BackendOrder, type OrderStatus, ordersApi } from '@/lib/api'
@@ -55,7 +55,14 @@ function StatusBadge({ status }: { status: OrderStatus }) {
 
 const DELIVERY_OPTIONS = [1, 2, 3, 5, 7, 10, 14, 21, 30] as const
 
-function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; onUpdate: () => void; currentUserId?: string }) {
+function OrderCard({ order, onUpdate, currentUserId, selected, onToggleSelect, selectMode }: {
+  order: ExtendedOrder
+  onUpdate: () => void
+  currentUserId?: string
+  selected?: boolean
+  onToggleSelect?: () => void
+  selectMode?: boolean
+}) {
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyerTrust, setBuyerTrust] = useState<BuyerTrust | null>(null)
@@ -119,11 +126,25 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
   const dateStr = new Date(order.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 
   return (
-    <m.div layout className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm">
-      <button
-        onClick={() => setExpanded(e => !e)}
-        className="w-full text-left p-4 sm:p-5 flex items-start gap-4"
-      >
+    <m.div layout className={`rounded-2xl border overflow-hidden shadow-sm transition-colors ${
+      selected ? 'border-primary bg-primary/5' : 'border-border/60 bg-card'
+    }`}>
+      <div className="w-full text-left p-4 sm:p-5 flex items-start gap-4">
+        {selectMode && (
+          <button
+            onClick={onToggleSelect}
+            className="mt-1 flex-shrink-0 text-primary"
+            aria-label={selected ? 'Deselect order' : 'Select order'}
+          >
+            {selected
+              ? <CheckSquare className="w-5 h-5" />
+              : <Square className="w-5 h-5 text-muted-foreground" />}
+          </button>
+        )}
+        <button
+          onClick={() => selectMode ? onToggleSelect?.() : setExpanded(e => !e)}
+          className="flex-1 flex items-start gap-4 text-left"
+        >
         <div className="w-12 h-12 rounded-xl bg-muted flex-shrink-0 flex items-center justify-center">
           {order.products?.images?.[0] ? (
             <img src={order.products.images[0]} alt={productName} className="w-full h-full object-cover rounded-xl" />
@@ -148,12 +169,13 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
         </div>
 
         <ChevronRight className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform mt-1 ${expanded ? 'rotate-90' : ''}`} />
-      </button>
+        </button>
+      </div>
 
       {/* Seller's only action is "Mark as Shipped". After that, escrow + the
           buyer's confirmation handle everything — sellers cannot mark items
           as delivered themselves (prevents fraudulent auto-release). */}
-      {order.status === 'paid' && (
+      {!selectMode && order.status === 'paid' && (
         <div className="px-4 sm:px-5 pb-4 -mt-1 space-y-3" onClick={(e) => e.stopPropagation()}>
           <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 p-3">
             <div className="flex items-center gap-2 mb-2">
@@ -203,7 +225,7 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
         </div>
       )}
 
-      {(order.status === 'shipped' || order.status === 'delivered') && (
+      {!selectMode && (order.status === 'shipped' || order.status === 'delivered') && (
         <div className="px-4 sm:px-5 pb-4 -mt-1">
           <div className="rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800 p-3 flex items-start gap-2">
             <ShieldCheck className="w-4 h-4 text-teal-600 dark:text-teal-400 mt-0.5 flex-shrink-0" />
@@ -221,7 +243,7 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
       )}
 
       <AnimatePresence>
-        {expanded && (
+        {expanded && !selectMode && (
           <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -372,8 +394,55 @@ export default function SellerOrdersPage() {
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
   const [search, setSearch] = useState('')
   const [sellerId, setSellerId] = useState<string | null>(null)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState<null | 'mark_shipped' | 'cancel'>(null)
   const qc = useQueryClient()
   const { data, isLoading, isError, error, refetch } = useVendorOrders(page)
+
+  function toggleId(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedIds(new Set())
+  }
+
+  async function runBulk(action: 'mark_shipped' | 'cancel') {
+    if (bulkBusy || selectedIds.size === 0) return
+    const ids = Array.from(selectedIds)
+    const verb = action === 'mark_shipped' ? 'mark as shipped' : 'cancel'
+    if (!confirm(`${verb.charAt(0).toUpperCase() + verb.slice(1)} ${ids.length} order${ids.length === 1 ? '' : 's'}?`)) return
+
+    setBulkBusy(action)
+    try {
+      const res = await fetch('/api/seller-orders/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, action }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Bulk action failed')
+      const { succeeded, failed } = data as { succeeded: number; failed: number }
+      if (failed > 0) {
+        toast.warning(`${succeeded} updated, ${failed} skipped (wrong status or not yours).`)
+      } else {
+        toast.success(`${succeeded} order${succeeded === 1 ? '' : 's'} updated.`)
+      }
+      exitSelectMode()
+      qc.invalidateQueries({ queryKey: ['orders', 'vendor'] })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Bulk action failed')
+    } finally {
+      setBulkBusy(null)
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -413,6 +482,18 @@ export default function SellerOrdersPage() {
             <p className="text-xs text-muted-foreground">Manage orders for your listings</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
+              title={selectMode ? 'Exit selection mode' : 'Select multiple'}
+              className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                selectMode
+                  ? 'bg-primary text-white'
+                  : 'bg-muted hover:bg-muted/80 text-foreground'
+              }`}
+            >
+              {selectMode ? <X className="w-3.5 h-3.5" /> : <CheckSquare className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{selectMode ? 'Cancel' : 'Select'}</span>
+            </button>
             <button
               onClick={() => exportOrdersToCsv(orders)}
               title="Export filtered orders as CSV"
@@ -555,9 +636,64 @@ export default function SellerOrdersPage() {
           </div>
         )}
 
+        {selectMode && (
+          <div className="sticky top-[112px] z-20 mb-3 -mx-4 px-4">
+            <div className="rounded-2xl bg-primary text-white px-4 py-3 shadow-lg shadow-primary/20 flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => {
+                  const eligible = orders.filter(o => o.status === 'paid' || o.status === 'pending').map(o => o.id)
+                  setSelectedIds(prev => prev.size === eligible.length ? new Set() : new Set(eligible))
+                }}
+                className="text-xs font-bold underline-offset-2 hover:underline"
+              >
+                {selectedIds.size === orders.filter(o => o.status === 'paid' || o.status === 'pending').length && selectedIds.size > 0 ? 'Clear all' : 'Select all eligible'}
+              </button>
+              <span className="text-xs font-bold tabular-nums">
+                {selectedIds.size} selected
+              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={() => runBulk('mark_shipped')}
+                  disabled={selectedIds.size === 0 || bulkBusy !== null}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold disabled:opacity-50 transition-colors"
+                >
+                  {bulkBusy === 'mark_shipped' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
+                  Ship
+                </button>
+                <button
+                  onClick={() => runBulk('cancel')}
+                  disabled={selectedIds.size === 0 || bulkBusy !== null}
+                  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold disabled:opacity-50 transition-colors"
+                >
+                  {bulkBusy === 'cancel' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+                  Cancel
+                </button>
+                <button
+                  onClick={exitSelectMode}
+                  className="inline-flex items-center gap-1 h-9 px-2 rounded-xl hover:bg-white/15 text-xs font-bold transition-colors"
+                  aria-label="Exit selection mode"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+              Bulk Ship works on Paid orders. Bulk Cancel works on Pending or Paid orders. Other selections are skipped.
+            </p>
+          </div>
+        )}
+
         <div className="space-y-3">
           {orders.map(order => (
-            <OrderCard key={order.id} order={order} onUpdate={handleUpdate} currentUserId={sellerId ?? undefined} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              onUpdate={handleUpdate}
+              currentUserId={sellerId ?? undefined}
+              selectMode={selectMode}
+              selected={selectedIds.has(order.id)}
+              onToggleSelect={() => toggleId(order.id)}
+            />
           ))}
         </div>
 

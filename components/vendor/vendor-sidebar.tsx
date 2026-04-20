@@ -6,16 +6,18 @@ import { useState } from 'react'
 import {
   LayoutDashboard, Inbox, Package, ShoppingBag,
   Settings, LogOut, Bell, Store, BookOpen, ClipboardList, BarChart2,
-  Heart, Gift, Loader2,
+  Heart, Gift, Loader2, MessageSquare, ShieldAlert,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV = [
   { href: '/dashboard',           icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/inbox',               icon: Inbox,           label: 'Inbox',     badge: true },
+  { href: '/dashboard/offers',    icon: MessageSquare,   label: 'Messages' },
   { href: '/products',            icon: Package,         label: 'My Listings' },
   { href: '/orders',              icon: ShoppingBag,     label: 'My Orders' },
   { href: '/seller-orders',       icon: ClipboardList,   label: 'Seller Orders' },
+  { href: '/dashboard/disputes',  icon: ShieldAlert,     label: 'Disputes' },
   { href: '/dashboard/analytics', icon: BarChart2,       label: 'Analytics' },
   { href: '/dashboard/wishlist',  icon: Heart,           label: 'Wishlist' },
   { href: '/dashboard/loyalty',   icon: Gift,            label: 'Loyalty Points' },
@@ -89,21 +91,15 @@ export function VendorSidebar({ initials, fullName, email, unreadInbox = 0 }: Pr
         })}
       </nav>
 
-      {/* Support */}
+      {/* Support — opens the in-app help center, not a third-party DM. */}
       <div className="px-2.5 pb-2">
-        <a
-          href="https://wa.me/2347082039150"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-sidebar-foreground hover:bg-[#25D366]/10 hover:text-[#25D366] dark:hover:text-[#25D366] transition-all duration-150 group"
+        <Link
+          href="/help"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-sidebar-foreground hover:bg-gray-100 dark:hover:bg-sidebar-accent hover:text-gray-900 dark:hover:text-white transition-all duration-150"
         >
-          <div className="w-4 h-4 flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.85L.057 23.928a.5.5 0 0 0 .606.65l6.277-1.642A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.878 9.878 0 0 1-5.029-1.373l-.36-.214-3.733.977.998-3.645-.235-.375A9.865 9.865 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z"/>
-            </svg>
-          </div>
-          <span className="flex-1">Contact Support</span>
-        </a>
+          <BookOpen className="w-4 h-4 flex-shrink-0" />
+          <span className="flex-1">Help &amp; Support</span>
+        </Link>
       </div>
 
       {/* User */}

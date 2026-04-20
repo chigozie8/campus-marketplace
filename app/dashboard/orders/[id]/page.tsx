@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { DeliveryOtpCard } from '@/components/orders/delivery-otp-card'
 import { TrackingDisplay } from '@/components/orders/tracking-display'
+import { BuyerProblemPanel } from '@/components/orders/buyer-problem-panel'
 import { createClient } from '@/lib/supabase/client'
 
 const PLATFORM_FEE_NAIRA = 100
@@ -285,6 +286,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
         )}
+
+        {/* Buyer-side: refund / problem reporter (only renders when eligible) */}
+        {isBuyer && <BuyerProblemPanel orderId={order.id} orderStatus={order.status} />}
 
         {order.status === 'cancelled' && (
           <div className="rounded-2xl border border-border bg-card p-4 mb-4 flex items-start gap-3">

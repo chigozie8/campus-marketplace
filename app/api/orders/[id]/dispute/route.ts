@@ -18,11 +18,35 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
   const { id: orderId } = await params
 
+  // Authz: only the buyer, seller, or an admin may read this dispute.
+  // Without this check, any logged-in user could read disputes by guessing
+  // an order id (the route uses service-role for the underlying read).
+  const { data: order, error: orderErr } = await adminClient()
+    .from('orders')
+    .select('buyer_id, seller_id')
+    .eq('id', orderId)
+    .single()
+
+  if (orderErr || !order) {
+    return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  }
+
+  let allowed = order.buyer_id === user.id || order.seller_id === user.id
+  if (!allowed) {
+    const { data: adminRow } = await adminClient()
+      .from('admin_roles').select('role').eq('user_id', user.id).maybeSingle()
+    if (adminRow) allowed = true
+  }
+  if (!allowed) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  // Return only the fields the dispute panel needs — no internal columns.
   const { data, error } = await adminClient()
     .from('order_disputes')
-    .select('*')
+    .select('id, order_id, buyer_id, seller_id, reason, evidence, status, admin_note, resolved_at, created_at, amount')
     .eq('order_id', orderId)
-    .single()
+    .maybeSingle()
 
   if (error && error.code !== 'PGRST116') {
     return NextResponse.json({ error: error.message }, { status: 500 })

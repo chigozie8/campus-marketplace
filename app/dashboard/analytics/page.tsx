@@ -7,8 +7,8 @@ import {
   BarChart2, Loader2, RefreshCw, Eye, MessageCircle,
 } from 'lucide-react'
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell,
+  AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell, Legend,
 } from 'recharts'
 import { createClient } from '@/lib/supabase/client'
 import { VendorShell } from '@/components/vendor/vendor-shell'
@@ -40,6 +40,50 @@ function groupByMonth(orders: Order[]) {
     map[month] = (map[month] ?? 0) + o.total_amount
   }
   return Object.entries(map).slice(-6).map(([month, revenue]) => ({ month, revenue }))
+}
+
+// Daily time-series for the last N days. Buckets are pre-seeded so the chart
+// shows a continuous line even on days with zero orders. Bucket keys are
+// LOCAL YYYY-MM-DD (not UTC) so an order placed at 23:00 local doesn't slide
+// into the next day's bucket.
+function localDateKey(d: Date) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function groupByDay(allOrders: Order[], completedOrders: Order[], days = 30) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const buckets: Record<string, { day: string; date: string; revenue: number; orders: number }> = {}
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    const key = localDateKey(d)
+    buckets[key] = {
+      day: d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' }),
+      date: key,
+      revenue: 0,
+      orders: 0,
+    }
+  }
+
+  const cutoff = today.getTime() - (days - 1) * 24 * 60 * 60 * 1000
+  for (const o of allOrders) {
+    const t = new Date(o.created_at).getTime()
+    if (t < cutoff) continue
+    const key = localDateKey(new Date(o.created_at))
+    if (buckets[key]) buckets[key].orders += 1
+  }
+  for (const o of completedOrders) {
+    const t = new Date(o.created_at).getTime()
+    if (t < cutoff) continue
+    const key = localDateKey(new Date(o.created_at))
+    if (buckets[key]) buckets[key].revenue += o.total_amount
+  }
+  return Object.values(buckets)
 }
 
 function groupByStatus(orders: Order[]) {
@@ -98,6 +142,13 @@ export default function AnalyticsPage() {
 
   const revenueData = groupByMonth(completedOrders)
   const statusData = groupByStatus(orders)
+  const dailyData = groupByDay(orders, completedOrders, 30)
+  const last7 = dailyData.slice(-7)
+  const prev7 = dailyData.slice(-14, -7)
+  const revLast7 = last7.reduce((s, d) => s + d.revenue, 0)
+  const revPrev7 = prev7.reduce((s, d) => s + d.revenue, 0)
+  const trendPct = revPrev7 > 0 ? Math.round(((revLast7 - revPrev7) / revPrev7) * 100) : (revLast7 > 0 ? 100 : 0)
+  const ordLast7 = last7.reduce((s, d) => s + d.orders, 0)
 
   const STATS = [
     { label: 'Total Revenue', value: fmt(totalRevenue), icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
@@ -146,6 +197,72 @@ export default function AnalyticsPage() {
                 )
               })}
             </div>
+
+            {/* 30-day daily time-series — revenue + order count */}
+            {orders.length > 0 && (
+              <div className="rounded-2xl border border-border bg-card p-5 mb-4">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h2 className="text-sm font-black text-foreground">Last 30 Days</h2>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Daily revenue (line) and orders placed (bars)</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">7-day vs prior 7</p>
+                    <p className={`text-sm font-black tabular-nums ${
+                      trendPct > 0 ? 'text-emerald-600' : trendPct < 0 ? 'text-red-600' : 'text-muted-foreground'
+                    }`}>
+                      {trendPct > 0 ? '+' : ''}{trendPct}%
+                    </p>
+                    <p className="text-[10px] text-muted-foreground tabular-nums">
+                      {fmt(revLast7)} · {ordLast7} order{ordLast7 === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={dailyData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" interval={Math.floor(dailyData.length / 7)} />
+                    <YAxis
+                      yAxisId="left"
+                      tick={{ fontSize: 10 }}
+                      stroke="hsl(var(--muted-foreground))"
+                      tickFormatter={v => `₦${(v / 1000).toFixed(0)}k`}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tick={{ fontSize: 10 }}
+                      stroke="hsl(var(--muted-foreground))"
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }}
+                      formatter={(v: number, name: string) => name === 'revenue' ? [fmt(v), 'Revenue'] : [v, 'Orders']}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Revenue"
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="orders"
+                      stroke="#f59e0b"
+                      strokeWidth={2}
+                      dot={false}
+                      name="Orders"
+                      strokeDasharray="4 2"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
             {/* Revenue over time */}
             {revenueData.length > 0 && (
