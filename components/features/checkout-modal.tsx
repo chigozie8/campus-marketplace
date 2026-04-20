@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
 import { hapticImpact, hapticNotification } from '@/lib/capacitor'
+import { SavedAddressesPicker } from '@/components/orders/saved-addresses-picker'
 
 export interface CheckoutProduct {
   id: string
@@ -41,6 +42,8 @@ type Step = 'address' | 'confirm' | 'paying'
 export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
   const [step, setStep] = useState<Step>('address')
   const [address, setAddress] = useState('')
+  const [saveAddress, setSaveAddress] = useState(false)
+  const [addressLabel, setAddressLabel] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
@@ -115,6 +118,16 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
         coupon_discount: couponDiscount > 0 ? couponDiscount : undefined,
       })
       setOrderId(result.data.id)
+
+      // Fire-and-forget save of the address to the buyer's address book.
+      if (saveAddress && addressLabel.trim().length > 0) {
+        fetch('/api/saved-addresses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ label: addressLabel.trim(), address: address.trim() }),
+        }).catch(() => {})
+      }
+
       setStep('confirm')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to create order'
@@ -142,6 +155,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   function handleClose() {
     setStep('address')
     setAddress('')
+    setSaveAddress(false)
+    setAddressLabel('')
     setQuantity(1)
     setOrderId(null)
     setCouponCode('')
@@ -202,6 +217,7 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
                 <MapPin className="w-3.5 h-3.5 text-primary" />
                 Delivery Address
               </Label>
+              <SavedAddressesPicker onPick={setAddress} currentValue={address} />
               <Textarea
                 placeholder="Enter your full delivery address (street, area, city)…"
                 value={address}
@@ -209,6 +225,24 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
                 className="rounded-xl resize-none text-sm"
                 rows={3}
               />
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={saveAddress}
+                  onChange={e => setSaveAddress(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded accent-emerald-600"
+                />
+                Save this address for next time
+              </label>
+              {saveAddress && (
+                <Input
+                  placeholder="Label (e.g. Hostel A — Room 12)"
+                  value={addressLabel}
+                  onChange={e => setAddressLabel(e.target.value)}
+                  maxLength={60}
+                  className="rounded-xl text-sm"
+                />
+              )}
             </div>
 
             {/* Coupon Code */}

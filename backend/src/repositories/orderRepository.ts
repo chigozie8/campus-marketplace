@@ -110,6 +110,37 @@ export async function setDeliveryDuration(id: string, days: number): Promise<Ord
   return data as OrderRow
 }
 
+export async function setOrderTracking(
+  id: string,
+  trackingNumber: string | null,
+  trackingCourier: string | null,
+): Promise<OrderRow> {
+  const updates: Record<string, string | null> = {
+    tracking_number: trackingNumber && trackingNumber.trim().length > 0 ? trackingNumber.trim() : null,
+    tracking_courier: trackingCourier && trackingCourier.trim().length > 0 ? trackingCourier.trim() : null,
+    updated_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('orders')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    if (error.message?.includes('tracking_number') || error.message?.includes('tracking_courier')) {
+      throw Object.assign(
+        new Error('Tracking columns are missing from the orders table. Run supabase/add_tracking_info.sql in the Supabase SQL editor.'),
+        { status: 500 }
+      )
+    }
+    throw new Error(error.message)
+  }
+  if (!data) throw Object.assign(new Error('Order not found.'), { status: 404 })
+  return data as OrderRow
+}
+
 export async function findOrderByReference(reference: string): Promise<OrderRow | null> {
   const { data, error } = await supabaseAdmin
     .from('orders')

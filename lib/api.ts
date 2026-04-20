@@ -129,6 +129,23 @@ export const ordersApi = {
       body: JSON.stringify({ days }),
     }),
 
+  setTracking: (id: string, tracking_number: string | null, tracking_courier: string | null) =>
+    request<{ success: boolean; data: BackendOrder; message?: string }>(`/orders/${id}/tracking`, {
+      method: 'PATCH',
+      body: JSON.stringify({ tracking_number, tracking_courier }),
+    }),
+
+  verifyDeliveryOtp: (id: string, otp: string) =>
+    request<{ success: boolean; data?: BackendOrder; message?: string; reason?: string }>(`/delivery-otp/${id}/verify`, {
+      method: 'POST',
+      body: JSON.stringify({ otp }),
+    }),
+
+  resendDeliveryOtp: (id: string) =>
+    request<{ success: boolean; channel?: string; message?: string }>(`/delivery-otp/${id}/resend`, {
+      method: 'POST',
+    }),
+
   // Uses the direct Next.js API route — works in production without the Express backend.
   initializePayment: (id: string) =>
     directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(`/api/orders/${id}/pay`, {
@@ -173,6 +190,8 @@ export interface BackendOrder {
   payment_ref?: string
   delivered_at?: string
   delivery_duration_days?: number | null
+  tracking_number?: string | null
+  tracking_courier?: string | null
   created_at: string
   updated_at?: string
   products?: { title: string; name?: string; price: number; images?: string[]; image_url?: string }

@@ -76,6 +76,14 @@ export async function getVendorOrders(vendorId: string, page: number, limit: num
   return result
 }
 
+export async function setOrderTracking(
+  id: string,
+  trackingNumber: string | null,
+  trackingCourier: string | null,
+): Promise<OrderRow> {
+  return orderRepo.setOrderTracking(id, trackingNumber, trackingCourier)
+}
+
 export async function setDeliveryDuration(id: string, days: number): Promise<OrderRow> {
   const order = await orderRepo.setDeliveryDuration(id, days)
   await delCache(`orders:id:${id}`)

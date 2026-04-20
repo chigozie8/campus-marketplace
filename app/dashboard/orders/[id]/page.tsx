@@ -14,6 +14,8 @@ import { OrderStatusTracker, OrderStatusBadge, type OrderStatusTimestamps } from
 import { OrderChat } from '@/components/features/order-chat'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
+import { DeliveryOtpCard } from '@/components/orders/delivery-otp-card'
+import { TrackingDisplay } from '@/components/orders/tracking-display'
 import { createClient } from '@/lib/supabase/client'
 
 const PLATFORM_FEE_NAIRA = 100
@@ -250,15 +252,25 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
 
-        {order.status === 'shipped' && (
-          <div className="rounded-2xl border border-border bg-card p-4 mb-4 flex items-start gap-3">
-            <Truck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-sm text-foreground">Your order is on the way</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Once it arrives, enter the delivery code from the seller to release payment.
-              </p>
-            </div>
+        {(order.status === 'shipped' || order.status === 'delivered') && (
+          <div className="space-y-3 mb-4">
+            <TrackingDisplay
+              trackingNumber={order.tracking_number}
+              trackingCourier={order.tracking_courier}
+            />
+            {isBuyer ? (
+              <DeliveryOtpCard orderId={order.id} onConfirmed={() => load()} />
+            ) : (
+              <div className="rounded-2xl border border-border bg-card p-4 flex items-start gap-3">
+                <Truck className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-sm text-foreground">In transit</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    The buyer received a delivery code automatically. They'll confirm receipt to release escrow.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -391,3 +391,42 @@ A focused UX improvement pass on the buyer + seller orders surfaces.
 ### Notes for future work (deferred this round)
 - Tracking number, delivery-OTP buyer-input UI, and saved addresses require new DB columns/tables and are queued for the next backend pass.
 - Full in-app dispute flow, time-series analytics, bulk actions, and refund-request UI are larger features that need their own design passes.
+
+## Dashboard & Orders v2 Pass — Batch C (April 2026)
+
+Backend additions for tracking, in-app delivery OTP confirmation, and the
+buyer's saved address book.
+
+### New SQL migrations (run once in Supabase SQL editor)
+- `supabase/add_tracking_info.sql` — adds `tracking_number TEXT` + `tracking_courier TEXT` to `orders`.
+- `supabase/saved_addresses.sql` — creates `saved_addresses` table with RLS so each user only sees their own rows.
+
+### New backend endpoints
+| Route | Method | Auth | Description |
+|---|---|---|---|
+| `/api/orders/:id/tracking` | PATCH | seller of order or admin | Save / update tracking number + courier on a shipped or delivered order |
+| `/api/delivery-otp/:orderId/resend` | POST | buyer, seller, or admin (was: admin-only) | Re-issue the 6-digit delivery OTP via email + SMS + in-app bell |
+
+### New Next.js API routes (backed by Supabase RLS)
+| Route | Methods | Description |
+|---|---|---|
+| `/api/saved-addresses` | GET, POST | List or create the current user's saved addresses |
+| `/api/saved-addresses/:id` | PATCH, DELETE | Update (e.g. mark default) or delete a saved address |
+
+### New shared frontend components
+| Component | Path | Purpose |
+|---|---|---|
+| `TrackingEditor` | `components/orders/tracking-editor.tsx` | Seller-side input for courier name + tracking number |
+| `TrackingDisplay` | `components/orders/tracking-display.tsx` | Buyer-side read-only courier + tracking number with copy button |
+| `DeliveryOtpCard` | `components/orders/delivery-otp-card.tsx` | Buyer pastes 6-digit OTP, hits Confirm delivery → escrow released. Includes "Resend code" |
+| `SavedAddressesPicker` | `components/orders/saved-addresses-picker.tsx` | Lists saved address chips; auto-fills the default one on checkout |
+
+### UI integrations
+- **`/seller-orders`** — `TrackingEditor` appears on every shipped/delivered order card.
+- **`/dashboard/orders/[id]`** — replaces the static "your order is on the way" hint with `TrackingDisplay` + `DeliveryOtpCard`. The OTP card refetches the order after a successful confirm so the page transitions to the "completed" state.
+- **CheckoutModal** — `SavedAddressesPicker` chips above the address textarea, plus a "Save this address for next time" checkbox + label input that POSTs the address to `/api/saved-addresses` after order creation.
+
+### Behaviour notes
+- Tracking columns and `saved_addresses` table are gracefully handled: the GET endpoint returns an empty list if the table is missing, and the PATCH endpoint surfaces a clear "run the migration" error if the columns are missing.
+- The OTP itself is generated and dispatched by the existing backend pipeline when the seller marks "shipped" — the new frontend just gives the buyer a place to enter it.
+- The OTP resend endpoint now allows the buyer or seller to request a fresh code (previously admin-only); this works because the OTP is still hashed and short-lived in `delivery_otps`.

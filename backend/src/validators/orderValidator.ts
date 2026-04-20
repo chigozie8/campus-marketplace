@@ -13,3 +13,8 @@ export const updateOrderStatusSchema = z.object({
 export const setDeliveryDurationSchema = z.object({
   days: z.number().int().min(1, 'Delivery window must be at least 1 day.').max(30, 'Delivery window cannot exceed 30 days.'),
 })
+
+export const setTrackingSchema = z.object({
+  tracking_number: z.string().trim().max(120).nullable().optional(),
+  tracking_courier: z.string().trim().max(80).nullable().optional(),
+})

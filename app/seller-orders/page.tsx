@@ -19,6 +19,7 @@ import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
 import { OrderChat } from '@/components/features/order-chat'
 import { CopyButton } from '@/components/ui/copy-button'
 import { OrderListSkeleton } from '@/components/orders/order-skeleton'
+import { TrackingEditor } from '@/components/orders/tracking-editor'
 
 async function getToken() {
   const supabase = createClient()
@@ -286,6 +287,14 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
                     Buyer has paid. Ship the item and tap “Mark as Shipped” above — the buyer will then receive a delivery code automatically.
                   </p>
                 </div>
+              )}
+
+              {(order.status === 'shipped' || order.status === 'delivered') && (
+                <TrackingEditor
+                  orderId={order.id}
+                  initialNumber={order.tracking_number}
+                  initialCourier={order.tracking_courier}
+                />
               )}
 
               {order.status === 'completed' && (

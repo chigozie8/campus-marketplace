@@ -160,12 +160,19 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
 // POST /api/delivery-otp/:orderId/resend?channel=email|sms|both
 // Vendor resends OTP (optionally changing channel).
 // ---------------------------------------------------------------------------
-router.post('/:orderId/resend', requireRole('admin'), async (req, res, next) => {
+router.post('/:orderId/resend', async (req, res, next) => {
   try {
     const { orderId } = req.params
-    const adminId = (req as AuthRequest).user.id
+    const userId = (req as AuthRequest).user.id
+    const role = (req as AuthRequest).user.role
 
     const order = await orderService.getOrderById(orderId)
+
+    // Allow: admins, the seller of this order, or the buyer of this order
+    if (role !== 'admin' && order.seller_id !== userId && order.buyer_id !== userId) {
+      res.status(403).json({ success: false, message: 'Only the buyer, seller, or an admin can resend the delivery OTP.' })
+      return
+    }
 
     if (order.status !== 'shipped' && order.status !== 'delivered') {
       res.status(400).json({ success: false, message: `Cannot resend OTP — order status is "${order.status}".` })
@@ -185,7 +192,7 @@ router.post('/:orderId/resend', requireRole('admin'), async (req, res, next) => 
       return
     }
 
-    logger.info(`[deliveryOtp] Admin ${adminId} resent OTP for order ${orderId} via ${result.channel}`)
+    logger.info(`[deliveryOtp] User ${userId} (${role}) resent OTP for order ${orderId} via ${result.channel}`)
 
     res.status(200).json({
       success: true,

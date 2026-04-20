@@ -84,6 +84,37 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
   }
 }
 
+export async function setOrderTracking(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userId = (req as AuthRequest).user.id
+    const role = (req as AuthRequest).user.role
+
+    const existing = await orderService.getOrderById(req.params.id)
+    if (role !== 'admin' && existing.seller_id !== userId) {
+      res.status(403).json({ success: false, message: 'Only the seller can set tracking info for this order.' })
+      return
+    }
+
+    if (existing.status === 'pending' || existing.status === 'cancelled') {
+      res.status(400).json({
+        success: false,
+        message: `Cannot set tracking on a ${existing.status} order.`,
+      })
+      return
+    }
+
+    const { tracking_number, tracking_courier } = req.body
+    const order = await orderService.setOrderTracking(
+      req.params.id,
+      tracking_number ?? null,
+      tracking_courier ?? null,
+    )
+    res.status(200).json({ success: true, message: 'Tracking info saved.', data: order })
+  } catch (err) {
+    next(err)
+  }
+}
+
 export async function setDeliveryDuration(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const userId = (req as AuthRequest).user.id
