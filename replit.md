@@ -261,7 +261,7 @@ This project has two services running side-by-side:
   - `backend/src/repositories/` — DB abstraction layer (Supabase queries)
   - `backend/src/queues/` — BullMQ async jobs (messages, payments, notifications)
   - `backend/src/bots/` — WhatsApp bot engine (intent detection, response builder)
-  - `backend/src/config/` — Supabase, Redis, Paystack, Meilisearch, Swagger
+  - `backend/src/config/` — Supabase, Redis, Paystack, Swagger
   - `backend/src/middleware/` — Auth JWT, error handler, rate limiter, request logger
   - `backend/src/validators/` — Zod schemas
   - `backend/src/types/` — Shared TypeScript types
