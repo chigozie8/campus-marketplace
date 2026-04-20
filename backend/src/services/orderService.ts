@@ -225,6 +225,24 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         body: `Order #${shortId} for "${productTitle}" has been cancelled.`,
         data: { url: '/seller-orders', orderId: id },
       }).catch(() => {})
+      // Email both sides via Mailtrap (fire-and-forget).
+      // Look up the product title separately because orderRepo.updateOrderStatus
+      // returns the bare row — no joined products. We also need the freshest
+      // quantity in case the row was patched recently.
+      ;(async () => {
+        try {
+          const { data: productRow } = await supabaseAdmin
+            .from('products')
+            .select('title')
+            .eq('id', (order as any).product_id)
+            .maybeSingle()
+          const realTitle = (productRow?.title as string | undefined) || productTitle
+          const { sendOrderCancelledEmails } = await import('./orderEmailService.js')
+          await sendOrderCancelledEmails(order, realTitle)
+        } catch (err) {
+          logger.warn(`[orderService] cancellation email failed for ${id}: ${err instanceof Error ? err.message : String(err)}`)
+        }
+      })()
       addTrustScoreJob({ type: 'order_failed', vendorId: order.seller_id })
         .catch(err => logger.warn(`[orderService] Trust score job failed: ${err.message}`))
       // Restore stock so the product can be sold to another buyer

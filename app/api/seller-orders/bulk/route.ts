@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { sendOrderCancelledEmail } from '@/lib/email'
 
 function svc() {
   return createAdmin(
@@ -58,6 +59,13 @@ export async function POST(req: Request) {
     : { id, ok: false as const, reason: 'forbidden_or_wrong_status' }
   )
 
+  // Fire cancellation emails (buyer + seller) for every order that flipped to
+  // cancelled. Fully async + per-row try/catch so one failed lookup doesn't
+  // block the response or affect other rows.
+  if (action === 'cancel' && updatedIds.size > 0) {
+    void notifyCancellations(Array.from(updatedIds))
+  }
+
   return NextResponse.json({
     action,
     target,
@@ -66,4 +74,64 @@ export async function POST(req: Request) {
     failed: ids.length - updatedIds.size,
     results,
   })
+}
+
+/**
+ * Pull each cancelled order along with the buyer + seller email/name and the
+ * product title, then send the two-sided cancellation email via Mailtrap.
+ * Errors are swallowed per-order so the whole batch never fails together.
+ */
+async function notifyCancellations(orderIds: string[]) {
+  try {
+    const admin = svc()
+    const { data: rows } = await admin
+      .from('orders')
+      .select('id, buyer_id, seller_id, quantity, total_amount, products(title)')
+      .in('id', orderIds)
+
+    if (!rows?.length) return
+
+    // Resolve emails + names in parallel — auth.admin.getUserById gives us
+    // the email reliably; profiles gives us the display name.
+    await Promise.all(rows.map(async (row: any) => {
+      try {
+        const productTitle = row.products?.title ?? 'your item'
+        const order = {
+          id: row.id,
+          productTitle,
+          quantity: Number(row.quantity ?? 1),
+          total: Number(row.total_amount ?? 0),
+        }
+
+        const [buyerAuth, sellerAuth, buyerProfile, sellerProfile] = await Promise.all([
+          admin.auth.admin.getUserById(row.buyer_id),
+          admin.auth.admin.getUserById(row.seller_id),
+          admin.from('profiles').select('full_name').eq('id', row.buyer_id).maybeSingle(),
+          admin.from('profiles').select('full_name').eq('id', row.seller_id).maybeSingle(),
+        ])
+
+        const buyerEmail = buyerAuth.data.user?.email
+        const sellerEmail = sellerAuth.data.user?.email
+
+        await Promise.all([
+          buyerEmail && sendOrderCancelledEmail({
+            to: buyerEmail,
+            name: (buyerProfile.data?.full_name as string | undefined) || 'there',
+            audience: 'buyer',
+            order,
+          }),
+          sellerEmail && sendOrderCancelledEmail({
+            to: sellerEmail,
+            name: (sellerProfile.data?.full_name as string | undefined) || 'there',
+            audience: 'seller',
+            order,
+          }),
+        ])
+      } catch (err) {
+        console.warn('[bulk-cancel] email failed for order', row.id, err)
+      }
+    }))
+  } catch (err) {
+    console.warn('[bulk-cancel] notifyCancellations crashed:', err)
+  }
 }

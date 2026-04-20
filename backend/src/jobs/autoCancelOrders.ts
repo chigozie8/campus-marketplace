@@ -16,7 +16,7 @@ async function runAutoCancel() {
     // delivery window below (defaulting to 5 days if the seller didn't set one).
     const baseQuery = supabaseAdmin
       .from('orders')
-      .select('id, buyer_id, seller_id, total_amount, updated_at, delivery_duration_days, products(title)')
+      .select('id, buyer_id, seller_id, quantity, total_amount, updated_at, delivery_duration_days, products(title)')
       .eq('status', 'paid')
       .lt('updated_at', prefilterCutoff)
 
@@ -27,7 +27,7 @@ async function runAutoCancel() {
       logger.warn('[autoCancelOrders] delivery_duration_days column missing — falling back to default window only.')
       const fallback = await supabaseAdmin
         .from('orders')
-        .select('id, buyer_id, seller_id, total_amount, updated_at, products(title)')
+        .select('id, buyer_id, seller_id, quantity, total_amount, updated_at, products(title)')
         .eq('status', 'paid')
         .lt('updated_at', prefilterCutoff)
       orders = fallback.data as any
@@ -100,6 +100,20 @@ async function runAutoCancel() {
           body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${dayLabel} of payment.`,
           data: { url: '/seller-orders', orderId: order.id },
         })
+
+        // Email both sides via Mailtrap (fire-and-forget — bell already fired).
+        ;(async () => {
+          try {
+            const { sendOrderCancelledEmails } = await import('../services/orderEmailService.js')
+            await sendOrderCancelledEmails(
+              order as any,
+              productTitle,
+              { autoCancelled: true, reason: `Seller did not ship within ${dayLabel}.` },
+            )
+          } catch (err) {
+            logger.warn(`[autoCancelOrders] email failed for order ${order.id}: ${err instanceof Error ? err.message : String(err)}`)
+          }
+        })()
 
         logger.info(`[autoCancelOrders] Cancelled order ${order.id}`)
       } catch (err) {

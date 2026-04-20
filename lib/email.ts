@@ -29,6 +29,10 @@ function layout(opts: {
     subtitle = 'VendoorX Campus Marketplace',
     bodyHtml,
     cta,
+    // ⚠️ HTML — callers MUST escape any user-supplied data they interpolate.
+    // We keep this raw (instead of esc()-ing it) so the newsletter footer
+    // can include a clickable <a> Unsubscribe link without it being rendered
+    // as escaped text in Gmail / Outlook.
     footerNote = 'You\'re receiving this because of activity on your VendoorX account.',
   } = opts
 
@@ -95,10 +99,10 @@ function layout(opts: {
               ` : ''}
             </td>
           </tr>
-          <!-- Footer -->
+          <!-- Footer (footerNote is raw HTML — see layout() opts) -->
           <tr>
             <td class="vx-footer" align="center" style="padding:16px 28px 22px;border-top:1px solid #f3f4f6">
-              <p style="color:#9ca3af;font-size:11px;margin:0 0 4px;line-height:1.6">${esc(footerNote)}</p>
+              <p style="color:#9ca3af;font-size:11px;margin:0 0 4px;line-height:1.6">${footerNote}</p>
               <p style="color:#9ca3af;font-size:11px;margin:0">VendoorX &middot; Nigeria &middot; <a href="${SITE_URL}" style="color:#16a34a;text-decoration:none">vendoorx.ng</a></p>
             </td>
           </tr>
@@ -576,6 +580,98 @@ export async function sendOrderPaidEmail(
         </div>
       `,
       cta: { label: 'Track your order', href: `${SITE_URL}/dashboard/orders` },
+    }),
+  })
+}
+
+/**
+ * Order cancellation — sent to BOTH the buyer and the seller. The `audience`
+ * flag tweaks the copy so the recipient gets the right framing (refund info
+ * for buyers, missed-window warning for sellers).
+ */
+export async function sendOrderCancelledEmail(args: {
+  to: string
+  name: string
+  audience: 'buyer' | 'seller'
+  order: { id: string; productTitle: string; quantity: number; total: number }
+  reason?: string
+  /** True when the cron auto-cancelled because the seller missed the window. */
+  autoCancelled?: boolean
+}): Promise<SendResult> {
+  const { to, name, audience, order, reason, autoCancelled } = args
+  const shortId = order.id.slice(0, 8).toUpperCase()
+  const isBuyer = audience === 'buyer'
+
+  const subject = isBuyer
+    ? (autoCancelled
+        ? `Order auto-cancelled & refunded (#${shortId})`
+        : `Your order has been cancelled (#${shortId})`)
+    : (autoCancelled
+        ? `Order #${shortId} cancelled — shipping window missed`
+        : `Order #${shortId} cancelled`)
+
+  const introCopy = isBuyer
+    ? (autoCancelled
+        ? 'Your order was automatically cancelled because your seller didn\'t ship within the agreed delivery window. Your full payment has been refunded to your VendoorX wallet — you can withdraw it or use it for another order.'
+        : 'Your order has been cancelled. If you had already paid, your funds are being returned to your VendoorX wallet. We\'re sorry for the inconvenience.')
+    : (autoCancelled
+        ? 'This order was automatically cancelled because it wasn\'t shipped within the buyer\'s delivery window. The buyer has been refunded from escrow and the stock has been returned to your listing. To avoid this in future, please ship paid orders promptly.'
+        : 'The order below has been cancelled. Stock has been returned to your listing automatically. The buyer will be refunded if a payment was already received.')
+
+  const calloutHtml = isBuyer
+    ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:8px">
+         <p style="color:#15803d;font-size:13px;margin:0;line-height:1.6">
+           <strong>💰 Refund:</strong> ${ngn(order.total)} is in your VendoorX wallet. Withdraw to your bank from the wallet page.
+         </p>
+       </div>`
+    : (autoCancelled
+        ? `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:8px">
+             <p style="color:#92400e;font-size:13px;margin:0;line-height:1.6">
+               <strong>⚠️ Heads-up:</strong> Repeated missed-shipping windows can lower your trust score and search ranking. Update your listing's delivery time if you need more days to ship.
+             </p>
+           </div>`
+        : '')
+
+  return safeSend({
+    to,
+    subject,
+    html: layout({
+      preheader: isBuyer
+        ? `Order #${shortId} for ${order.productTitle} has been cancelled.`
+        : `Order #${shortId} for ${order.productTitle} was cancelled.`,
+      iconEmoji: '🚫',
+      iconBg: '#ef444422',
+      iconBorder: '#ef444444',
+      title: isBuyer ? 'Order cancelled' : 'Order cancelled',
+      subtitle: `Order #${shortId}`,
+      bodyHtml: `
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 12px">Hi <strong>${esc(name)}</strong>,</p>
+        <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 18px">${introCopy}</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:18px">
+          <tr><td style="padding:16px 18px 0">
+            <p style="color:#0a0a0a;font-size:15px;font-weight:700;margin:0 0 4px;line-height:1.4">${esc(order.productTitle)}</p>
+            <p class="vx-row-value" style="color:#6b7280;font-size:13px;margin:0 0 14px">Quantity: ${esc(order.quantity)}</p>
+          </td></tr>
+          <tr><td style="padding:0 18px 16px">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top:1px solid #e5e7eb">
+              <tr>
+                <td class="vx-row-label" style="color:#6b7280;font-size:13px;padding-top:12px">Order total</td>
+                <td class="vx-amount" align="right" style="color:#0a0a0a;font-size:16px;font-weight:900;padding-top:12px">${ngn(order.total)}</td>
+              </tr>
+            </table>
+          </td></tr>
+        </table>
+        ${reason ? `
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px 18px;margin-bottom:14px">
+            <p style="color:#991b1b;font-size:12px;font-weight:700;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px">Reason</p>
+            <p style="color:#991b1b;font-size:13px;margin:0;line-height:1.6">${esc(reason)}</p>
+          </div>
+        ` : ''}
+        ${calloutHtml}
+      `,
+      cta: isBuyer
+        ? { label: 'View my orders', href: `${SITE_URL}/dashboard/orders` }
+        : { label: 'Manage my orders', href: `${SITE_URL}/seller-orders` },
     }),
   })
 }
