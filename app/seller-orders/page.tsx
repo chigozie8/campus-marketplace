@@ -8,7 +8,7 @@ import {
   ShieldCheck, Banknote, RefreshCw,
 } from 'lucide-react'
 import { useVendorOrders } from '@/hooks/use-orders'
-import { type BackendOrder, type OrderStatus } from '@/lib/api'
+import { type BackendOrder, type OrderStatus, ordersApi } from '@/lib/api'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -49,11 +49,30 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   )
 }
 
+const DELIVERY_OPTIONS = [1, 2, 3, 5, 7, 10, 14, 21, 30] as const
+
 function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; onUpdate: () => void; currentUserId?: string }) {
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [buyerTrust, setBuyerTrust] = useState<BuyerTrust | null>(null)
   const [trustLoading, setTrustLoading] = useState(false)
+  const [savingDuration, setSavingDuration] = useState(false)
+  const [duration, setDuration] = useState<number>(order.delivery_duration_days ?? 5)
+
+  async function saveDuration(days: number) {
+    if (savingDuration) return
+    setSavingDuration(true)
+    try {
+      await ordersApi.setDeliveryDuration(order.id, days)
+      setDuration(days)
+      toast.success(`Delivery window set to ${days} day${days === 1 ? '' : 's'}. Buyer notified.`)
+      onUpdate()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not save delivery window')
+    } finally {
+      setSavingDuration(false)
+    }
+  }
 
   useEffect(() => {
     if (!expanded || buyerTrust || !order.buyer_id) return
@@ -131,9 +150,46 @@ function OrderCard({ order, onUpdate, currentUserId }: { order: ExtendedOrder; o
           buyer's confirmation handle everything — sellers cannot mark items
           as delivered themselves (prevents fraudulent auto-release). */}
       {order.status === 'paid' && (
-        <div className="px-4 sm:px-5 pb-4 -mt-1">
+        <div className="px-4 sm:px-5 pb-4 -mt-1 space-y-3" onClick={(e) => e.stopPropagation()}>
+          <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <p className="text-xs font-bold text-blue-800 dark:text-blue-300">
+                Delivery window
+                {order.delivery_duration_days != null && (
+                  <span className="ml-1 font-normal text-blue-700/80 dark:text-blue-400/80">
+                    · currently {order.delivery_duration_days} day{order.delivery_duration_days === 1 ? '' : 's'}
+                  </span>
+                )}
+              </p>
+            </div>
+            <p className="text-[11px] text-blue-700/80 dark:text-blue-400/80 mb-2 leading-relaxed">
+              Tell the buyer how long shipping will take. They&apos;ll get a notification, and the order auto-cancels if you don&apos;t ship in time. Default is 5 days.
+            </p>
+            <div className="flex items-center gap-2">
+              <select
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                disabled={savingDuration}
+                className="flex-1 h-9 px-2 text-xs rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 font-semibold disabled:opacity-60"
+              >
+                {DELIVERY_OPTIONS.map((d) => (
+                  <option key={d} value={d}>{d} day{d === 1 ? '' : 's'}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => saveDuration(duration)}
+                disabled={savingDuration || duration === (order.delivery_duration_days ?? 5)}
+                className="h-9 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold disabled:opacity-50 transition-colors flex items-center gap-1.5"
+              >
+                {savingDuration ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                Save
+              </button>
+            </div>
+          </div>
+
           <button
-            onClick={(e) => { e.stopPropagation(); markStatus('shipped') }}
+            onClick={() => markStatus('shipped')}
             disabled={loading}
             className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold transition-all disabled:opacity-60 shadow-md shadow-violet-500/25"
           >

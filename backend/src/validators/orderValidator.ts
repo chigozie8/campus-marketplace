@@ -9,3 +9,7 @@ export const createOrderSchema = z.object({
 export const updateOrderStatusSchema = z.object({
   status: z.enum(['pending', 'paid', 'shipped', 'delivered', 'completed', 'cancelled']),
 })
+
+export const setDeliveryDurationSchema = z.object({
+  days: z.number().int().min(1, 'Delivery window must be at least 1 day.').max(30, 'Delivery window cannot exceed 30 days.'),
+})

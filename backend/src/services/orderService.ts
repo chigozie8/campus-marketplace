@@ -76,6 +76,26 @@ export async function getVendorOrders(vendorId: string, page: number, limit: num
   return result
 }
 
+export async function setDeliveryDuration(id: string, days: number): Promise<OrderRow> {
+  const order = await orderRepo.setDeliveryDuration(id, days)
+  await delCache(`orders:id:${id}`)
+
+  const shortId = id.split('-')[0].toUpperCase()
+  const productTitle = (order as any).products?.title ?? 'your item'
+  const dayLabel = days === 1 ? '1 day' : `${days} days`
+
+  // Notify the buyer the seller has committed to a delivery window
+  notify({
+    userId: order.buyer_id,
+    type: 'delivery_estimate_set',
+    title: 'Delivery Window Set by Seller',
+    body: `Good news! Your seller has set a delivery window of ${dayLabel} for "${productTitle}" (Order #${shortId}). If they don't ship within ${dayLabel}, your payment is automatically reversed.`,
+    data: { url: '/dashboard/orders', orderId: id },
+  }).catch(() => {})
+
+  return order
+}
+
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<OrderRow> {
   const order = await orderRepo.updateOrderStatus(id, status)
   await delCache(`orders:id:${id}`)

@@ -88,6 +88,28 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   return data as OrderRow
 }
 
+export async function setDeliveryDuration(id: string, days: number): Promise<OrderRow> {
+  const { data, error } = await supabaseAdmin
+    .from('orders')
+    .update({ delivery_duration_days: days, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    // Surface a clearer message if the column hasn't been added yet
+    if (error.message?.includes('delivery_duration_days')) {
+      throw Object.assign(
+        new Error('The delivery_duration_days column is missing from the orders table. Run supabase/add_delivery_duration.sql in the Supabase SQL editor.'),
+        { status: 500 }
+      )
+    }
+    throw new Error(error.message)
+  }
+  if (!data) throw Object.assign(new Error('Order not found.'), { status: 404 })
+  return data as OrderRow
+}
+
 export async function findOrderByReference(reference: string): Promise<OrderRow | null> {
   const { data, error } = await supabaseAdmin
     .from('orders')

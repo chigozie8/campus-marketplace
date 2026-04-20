@@ -123,6 +123,12 @@ export const ordersApi = {
       body: JSON.stringify({ status }),
     }),
 
+  setDeliveryDuration: (id: string, days: number) =>
+    request<{ success: boolean; data: BackendOrder; message?: string }>(`/orders/${id}/delivery-duration`, {
+      method: 'PATCH',
+      body: JSON.stringify({ days }),
+    }),
+
   // Uses the direct Next.js API route — works in production without the Express backend.
   initializePayment: (id: string) =>
     directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(`/api/orders/${id}/pay`, {
@@ -166,6 +172,7 @@ export interface BackendOrder {
   delivery_address: string
   payment_ref?: string
   delivered_at?: string
+  delivery_duration_days?: number | null
   created_at: string
   updated_at?: string
   products?: { title: string; name?: string; price: number; images?: string[]; image_url?: string }

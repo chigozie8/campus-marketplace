@@ -2,7 +2,7 @@ import { Router } from 'express'
 import * as orderController from '../controllers/orderController.js'
 import { authenticate, requireRole } from '../middleware/authMiddleware.js'
 import { validate } from '../validators/authValidator.js'
-import { createOrderSchema, updateOrderStatusSchema } from '../validators/orderValidator.js'
+import { createOrderSchema, updateOrderStatusSchema, setDeliveryDurationSchema } from '../validators/orderValidator.js'
 import * as paymentService from '../services/paymentService.js'
 import * as orderService from '../services/orderService.js'
 import * as payoutService from '../services/payoutService.js'
@@ -87,6 +87,12 @@ router.patch(
   '/:id/status',
   validate(updateOrderStatusSchema),
   orderController.updateOrderStatus
+)
+
+router.patch(
+  '/:id/delivery-duration',
+  validate(setDeliveryDurationSchema),
+  orderController.setDeliveryDuration
 )
 
 router.post('/:id/pay', async (req, res, next) => {

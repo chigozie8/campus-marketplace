@@ -3,18 +3,36 @@ import { notify } from '../services/notificationService.js'
 import { reversePendingCredit } from '../services/walletService.js'
 import logger from '../utils/logger.js'
 
-const CANCEL_AFTER_DAYS = 5
+const DEFAULT_CANCEL_AFTER_DAYS = 5
+// Pull anything paid for at least 1 day; per-order durations are then enforced in JS
+const PREFILTER_CUTOFF_HOURS = 24
 
 async function runAutoCancel() {
   try {
-    const cutoff = new Date(Date.now() - CANCEL_AFTER_DAYS * 24 * 60 * 60 * 1000).toISOString()
+    const prefilterCutoff = new Date(Date.now() - PREFILTER_CUTOFF_HOURS * 60 * 60 * 1000).toISOString()
+    const now = Date.now()
 
-    // Find paid orders older than CANCEL_AFTER_DAYS with no ship date
-    const { data: orders, error } = await supabaseAdmin
+    // Find paid orders at least 1 day old; we'll filter further by per-order
+    // delivery window below (defaulting to 5 days if the seller didn't set one).
+    const baseQuery = supabaseAdmin
       .from('orders')
-      .select('id, buyer_id, seller_id, total_amount, products(title)')
+      .select('id, buyer_id, seller_id, total_amount, updated_at, delivery_duration_days, products(title)')
       .eq('status', 'paid')
-      .lt('updated_at', cutoff)
+      .lt('updated_at', prefilterCutoff)
+
+    let { data: orders, error } = await baseQuery
+    // Gracefully fall back if the delivery_duration_days column hasn't been
+    // added to Supabase yet — every order is treated as the default window.
+    if (error && error.message?.includes('delivery_duration_days')) {
+      logger.warn('[autoCancelOrders] delivery_duration_days column missing — falling back to default window only.')
+      const fallback = await supabaseAdmin
+        .from('orders')
+        .select('id, buyer_id, seller_id, total_amount, updated_at, products(title)')
+        .eq('status', 'paid')
+        .lt('updated_at', prefilterCutoff)
+      orders = fallback.data as any
+      error = fallback.error
+    }
 
     if (error) {
       logger.error(`[autoCancelOrders] Query failed: ${error.message}`)
@@ -26,9 +44,21 @@ async function runAutoCancel() {
       return
     }
 
-    logger.info(`[autoCancelOrders] Cancelling ${orders.length} stale order(s)…`)
+    // Filter by per-order delivery window
+    const stale = orders.filter(o => {
+      const days = (o as any).delivery_duration_days ?? DEFAULT_CANCEL_AFTER_DAYS
+      const ageMs = now - new Date((o as any).updated_at).getTime()
+      return ageMs >= days * 24 * 60 * 60 * 1000
+    })
 
-    for (const order of orders) {
+    if (stale.length === 0) {
+      logger.info('[autoCancelOrders] No orders past their delivery window yet.')
+      return
+    }
+
+    logger.info(`[autoCancelOrders] Cancelling ${stale.length} stale order(s)…`)
+
+    for (const order of stale) {
       try {
         const { error: updateErr } = await supabaseAdmin
           .from('orders')
@@ -50,13 +80,15 @@ async function runAutoCancel() {
 
         const productTitle = (order.products as any)?.title ?? 'your item'
         const shortId = order.id.split('-')[0].toUpperCase()
+        const windowDays = (order as any).delivery_duration_days ?? DEFAULT_CANCEL_AFTER_DAYS
+        const dayLabel = windowDays === 1 ? '1 day' : `${windowDays} days`
 
         // Notify buyer — payment reversed
         await notify({
           userId: order.buyer_id,
           type: 'order_cancelled',
           title: 'Payment Reversed',
-          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${CANCEL_AFTER_DAYS} days. Your payment has been reversed and refunded to your wallet.`,
+          body: `Your order #${shortId} for "${productTitle}" was cancelled — the seller did not ship within ${dayLabel}. Your payment has been reversed and refunded to your wallet.`,
           data: { url: '/dashboard/orders', orderId: order.id },
         })
 
@@ -65,7 +97,7 @@ async function runAutoCancel() {
           userId: order.seller_id,
           type: 'order_cancelled',
           title: 'Order Cancelled — Payment Reversed',
-          body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${CANCEL_AFTER_DAYS} days of payment.`,
+          body: `Order #${shortId} for "${productTitle}" was automatically cancelled and the buyer refunded because it was not shipped within ${dayLabel} of payment.`,
           data: { url: '/seller-orders', orderId: order.id },
         })
 

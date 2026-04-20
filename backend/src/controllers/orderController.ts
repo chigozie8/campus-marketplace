@@ -83,3 +83,32 @@ export async function updateOrderStatus(req: Request, res: Response, next: NextF
     next(err)
   }
 }
+
+export async function setDeliveryDuration(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userId = (req as AuthRequest).user.id
+    const role = (req as AuthRequest).user.role
+
+    const existing = await orderService.getOrderById(req.params.id)
+
+    // Only the seller (or admin) may set the delivery window
+    if (role !== 'admin' && existing.seller_id !== userId) {
+      res.status(403).json({ success: false, message: 'Only the seller can set the delivery window for this order.' })
+      return
+    }
+
+    // Only meaningful while the order is paid and not yet shipped
+    if (existing.status !== 'paid') {
+      res.status(400).json({
+        success: false,
+        message: `You can only set a delivery window while the order is awaiting shipment. Current status: ${existing.status}.`,
+      })
+      return
+    }
+
+    const order = await orderService.setDeliveryDuration(req.params.id, req.body.days)
+    res.status(200).json({ success: true, message: 'Delivery window saved. The buyer has been notified.', data: order })
+  } catch (err) {
+    next(err)
+  }
+}

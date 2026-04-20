@@ -46,6 +46,7 @@ export interface OrderRow {
   delivery_address: string
   payment_ref?: string
   delivered_at?: string
+  delivery_duration_days?: number | null
   created_at: string
   updated_at?: string
 }

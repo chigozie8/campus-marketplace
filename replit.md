@@ -2,6 +2,13 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Per-Order Seller-Set Delivery Window
+- New nullable column `orders.delivery_duration_days` (1–30, NULL = use default 5). Migration: `supabase/add_delivery_duration.sql` — paste once into the Supabase SQL editor.
+- Seller-only endpoint `PATCH /api/backend/orders/:id/delivery-duration` (validator: `setDeliveryDurationSchema`). Allowed only while order is `paid`. Sends a `delivery_estimate_set` notification to the buyer on save.
+- `backend/src/jobs/autoCancelOrders.ts` now respects per-order durations (default 5 days when NULL); pre-filters orders ≥1 day old then evaluates the per-order window in JS. Falls back gracefully if the column hasn't been added yet (logs a warning, treats every order as default).
+- Seller UI: blue "Delivery window" picker (1/2/3/5/7/10/14/21/30 days) above the "Mark as Shipped" button on each paid order in `app/seller-orders/page.tsx`. Shows current value when set; Save button disabled until value changes.
+- API client: `ordersApi.setDeliveryDuration(id, days)` in `lib/api.ts`.
+
 ### Two-Way Offer Conversations + Escrow Refund Fix + Order Detail Page
 - **Offers — full negotiation thread:** new `offer_messages` table (`scripts/030_offer_messages.sql`) lets buyer & seller exchange replies and counter-prices on a single offer. New routes:
   - `GET/PATCH /api/offers/[id]` — fetch single offer with both parties; accept/decline/withdraw/counter
