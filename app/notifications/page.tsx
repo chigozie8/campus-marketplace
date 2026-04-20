@@ -9,6 +9,11 @@ import {
   BellOff, Sparkles, Tag,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { LottiePlayer } from '@/components/ui/lottie-player'
+
+// Hosted on LottieFiles' CDN. If the URL ever fails, the static <BellOff/>
+// fallback below is rendered instead — the empty state always works.
+const EMPTY_BELL_LOTTIE = 'https://assets3.lottiefiles.com/packages/lf20_jbrw3hcz.json'
 
 interface Notification {
   id: string
@@ -272,9 +277,15 @@ export default function NotificationsPage() {
           /* ── Empty State ── */
           <div className="flex flex-col items-center justify-center py-20 text-center px-6">
             <div className="relative mb-5">
-              <div className="w-20 h-20 rounded-3xl bg-[#0a0a0a] flex items-center justify-center shadow-xl shadow-black/20">
-                <BellOff className="w-9 h-9 text-white/30" />
-              </div>
+              <LottiePlayer
+                src={EMPTY_BELL_LOTTIE}
+                className="w-32 h-32 flex items-center justify-center"
+                fallback={
+                  <div className="w-20 h-20 rounded-3xl bg-[#0a0a0a] flex items-center justify-center shadow-xl shadow-black/20">
+                    <BellOff className="w-9 h-9 text-white/30" />
+                  </div>
+                }
+              />
               <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#16a34a] flex items-center justify-center shadow-md shadow-[#16a34a]/40">
                 <Sparkles className="w-3 h-3 text-white" />
               </div>
