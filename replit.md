@@ -2,6 +2,32 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Dashboard Improvements Batch 1–12 (April 2026)
+Twelve dashboard upgrades shipped, with the buyer/seller view toggle as the centerpiece. Server-component branches by `?view=buyer|seller` (default from `profile.role`); client toggle persists choice in localStorage and updates URL via `router.replace`.
+
+**New components in `components/dashboard/`:**
+- `mode-toggle.tsx` — Selling | Buying segmented control (URL + localStorage)
+- `stat-card.tsx` — reusable stat tile w/ optional delta pill + sparkline slot
+- `earnings-sparkline.tsx` — 7-day SVG line chart
+- `header-badges.tsx` — pill counters (unread inbox / pending orders / unread notifs)
+- `activity-feed.tsx` — last-24h orders + chat events with relative timestamps
+- `inventory-alerts.tsx` — low-stock and "sold out but visible" warnings
+- `smart-empty-state.tsx` — replaces generic zero-listing block
+- `share-store-button.tsx` — generates 1200×630 PNG via `/api/og/store/[id]`, uses Web Share API w/ download fallback
+- `buyer-dashboard-view.tsx` — full buyer dashboard (stats, in-transit, wishlist drops w/ `last_seen_price`, recent orders)
+
+**New routes:**
+- `app/api/og/store/[id]/route.tsx` — branded share image (next/og). Hardened: UUID regex check, `is_seller`/`role==='vendor'`/has-listings gate, SSRF allowlist on top-product image (Supabase host only).
+
+**Refactored:**
+- `app/dashboard/page.tsx` — view-conditional parallel fetches (capped at PRODUCT_LIMIT=200 / ORDERS_LIMIT=500), Quick Links horizontal-scroll on mobile, sparkline & deltas wired into stat cards
+- `app/dashboard/loading.tsx` — proper skeleton matching final layout (was 5-line stub)
+- `components/dashboard/trust-panel.tsx` — `rankTips()` reorders tips so unearned bonuses surface first
+
+**Skipped (data not available):** Per-day view sparklines and trend deltas for views/CTR — no `product_views_history` table exists; only earnings sparkline is real data.
+
+
+
 ### Animations
 - The custom GSAP/Lottie animation layer was removed at the user's request. The codebase now relies only on plain CSS transitions/Tailwind animations that were already in place.
 

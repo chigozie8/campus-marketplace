@@ -37,21 +37,46 @@ type TrustData = {
   seller: ScoreData | null
 }
 
-const BUYER_TIPS = [
-  { tip: 'Complete more orders without cancelling to earn +2 pts each (up to +20)', icon: '📦' },
-  { tip: 'Never open a false dispute — each lost dispute costs −20 pts', icon: '⚠️' },
-  { tip: 'Keep your account active for 3+ months to earn age bonus (+5 pts)', icon: '📅' },
-  { tip: 'Always confirm delivery promptly instead of letting auto-release trigger', icon: '✅' },
-  { tip: 'Reach 70 pts to earn the Trusted Buyer badge', icon: '🏅' },
+type Tip = { tip: string; icon: string; key: string }
+
+const BUYER_TIPS: Tip[] = [
+  { key: 'orders',     tip: 'Complete more orders without cancelling to earn +2 pts each (up to +20)', icon: '📦' },
+  { key: 'noDispute',  tip: 'Never open a false dispute — each lost dispute costs −20 pts', icon: '⚠️' },
+  { key: 'age',        tip: 'Keep your account active for 3+ months to earn age bonus (+5 pts)', icon: '📅' },
+  { key: 'delivery',   tip: 'Always confirm delivery promptly instead of letting auto-release trigger', icon: '✅' },
+  { key: 'milestone',  tip: 'Reach 70 pts to earn the Trusted Buyer badge', icon: '🏅' },
 ]
 
-const SELLER_TIPS = [
-  { tip: 'Get reviewed by buyers to boost your rating score (up to +25 pts)', icon: '⭐' },
-  { tip: 'Complete seller verification to earn the verified bonus (+10 pts)', icon: '✅' },
-  { tip: 'Make more sales — every 20 confirmed sales adds up to +15 pts', icon: '💰' },
-  { tip: 'Avoid disputes being resolved against you — each costs −10 pts', icon: '⚠️' },
-  { tip: 'Keep your account active for 6+ months for maximum age bonus (+10 pts)', icon: '📅' },
+const SELLER_TIPS: Tip[] = [
+  { key: 'verified',   tip: 'Complete seller verification to earn the verified bonus (+10 pts)', icon: '✅' },
+  { key: 'rating',     tip: 'Get reviewed by buyers to boost your rating score (up to +25 pts)', icon: '⭐' },
+  { key: 'sales',      tip: 'Make more sales — every 20 confirmed sales adds up to +15 pts', icon: '💰' },
+  { key: 'age',        tip: 'Keep your account active for 6+ months for maximum age bonus (+10 pts)', icon: '📅' },
+  { key: 'noDispute',  tip: 'Avoid disputes being resolved against you — each costs −10 pts', icon: '⚠️' },
 ]
+
+/**
+ * Reorder tips so the ones the user can act on right now (zero-value
+ * breakdown items) appear first. Tips for already-earned bonuses sink to
+ * the bottom but stay visible as reminders.
+ */
+function rankTips(tips: Tip[], breakdown: Breakdown, mode: 'buyer' | 'seller'): Tip[] {
+  const earned = (k: string): boolean => {
+    if (mode === 'seller') {
+      if (k === 'verified') return (breakdown.verifiedBonus ?? 0) > 0
+      if (k === 'rating')   return (breakdown.ratingBonus ?? 0) >= 15
+      if (k === 'sales')    return (breakdown.salesBonus ?? 0) >= 10
+      if (k === 'age')      return (breakdown.ageBonus ?? 0) >= 5
+      if (k === 'noDispute')return (breakdown.sellerDisputePenalty ?? 0) === 0
+    } else {
+      if (k === 'orders')    return (breakdown.ordersBonus ?? 0) >= 10
+      if (k === 'noDispute') return (breakdown.disputeLossPenalty ?? 0) === 0 && (breakdown.disputeWinPenalty ?? 0) === 0
+      if (k === 'age')       return (breakdown.ageBonus ?? 0) >= 5
+    }
+    return false
+  }
+  return [...tips].sort((a, b) => Number(earned(a.key)) - Number(earned(b.key)))
+}
 
 const MILESTONES = [
   { score: 70, label: 'Trusted Buyer', emoji: '✅', desc: 'Unlock the Trusted Buyer badge' },
@@ -244,8 +269,8 @@ export function DashboardTrustPanel({ userId, isSeller = false }: Props) {
 
         {showTips && (
           <div className="px-5 pb-4 space-y-2">
-            {(activeTab === 'seller' ? SELLER_TIPS : BUYER_TIPS).map((t, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+            {rankTips(activeTab === 'seller' ? SELLER_TIPS : BUYER_TIPS, breakdown, activeTab).map((t, i) => (
+              <div key={t.key} className={`flex items-start gap-2 text-xs leading-relaxed ${i === 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                 <span className="flex-shrink-0 mt-0.5">{t.icon}</span>
                 <span>{t.tip}</span>
               </div>
