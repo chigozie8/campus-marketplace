@@ -2,12 +2,8 @@
 
 ## Recently Completed Features (Latest Session)
 
-### Subtle GSAP + Lottie Animation Layer (mobile-safe)
-- Installed `gsap@^3.12.5`. `lottie-react` was already present.
-- `lib/gsap-client.ts` — single-instance GSAP + ScrollTrigger registration with `prefersReducedMotion()` and `isLowEndDevice()` (Save-Data / 2G / `deviceMemory < 2GB`) helpers.
-- `components/ui/reveal.tsx` — `<Reveal>` wrapper. Uses `gsap.matchMedia()` so mobile gets shorter/smaller transforms (max 12px / 0.45s) vs desktop (24px / 0.6s). `force3D: true`, transform+opacity only, `will-change` toggled on/off, `toggleActions: 'play none none none'` + `once: true` so triggers self-destruct after firing. Skipped entirely on reduced-motion or low-end devices (content shows immediately).
-- `components/ui/lottie-player.tsx` — lazy-loaded Lottie via `next/dynamic` (no cost on pages that don't use it). Won't fetch the JSON until visible (IntersectionObserver, 100px rootMargin); auto-pauses off-screen; gracefully renders a `fallback` if the URL fails or motion is reduced.
-- Applied tastefully to: hero (badge + headline + CTA stagger on mount), Features section (text + 8-card stagger on scroll), and notifications empty state (Lottie bell with the existing `<BellOff/>` icon as fallback).
+### Animations
+- The custom GSAP/Lottie animation layer was removed at the user's request. The codebase now relies only on plain CSS transitions/Tailwind animations that were already in place.
 
 ### Per-Order Seller-Set Delivery Window
 - New nullable column `orders.delivery_duration_days` (1–30, NULL = use default 5). Migration: `supabase/add_delivery_duration.sql` — paste once into the Supabase SQL editor.

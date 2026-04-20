@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { GraduationCap, ArrowRight, Play, Shield, Zap, Users, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Reveal } from '@/components/ui/reveal'
 import type { User } from '@supabase/supabase-js'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { DEFAULT_SETTINGS } from '@/lib/site-settings-defaults'
@@ -46,7 +45,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
       {/* Dark mode subtle glow only */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full dark:bg-green-500/5 blur-[120px] pointer-events-none" />
 
-      <Reveal stagger staggerAmount={0.1} immediate y={20} className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
+      <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
 
         {/* Trust badge pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
@@ -182,7 +181,7 @@ export function HeroSection({ user, settings }: HeroSectionProps) {
             </span>
           </div>
         </div>
-      </Reveal>
+      </div>
 
       {/* Scroll indicator */}
       <div className="pb-10 flex flex-col items-center gap-2 group cursor-pointer select-none">

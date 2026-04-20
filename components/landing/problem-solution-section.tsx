@@ -1,9 +1,6 @@
-'use client'
-
 import { X, Check, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Reveal } from '@/components/ui/reveal'
 
 const BEFORE = [
   'Buried under 60+ unread chats you\'ll never catch up on',
@@ -28,7 +25,7 @@ export function ProblemSolutionSection() {
     <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <Reveal as="div" className="text-center mb-14">
+        <div className="text-center mb-14">
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Sound Familiar?
           </span>
@@ -39,10 +36,10 @@ export function ProblemSolutionSection() {
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-pretty">
             You have the hustle. You have the customers. But managing everything through chat alone is costing you real money — and you might not even realise it.
           </p>
-        </Reveal>
+        </div>
 
         {/* Comparison cards */}
-        <Reveal as="div" stagger staggerAmount={0.15} className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6 relative">
           {/* VS Badge — only visible on desktop */}
           <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-background border-2 border-border shadow-xl items-center justify-center">
             <span className="text-xs font-black text-muted-foreground tracking-widest">VS</span>
@@ -129,7 +126,7 @@ export function ProblemSolutionSection() {
               </Button>
             </div>
           </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   )

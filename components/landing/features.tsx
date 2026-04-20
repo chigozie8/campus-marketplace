@@ -1,5 +1,3 @@
-'use client'
-
 import {
   MessageCircle,
   LayoutDashboard,
@@ -10,7 +8,6 @@ import {
   Users,
   Bot,
 } from 'lucide-react'
-import { Reveal } from '@/components/ui/reveal'
 
 const features = [
   {
@@ -83,7 +80,7 @@ export function Features() {
   return (
     <section id="features" className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Reveal className="text-center mb-16">
+        <div className="text-center mb-16">
           <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Built for You</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-4">
             Every tool your business needs to sell on WhatsApp
@@ -91,9 +88,9 @@ export function Features() {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance leading-relaxed">
             Stop duct-taping your business together with manual chats and spreadsheets. VendoorX gives you one powerful AI-driven platform to sell, automate, and grow.
           </p>
-        </Reveal>
+        </div>
 
-        <Reveal stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {features.map(({ icon: Icon, title, description, color, bg }) => (
             <div
               key={title}
@@ -106,7 +103,7 @@ export function Features() {
               <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
             </div>
           ))}
-        </Reveal>
+        </div>
       </div>
     </section>
   )

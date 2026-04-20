@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { MessageCircle, Plus, Minus } from 'lucide-react'
-import { Reveal } from '@/components/ui/reveal'
 
 const FAQS = [
   {
@@ -118,7 +117,7 @@ export function FaqSection() {
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <Reveal as="div" className="text-center mb-14">
+        <div className="text-center mb-14">
           <span className="inline-flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-[0.2em] mb-5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             FAQ
@@ -133,14 +132,14 @@ export function FaqSection() {
           <p className="text-muted-foreground text-lg max-w-xl mx-auto leading-relaxed">
             Everything you need to know before signing up. Still not sure? We&apos;re always reachable on WhatsApp.
           </p>
-        </Reveal>
+        </div>
 
         {/* FAQ items */}
-        <Reveal as="div" stagger staggerAmount={0.06} y={16} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {FAQS.map((faq, i) => (
             <FaqItem key={i} faq={faq} index={i} />
           ))}
-        </Reveal>
+        </div>
 
         {/* Bottom CTA */}
         <div className="mt-12 rounded-3xl bg-primary/5 border border-primary/15 p-8 flex flex-col sm:flex-row items-center justify-between gap-6">

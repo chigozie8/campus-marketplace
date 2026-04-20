@@ -1,7 +1,5 @@
 'use client'
 
-import { Reveal } from '@/components/ui/reveal'
-
 const INTEGRATIONS = [
   {
     name: 'WhatsApp',
@@ -82,7 +80,7 @@ export function IntegrationsSection() {
     <section className="py-20 sm:py-28 px-4 sm:px-6 bg-background">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <Reveal as="div" className="text-center mb-16">
+        <div className="text-center mb-16">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground/70 mb-3">
             Works with everything you already use
           </p>
@@ -92,10 +90,10 @@ export function IntegrationsSection() {
           <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             Share your listings to every platform your buyers scroll daily — in one tap. One store, unlimited reach.
           </p>
-        </Reveal>
+        </div>
 
         {/* Cards grid */}
-        <Reveal as="div" stagger staggerAmount={0.06} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {INTEGRATIONS.map(({ name, bg, icon, description, users }) => (
             <div
               key={name}
@@ -129,7 +127,7 @@ export function IntegrationsSection() {
               />
             </div>
           ))}
-        </Reveal>
+        </div>
 
         {/* Sub-line */}
         <p className="text-center text-sm text-muted-foreground mt-10">
