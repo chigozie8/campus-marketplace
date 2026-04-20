@@ -231,13 +231,12 @@ export default function LoginPage() {
                   <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-foreground">
                     Password
                   </Label>
-                  {/* Forgot password link removed — users can change their password from Profile → Security */}
-                  {/* <Link
+                  <Link
                     href="/auth/forgot-password"
-                    className="text-xs text-[#16a34a] hover:text-[#15803d] font-medium transition-colors"
+                    className="text-xs text-[#16a34a] hover:text-[#15803d] font-semibold transition-colors"
                   >
                     Forgot password?
-                  </Link> */}
+                  </Link>
                 </div>
                 <div className="relative">
                   <Input

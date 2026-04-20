@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   CheckCircle2, ShieldCheck, Sparkles, Lock,
-  ShoppingBag, Store, GraduationCap, Phone
+  ShoppingBag, Store, Repeat, GraduationCap, Phone
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,16 @@ function PasswordStrength({ password }: { password: string }) {
     { label: 'Symbol', pass: /[^A-Za-z0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  const barColor = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-amber-400', 'bg-[#16a34a]'][score]
+  // score 0 → none, 1 → Weak, 2 → Medium, 3 → Strong, 4 → Perfect
+  const tiers = [
+    { label: '', textColor: '' },
+    { label: 'Weak', textColor: 'text-red-500' },
+    { label: 'Medium', textColor: 'text-orange-500' },
+    { label: 'Strong', textColor: 'text-amber-500' },
+    { label: 'Perfect', textColor: 'text-[#16a34a]' },
+  ]
+  const barColor = ['bg-red-400', 'bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-[#16a34a]'][score]
+  const tier = tiers[score]
   if (!password) return null
   return (
     <div className="mt-2 space-y-1.5">
@@ -39,25 +48,32 @@ function PasswordStrength({ password }: { password: string }) {
           />
         ))}
       </div>
-      <div className="flex gap-3 flex-wrap">
-        {checks.map(({ label, pass }) => (
-          <span
-            key={label}
-            className={cn(
-              'text-[10px] flex items-center gap-1 transition-colors',
-              pass ? 'text-[#16a34a]' : 'text-gray-400'
-            )}
-          >
-            <CheckCircle2 className="w-2.5 h-2.5" />
-            {label}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex gap-3 flex-wrap">
+          {checks.map(({ label, pass }) => (
+            <span
+              key={label}
+              className={cn(
+                'text-[10px] flex items-center gap-1 transition-colors',
+                pass ? 'text-[#16a34a]' : 'text-gray-400'
+              )}
+            >
+              <CheckCircle2 className="w-2.5 h-2.5" />
+              {label}
+            </span>
+          ))}
+        </div>
+        {tier.label && (
+          <span className={cn('text-[11px] font-bold uppercase tracking-wider', tier.textColor)}>
+            {tier.label}
           </span>
-        ))}
+        )}
       </div>
     </div>
   )
 }
 
-type Role = 'buyer' | 'seller' | ''
+type Role = 'buyer' | 'seller' | 'both' | ''
 
 function SignUpPageInner() {
   const router = useRouter()
@@ -244,17 +260,18 @@ function SignUpPageInner() {
               {/* Role selector */}
               <div className="space-y-1.5">
                 <Label className="text-sm font-semibold text-gray-700 dark:text-foreground">I want to</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {[
-                    { value: 'buyer' as Role, icon: ShoppingBag, label: 'Buy items', sub: 'Browse & buy' },
-                    { value: 'seller' as Role, icon: Store, label: 'Sell items', sub: 'List & earn' },
+                    { value: 'buyer' as Role, icon: ShoppingBag, label: 'Buy', sub: 'Browse & buy' },
+                    { value: 'seller' as Role, icon: Store, label: 'Sell', sub: 'List & earn' },
+                    { value: 'both' as Role, icon: Repeat, label: 'Both', sub: 'Buy & sell' },
                   ].map(({ value, icon: Icon, label, sub }) => (
                     <button
                       key={value}
                       type="button"
                       onClick={() => setRole(value)}
                       className={cn(
-                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 text-center',
+                        'relative flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 text-center',
                         role === value
                           ? 'border-[#16a34a] bg-[#16a34a]/5 text-[#16a34a]'
                           : 'border-gray-200 dark:border-border hover:border-gray-300 dark:hover:border-border/80 text-gray-600 dark:text-muted-foreground bg-gray-50 dark:bg-muted'
@@ -268,10 +285,10 @@ function SignUpPageInner() {
                       </div>
                       <div>
                         <p className="text-sm font-bold leading-none">{label}</p>
-                        <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5">{sub}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-muted-foreground mt-0.5">{sub}</p>
                       </div>
                       {role === value && (
-                        <CheckCircle2 className="w-4 h-4 text-[#16a34a] absolute top-3 right-3" />
+                        <CheckCircle2 className="w-4 h-4 text-[#16a34a] absolute top-2 right-2" />
                       )}
                     </button>
                   ))}
