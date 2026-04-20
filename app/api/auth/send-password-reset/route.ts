@@ -101,27 +101,34 @@ export async function POST(req: Request) {
     options: { redirectTo },
   })
 
-  const actionLink = data?.properties?.action_link
+  // We do NOT use data.properties.action_link — that link routes through
+  // Supabase's own /auth/v1/verify which returns the session in the URL hash
+  // fragment (implicit flow), invisible to our server-side callback. Instead
+  // we use data.properties.hashed_token and build our own callback URL that
+  // hits the verifyOtp({token_hash, type:'recovery'}) path in /auth/callback.
+  const hashedToken = data?.properties?.hashed_token
 
   // Fail-safe anti-enumeration: ANY error from generateLink — including
   // unknown-user, malformed input, and quota exhaustion — collapses to the
   // same generic 200 response. We deliberately do NOT inspect the error
   // message because Supabase's wording is not a stable contract. Real infra
   // failures still get logged server-side for monitoring.
-  if (error || !actionLink) {
+  if (error || !hashedToken) {
     if (error) {
       console.warn(`[send-password-reset] generateLink failed for masked email; treating as no-op: ${error.message}`)
     } else {
-      console.warn('[send-password-reset] no action_link returned; treating as no-op')
+      console.warn('[send-password-reset] no hashed_token returned; treating as no-op')
     }
     await profileLookup // keep timing parity with the success branch
     await padTo(startedAt)
     return NextResponse.json(SUCCESS_MSG)
   }
 
+  const resetUrl = `${appUrl}/auth/callback?token_hash=${encodeURIComponent(hashedToken)}&type=recovery&next=/auth/reset-password`
+
   const displayName = await profileLookup
 
-  const result = await sendPasswordResetLinkEmail(email, displayName, actionLink)
+  const result = await sendPasswordResetLinkEmail(email, displayName, resetUrl)
   if (!result.ok) {
     console.error('[send-password-reset] mailtrap send failed:', result.error)
     // Even on Mailtrap failure we return the generic success message — the
