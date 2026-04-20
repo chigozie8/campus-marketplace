@@ -213,6 +213,47 @@ export async function sendConfirmationLinkEmail(to: string, name: string, confir
   })
 }
 
+/**
+ * Self-service password reset link (sent when a user clicks "Forgot password").
+ * We mint the link with supabaseAdmin.auth.admin.generateLink() and deliver it
+ * through Mailtrap so the email lands in the inbox like every other VendoorX
+ * notification — bypassing whatever SMTP Supabase has configured.
+ *
+ * Deliverability notes:
+ *   - Plain transactional copy, no urgency / "act now" / "click here" language
+ *   - Single CTA + visible fallback URL (low link-to-text ratio)
+ *   - Personalised greeting when we know the user's name
+ */
+export async function sendPasswordResetLinkEmail(to: string, name: string | null, resetUrl: string) {
+  const greeting = name ? `Hi <strong>${esc(name)}</strong>,` : 'Hi there,'
+  return safeSend({
+    to,
+    subject: 'Reset your VendoorX password',
+    html: layout({
+      preheader: 'Use the link below to choose a new password.',
+      iconEmoji: '🔐',
+      title: 'Reset your password',
+      bodyHtml: `
+        <p style="color:#111827;font-size:15px;line-height:1.6;margin:0 0 12px">${greeting}</p>
+        <p style="color:#374151;font-size:14px;line-height:1.7;margin:0 0 22px">
+          We received a request to reset the password on your VendoorX account.
+          Choose a new password using the button below.
+        </p>
+        <a href="${resetUrl}" style="display:block;background:#16a34a;color:#fff;text-align:center;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:20px">
+          Choose a new password
+        </a>
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:8px">
+          <p style="color:#6b7280;font-size:12px;margin:0 0 6px;font-weight:600;">If the button does not work, copy this link into your browser:</p>
+          <p style="color:#374151;font-size:12px;margin:0;word-break:break-all;">${resetUrl}</p>
+        </div>
+        <p style="color:#9ca3af;font-size:12px;margin:14px 0 0;line-height:1.6;">
+          This link expires in 1 hour for your security. If you did not request a password reset, you can ignore this email — your password will stay the same.
+        </p>
+      `,
+    }),
+  })
+}
+
 export async function sendVerificationApprovedEmail(to: string, name: string) {
   await safeSend({
     to,

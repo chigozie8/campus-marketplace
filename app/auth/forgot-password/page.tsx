@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 export default function ForgotPasswordPage() {
@@ -22,19 +21,30 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setLoading(true)
     const toastId = toast.loading('Sending reset link...')
-    const supabase = createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?next=/auth/reset-password`,
-    })
-    toast.dismiss(toastId)
-    if (error) {
-      toast.error(error.message)
+    try {
+      // Custom endpoint: mints the recovery link via Supabase admin API and
+      // delivers it through Mailtrap so the email actually lands in the inbox
+      // (the default Supabase SMTP path was being flagged as spam).
+      const res = await fetch('/api/auth/send-password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const result = await res.json().catch(() => ({}))
+      toast.dismiss(toastId)
+      if (!res.ok) {
+        toast.error(result.error || 'Could not send reset link. Please try again.')
+        setLoading(false)
+        return
+      }
+      toast.success('Reset link sent!', { description: 'Check your inbox.' })
+      setSuccess(true)
+    } catch {
+      toast.dismiss(toastId)
+      toast.error('Network error. Please try again.')
+    } finally {
       setLoading(false)
-      return
     }
-    toast.success('Reset link sent!', { description: 'Check your inbox.' })
-    setSuccess(true)
-    setLoading(false)
   }
 
   if (success) {
