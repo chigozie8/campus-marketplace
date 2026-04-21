@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -338,7 +339,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://lgslsxokxohqzgsheybd.supabase.co" />
 
         {/* ── Splash screen — runs synchronously before React so it appears on the very first paint ── */}
-        <script dangerouslySetInnerHTML={{ __html: `
+        <Script id="vx-splash" strategy="beforeInteractive">{`
 (function(){
   try {
     // Skip splash on coming-soon page
@@ -408,11 +409,13 @@ export default function RootLayout({
 
   } catch(e) {}
 })();
-        `}} />
+        `}</Script>
 
         {/* Structured data — inlined directly so crawlers see it in initial HTML */}
-        <script
+        <Script
+          id="vx-jsonld"
           type="application/ld+json"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
