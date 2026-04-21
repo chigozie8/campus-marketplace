@@ -19,6 +19,16 @@ interface Props {
 
 const STORAGE_KEY = 'vx_ad_popup_dismissed'
 
+/** Tiny non-cryptographic hash so a fresh ad bypasses any prior dismissal. */
+function contentHash(title: string, body: string, ctaHref?: string) {
+  const s = `${title}|${body}|${ctaHref ?? ''}`
+  let h = 0
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0
+  }
+  return String(h)
+}
+
 /**
  * Site-wide promotional popup. Renders nothing unless `enabled` is true and
  * the visitor hasn't already dismissed it according to the configured
@@ -34,17 +44,21 @@ export function AdPopup({
   useEffect(() => {
     if (!enabled) return
 
-    // Respect prior dismissal.
+    // Respect prior dismissal — but only for the SAME ad content.
+    // When admin edits the popup, the hash changes and the dismissal is bypassed
+    // so visitors see the new ad even if they dismissed the old one.
     if (frequency !== 'always') {
       try {
         const store = frequency === 'once' ? localStorage : sessionStorage
-        if (store.getItem(STORAGE_KEY)) return
+        const dismissedHash = store.getItem(STORAGE_KEY)
+        const currentHash = contentHash(title, body, ctaHref)
+        if (dismissedHash === currentHash) return
       } catch { /* storage blocked — show anyway */ }
     }
 
     const showTimer = window.setTimeout(() => setOpen(true), Math.max(0, delayMs))
     return () => window.clearTimeout(showTimer)
-  }, [enabled, delayMs, frequency])
+  }, [enabled, delayMs, frequency, title, body, ctaHref])
 
   // Auto-close
   useEffect(() => {
@@ -70,7 +84,7 @@ export function AdPopup({
     if (frequency !== 'always') {
       try {
         const store = frequency === 'once' ? localStorage : sessionStorage
-        store.setItem(STORAGE_KEY, '1')
+        store.setItem(STORAGE_KEY, contentHash(title, body, ctaHref))
       } catch { /* ignore */ }
     }
   }

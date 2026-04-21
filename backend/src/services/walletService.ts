@@ -74,11 +74,29 @@ export async function creditSellerPending(
   }
 }
 
-// Called when order is marked "completed" — move pending → available
+// Called when order is marked "completed" — move pending → available.
+// Self-healing: if no pending wallet entry exists (e.g. the original
+// payment webhook missed creating one), we look up the order's actual
+// amount and credit the seller's available balance directly. This ensures
+// the seller ALWAYS gets paid the moment the buyer confirms delivery.
 export async function releaseSellerEarnings(sellerId: string, orderId: string) {
   try {
+    // Idempotency: if we've already released for this order, do nothing.
     const wallet = await ensureWallet(sellerId)
+    const { data: alreadyReleased } = await supabaseAdmin
+      .from('wallet_transactions')
+      .select('id')
+      .eq('wallet_id', wallet.id)
+      .eq('order_id', orderId)
+      .eq('type', 'release')
+      .maybeSingle()
 
+    if (alreadyReleased) {
+      logger.info(`[wallet] Order ${orderId} earnings already released — skipping`)
+      return
+    }
+
+    // Try the standard path first: a pending entry exists from payment.
     const { data: txn } = await supabaseAdmin
       .from('wallet_transactions')
       .select('*')
@@ -86,34 +104,61 @@ export async function releaseSellerEarnings(sellerId: string, orderId: string) {
       .eq('order_id', orderId)
       .eq('type', 'pending')
       .eq('status', 'pending')
-      .single()
+      .maybeSingle()
 
-    if (!txn) return
+    let amountToRelease = txn?.amount ?? 0
 
+    // Self-heal: no pending entry — derive the amount from the order itself.
+    // This catches orders paid before the wallet system existed, missed
+    // webhooks, manual admin completions, etc.
+    if (!txn) {
+      const { data: order } = await supabaseAdmin
+        .from('orders')
+        .select('total_amount, status')
+        .eq('id', orderId)
+        .maybeSingle()
+
+      if (!order) {
+        logger.warn(`[wallet] Cannot release — order ${orderId} not found`)
+        return
+      }
+      amountToRelease = Math.max(0, Number(order.total_amount ?? 0) - PLATFORM_FEE)
+      if (amountToRelease <= 0) {
+        logger.warn(`[wallet] Order ${orderId} amount too small to release after platform fee`)
+        return
+      }
+      logger.info(`[wallet] Self-heal release for order ${orderId} — no pending entry, crediting ₦${amountToRelease} directly to available`)
+    }
+
+    // Credit available balance (and decrement pending if a pending entry existed)
     await supabaseAdmin
       .from('wallets')
       .update({
-        available: wallet.available + txn.amount,
-        pending: Math.max(0, wallet.pending - txn.amount),
+        available: wallet.available + amountToRelease,
+        pending: txn ? Math.max(0, wallet.pending - amountToRelease) : wallet.pending,
         updated_at: new Date().toISOString(),
       })
       .eq('id', wallet.id)
 
-    await supabaseAdmin
-      .from('wallet_transactions')
-      .update({ status: 'completed' })
-      .eq('id', txn.id)
+    if (txn) {
+      await supabaseAdmin
+        .from('wallet_transactions')
+        .update({ status: 'completed' })
+        .eq('id', txn.id)
+    }
 
     await supabaseAdmin.from('wallet_transactions').insert({
       wallet_id: wallet.id,
       order_id: orderId,
       type: 'release',
-      amount: txn.amount,
+      amount: amountToRelease,
       status: 'completed',
-      description: 'Earnings released — order completed',
+      description: txn
+        ? 'Earnings released — order completed'
+        : `Earnings released — order completed (₦${PLATFORM_FEE} platform fee deducted)`,
     })
 
-    logger.info(`[wallet] Released ₦${txn.amount} to seller ${sellerId} for order ${orderId}`)
+    logger.info(`[wallet] Released ₦${amountToRelease} to seller ${sellerId} for order ${orderId}`)
   } catch (err) {
     logger.error(`[wallet] Failed to release earnings for order ${orderId}: ${err}`)
   }
