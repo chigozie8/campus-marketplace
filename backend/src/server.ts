@@ -7,6 +7,10 @@ import { startLocationCleanupJob } from './jobs/locationCleanup.js'
 import { startCartAbandonmentJob } from './jobs/cartAbandonmentJob.js'
 import { startInactivityJob } from './jobs/inactivityJob.js'
 import { startWeeklySellerDigestJob } from './jobs/weeklySellerDigest.js'
+import { startProfileCompletionJob } from './jobs/profileCompletionJob.js'
+import { startSellerActivationJob } from './jobs/sellerActivationJob.js'
+import { startReviewRequestJob } from './jobs/reviewRequestJob.js'
+import { startPayoutReminderJob } from './jobs/payoutReminderJob.js'
 import { initDb } from './config/db.js'
 
 const PORT = Number(process.env.PORT) || 3001
@@ -29,6 +33,10 @@ initDb()
       startCartAbandonmentJob()
       startInactivityJob()
       startWeeklySellerDigestJob()
+      startProfileCompletionJob()
+      startSellerActivationJob()
+      startReviewRequestJob()
+      startPayoutReminderJob()
     })
 
     function shutdown(signal: string): void {

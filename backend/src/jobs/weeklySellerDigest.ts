@@ -69,7 +69,7 @@ async function runWeeklySellerDigest() {
         totalViews > 0 ? `${totalViews} listing view${totalViews !== 1 ? 's' : ''}` : null,
       ].filter(Boolean).join(' · ')
 
-      await notify(seller.id, title, body, 'weekly_digest')
+      await notify({ userId: seller.id, type: 'weekly_digest', title, body, data: { url: '/dashboard?view=seller' } })
     }
 
     logger.info('[weeklyDigest] Weekly seller digests sent.')

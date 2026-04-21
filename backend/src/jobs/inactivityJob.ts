@@ -54,7 +54,7 @@ async function runInactivityCheck() {
     logger.info(`[inactivity] Re-engaging ${toNotify.length} inactive user(s)…`)
 
     for (const userId of toNotify) {
-      await notify(userId, msg.title, msg.body, 'reengagement')
+      await notify({ userId, type: 'reengagement', title: msg.title, body: msg.body })
     }
 
     logger.info(`[inactivity] Sent ${toNotify.length} re-engagement notification(s).`)

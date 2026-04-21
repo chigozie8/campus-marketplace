@@ -14,6 +14,13 @@ export type NotificationType =
   | 'review_request'
   | 'admin_alert'
   | 'system'
+  // ─── Lifecycle / engagement nudges ───
+  | 'reengagement'
+  | 'cart_reminder'
+  | 'weekly_digest'
+  | 'profile_incomplete'
+  | 'seller_activation'
+  | 'payout_available'
 
 /**
  * Notify every admin user. Used for ops alerts that require human follow-up

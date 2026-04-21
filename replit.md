@@ -2,6 +2,20 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Lifecycle Nudges + Crisp Support (April 2026)
+- **4 new lifecycle cron jobs** added in `backend/src/jobs/`, all registered in `backend/src/server.ts`:
+  - `profileCompletionJob.ts` — nudges users with no avatar 24h after signup (every 6h)
+  - `sellerActivationJob.ts` — nudges sellers with 0 listings 48h after signup (every 6h)
+  - `reviewRequestJob.ts` — asks buyers to review 3 days after delivery (every 6h)
+  - `payoutReminderJob.ts` — reminds sellers about claimable wallet balance (daily, ₦100 min)
+- Existing jobs already cover: cart abandonment, 7-day inactivity, weekly seller digest, escrow auto-release, auto-cancel unshipped orders.
+- **Dedup layer**: new `user_nudges` table (migration `scripts/035_user_nudges.sql`) with `(user_id, nudge_key, ref_id)` unique constraint. Helper `backend/src/utils/nudgeTracker.ts` calls `shouldSendNudge()` before each send. Falls open if table missing so jobs keep working pre-migration.
+- **Bug fix in old jobs**: `inactivityJob`, `cartAbandonmentJob`, and `weeklySellerDigest` were calling `notify()` with the old positional signature, silently failing DB inserts. Migrated all three to the current `notify({userId, type, title, body, data})` object form.
+- **NotificationType union extended** with `reengagement | cart_reminder | weekly_digest | profile_incomplete | seller_activation | payout_available`.
+- **Crisp Chat support (optional)**: drop-in `components/crisp-chat.tsx` activates only when `NEXT_PUBLIC_CRISP_WEBSITE_ID` is set. Identifies the logged-in user (email, name, phone, avatar, user_id) to Crisp's session. `app/layout.tsx` renders `<CrispChat />` when env var is set, otherwise falls back to the in-house `<ChatWidget />`. Setup is sign up at crisp.chat → copy Website ID → paste into Replit Secrets → done.
+
+
+
 ### Trust Badges → Admin-Only (April 2026)
 - Auto trust-score badges (Excellent/Good/Rising/etc.) and auto seller-tier (Gold/Silver/Bronze based on activity) **removed from all public-facing pages**: `app/sellers/[id]/page.tsx`, `app/marketplace/[id]/page.tsx`, `components/marketplace/product-card.tsx`. Buyer's view of `TrustBadge`/`SellerTierBadge` is gone.
 - New admin-awarded badges added in `components/TrustBadge.tsx` → `ADMIN_BADGE_DEFS` (single source of truth, exported with `AdminBadgeGroup` type and `normalizeAdminBadges()` helper):

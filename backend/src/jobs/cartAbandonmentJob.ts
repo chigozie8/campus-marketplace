@@ -45,7 +45,7 @@ async function runCartAbandonmentCheck() {
         ? `${firstProduct.title} is still in your cart. Complete your order before it sells out!`
         : `Items in your cart are waiting for you. Come back and complete your purchase!`
 
-      await notify(userId, title, body, 'cart_reminder')
+      await notify({ userId, type: 'cart_reminder', title, body, data: { url: '/cart' } })
 
       // Mark reminders as sent
       const productIds = items.map(i => i.product_id)
