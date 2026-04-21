@@ -398,7 +398,7 @@ export default function SellerOrdersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = useState<null | 'mark_shipped' | 'cancel'>(null)
   const qc = useQueryClient()
-  const { data, isLoading, isError, error, refetch } = useVendorOrders(page)
+  const { data, isLoading, isFetching, isError, error, refetch } = useVendorOrders(page)
 
   function toggleId(id: string) {
     setSelectedIds(prev => {
@@ -567,7 +567,7 @@ export default function SellerOrdersPage() {
           </div>
         </div>
 
-        {isLoading && <OrderListSkeleton count={4} />}
+        {(isLoading || (isFetching && allOrders.length === 0)) && <OrderListSkeleton count={4} />}
 
         {isError && (
           <div className="text-center py-20 px-4">
@@ -580,7 +580,7 @@ export default function SellerOrdersPage() {
           </div>
         )}
 
-        {!isLoading && !isError && orders.length === 0 && (
+        {!isLoading && !isFetching && !isError && orders.length === 0 && (
           <div className="text-center py-16 px-4 rounded-2xl border border-dashed border-border/80 bg-card/50">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
               <Package className="w-7 h-7 text-muted-foreground/60" />

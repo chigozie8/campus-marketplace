@@ -16,6 +16,12 @@ export function useVendorOrders(page = 1) {
   return useQuery({
     queryKey: ['orders', 'vendor', page],
     queryFn: () => ordersApi.getVendorOrders(page),
+    // Always re-fetch when this page mounts so a freshly-placed order
+    // (e.g. seller arriving from a "New Order" notification) shows up
+    // instead of the stale "no orders" empty state from cache.
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   })
 }
 
