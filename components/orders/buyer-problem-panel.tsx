@@ -72,9 +72,11 @@ export function BuyerProblemPanel({ orderId, orderStatus }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: reasonText, evidence: details.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Could not submit')
-      setExisting(data.dispute)
+      const text = await res.text()
+      let data: { error?: string; dispute?: Existing } = {}
+      try { data = text ? JSON.parse(text) : {} } catch { /* non-JSON body */ }
+      if (!res.ok) throw new Error(data.error || `Could not submit (HTTP ${res.status})`)
+      if (data.dispute) setExisting(data.dispute)
       setOpen(false)
       setDetails('')
       toast.success('Submitted. Our team will review within 24 hours.')

@@ -57,9 +57,9 @@ export function PlatformFeeEditor({ initialAmount, initialLabel }: PlatformFeeEd
         <div className="flex items-center gap-2">
           <Receipt className="w-4 h-4 text-primary" />
           <div>
-            <h4 className="font-black text-sm text-foreground">VAT / Service Charge</h4>
+            <h4 className="font-black text-sm text-foreground">Platform / Escrow Fee</h4>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Added to every buyer's checkout total. Shown as "{label}" on the payment screen.
+              Added to every buyer's checkout total <span className="font-semibold">and</span> retained by VendoorX from each escrow payment. Shown as "{label}" on the payment screen.
             </p>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { createClient as createAdmin } from '@supabase/supabase-js'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 const PAYSTACK_BASE = 'https://api.paystack.co'
-const PLATFORM_FEE_KOBO = 10000
+const DEFAULT_PLATFORM_FEE_NAIRA = 100
 
 function db() {
   return createAdmin(
@@ -45,7 +45,7 @@ export async function POST(
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
-      .select('id, buyer_id, seller_id, total_amount, status')
+      .select('id, buyer_id, seller_id, total_amount, status, platform_fee')
       .eq('id', orderId)
       .single()
 
@@ -86,9 +86,22 @@ export async function POST(
     }
 
     if (subaccountCode) {
+      // Read the live platform fee from settings — falls back to the order's
+      // saved platform_fee, then to the safe default. Multiplied by 100 → kobo.
+      const { data: feeRow } = await admin
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'platform_fee_amount')
+        .maybeSingle()
+      const liveFeeNaira = Math.max(0, Number(feeRow?.value ?? NaN))
+      const orderFeeNaira = Math.max(0, Number(order.platform_fee ?? 0))
+      const feeNaira = Number.isFinite(liveFeeNaira) && liveFeeNaira > 0
+        ? liveFeeNaira
+        : (orderFeeNaira > 0 ? orderFeeNaira : DEFAULT_PLATFORM_FEE_NAIRA)
+
       payload.subaccount = subaccountCode
       payload.bearer = 'account'
-      payload.transaction_charge = PLATFORM_FEE_KOBO
+      payload.transaction_charge = Math.round(feeNaira * 100) // kobo
     }
 
     const paystackRes = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {

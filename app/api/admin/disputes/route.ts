@@ -85,33 +85,39 @@ export async function PATCH(req: Request) {
   const order = dispute.orders as { id: string; seller_id: string; buyer_id: string; status: string }
 
   if (resolution === 'resolved_seller') {
-    await svc()
-      .from('orders')
-      .update({ status: 'completed', updated_at: new Date().toISOString() })
-      .eq('id', order.id)
-      .catch(() => {})
+    try {
+      await svc()
+        .from('orders')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', order.id)
+    } catch { /* non-critical */ }
 
     await releaseSellerEarnings(order.seller_id, order.id).catch(() => {})
 
-    await svc().from('notifications').insert([
-      { user_id: order.seller_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed the dispute for order #${order.id.split('-')[0]} and released payment to you.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
-      { user_id: order.buyer_id, title: 'Dispute Resolved', body: `Admin reviewed your dispute for order #${order.id.split('-')[0]}. Decision: funds released to seller.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
-    ]).catch(() => {})
+    try {
+      await svc().from('notifications').insert([
+        { user_id: order.seller_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed the dispute for order #${order.id.split('-')[0]} and released payment to you.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
+        { user_id: order.buyer_id, title: 'Dispute Resolved', body: `Admin reviewed your dispute for order #${order.id.split('-')[0]}. Decision: funds released to seller.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
+      ])
+    } catch { /* non-critical */ }
   }
 
   if (resolution === 'resolved_buyer') {
-    await svc()
-      .from('orders')
-      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-      .eq('id', order.id)
-      .catch(() => {})
+    try {
+      await svc()
+        .from('orders')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', order.id)
+    } catch { /* non-critical */ }
 
     await reversePendingCredit(order.seller_id, order.id).catch(() => {})
 
-    await svc().from('notifications').insert([
-      { user_id: order.buyer_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed your dispute for order #${order.id.split('-')[0]}. Refund has been processed.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
-      { user_id: order.seller_id, title: 'Dispute Resolved', body: `Admin reviewed the dispute for order #${order.id.split('-')[0]}. Decision: refund to buyer.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
-    ]).catch(() => {})
+    try {
+      await svc().from('notifications').insert([
+        { user_id: order.buyer_id, title: 'Dispute Resolved — In Your Favour', body: `Admin reviewed your dispute for order #${order.id.split('-')[0]}. Refund has been processed.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
+        { user_id: order.seller_id, title: 'Dispute Resolved', body: `Admin reviewed the dispute for order #${order.id.split('-')[0]}. Decision: refund to buyer.`, type: 'dispute_resolved', data: { url: '/dashboard/orders' } },
+      ])
+    } catch { /* non-critical */ }
   }
 
   // Fire-and-forget milestone checks after dispute resolution

@@ -67,7 +67,7 @@ export default async function AdminSettingsPage() {
       </div>
 
       <div>
-        <h3 className="text-sm font-black text-foreground mb-4">💳 VAT & Fees</h3>
+        <h3 className="text-sm font-black text-foreground mb-4">💳 Platform / Escrow Fee</h3>
         <PlatformFeeEditor
           initialAmount={Number(settings.platform_fee_amount ?? 100)}
           initialLabel={settings.platform_fee_label ?? 'VAT & Service Fee'}
