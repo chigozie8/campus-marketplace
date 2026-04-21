@@ -2,6 +2,7 @@ import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
 const DEFAULT_PLATFORM_FEE = 100 // fallback if site_settings unreachable
+const DEFAULT_MIN_WITHDRAWAL = 1000 // ₦1,000 fallback if site_settings unreachable
 
 /**
  * Always pull the live platform fee from site_settings so the wallet stays in
@@ -24,6 +25,33 @@ async function getPlatformFee(): Promise<number> {
     return value
   } catch {
     return DEFAULT_PLATFORM_FEE
+  }
+}
+
+/**
+ * Admin-controlled minimum withdrawal amount in NGN. Editable from
+ * /admin/settings → site_settings.key = 'min_withdrawal_ngn'.
+ * Cached for 60s. Falls back to ₦1,000 if the row is missing or invalid.
+ *
+ * Note: Paystack's own minimum transfer is ₦100 — set the admin value at or
+ * above that. Lower platform thresholds reduce wasted Paystack transfer fees.
+ */
+let _minWithdrawalCache: { value: number; expires: number } | null = null
+export async function getMinWithdrawal(): Promise<number> {
+  const now = Date.now()
+  if (_minWithdrawalCache && _minWithdrawalCache.expires > now) return _minWithdrawalCache.value
+  try {
+    const { data } = await supabaseAdmin
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'min_withdrawal_ngn')
+      .maybeSingle()
+    const raw = Number(data?.value)
+    const value = Number.isFinite(raw) && raw >= 100 ? raw : DEFAULT_MIN_WITHDRAWAL
+    _minWithdrawalCache = { value, expires: now + 60_000 }
+    return value
+  } catch {
+    return DEFAULT_MIN_WITHDRAWAL
   }
 }
 
@@ -280,8 +308,12 @@ export async function requestWithdrawal(
   if (wallet.available < amount) {
     throw Object.assign(new Error('Insufficient available balance'), { status: 400 })
   }
-  if (amount < 1000) {
-    throw Object.assign(new Error('Minimum withdrawal is ₦1,000'), { status: 400 })
+  const minWithdrawal = await getMinWithdrawal()
+  if (amount < minWithdrawal) {
+    throw Object.assign(
+      new Error(`Minimum withdrawal is ₦${minWithdrawal.toLocaleString('en-NG')}`),
+      { status: 400 },
+    )
   }
 
   const paystackKey = process.env.PAYSTACK_SECRET_KEY

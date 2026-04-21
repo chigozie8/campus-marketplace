@@ -14,6 +14,7 @@ interface WalletData {
   available: number
   pending: number
   currency: string
+  min_withdrawal?: number
 }
 
 interface Transaction {
@@ -227,7 +228,7 @@ export default function WalletPage() {
               <div className="flex gap-2.5 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30">
                 <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                  <strong>Pending balance</strong> is held until your buyer confirms delivery. Minimum withdrawal is ₦1,000.
+                  <strong>Pending balance</strong> is held until your buyer confirms delivery. Minimum withdrawal is ₦{(wallet?.min_withdrawal ?? 1000).toLocaleString()}.
                 </p>
               </div>
             )}
@@ -236,7 +237,7 @@ export default function WalletPage() {
             {!showWithdrawForm ? (
               <button
                 onClick={() => setShowWithdrawForm(true)}
-                disabled={(wallet?.available ?? 0) < 1000}
+                disabled={(wallet?.available ?? 0) < (wallet?.min_withdrawal ?? 1000)}
                 className="w-full h-12 rounded-xl bg-gray-950 dark:bg-primary text-white font-bold text-sm hover:bg-gray-800 dark:hover:bg-primary/90 transition-all hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 shadow-lg shadow-black/10"
               >
                 <Building2 className="w-4 h-4" />
@@ -255,7 +256,7 @@ export default function WalletPage() {
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Amount (₦)</label>
                     <input
                       type="number"
-                      min="1000"
+                      min={wallet?.min_withdrawal ?? 1000}
                       max={wallet?.available}
                       value={form.amount}
                       onChange={e => setForm(p => ({ ...p, amount: e.target.value }))}

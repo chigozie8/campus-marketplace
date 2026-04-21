@@ -8,12 +8,15 @@ import { supabaseAdmin } from '../config/supabaseClient.js'
 const router = Router()
 router.use(authenticate)
 
-// GET /api/wallets/me — get wallet balance
+// GET /api/wallets/me — get wallet balance + admin-controlled minimum withdrawal
 router.get('/me', async (req, res, next) => {
   try {
     const userId = (req as AuthRequest).user.id
-    const wallet = await walletService.getWallet(userId)
-    res.json({ success: true, data: wallet })
+    const [wallet, minWithdrawal] = await Promise.all([
+      walletService.getWallet(userId),
+      walletService.getMinWithdrawal(),
+    ])
+    res.json({ success: true, data: { ...wallet, min_withdrawal: minWithdrawal } })
   } catch (err) { next(err) }
 })
 

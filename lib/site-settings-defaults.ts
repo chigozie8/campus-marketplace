@@ -20,6 +20,7 @@ export type SiteSettings = {
   /* ── Platform Fee ── */
   platform_fee_amount: string
   platform_fee_label: string
+  min_withdrawal_ngn: string
   /* ── Contact & Support ── */
   support_phone: string
   support_whatsapp_url: string
@@ -223,6 +224,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   /* platform fee */
   platform_fee_amount: '100',
   platform_fee_label: 'VAT & Service Fee',
+  min_withdrawal_ngn: '1000',
   /* contact */
   support_phone: '07082039150',
   support_whatsapp_url: 'https://wa.me/2347082039250',

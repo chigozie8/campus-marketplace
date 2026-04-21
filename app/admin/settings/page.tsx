@@ -178,6 +178,19 @@ export default async function AdminSettingsPage() {
       </div>
 
       <div>
+        <h3 className="text-sm font-black text-foreground mb-4">💸 Wallet — Minimum Withdrawal</h3>
+        <ScalarSettingEditor
+          settingKey="min_withdrawal_ngn"
+          label="Minimum withdrawal amount (₦)"
+          description="Sellers cannot request a payout below this amount. Applies to every withdrawal request."
+          initialValue={settings.min_withdrawal_ngn || '1000'}
+          placeholder="1000"
+          type="number"
+          helpText="Paystack's own minimum NGN transfer is ₦100, so this must be at least 100. Higher values reduce wasted Paystack transfer fees on tiny payouts. Default is ₦1,000."
+        />
+      </div>
+
+      <div>
         <h3 className="text-sm font-black text-foreground mb-4">✉️ Contact Form Inbox</h3>
         <ScalarSettingEditor
           settingKey="contact_recipient_email"

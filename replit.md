@@ -2,6 +2,14 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Admin-Configurable Min Withdrawal (April 2026)
+- **Min withdrawal is now editable from `/admin/settings`** instead of hardcoded.
+- New `site_settings` row `min_withdrawal_ngn` (default `1000`). Migration: `scripts/036_min_withdrawal_setting.sql` (run in Supabase).
+- `backend/src/services/walletService.ts` exports new `getMinWithdrawal()` helper (60s cache, ₦1,000 fallback, enforces ≥ ₦100 floor since Paystack's own minimum NGN transfer is ₦100).
+- `requestWithdrawal()` now uses the dynamic value with a localized error message.
+- `/api/wallets/me` response now includes `min_withdrawal` so the frontend wallet page reads the live value (button disable, input min, info-banner copy all dynamic).
+- Admin UI: new ScalarSettingEditor in the wallet section of `app/admin/settings/page.tsx`.
+
 ### Lifecycle Nudges + Crisp Support (April 2026)
 - **4 new lifecycle cron jobs** added in `backend/src/jobs/`, all registered in `backend/src/server.ts`:
   - `profileCompletionJob.ts` — nudges users with no avatar 24h after signup (every 6h)
