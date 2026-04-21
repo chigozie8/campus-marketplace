@@ -53,17 +53,17 @@ export function FloatingNav() {
             )}
           >
             {/* Left tabs */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {NAV_ITEMS.filter(i => !i.isAction).slice(0, 2).map(item => (
                 <NavTab key={item.href} item={item} active={isItemActive(item.href, pathname)} />
               ))}
             </div>
 
-            {/* Reserved space for the center FAB so the pill width stays balanced */}
-            <div className="w-[68px] shrink-0" aria-hidden />
+            {/* Reserved space for the center FAB so the marketplace icon never collides */}
+            <div className="w-[84px] shrink-0" aria-hidden />
 
             {/* Right tabs */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               {NAV_ITEMS.filter(i => !i.isAction).slice(2).map(item => (
                 <NavTab key={item.href} item={item} active={isItemActive(item.href, pathname)} />
               ))}
@@ -93,43 +93,54 @@ function NavTab({ item, active }: { item: NavItem; active: boolean }) {
   return (
     <Link href={item.href} aria-label={item.label} className="relative">
       <m.div
-        whileTap={{ scale: 0.92 }}
+        whileTap={{ scale: 0.9 }}
         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        className={cn(
-          'relative flex items-center gap-1.5 h-11 rounded-full overflow-hidden',
-          'transition-colors duration-200',
-          active
-            ? 'bg-black text-white dark:bg-white dark:text-black px-3.5'
-            : 'px-3',
-        )}
+        className="relative flex flex-col items-center justify-center h-12 px-3.5 rounded-full"
       >
         <m.div
-          animate={active ? { rotate: [0, -8, 8, 0], scale: [1, 1.15, 1] } : { scale: 1 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
+          animate={active ? { y: -1, scale: 1.05 } : { y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           className="relative flex items-center justify-center"
         >
           <Icon
             className={cn(
-              'transition-all duration-200 w-[22px] h-[22px]',
+              'transition-colors duration-200 w-[22px] h-[22px]',
               active
-                ? 'text-white dark:text-black stroke-[2.75]'
-                : 'text-gray-400 dark:text-gray-500 stroke-[2.25]',
+                ? 'text-foreground stroke-[2.6]'
+                : 'text-gray-400 dark:text-gray-500 stroke-[2.1]',
             )}
           />
         </m.div>
 
+        {/* Active label sits beneath the icon — small, tight, no heavy pill */}
         <AnimatePresence initial={false}>
           {active && (
             <m.span
               key="label"
-              initial={{ opacity: 0, width: 0, x: -4 }}
-              animate={{ opacity: 1, width: 'auto', x: 0 }}
-              exit={{ opacity: 0, width: 0, x: -4 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="text-[13px] font-black text-white dark:text-black whitespace-nowrap overflow-hidden tracking-tight"
+              initial={{ opacity: 0, y: -2 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -2 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="absolute -bottom-0.5 text-[10px] font-bold text-foreground whitespace-nowrap tracking-tight leading-none"
             >
               {item.label}
             </m.span>
+          )}
+        </AnimatePresence>
+
+        {/* Tiny indicator dot when active */}
+        <AnimatePresence initial={false}>
+          {active && (
+            <m.span
+              key="dot"
+              layoutId="nav-active-dot"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              className="absolute -top-0.5 w-1 h-1 rounded-full bg-foreground"
+              aria-hidden
+            />
           )}
         </AnimatePresence>
       </m.div>
