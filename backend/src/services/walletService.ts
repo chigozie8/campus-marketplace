@@ -1,7 +1,31 @@
 import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
-const PLATFORM_FEE = 100 // ₦100 in naira
+const DEFAULT_PLATFORM_FEE = 100 // fallback if site_settings unreachable
+
+/**
+ * Always pull the live platform fee from site_settings so the wallet stays in
+ * lockstep with what was charged at checkout. Cached briefly to avoid a DB
+ * round-trip on every wallet operation.
+ */
+let _feeCache: { value: number; expires: number } | null = null
+async function getPlatformFee(): Promise<number> {
+  const now = Date.now()
+  if (_feeCache && _feeCache.expires > now) return _feeCache.value
+  try {
+    const { data } = await supabaseAdmin
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'platform_fee_amount')
+      .maybeSingle()
+    const fee = Number(data?.value)
+    const value = Number.isFinite(fee) && fee >= 0 ? fee : DEFAULT_PLATFORM_FEE
+    _feeCache = { value, expires: now + 60_000 } // 1-minute cache
+    return value
+  } catch {
+    return DEFAULT_PLATFORM_FEE
+  }
+}
 
 // Ensure a wallet exists for a user; return it
 export async function ensureWallet(userId: string) {
@@ -48,7 +72,8 @@ export async function creditSellerPending(
   orderId: string,
   totalPaid: number,
 ) {
-  const sellerAmount = totalPaid - PLATFORM_FEE
+  const platformFee = await getPlatformFee()
+  const sellerAmount = totalPaid - platformFee
   if (sellerAmount <= 0) return
 
   try {
@@ -65,7 +90,7 @@ export async function creditSellerPending(
       type: 'pending',
       amount: sellerAmount,
       status: 'pending',
-      description: `Order payment received — pending delivery confirmation (₦${PLATFORM_FEE} platform fee deducted)`,
+      description: `Order payment received — pending delivery confirmation (₦${platformFee} platform fee deducted)`,
     })
 
     logger.info(`[wallet] Credited ₦${sellerAmount} pending to seller ${sellerId} for order ${orderId}`)
@@ -122,12 +147,13 @@ export async function releaseSellerEarnings(sellerId: string, orderId: string) {
         logger.warn(`[wallet] Cannot release — order ${orderId} not found`)
         return
       }
-      amountToRelease = Math.max(0, Number(order.total_amount ?? 0) - PLATFORM_FEE)
+      const platformFee = await getPlatformFee()
+      amountToRelease = Math.max(0, Number(order.total_amount ?? 0) - platformFee)
       if (amountToRelease <= 0) {
         logger.warn(`[wallet] Order ${orderId} amount too small to release after platform fee`)
         return
       }
-      logger.info(`[wallet] Self-heal release for order ${orderId} — no pending entry, crediting ₦${amountToRelease} directly to available`)
+      logger.info(`[wallet] Self-heal release for order ${orderId} — no pending entry, crediting ₦${amountToRelease} directly to available (fee ₦${platformFee})`)
     }
 
     // Credit available balance (and decrement pending if a pending entry existed)
@@ -153,9 +179,7 @@ export async function releaseSellerEarnings(sellerId: string, orderId: string) {
       type: 'release',
       amount: amountToRelease,
       status: 'completed',
-      description: txn
-        ? 'Earnings released — order completed'
-        : `Earnings released — order completed (₦${PLATFORM_FEE} platform fee deducted)`,
+      description: 'Earnings released — order completed',
     })
 
     logger.info(`[wallet] Released ₦${amountToRelease} to seller ${sellerId} for order ${orderId}`)
