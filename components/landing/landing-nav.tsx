@@ -14,7 +14,7 @@ interface LandingNavProps {
 }
 
 const NAV_LINKS = [
-  { href: '/#features', label: 'Features' },
+  { href: '/features', label: 'Features' },
   { href: '/marketplace', label: 'Browse' },
   { href: '/categories', label: 'Categories' },
   { href: '/pricing', label: 'Pricing' },
