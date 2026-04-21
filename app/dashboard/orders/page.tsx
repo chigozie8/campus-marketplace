@@ -72,7 +72,9 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [resending, setResending] = useState(false)
   const [error, setError] = useState('')
+  const [resentNote, setResentNote] = useState('')
   const inputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null, null, null, null])
   const remaining = useCountdown(order.delivered_at ?? order.updated_at)
 
@@ -115,6 +117,26 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
       inputRefs.current[5]?.focus()
     }
     e.preventDefault()
+  }
+
+  async function handleResend() {
+    setResending(true)
+    setError('')
+    setResentNote('')
+    try {
+      const { ordersApi } = await import('@/lib/api')
+      const res = await ordersApi.resendDeliveryOtp(order.id)
+      if (res.success) {
+        setResentNote('A fresh code is on its way to your email and notification bell.')
+        toast.success('New delivery code sent!')
+      } else {
+        setError(res.message || 'Could not resend code. Please try again.')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not resend code.')
+    } finally {
+      setResending(false)
+    }
   }
 
   async function handleVerify() {
@@ -184,6 +206,9 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
       {error && (
         <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold text-center">{error}</p>
       )}
+      {resentNote && (
+        <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold text-center">{resentNote}</p>
+      )}
 
       <button
         onClick={handleVerify}
@@ -195,6 +220,22 @@ function ConfirmDeliverySection({ order, onConfirmed }: { order: BackendOrder; o
           : <><CheckCircle2 className="w-4 h-4" />Confirm Delivery</>
         }
       </button>
+
+      {/* Resend code — sends a fresh OTP to email + bell + SMS */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-emerald-200/60 dark:border-emerald-800/40">
+        <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/70">
+          Didn't get the code or it expired?
+        </p>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={resending}
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-100 disabled:opacity-50 transition-colors"
+        >
+          {resending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+          Resend code
+        </button>
+      </div>
     </div>
   )
 }
