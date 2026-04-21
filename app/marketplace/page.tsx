@@ -220,6 +220,8 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     .eq('is_available', true)
   if (categoryId) dataQuery = dataQuery.eq('category_id', categoryId)
   if (searchParams.q) dataQuery = dataQuery.ilike('title', `%${searchParams.q}%`)
+  // Pinned products always rise to the top — invisible promotion (no badge shown to buyers)
+  dataQuery = dataQuery.order('is_pinned', { ascending: false })
   if (searchParams.sort === 'price_asc') dataQuery = dataQuery.order('price', { ascending: true })
   else if (searchParams.sort === 'price_desc') dataQuery = dataQuery.order('price', { ascending: false })
   else if (searchParams.sort === 'popular') dataQuery = dataQuery.order('views', { ascending: false })

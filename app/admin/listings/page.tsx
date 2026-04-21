@@ -10,7 +10,8 @@ export default async function AdminListingsPage() {
     .from('products')
     .select(`
       id, title, price, original_price, condition, images, campus,
-      is_available, is_featured, views, whatsapp_clicks, created_at,
+      is_available, is_featured, is_pinned, pinned_until,
+      views, whatsapp_clicks, created_at,
       profiles(full_name),
       categories(name, slug)
     `)

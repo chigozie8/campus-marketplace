@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import {
-  Search, Trash2, Star, Eye, ShoppingBag,
+  Search, Trash2, Star, Eye, ShoppingBag, Pin,
   Loader2, CheckCircle2, XCircle, ExternalLink, Download,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -19,6 +19,8 @@ interface Product {
   campus: string | null
   is_available: boolean
   is_featured: boolean
+  is_pinned?: boolean
+  pinned_until?: string | null
   views: number
   whatsapp_clicks: number
   created_at: string
@@ -33,7 +35,7 @@ export function AdminListingsTable({ products }: Props) {
   const [search, setSearch] = useState('')
   const [, startTransition] = useTransition()
   const [loadingId, setLoadingId] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'active' | 'sold' | 'featured'>('all')
+  const [filter, setFilter] = useState<'all' | 'active' | 'sold' | 'featured' | 'pinned'>('all')
   const [confirmDialog, confirm] = useConfirm()
 
   const filtered = products.filter(p => {
@@ -48,10 +50,24 @@ export function AdminListingsTable({ products }: Props) {
       filter === 'all' ? true :
       filter === 'active' ? p.is_available :
       filter === 'sold' ? !p.is_available :
+      filter === 'pinned' ? !!p.is_pinned :
       p.is_featured
 
     return matchSearch && matchFilter
   })
+
+  async function togglePin(p: Product) {
+    if (p.is_pinned) {
+      await patchProduct(p.id, { is_pinned: false, pinned_until: null })
+      return
+    }
+    // Optional duration prompt — blank = pin indefinitely
+    const raw = window.prompt('Pin for how many days? (blank = until you unpin)', '7')
+    if (raw === null) return
+    const days = raw.trim() === '' ? null : Math.max(1, Math.min(90, parseInt(raw, 10) || 0))
+    const pinned_until = days ? new Date(Date.now() + days * 86_400_000).toISOString() : null
+    await patchProduct(p.id, { is_pinned: true, pinned_until, pinned_at: new Date().toISOString() })
+  }
 
   async function patchProduct(product_id: string, updates: Record<string, unknown>) {
     setLoadingId(product_id)
@@ -116,6 +132,7 @@ export function AdminListingsTable({ products }: Props) {
     { key: 'active',   label: 'Active' },
     { key: 'sold',     label: 'Sold' },
     { key: 'featured', label: 'Featured' },
+    { key: 'pinned',   label: '📌 Pinned' },
   ] as const
 
   const conditionColors: Record<string, string> = {
@@ -177,6 +194,7 @@ export function AdminListingsTable({ products }: Props) {
               <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Condition</th>
               <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
               <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Featured</th>
+              <th className="text-center px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider" title="Invisible pin — pushes product to top of marketplace listings">Pin</th>
               <th className="text-right px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">
                 <Eye className="w-3.5 h-3.5 inline mr-1" />Views
               </th>
@@ -253,6 +271,29 @@ export function AdminListingsTable({ products }: Props) {
                     {loadingId === p.id
                       ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       : <Star className={`w-3.5 h-3.5 ${p.is_featured ? 'fill-current' : ''}`} />
+                    }
+                  </button>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <button
+                    onClick={() => togglePin(p)}
+                    disabled={loadingId === p.id}
+                    className={`inline-flex items-center justify-center w-7 h-7 rounded-lg transition-all ${
+                      p.is_pinned
+                        ? 'text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40'
+                        : 'text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40'
+                    }`}
+                    title={
+                      p.is_pinned
+                        ? p.pinned_until
+                          ? `Pinned until ${new Date(p.pinned_until).toLocaleDateString()} — click to unpin`
+                          : 'Pinned (no expiry) — click to unpin'
+                        : 'Pin to top of marketplace'
+                    }
+                  >
+                    {loadingId === p.id
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Pin className={`w-3.5 h-3.5 ${p.is_pinned ? 'fill-current rotate-45' : ''}`} />
                     }
                   </button>
                 </td>
