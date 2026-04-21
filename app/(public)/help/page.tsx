@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
-import { ArrowRight, Search, ShoppingBag, CreditCard, Shield, Package, Star, MessageCircle, ChevronDown, Bot } from 'lucide-react'
+import { ArrowRight, Search, ShoppingBag, CreditCard, Shield, Package, Star, MessageCircle, ChevronDown } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { parseHelpCategories, parseHelpPopular, type HelpCategory } from '@/lib/site-settings-defaults'
-import EnjoChat from '@/components/enjo-chat'
 
 export const dynamic = 'force-dynamic'
 
@@ -110,27 +109,6 @@ export default async function HelpPage() {
               </div>
             )
           })}
-        </div>
-      </section>
-
-      {/* AI Assistant — embedded Enjo webchat */}
-      <section className="py-16 px-4 border-t border-border">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-4">
-              <Bot className="w-3.5 h-3.5" />
-              Ask Our AI Assistant
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-3">Chat with VendoorX AI</h2>
-            <p className="text-muted-foreground text-sm">
-              Get instant answers about orders, payments, escrow, and selling — 24/7.
-            </p>
-          </div>
-          <EnjoChat />
-          <div
-            className="enjo-webchat-container rounded-3xl border-2 border-border bg-card overflow-hidden shadow-lg"
-            style={{ minHeight: '600px', height: '70vh' }}
-          />
         </div>
       </section>
 
