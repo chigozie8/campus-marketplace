@@ -65,6 +65,10 @@ export type SiteSettings = {
   homepage_hiw_steps: string
   homepage_faqs: string
   homepage_testimonials: string
+  homepage_hero_features: string
+  homepage_escrow_steps: string
+  homepage_sections_visible: string
+  homepage_trending_enabled: string
   /* ── Help Center ── */
   help_hero_title: string
   help_hero_subtitle: string
@@ -221,7 +225,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   hero_badge: 'The Shopify for WhatsApp & Social Sellers in Africa',
   hero_line1: 'Sell smarter on',
   hero_accent: 'WhatsApp.',
-  hero_subtitle: 'Stop tracking orders in chats. VendoorX turns your WhatsApp, Instagram, and Facebook conversations into a structured, trackable store — with payments, dashboards, and order management built in.',
+  hero_subtitle: 'Buy and sell with classmates from {campuses} and 100+ more universities — all powered by WhatsApp. Faster than DMs. Safer than meetups. Free to start.',
   hero_cta_primary: 'Get Started Free',
   hero_cta_secondary: 'See How It Works',
   /* how it works */
@@ -231,6 +235,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   homepage_hiw_steps: '',
   homepage_faqs: '',
   homepage_testimonials: '',
+  homepage_hero_features: '',
+  homepage_escrow_steps: '',
+  homepage_sections_visible: '',
+  homepage_trending_enabled: '1',
   /* help center */
   help_hero_title: 'How can we help?',
   help_hero_subtitle: 'Find answers to common questions about buying, selling, payments, and your account.',
@@ -258,6 +266,72 @@ export function parseFaqs(raw: string): FaqItem[] {
 export function parseTestimonials(raw: string): TestimonialItem[] {
   if (!raw) return DEFAULT_TESTIMONIALS
   try { return JSON.parse(raw) as TestimonialItem[] } catch { return DEFAULT_TESTIMONIALS }
+}
+
+/* ── Hero Feature Pills ── */
+export type HeroFeature = { icon: string; text: string }
+export const DEFAULT_HERO_FEATURES: HeroFeature[] = [
+  { icon: 'GraduationCap', text: '120+ Nigerian Universities' },
+  { icon: 'Shield',         text: 'Verified Student Sellers' },
+  { icon: 'Zap',            text: 'WhatsApp-Powered Orders' },
+]
+export function parseHeroFeatures(raw: string): HeroFeature[] {
+  if (!raw) return DEFAULT_HERO_FEATURES
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as HeroFeature[]) : DEFAULT_HERO_FEATURES
+  } catch { return DEFAULT_HERO_FEATURES }
+}
+
+/* ── Escrow Flow Steps ── */
+export type EscrowStep = { title: string; description: string }
+export const DEFAULT_ESCROW_STEPS: EscrowStep[] = [
+  { title: 'You pay securely',  description: 'Buyer checks out via Paystack — debit card, transfer, or USSD. Funds clear in seconds.' },
+  { title: 'We hold the money', description: "VendoorX holds the payment in escrow. The seller can see it, but can't touch it yet." },
+  { title: 'Seller delivers',   description: 'Seller ships or hands over the item. You get a tracking update at every step.' },
+  { title: 'Money releases',    description: "Once you confirm delivery (or 24 h pass with no dispute), funds release to the seller's wallet." },
+]
+export function parseEscrowSteps(raw: string): EscrowStep[] {
+  if (!raw) return DEFAULT_ESCROW_STEPS
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as EscrowStep[]) : DEFAULT_ESCROW_STEPS
+  } catch { return DEFAULT_ESCROW_STEPS }
+}
+
+/* ── Section Visibility ── */
+export type SectionVisibility = {
+  trustedBy: boolean
+  problemSolution: boolean
+  whatsappMockup: boolean
+  howItWorks: boolean
+  features: boolean
+  integrations: boolean
+  trust: boolean
+  escrow: boolean
+  faq: boolean
+  cta: boolean
+  trending: boolean
+}
+export const DEFAULT_SECTION_VISIBILITY: SectionVisibility = {
+  trustedBy: true,
+  problemSolution: true,
+  whatsappMockup: true,
+  howItWorks: true,
+  features: true,
+  integrations: true,
+  trust: true,
+  escrow: true,
+  faq: true,
+  cta: true,
+  trending: true,
+}
+export function parseSectionVisibility(raw: string): SectionVisibility {
+  if (!raw) return DEFAULT_SECTION_VISIBILITY
+  try {
+    const v = JSON.parse(raw)
+    return { ...DEFAULT_SECTION_VISIBILITY, ...(v as Partial<SectionVisibility>) }
+  } catch { return DEFAULT_SECTION_VISIBILITY }
 }
 
 const DEFAULT_CONTACT_SUBJECTS = [

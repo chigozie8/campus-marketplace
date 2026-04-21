@@ -3,6 +3,7 @@ import lazyLoad from 'next/dynamic'
 import { buildMetadata, SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo'
 import { createClient } from '@/lib/supabase/server'
 import { getSiteSettings } from '@/lib/site-settings'
+import { parseSectionVisibility, parseEscrowSteps, parseHiwSteps, parseFaqs } from '@/lib/site-settings-defaults'
 
 /* ── Above the fold — eager imports (critical for LCP) ── */
 import { LandingNav } from '@/components/landing/landing-nav'
@@ -10,18 +11,21 @@ import { HeroSection } from '@/components/landing/hero-section'
 import { StatsBar } from '@/components/landing/stats-bar'
 
 /* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
-const TrustedBySection      = lazyLoad(() => import('@/components/landing/trusted-by-section').then(m => ({ default: m.TrustedBySection })))
+const TrendingProducts       = lazyLoad(() => import('@/components/landing/trending-products').then(m => ({ default: m.TrendingProducts })))
+const TrustedBySection       = lazyLoad(() => import('@/components/landing/trusted-by-section').then(m => ({ default: m.TrustedBySection })))
 const ProblemSolutionSection = lazyLoad(() => import('@/components/landing/problem-solution-section').then(m => ({ default: m.ProblemSolutionSection })))
 const WhatsappMockupSection  = lazyLoad(() => import('@/components/landing/whatsapp-mockup-section').then(m => ({ default: m.WhatsappMockupSection })))
 const HowItWorksSection      = lazyLoad(() => import('@/components/landing/how-it-works-section').then(m => ({ default: m.HowItWorksSection })))
 const Features               = lazyLoad(() => import('@/components/landing/features').then(m => ({ default: m.Features })))
 const IntegrationsSection    = lazyLoad(() => import('@/components/landing/integrations-section').then(m => ({ default: m.IntegrationsSection })))
 const TrustSection           = lazyLoad(() => import('@/components/landing/trust-section').then(m => ({ default: m.TrustSection })))
+const EscrowFlowSection      = lazyLoad(() => import('@/components/landing/escrow-flow-section').then(m => ({ default: m.EscrowFlowSection })))
 const FaqSection             = lazyLoad(() => import('@/components/landing/faq-section').then(m => ({ default: m.FaqSection })))
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
+const StickyMobileCta        = lazyLoad(() => import('@/components/landing/sticky-mobile-cta').then(m => ({ default: m.StickyMobileCta })))
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export const metadata: Metadata = buildMetadata({
   title: 'VendoorX — AI-Powered WhatsApp Commerce Platform | Automate Sales on WhatsApp',
@@ -61,7 +65,7 @@ const localBusinessJsonLd = {
   description: SITE_DESCRIPTION,
   logo: `${SITE_URL}/icon.svg`,
   image: `${SITE_URL}/og-image.png`,
-  priceRange: 'Free',
+  priceRange: '₦',
   currenciesAccepted: 'NGN',
   paymentAccepted: 'Cash, Bank Transfer, Paystack',
   areaServed: {
@@ -158,6 +162,23 @@ export default async function Home() {
   ])
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
 
+  // Pull the visitor's campus for hero personalization (best-effort, optional).
+  let visitorCampus: string | null = null
+  if (supabase && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('university')
+      .eq('id', user.id)
+      .maybeSingle()
+    visitorCampus = (profile?.university as string | undefined) ?? null
+  }
+
+  const visible = parseSectionVisibility(settings.homepage_sections_visible)
+  const trendingEnabled = settings.homepage_trending_enabled !== '0'
+  const escrowSteps = parseEscrowSteps(settings.homepage_escrow_steps)
+  const hiwSteps    = parseHiwSteps(settings.homepage_hiw_steps)
+  const faqs        = parseFaqs(settings.homepage_faqs)
+
   return (
     <main className="min-h-screen bg-background">
       <script
@@ -177,23 +198,26 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <LandingNav user={user} />
-      <HeroSection user={user} settings={settings} />
+      <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
       <StatsBar stats={[
         { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
         { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
         { value: settings.stat_transactions,    label: 'Sales Processed',   sublabel: settings.stat_transactions_sub },
         { value: settings.stat_rating,          label: 'Average Rating',    sublabel: settings.stat_rating_sub },
       ]} />
-      <TrustedBySection />
-      <ProblemSolutionSection />
-      <WhatsappMockupSection />
-      <HowItWorksSection />
-      <Features />
-      <IntegrationsSection />
-      <TrustSection />
-      <FaqSection />
-      <CtaSection user={user} />
+      {visible.trending && trendingEnabled && <TrendingProducts />}
+      {visible.trustedBy       && <TrustedBySection />}
+      {visible.problemSolution && <ProblemSolutionSection />}
+      {visible.whatsappMockup  && <WhatsappMockupSection />}
+      {visible.howItWorks      && <HowItWorksSection title={settings.hiw_title} subtitle={settings.hiw_subtitle} steps={hiwSteps} />}
+      {visible.features        && <Features />}
+      {visible.integrations    && <IntegrationsSection />}
+      {visible.trust           && <TrustSection />}
+      {visible.escrow          && <EscrowFlowSection steps={escrowSteps} />}
+      {visible.faq             && <FaqSection faqs={faqs} />}
+      {visible.cta             && <CtaSection user={user} />}
       <LandingFooter settings={settings} />
+      <StickyMobileCta isAuthed={!!user} />
     </main>
   )
 }

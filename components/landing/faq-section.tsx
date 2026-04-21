@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { MessageCircle, Plus, Minus } from 'lucide-react'
+import type { FaqItem as FaqItemType } from '@/lib/site-settings-defaults'
 
-const FAQS = [
+const DEFAULT_FAQS: FaqItemType[] = [
   {
     category: 'Getting Started',
     q: 'Is VendoorX completely free to join?',
@@ -64,7 +64,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Billing': 'bg-amber-50 text-amber-700 border-amber-200',
 }
 
-function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
+function FaqItem({ faq, index }: { faq: FaqItemType; index: number }) {
   const [open, setOpen] = useState(false)
   return (
     <div
@@ -85,7 +85,7 @@ function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[faq.category]}`}>
+            <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[faq.category] ?? CATEGORY_COLORS['Platform']}`}>
               {faq.category}
             </span>
           </div>
@@ -111,9 +111,10 @@ function FaqItem({ faq, index }: { faq: typeof FAQS[0]; index: number }) {
   )
 }
 
-export function FaqSection() {
+export function FaqSection({ faqs }: { faqs?: FaqItemType[] } = {}) {
+  const FAQS = faqs && faqs.length ? faqs : DEFAULT_FAQS
   return (
-    <section id="faq" className="py-24 sm:py-32 px-4 sm:px-6 bg-[#fafafa] dark:bg-muted/20">
+    <section id="faq" className="py-24 sm:py-32 px-4 sm:px-6 bg-[#fafafa] dark:bg-muted/20 scroll-mt-24">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}

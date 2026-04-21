@@ -1,13 +1,43 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Loader2, CheckCircle2, Phone, Share2, BarChart3, ImageIcon } from 'lucide-react'
+import { Save, Loader2, CheckCircle2, Phone, Share2, BarChart3, ImageIcon, Type, Layers } from 'lucide-react'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 
-type SettingRow = { key: keyof SiteSettings; label: string; placeholder?: string; type?: 'url' | 'text' | 'image-url' }
+type SettingRow = { key: keyof SiteSettings; label: string; placeholder?: string; type?: 'url' | 'text' | 'image-url' | 'textarea' | 'toggle' }
 
 const SECTIONS: { title: string; desc: string; icon: React.ReactNode; settings: SettingRow[] }[] = [
+  {
+    title: 'Hero Headline & CTAs',
+    desc: 'The big text and buttons at the very top of the homepage.',
+    icon: <Type className="w-4 h-4" />,
+    settings: [
+      { key: 'hero_badge',         label: 'Badge / Trust Pill',     placeholder: 'Built for Nigerian university campuses', type: 'text' },
+      { key: 'hero_line1',         label: 'Headline Line 1',         placeholder: 'Your campus', type: 'text' },
+      { key: 'hero_accent',        label: 'Headline Accent Word',    placeholder: 'marketplace.', type: 'text' },
+      { key: 'hero_subtitle',      label: 'Subtitle',                placeholder: 'Buy and sell with classmates...', type: 'textarea' },
+      { key: 'hero_cta_primary',   label: 'Primary CTA Label',       placeholder: 'Get Started Free', type: 'text' },
+      { key: 'hero_cta_secondary', label: 'Secondary CTA Label',     placeholder: 'See How It Works', type: 'text' },
+    ],
+  },
+  {
+    title: 'How It Works — Header',
+    desc: 'Title and subtitle above the 4-step diagram. Use the JSON editor below to manage the steps themselves.',
+    icon: <Layers className="w-4 h-4" />,
+    settings: [
+      { key: 'hiw_title',    label: 'Title',    placeholder: 'Selling made ridiculously simple', type: 'text' },
+      { key: 'hiw_subtitle', label: 'Subtitle', placeholder: 'From sign-up to first sale...',     type: 'text' },
+    ],
+  },
+  {
+    title: 'Trending Products Strip',
+    desc: 'The "What students are buying today" grid right after the stats bar.',
+    icon: <BarChart3 className="w-4 h-4" />,
+    settings: [
+      { key: 'homepage_trending_enabled', label: 'Show on homepage', type: 'toggle' },
+    ],
+  },
   {
     title: 'Contact & Support',
     desc: 'Shown on the floating support button on the dashboard.',
@@ -147,6 +177,65 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
                       )}
                     </button>
                   </div>
+                ) : type === 'toggle' ? (
+                  <div className="flex items-center justify-between gap-3 px-3 py-3 rounded-xl bg-muted/50 border border-border">
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{label}</p>
+                      {placeholder && <p className="text-xs text-muted-foreground mt-0.5">{placeholder}</p>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = values[key] === '1' ? '0' : '1'
+                        setValues(v => ({ ...v, [key]: next }))
+                        // auto-save toggles
+                        ;(async () => {
+                          setSaving(key)
+                          try {
+                            const res = await fetch('/api/admin/site-settings', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ key, value: next }),
+                            })
+                            if (!res.ok) throw new Error((await res.json()).error || 'Save failed')
+                            setSaved(key)
+                            setTimeout(() => setSaved(null), 2000)
+                          } catch (e: unknown) {
+                            setError(e instanceof Error ? e.message : 'Save failed')
+                          } finally { setSaving(null) }
+                        })()
+                      }}
+                      role="switch"
+                      aria-checked={values[key] === '1'}
+                      className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${values[key] === '1' ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${values[key] === '1' ? 'translate-x-6' : ''}`} />
+                    </button>
+                  </div>
+                ) : type === 'textarea' ? (
+                  <>
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2 block">
+                      {label}
+                    </label>
+                    <div className="flex gap-2 items-start">
+                      <textarea
+                        value={values[key]}
+                        onChange={e => setValues(v => ({ ...v, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        rows={3}
+                        className="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm focus:outline-none focus:border-primary transition-colors resize-y"
+                      />
+                      <button
+                        onClick={() => saveSetting(key)}
+                        disabled={saving === key}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-xs font-bold shrink-0 transition-all"
+                      >
+                        {saving === key ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          : saved === key ? <><CheckCircle2 className="w-3.5 h-3.5" /> Saved</>
+                          : <><Save className="w-3.5 h-3.5" /> Save</>}
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2 block">

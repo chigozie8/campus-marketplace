@@ -6,7 +6,12 @@ import { SiteSettingsEditor } from '@/components/admin/site-settings-editor'
 import { HelpCenterEditor } from '@/components/admin/help-center-editor'
 import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
 import { PlatformFeeEditor } from '@/components/admin/platform-fee-editor'
+import { JsonListEditor } from '@/components/admin/json-list-editor'
+import { SectionVisibilityEditor } from '@/components/admin/section-visibility-editor'
 import { getSiteSettings } from '@/lib/site-settings'
+import {
+  parseHiwSteps, parseFaqs, parseHeroFeatures, parseEscrowSteps, parseSectionVisibility,
+} from '@/lib/site-settings-defaults'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,6 +79,76 @@ export default async function AdminSettingsPage() {
       <div>
         <h3 className="text-sm font-black text-foreground mb-4">Site Content</h3>
         <SiteSettingsEditor initialSettings={settings} />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">🏠 Homepage Sections</h3>
+        <SectionVisibilityEditor initialValue={parseSectionVisibility(settings.homepage_sections_visible)} />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">⭐ Hero Feature Pills</h3>
+        <JsonListEditor
+          settingKey="homepage_hero_features"
+          title="Feature Pills under the headline"
+          description="The small badges shown below the hero subtitle (e.g. '120+ Universities'). Icon names from lucide-react: GraduationCap, Shield, Zap, Users, Phone, Star, Heart."
+          fields={[
+            { key: 'icon', label: 'Icon name (lucide-react)', placeholder: 'GraduationCap' },
+            { key: 'text', label: 'Pill text', placeholder: '120+ Nigerian Universities' },
+          ]}
+          initialItems={parseHeroFeatures(settings.homepage_hero_features) as unknown as { icon: string; text: string }[]}
+          blankItem={{ icon: 'Star', text: '' }}
+          maxItems={6}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">📋 How It Works — Steps</h3>
+        <JsonListEditor
+          settingKey="homepage_hiw_steps"
+          title="Step-by-step content"
+          description="The 4 cards in the How It Works section. Reorder, add, remove, or edit."
+          fields={[
+            { key: 'step',        label: 'Step number',  placeholder: '01' },
+            { key: 'title',       label: 'Title',         placeholder: 'Create your free account' },
+            { key: 'description', label: 'Description',   placeholder: 'Sign up in seconds...', type: 'textarea' },
+          ]}
+          initialItems={parseHiwSteps(settings.homepage_hiw_steps) as unknown as { step: string; title: string; description: string }[]}
+          blankItem={{ step: '', title: '', description: '' }}
+          maxItems={6}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">🔒 Escrow Flow Steps</h3>
+        <JsonListEditor
+          settingKey="homepage_escrow_steps"
+          title="Escrow flow diagram"
+          description="The 4-step trust diagram before the FAQ. Keeps to max 4 cards."
+          fields={[
+            { key: 'title',       label: 'Title',       placeholder: 'You pay securely' },
+            { key: 'description', label: 'Description', placeholder: 'Buyer checks out via Paystack...', type: 'textarea' },
+          ]}
+          initialItems={parseEscrowSteps(settings.homepage_escrow_steps) as unknown as { title: string; description: string }[]}
+          blankItem={{ title: '', description: '' }}
+          maxItems={4}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">❓ Homepage FAQs</h3>
+        <JsonListEditor
+          settingKey="homepage_faqs"
+          title="Frequently Asked Questions"
+          description="Each FAQ is shown on the homepage in the order listed. Categories control the colour pill."
+          fields={[
+            { key: 'category', label: 'Category', placeholder: 'Getting Started', type: 'select', options: ['Getting Started', 'Payments', 'Platform', 'Billing'] },
+            { key: 'q',        label: 'Question', placeholder: 'Is VendoorX completely free?' },
+            { key: 'a',        label: 'Answer',   placeholder: 'Yes — joining VendoorX is...', type: 'textarea' },
+          ]}
+          initialItems={parseFaqs(settings.homepage_faqs) as unknown as { category: string; q: string; a: string }[]}
+          blankItem={{ category: 'Getting Started', q: '', a: '' }}
+        />
       </div>
 
       <div>

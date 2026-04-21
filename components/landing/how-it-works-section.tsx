@@ -1,41 +1,35 @@
-'use client'
+import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2, type LucideIcon } from 'lucide-react'
+import type { HiwStep } from '@/lib/site-settings-defaults'
 
-import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2 } from 'lucide-react'
-
-const STEPS = [
-  {
-    step: '01',
-    icon: UserPlus,
-    title: 'Create your free account',
-    description: 'Sign up in seconds. Add your name, WhatsApp number, and what you sell. Your store profile goes live immediately — no approval, no waiting, no technical setup.',
-    color: 'from-emerald-500 to-green-600',
-  },
-  {
-    step: '02',
-    icon: Camera,
-    title: 'List your first product',
-    description: 'Upload a photo, write a short description, set your price, and pick a category. Done. Your listing is instantly visible to buyers looking for exactly what you sell.',
-    color: 'from-teal-500 to-cyan-600',
-  },
-  {
-    step: '03',
-    icon: Share2,
-    title: 'Share everywhere in one tap',
-    description: 'Hit share and your listing lands on WhatsApp Status, Instagram Stories, Facebook, and TikTok in seconds. One action. Maximum reach across every channel your buyers are on.',
-    color: 'from-cyan-500 to-blue-600',
-  },
-  {
-    step: '04',
-    icon: MessageCircle,
-    title: 'Let AI close the deal on WhatsApp',
-    description: 'Buyers tap "Chat on WhatsApp" and land right in your store. VendoorX AI handles their questions, confirms orders, and collects payment — so you earn even while you sleep.',
-    color: 'from-green-500 to-emerald-600',
-  },
+const STEP_ICONS: LucideIcon[] = [UserPlus, Camera, Share2, MessageCircle]
+const STEP_COLORS = [
+  'from-emerald-500 to-green-600',
+  'from-teal-500 to-cyan-600',
+  'from-cyan-500 to-blue-600',
+  'from-green-500 to-emerald-600',
 ]
 
-export function HowItWorksSection() {
+const FALLBACK_STEPS: HiwStep[] = [
+  { step: '01', title: 'Create your free account',          description: 'Sign up in seconds. Add your name, WhatsApp number, and what you sell. Your store profile goes live immediately — no approval, no waiting, no technical setup.' },
+  { step: '02', title: 'List your first product',           description: 'Upload a photo, write a short description, set your price, and pick a category. Done. Your listing is instantly visible to buyers looking for exactly what you sell.' },
+  { step: '03', title: 'Share everywhere in one tap',       description: 'Hit share and your listing lands on WhatsApp Status, Instagram Stories, Facebook, and TikTok in seconds. One action. Maximum reach across every channel your buyers are on.' },
+  { step: '04', title: 'Let AI close the deal on WhatsApp', description: 'Buyers tap "Chat on WhatsApp" and land right in your store. VendoorX AI handles their questions, confirms orders, and collects payment — so you earn even while you sleep.' },
+]
+
+interface Props {
+  title?: string
+  subtitle?: string
+  steps?: HiwStep[]
+}
+
+export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
+  const STEPS = (steps && steps.length ? steps : FALLBACK_STEPS).map((s, i) => ({
+    ...s,
+    icon: STEP_ICONS[i % STEP_ICONS.length],
+    color: STEP_COLORS[i % STEP_COLORS.length],
+  }))
   return (
-    <section id="how-it-works" className="py-24 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden">
+    <section id="how-it-works" className="py-24 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden scroll-mt-24">
       {/* Background decoration */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
@@ -49,11 +43,10 @@ export function HowItWorksSection() {
             How it works
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground text-balance mt-4 mb-5">
-            From sign-up to first sale{' '}
-            <span className="text-primary">in under 5 minutes</span>
+            {title ?? <>From sign-up to first sale <span className="text-primary">in under 5 minutes</span></>}
           </h2>
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
-            No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale — powered by AI on WhatsApp.
+            {subtitle ?? 'No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale — powered by AI on WhatsApp.'}
           </p>
         </div>
 

@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export const runtime = 'nodejs'
@@ -57,14 +58,21 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
 
   if (!profile) return new Response('Not found', { status: 404 })
 
-  // Only honour the request if the user really is a seller. We treat any of
-  // these signals as enough proof: an explicit seller flag, a vendor role,
-  // or having at least one live listing.
+  // Owners can always render their own card (so a brand-new seller can share
+  // before they have listings). For everyone else, require seller signal to
+  // prevent this route being a profile-data probe for arbitrary user UUIDs.
+  let isOwner = false
+  try {
+    const userClient = await createClient()
+    const { data: { user: authedUser } } = userClient ? await userClient.auth.getUser() : { data: { user: null } }
+    isOwner = !!authedUser && authedUser.id === id
+  } catch { /* ignore — fall through to public seller check */ }
+
   const isSeller = !!profile.is_seller
     || profile.role === 'vendor'
     || profile.role === 'both'
     || (products?.length ?? 0) > 0
-  if (!isSeller) return new Response('Not found', { status: 404 })
+  if (!isOwner && !isSeller) return new Response('Not found', { status: 404 })
 
   const name = (profile.full_name as string) || 'VendoorX Seller'
   const rating = profile.rating ? Number(profile.rating).toFixed(1) : null
