@@ -3,7 +3,11 @@ import { supabaseAdmin } from '../config/supabaseClient.js'
 import logger from '../utils/logger.js'
 
 const OTP_LENGTH = 6
-const OTP_TTL_MINUTES = 10
+// Delivery OTPs must stay valid for the entire shipping window — a buyer might
+// receive their package days after the seller marks it shipped. 14 days mirrors
+// the longest realistic Nigerian intercity delivery window and lines up with
+// the auto-release safety net.
+const OTP_TTL_MINUTES = 60 * 24 * 14
 const MAX_ATTEMPTS = 5
 
 export type OtpChannel = 'email' | 'sms' | 'both'

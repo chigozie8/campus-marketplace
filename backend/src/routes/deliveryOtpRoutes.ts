@@ -125,7 +125,7 @@ router.post('/:orderId/verify', requireRole('buyer', 'admin'), async (req, res, 
     if (!verifyResult.success) {
       const messages: Record<string, string> = {
         not_found: 'No OTP found. Ask the vendor to resend.',
-        expired: 'OTP has expired. Ask the vendor to generate a new one.',
+        expired: 'This delivery code has expired. Tap "Resend code" to get a fresh one.',
         used: 'This OTP has already been used.',
         invalid: 'Invalid code. Check your email, SMS, or in-app bell and try again.',
         max_attempts: 'Too many failed attempts. Ask the vendor to generate a new OTP.',

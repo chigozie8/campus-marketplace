@@ -139,7 +139,7 @@ export async function sendDeliveryOtpToBuyer(
     userId: buyerId,
     type: 'delivery_otp',
     title: '🔐 Your Delivery Code',
-    body: `Use code ${rawOtp} to confirm delivery of Order #${shortOrderId}. Only enter it AFTER your item arrives. Expires in 10 minutes.`,
+    body: `Use code ${rawOtp} to confirm delivery of Order #${shortOrderId}. Only enter it AFTER your item arrives in your hand — never share it with the seller. Stays valid for the full delivery window.`,
     data: { url: '/dashboard/orders', orderId, code: rawOtp },
   }).catch(err => logger.warn(`[deliveryOtp] Bell notification failed for order ${orderId}: ${err}`))
 
