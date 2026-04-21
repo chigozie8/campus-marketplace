@@ -277,9 +277,6 @@ export default async function ProductDetailPage({ params }: Props) {
                           <span className="text-xs text-gray-500">{sellerRating.toFixed(1)}</span>
                         </div>
                       )}
-                      <span className="text-xs text-gray-400">
-                        {p.profiles?.total_sales || 0} sales
-                      </span>
                     </div>
                   </div>
                 </div>
