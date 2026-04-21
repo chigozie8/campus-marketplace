@@ -12,6 +12,7 @@ import { SplashScreen } from '@/components/splash-screen'
 import { CookieConsent } from '@/components/cookie-consent'
 import { ChatWidget } from '@/components/chat-widget'
 import { CrispChat } from '@/components/crisp-chat'
+import { EnjoChat } from '@/components/enjo-chat'
 import { PushNotificationPrompt } from '@/components/push-notification-prompt'
 import { CapacitorInit } from '@/components/capacitor-init'
 import { NetworkToast } from '@/components/network-toast'
@@ -438,7 +439,7 @@ export default function RootLayout({
             <ServiceWorkerRegistration />
             <PwaInstallPrompt />
             <PushNotificationPrompt />
-            {process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ? <CrispChat /> : <ChatWidget />}
+            <EnjoChat />
             <CookieConsent />
             <Toaster richColors position="top-right" />
             {process.env.NODE_ENV === 'production' && <Analytics />}
