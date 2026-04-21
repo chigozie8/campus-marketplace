@@ -195,7 +195,7 @@ export default async function SellerProfilePage({ params }: Props) {
           <div className="relative z-10 flex gap-6 mt-5 pt-5 border-t border-white/10">
             {[
               { label: 'Listings', value: (products || []).length },
-              { label: 'Sales', value: profile.total_sales || 0 },
+              // { label: 'Sales', value: profile.total_sales || 0 }, // Hidden per request — re-enable once total_sales is reliably tracked
               { label: 'Rating', value: avgRating > 0 ? `${avgRating.toFixed(1)}★` : '—' },
               { label: 'Reviews', value: reviews?.length || 0 },
             ].map(({ label, value }) => (
