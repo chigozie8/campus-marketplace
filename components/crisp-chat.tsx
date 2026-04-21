@@ -14,8 +14,10 @@ import { createClient } from '@/lib/supabase/client'
  *   3. Add NEXT_PUBLIC_CRISP_WEBSITE_ID to Replit Secrets
  *   4. Refresh — that's it. The widget appears bottom-right with your branding.
  */
+const DEFAULT_CRISP_WEBSITE_ID = 'bb298b2b-c7cf-4245-89bf-951f5a8047dc'
+
 export function CrispChat() {
-  const websiteId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID
+  const websiteId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID || DEFAULT_CRISP_WEBSITE_ID
 
   useEffect(() => {
     if (!websiteId) return
