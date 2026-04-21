@@ -83,12 +83,14 @@ function ReviewCard({ review }: { review: Review }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <span className="text-sm font-semibold text-foreground">{name}</span>
-          <span className="text-xs text-muted-foreground">{date}</span>
+          <span className="text-sm font-semibold text-foreground break-words min-w-0">{name}</span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{date}</span>
         </div>
         <StarRow rating={review.rating} size={13} />
         {review.comment && (
-          <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{review.comment}</p>
+          <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+            {review.comment}
+          </p>
         )}
       </div>
     </div>

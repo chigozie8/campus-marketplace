@@ -73,7 +73,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       toast.error('Sign in to save favourites')
-      router.push(`/auth/sign-in?redirect=/marketplace/${product.id}`)
+      router.push(`/auth/login?redirect=/marketplace/${product.id}`)
       return
     }
     const next = !localFav
