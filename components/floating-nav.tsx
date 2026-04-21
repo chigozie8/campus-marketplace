@@ -47,10 +47,9 @@ export function FloatingNav() {
           <div
             className={cn(
               'relative flex items-center gap-1 h-16 px-2.5 rounded-full',
-              'bg-white dark:bg-black backdrop-blur-xl',
-              'border-2 border-black dark:border-white',
-              'shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45),0_2px_8px_-2px_rgba(0,0,0,0.15)]',
-              'dark:shadow-[0_10px_40px_-10px_rgba(255,255,255,0.15)]',
+              'bg-white/95 dark:bg-black/90 backdrop-blur-2xl',
+              'shadow-[0_18px_50px_-12px_rgba(0,0,0,0.35),0_4px_14px_-4px_rgba(0,0,0,0.18),inset_0_1px_0_0_rgba(255,255,255,0.6)]',
+              'dark:shadow-[0_18px_50px_-12px_rgba(0,0,0,0.7),0_4px_14px_-4px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.08)]',
             )}
           >
             {NAV_ITEMS.map((item) => {
