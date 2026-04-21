@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { m, LazyMotion, domAnimation } from 'framer-motion'
-import { quickSellerScore } from '@/lib/trust'
-import { TrustBadge } from '@/components/TrustBadge'
+import { AdminBadgesList } from '@/components/TrustBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { botWhatsappUrl } from '@/lib/whatsapp-bot'
@@ -114,15 +113,8 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0
 
-  const accountAgeDays = product.profiles?.created_at
-    ? Math.floor((Date.now() - new Date(product.profiles.created_at).getTime()) / (1000 * 60 * 60 * 24))
-    : 0
-  const trustScore = quickSellerScore({
-    rating: sellerRating,
-    totalSales: product.profiles?.total_sales ?? 0,
-    sellerVerified: isVerified,
-    accountAgeDays,
-  })
+  const sellerAdminBadges =
+    (product.profiles as { admin_badges?: string[] } | null)?.admin_badges ?? []
 
   return (
     <LazyMotion features={domAnimation}>
@@ -211,8 +203,14 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
           </div>
           <span className="truncate max-w-[80px] sm:max-w-none">{sellerName}</span>
           {isVerified && <BadgeCheck className="w-3 h-3 text-primary flex-shrink-0" />}
-          {isStudentVerified && <GraduationCap className="w-3 h-3 text-blue-500 flex-shrink-0" title="Verified seller" />}
-          <TrustBadge score={trustScore} size="sm" showScore={false} />
+          {isStudentVerified && (
+            <span title="Verified seller" className="inline-flex">
+              <GraduationCap className="w-3 h-3 text-blue-500 flex-shrink-0" />
+            </span>
+          )}
+          {sellerAdminBadges.length > 0 && (
+            <AdminBadgesList badges={sellerAdminBadges} size="xs" iconOnly max={3} />
+          )}
           {sellerRating > 0 && (
             <div className="flex items-center gap-0.5 ml-auto">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />

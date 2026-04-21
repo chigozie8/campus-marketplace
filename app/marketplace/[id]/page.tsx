@@ -6,8 +6,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import type { Product } from '@/lib/types'
-import { TrustBadge, SellerTierBadge } from '@/components/TrustBadge'
-import { computeSellerScore } from '@/lib/trust'
+import { AdminBadgesList } from '@/components/TrustBadge'
 import type { Metadata } from 'next'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import { ProductJsonLd } from '@/components/seo/product-jsonld'
@@ -119,16 +118,9 @@ export default async function ProductDetailPage({ params }: Props) {
   const isVerified = p.profiles?.seller_verified || false
   const cond = conditionConfig[p.condition] || conditionConfig.good
 
-  const sellerAccountAgeDays = p.profiles?.created_at
-    ? Math.floor((Date.now() - new Date(p.profiles.created_at).getTime()) / (1000 * 60 * 60 * 24))
-    : 0
-  const { score: listingTrustScore } = computeSellerScore({
-    rating: sellerRating,
-    totalSales: p.profiles?.total_sales ?? 0,
-    sellerVerified: isVerified,
-    sellerDisputes: (sellerDisputesData ?? []) as Array<{ id: string; status: string }>,
-    accountAgeDays: sellerAccountAgeDays,
-  })
+  // sellerDisputesData no longer used for public-facing trust scoring (admin awards badges manually)
+  void sellerDisputesData
+  const sellerAdminBadges = (p.profiles as { admin_badges?: string[] } | null)?.admin_badges ?? []
 
   return (
     <>
@@ -280,10 +272,11 @@ export default async function ProductDetailPage({ params }: Props) {
                     </div>
                   </div>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <TrustBadge score={listingTrustScore} size="sm" showScore={true} />
-                  <SellerTierBadge score={listingTrustScore} size="sm" />
-                </div>
+                {sellerAdminBadges.length > 0 && (
+                  <div className="mt-3">
+                    <AdminBadgesList badges={sellerAdminBadges} size="sm" />
+                  </div>
+                )}
               </Link>
 
               {/* Make an Offer */}

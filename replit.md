@@ -2,6 +2,18 @@
 
 ## Recently Completed Features (Latest Session)
 
+### Trust Badges → Admin-Only (April 2026)
+- Auto trust-score badges (Excellent/Good/Rising/etc.) and auto seller-tier (Gold/Silver/Bronze based on activity) **removed from all public-facing pages**: `app/sellers/[id]/page.tsx`, `app/marketplace/[id]/page.tsx`, `components/marketplace/product-card.tsx`. Buyer's view of `TrustBadge`/`SellerTierBadge` is gone.
+- New admin-awarded badges added in `components/TrustBadge.tsx` → `ADMIN_BADGE_DEFS` (single source of truth, exported with `AdminBadgeGroup` type and `normalizeAdminBadges()` helper):
+  - **Promo group** (mutually exclusive, awarded based on amount paid): `gold_seller` 🥇, `silver_seller` 🥈, `bronze_seller` 🥉
+  - **Rank group** (mutually exclusive, manual recognition): `excellent_seller` 🏅, `rising_seller` 🌱
+  - **Other group** (any combination): top_seller, trusted_buyer, vip, verified_business, student_ambassador, rising_star, campus_vendor
+- Admin picker at `/admin/trust-scores` Badges tab is reorganized into Promo/Recognition/Other sections; toggle uses shared `normalizeAdminBadges()` so client UI and server agree.
+- `PATCH /api/admin/trust-scores/[userId]` now calls `normalizeAdminBadges()` server-side — strips unknowns, dedupes, enforces promo/rank exclusivity even via direct API calls.
+- Internal-use kept: `lib/trust.ts` (`computeSellerScore`, `getSellerTier`, etc.) still powers admin trust-score visibility & seller's own dashboard `trust-panel`.
+
+
+
 ### Dashboard Improvements Batch 1–12 (April 2026)
 Twelve dashboard upgrades shipped, with the buyer/seller view toggle as the centerpiece. Server-component branches by `?view=buyer|seller` (default from `profile.role`); client toggle persists choice in localStorage and updates URL via `router.replace`.
 

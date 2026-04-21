@@ -2,13 +2,12 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import {
-  ShieldCheck, Shield, ShieldAlert, ShieldOff,
+  ShieldCheck, Shield, ShieldOff,
   Loader2, AlertCircle, RefreshCw, Search, Users,
   TrendingUp, TrendingDown, Flag, Award, Sliders,
-  X, Check, BadgeCheck, Star, Crown, Briefcase,
-  GraduationCap, Sparkles, AlertTriangle,
+  X, Check, AlertTriangle, Medal,
 } from 'lucide-react'
-import { TrustBadge, getTrustLevel } from '@/components/TrustBadge'
+import { TrustBadge, ADMIN_BADGE_DEFS, normalizeAdminBadges } from '@/components/TrustBadge'
 
 type UserTrust = {
   id: string
@@ -35,15 +34,8 @@ type UserTrust = {
 
 const LEVEL_ORDER = { excellent: 0, good: 1, fair: 2, low: 3 }
 
-const ADMIN_BADGES = [
-  { id: 'top_seller',          label: 'Top Seller',          emoji: '🏆', Icon: Crown,       color: 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800' },
-  { id: 'trusted_buyer',       label: 'Trusted Buyer',       emoji: '⭐', Icon: Star,        color: 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' },
-  { id: 'vip',                 label: 'VIP Member',          emoji: '👑', Icon: Crown,       color: 'text-purple-700 bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800' },
-  { id: 'verified_business',   label: 'Verified Business',   emoji: '✅', Icon: BadgeCheck,  color: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' },
-  { id: 'student_ambassador',  label: 'Student Ambassador',  emoji: '🎓', Icon: GraduationCap, color: 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800' },
-  { id: 'rising_star',         label: 'Rising Star',         emoji: '🌟', Icon: Sparkles,    color: 'text-yellow-700 bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800' },
-  { id: 'campus_vendor',       label: 'Campus Vendor',       emoji: '🏫', Icon: Briefcase,   color: 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/30 dark:text-cyan-400 dark:border-cyan-800' },
-]
+// Single source of truth — badge metadata (id/label/emoji/color/group) lives in components/TrustBadge.tsx
+const ADMIN_BADGES = ADMIN_BADGE_DEFS
 
 export default function TrustScoresPage() {
   const [users, setUsers] = useState<UserTrust[]>([])
@@ -479,7 +471,11 @@ function TrustManageModal({
   const [saved, setSaved] = useState(false)
 
   function toggleBadge(id: string) {
-    setBadges(prev => prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id])
+    setBadges(prev => {
+      if (prev.includes(id)) return prev.filter(b => b !== id)
+      // Mutual-exclusion enforced via shared normalizer (server applies the same rule)
+      return normalizeAdminBadges([...prev, id])
+    })
     setSaved(false)
   }
 
@@ -589,37 +585,96 @@ function TrustManageModal({
 
           {/* ── BADGES TAB ── */}
           {activeTab === 'badges' && (
-            <div className="space-y-4">
-              <p className="text-xs text-muted-foreground">Select badges to assign to this user. Click a badge to toggle it on or off.</p>
-              <div className="grid grid-cols-2 gap-2">
-                {ADMIN_BADGES.map(badge => {
-                  const active = badges.includes(badge.id)
-                  return (
-                    <button
-                      key={badge.id}
-                      onClick={() => toggleBadge(badge.id)}
-                      className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-left transition-all ${
-                        active
-                          ? `${badge.color} border-current`
-                          : 'border-border bg-card hover:bg-muted text-muted-foreground'
-                      }`}
-                    >
-                      <span className="text-lg leading-none">{badge.emoji}</span>
-                      <span className="text-xs font-bold flex-1">{badge.label}</span>
-                      {active && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
-                    </button>
-                  )
-                })}
+            <div className="space-y-5">
+              <p className="text-xs text-muted-foreground">
+                Award badges to this user. <span className="font-semibold">Promotion tiers</span> and <span className="font-semibold">recognition tiers</span> are mutually exclusive — selecting one auto-replaces the other in its group.
+              </p>
+
+              {/* Paid Promotion Tiers */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Medal className="w-3.5 h-3.5 text-amber-600" />
+                  <p className="text-xs font-black uppercase tracking-wide text-foreground">Paid Promotion Tier</p>
+                  <span className="text-[10px] text-muted-foreground font-semibold">(based on amount paid)</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {ADMIN_BADGES.filter(b => b.group === 'promo').map(badge => {
+                    const active = badges.includes(badge.id)
+                    return (
+                      <button
+                        key={badge.id}
+                        onClick={() => toggleBadge(badge.id)}
+                        className={`flex flex-col items-center gap-1 px-2 py-3 rounded-xl border text-center transition-all ${
+                          active ? `${badge.color} border-current ring-2 ring-current/20` : 'border-border bg-card hover:bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        <span className="text-2xl leading-none">{badge.emoji}</span>
+                        <span className="text-[11px] font-black">{badge.label.replace(' Seller', '')}</span>
+                        {active && <Check className="w-3 h-3" />}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-              {badges.length === 0 && (
-                <p className="text-center text-xs text-muted-foreground py-2">No badges assigned yet. Click any badge above to assign it.</p>
-              )}
+
+              {/* Recognition Tiers */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <p className="text-xs font-black uppercase tracking-wide text-foreground">Recognition Tier</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {ADMIN_BADGES.filter(b => b.group === 'rank').map(badge => {
+                    const active = badges.includes(badge.id)
+                    return (
+                      <button
+                        key={badge.id}
+                        onClick={() => toggleBadge(badge.id)}
+                        className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-left transition-all ${
+                          active ? `${badge.color} border-current` : 'border-border bg-card hover:bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        <span className="text-lg leading-none">{badge.emoji}</span>
+                        <span className="text-xs font-bold flex-1">{badge.label}</span>
+                        {active && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Other Badges */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Award className="w-3.5 h-3.5 text-primary" />
+                  <p className="text-xs font-black uppercase tracking-wide text-foreground">Other Badges</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {ADMIN_BADGES.filter(b => b.group === 'other').map(badge => {
+                    const active = badges.includes(badge.id)
+                    return (
+                      <button
+                        key={badge.id}
+                        onClick={() => toggleBadge(badge.id)}
+                        className={`flex items-center gap-2 px-3 py-3 rounded-xl border text-left transition-all ${
+                          active ? `${badge.color} border-current` : 'border-border bg-card hover:bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        <span className="text-lg leading-none">{badge.emoji}</span>
+                        <span className="text-xs font-bold flex-1">{badge.label}</span>
+                        {active && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
               {badges.length > 0 && (
                 <div className="rounded-xl bg-muted/40 px-4 py-3 flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-semibold text-muted-foreground">Assigned:</span>
                   {badges.map(bid => {
                     const b = ADMIN_BADGES.find(x => x.id === bid)
-                    return b ? <span key={bid} className="text-base">{b.emoji}</span> : null
+                    return b ? <span key={bid} className="text-base" title={b.label}>{b.emoji}</span> : null
                   })}
                 </div>
               )}
@@ -784,11 +839,8 @@ function StatCard({ icon, label, value, color, suffix = '' }: {
 }
 
 function scoreBarColor(score: number) {
-  const level = getTrustLevel(score)
-  return {
-    excellent: 'bg-emerald-500',
-    good: 'bg-blue-500',
-    fair: 'bg-amber-500',
-    low: 'bg-red-500',
-  }[level]
+  if (score >= 85) return 'bg-emerald-500'
+  if (score >= 70) return 'bg-blue-500'
+  if (score >= 50) return 'bg-amber-500'
+  return 'bg-red-500'
 }

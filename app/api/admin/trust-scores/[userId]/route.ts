@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
+import { normalizeAdminBadges } from '@/components/TrustBadge'
 
 function svc() {
   return createAdmin(
@@ -48,7 +49,10 @@ export async function PATCH(
     if (!is_flagged) updates.flag_reason = null
   }
   if (typeof flag_reason === 'string') updates.flag_reason = flag_reason || null
-  if (Array.isArray(admin_badges)) updates.admin_badges = admin_badges
+  if (Array.isArray(admin_badges)) {
+    // Strip unknowns + enforce promo/rank mutual exclusion server-side
+    updates.admin_badges = normalizeAdminBadges(admin_badges)
+  }
   if (trust_score_override !== undefined) {
     updates.trust_score_override = trust_score_override === null ? null : Number(trust_score_override)
     updates.score_override_note = score_override_note ?? null

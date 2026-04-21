@@ -7,6 +7,124 @@ import type { TrustLevel, SellerTier } from '@/lib/trust'
 export type { TrustLevel, SellerTier }
 export { getSellerTier, getMilestoneBadge }
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * Admin-awarded badges (manually assigned by admin from /admin/trust-scores)
+ * Includes paid promotion tiers (Gold/Silver/Bronze) and recognition badges
+ * (Excellent/Rising). These are the ONLY badges shown publicly — automatic
+ * trust-score badges are hidden from buyers/sellers.
+ * ────────────────────────────────────────────────────────────────────── */
+export type AdminBadgeGroup = 'promo' | 'rank' | 'other'
+
+export interface AdminBadgeDef {
+  id: string
+  label: string
+  emoji: string
+  color: string
+  group: AdminBadgeGroup
+}
+
+export const ADMIN_BADGE_DEFS: AdminBadgeDef[] = [
+  // Paid promotion tiers (mutually exclusive)
+  { id: 'gold_seller',         label: 'Gold Seller',         emoji: '🥇', group: 'promo', color: 'text-amber-700 bg-amber-50 border-amber-300 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-700' },
+  { id: 'silver_seller',       label: 'Silver Seller',       emoji: '🥈', group: 'promo', color: 'text-slate-700 bg-slate-50 border-slate-300 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-600' },
+  { id: 'bronze_seller',       label: 'Bronze Seller',       emoji: '🥉', group: 'promo', color: 'text-orange-700 bg-orange-50 border-orange-300 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-700' },
+  // Recognition tiers (mutually exclusive)
+  { id: 'excellent_seller',    label: 'Excellent Seller',    emoji: '🏅', group: 'rank',  color: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' },
+  { id: 'rising_seller',       label: 'Rising Seller',       emoji: '🌱', group: 'rank',  color: 'text-lime-700 bg-lime-50 border-lime-200 dark:bg-lime-950/30 dark:text-lime-400 dark:border-lime-800' },
+  // Other badges (any combination)
+  { id: 'top_seller',          label: 'Top Seller',          emoji: '🏆', group: 'other', color: 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800' },
+  { id: 'trusted_buyer',       label: 'Trusted Buyer',       emoji: '⭐', group: 'other', color: 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' },
+  { id: 'vip',                 label: 'VIP Member',          emoji: '👑', group: 'other', color: 'text-purple-700 bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800' },
+  { id: 'verified_business',   label: 'Verified Business',   emoji: '✅', group: 'other', color: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' },
+  { id: 'student_ambassador',  label: 'Student Ambassador',  emoji: '🎓', group: 'other', color: 'text-indigo-700 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800' },
+  { id: 'rising_star',         label: 'Rising Star',         emoji: '🌟', group: 'other', color: 'text-yellow-700 bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800' },
+  { id: 'campus_vendor',       label: 'Campus Vendor',       emoji: '🏫', group: 'other', color: 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/30 dark:text-cyan-400 dark:border-cyan-800' },
+]
+
+export const VALID_ADMIN_BADGE_IDS = new Set(ADMIN_BADGE_DEFS.map(b => b.id))
+
+/**
+ * Normalize a badge array — strips unknown ids, dedupes, and enforces mutual
+ * exclusion within the `promo` and `rank` groups (last write wins). Used by
+ * both the admin UI and the server-side PATCH route to keep the model honest.
+ */
+export function normalizeAdminBadges(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  const seen = new Set<string>()
+  const ordered: string[] = []
+  for (const id of raw) {
+    if (typeof id !== 'string') continue
+    if (!VALID_ADMIN_BADGE_IDS.has(id)) continue
+    if (seen.has(id)) continue
+    seen.add(id)
+    ordered.push(id)
+  }
+  // Mutual-exclusion: keep only the LAST badge added in each exclusive group
+  const exclusiveGroups: AdminBadgeGroup[] = ['promo', 'rank']
+  for (const g of exclusiveGroups) {
+    const inGroup = ordered.filter(id => ADMIN_BADGE_DEFS.find(b => b.id === id)?.group === g)
+    if (inGroup.length <= 1) continue
+    const keep = inGroup[inGroup.length - 1]
+    for (let i = ordered.length - 1; i >= 0; i--) {
+      const def = ADMIN_BADGE_DEFS.find(b => b.id === ordered[i])
+      if (def?.group === g && ordered[i] !== keep) ordered.splice(i, 1)
+    }
+  }
+  return ordered
+}
+
+interface AdminBadgesProps {
+  badges: string[] | null | undefined
+  size?: 'xs' | 'sm' | 'md'
+  iconOnly?: boolean
+  max?: number
+  className?: string
+}
+
+/**
+ * Renders the admin-awarded badges from a profile's `admin_badges` array.
+ * Hidden entirely if the array is empty.
+ */
+export function AdminBadgesList({ badges, size = 'sm', iconOnly = false, max, className = '' }: AdminBadgesProps) {
+  const list = (badges ?? []).filter(Boolean)
+  if (list.length === 0) return null
+  const visible = max ? list.slice(0, max) : list
+  const sizeClass = {
+    xs: 'text-[10px] px-1.5 py-0.5 gap-0.5',
+    sm: 'text-[11px] px-2 py-0.5 gap-1',
+    md: 'text-xs px-2.5 py-1 gap-1.5',
+  }[size]
+
+  return (
+    <div className={`inline-flex flex-wrap items-center gap-1 ${className}`}>
+      {visible.map(id => {
+        const def = ADMIN_BADGE_DEFS.find(b => b.id === id)
+        if (!def) return null
+        if (iconOnly) {
+          return (
+            <span key={id} title={def.label} className="text-base leading-none" aria-label={def.label}>
+              {def.emoji}
+            </span>
+          )
+        }
+        return (
+          <span
+            key={id}
+            title={def.label}
+            className={`inline-flex items-center border rounded-full font-bold ${sizeClass} ${def.color}`}
+          >
+            <span className="leading-none">{def.emoji}</span>
+            <span>{def.label}</span>
+          </span>
+        )
+      })}
+      {max && list.length > max && (
+        <span className="text-[10px] font-bold text-muted-foreground">+{list.length - max}</span>
+      )}
+    </div>
+  )
+}
+
 export interface TrustScore {
   score: number
   level: TrustLevel
