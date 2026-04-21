@@ -32,7 +32,7 @@ export function levelFor(score: number): TrustLevel {
 }
 
 export function labelFor(level: TrustLevel) {
-  return { excellent: 'Excellent', good: 'Good', fair: 'Fair', low: 'Low' }[level]
+  return { excellent: 'Excellent', good: 'Good', fair: 'Rising', low: 'New' }[level]
 }
 
 export function computeBuyerScore({

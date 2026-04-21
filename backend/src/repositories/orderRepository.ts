@@ -76,12 +76,39 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
   const { data, error } = result
   if (error || !data) throw Object.assign(new Error('Order not found.'), { status: 404 })
 
-  // When an order is marked completed/delivered, try to credit referral milestone
+  // When an order is marked completed/delivered, credit referral + bump seller's sales count
   if (status === 'completed' || status === 'delivered') {
     const order = data as OrderRow
+
+    // Fire-and-forget — don't block the response if any of these fail
     if (order.buyer_id) {
-      // Fire-and-forget — don't block the response if this fails
-      supabaseAdmin.rpc('credit_referral', { p_buyer_id: order.buyer_id }).catch(() => {})
+      try {
+        await supabaseAdmin.rpc('credit_referral', { p_buyer_id: order.buyer_id })
+      } catch (err) {
+        console.warn('[orderRepository] credit_referral failed:', err)
+      }
+    }
+
+    // Recount this seller's completed/delivered orders and write to profiles.total_sales.
+    // Recounting (vs. incrementing) is self-healing — it backfills any past sales that
+    // never got credited and stays correct even if an order is reverted.
+    if (order.seller_id) {
+      try {
+        const { count } = await supabaseAdmin
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('seller_id', order.seller_id)
+          .in('status', ['delivered', 'completed'])
+
+        if (typeof count === 'number') {
+          await supabaseAdmin
+            .from('profiles')
+            .update({ total_sales: count, updated_at: new Date().toISOString() })
+            .eq('id', order.seller_id)
+        }
+      } catch (err) {
+        console.warn('[orderRepository] total_sales sync failed:', err)
+      }
     }
   }
 

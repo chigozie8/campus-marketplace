@@ -196,8 +196,8 @@ export default function TrustScoresPage() {
           <option value="all">All Levels</option>
           <option value="excellent">Excellent</option>
           <option value="good">Good</option>
-          <option value="fair">Fair</option>
-          <option value="low">Low</option>
+          <option value="fair">Rising</option>
+          <option value="low">New</option>
         </select>
 
         <select
@@ -430,7 +430,7 @@ export default function TrustScoresPage() {
           {(['excellent', 'good', 'fair', 'low'] as const).map(l => (
             <TrustBadge key={l} score={l === 'excellent' ? 90 : l === 'good' ? 75 : l === 'fair' ? 60 : 30} size="sm" />
           ))}
-          <span className="text-xs text-muted-foreground self-center">85+ Excellent · 70+ Good · 50+ Fair · below Low</span>
+          <span className="text-xs text-muted-foreground self-center">85+ Excellent · 70+ Good · 50+ Rising · below New</span>
         </div>
         <div className="pt-2 border-t border-border">
           <p className="text-xs font-bold text-foreground mb-2">Admin Badges</p>
@@ -678,7 +678,7 @@ function TrustManageModal({
                       'text-red-700 bg-red-50 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800'
                     }`}>
                       <ShieldCheck className="w-3 h-3" />
-                      Will display as: {overrideScore >= 85 ? 'Excellent' : overrideScore >= 70 ? 'Good' : overrideScore >= 50 ? 'Fair' : 'Low'}
+                      Will display as: {overrideScore >= 85 ? 'Excellent' : overrideScore >= 70 ? 'Good' : overrideScore >= 50 ? 'Rising' : 'New'}
                     </div>
                   </div>
                   <div className="space-y-1">
