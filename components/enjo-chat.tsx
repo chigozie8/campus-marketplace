@@ -21,5 +21,5 @@ export default function EnjoChat() {
     }
   }, []);
 
-  return null;
+  return <div className="enjo-webchat-container" />;
 }
