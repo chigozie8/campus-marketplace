@@ -15,7 +15,7 @@ import { ScalarSettingEditor } from '@/components/admin/scalar-setting-editor'
 import { getSiteSettings } from '@/lib/site-settings'
 import {
   parseHiwSteps, parseFaqs, parseHeroFeatures, parseEscrowSteps, parseSectionVisibility,
-  parseFooterSocials,
+  parseFooterSocials, parseCommunityChannels, parseCommunityAchievements,
 } from '@/lib/site-settings-defaults'
 import { SOCIAL_PLATFORMS } from '@/components/landing/social-icons'
 
@@ -235,6 +235,132 @@ export default async function AdminSettingsPage() {
             frequency:     settings.ad_popup_frequency     ?? 'session',
           }}
         />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">👥 Community Page — Hero</h3>
+        <div className="space-y-3">
+          <ScalarSettingEditor
+            settingKey="community_hero_badge"
+            label="Top badge label"
+            description="The small pill at the top of the hero (e.g. 'Community')."
+            initialValue={settings.community_hero_badge || 'Community'}
+            placeholder="Community"
+          />
+          <ScalarSettingEditor
+            settingKey="community_hero_title_line1"
+            label="Headline — first line"
+            description="The big bold first line of the hero title."
+            initialValue={settings.community_hero_title_line1 || '50,000 sellers.'}
+            placeholder="50,000 sellers."
+          />
+          <ScalarSettingEditor
+            settingKey="community_hero_title_accent"
+            label="Headline — accent line (green)"
+            description="The second, accent-coloured line of the hero title."
+            initialValue={settings.community_hero_title_accent || 'One community.'}
+            placeholder="One community."
+          />
+          <ScalarSettingEditor
+            settingKey="community_hero_subtitle"
+            label="Subtitle paragraph"
+            description="The descriptive paragraph under the headline."
+            initialValue={settings.community_hero_subtitle || ''}
+            placeholder="The VendoorX community is where..."
+            type="textarea"
+            rows={4}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">💬 Community Page — Channels</h3>
+        <ScalarSettingEditor
+          settingKey="community_section1_title"
+          label="Section heading"
+          description="The heading shown above the channel cards."
+          initialValue={settings.community_section1_title || 'Join the Conversation'}
+          placeholder="Join the Conversation"
+        />
+        <div className="mt-3">
+          <JsonListEditor
+            settingKey="community_channels"
+            title="Channel cards (WhatsApp / Telegram / etc.)"
+            description="Each card invites visitors to join a community channel. Icon names from lucide-react: MessageCircle, Users, Send, Phone, Heart, Sparkles, Globe, Instagram, Facebook, Youtube, Linkedin."
+            fields={[
+              { key: 'icon',        label: 'Icon name (lucide-react)', placeholder: 'MessageCircle' },
+              { key: 'title',       label: 'Title',                    placeholder: 'WhatsApp Community' },
+              { key: 'description', label: 'Description',              placeholder: 'Join our WhatsApp groups...', type: 'textarea' },
+              { key: 'cta',         label: 'Button label',             placeholder: 'Join WhatsApp Community' },
+              { key: 'href',        label: 'Button link',              placeholder: 'https://wa.me/2348000000000' },
+              { key: 'color',       label: 'Header colour (hex)',      placeholder: '#25D366' },
+            ]}
+            initialItems={parseCommunityChannels(settings.community_channels) as unknown as { icon: string; title: string; description: string; cta: string; href: string; color: string }[]}
+            blankItem={{ icon: 'MessageCircle', title: '', description: '', cta: '', href: '', color: '#25D366' }}
+            maxItems={6}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">🏆 Community Page — Recognition</h3>
+        <ScalarSettingEditor
+          settingKey="community_section2_title"
+          label="Section heading"
+          description="The heading shown above the recognition / achievement cards."
+          initialValue={settings.community_section2_title || 'Community Recognition'}
+          placeholder="Community Recognition"
+        />
+        <div className="mt-3">
+          <JsonListEditor
+            settingKey="community_achievements"
+            title="Achievement / badge cards"
+            description="Recognition badges shown to the community. Icon names from lucide-react: Trophy, Star, Zap, Users, Heart, Sparkles."
+            fields={[
+              { key: 'icon',        label: 'Icon name (lucide-react)', placeholder: 'Trophy' },
+              { key: 'label',       label: 'Badge name',               placeholder: 'Top Seller' },
+              { key: 'description', label: 'Description',              placeholder: 'Monthly award for...', type: 'textarea' },
+              { key: 'palette',     label: 'Colour palette',           type: 'select',
+                options: ['amber', 'purple', 'blue', 'green', 'red', 'pink', 'teal', 'cyan', 'orange'] },
+            ]}
+            initialItems={parseCommunityAchievements(settings.community_achievements) as unknown as { icon: string; label: string; description: string; palette: string }[]}
+            blankItem={{ icon: 'Trophy', label: '', description: '', palette: 'amber' }}
+            maxItems={8}
+          />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">🚀 Community Page — Bottom CTA</h3>
+        <div className="space-y-3">
+          <ScalarSettingEditor
+            settingKey="community_cta_title"
+            label="CTA heading"
+            initialValue={settings.community_cta_title || 'Start your journey today'}
+            placeholder="Start your journey today"
+          />
+          <ScalarSettingEditor
+            settingKey="community_cta_body"
+            label="CTA paragraph"
+            initialValue={settings.community_cta_body || ''}
+            placeholder="Join VendoorX free, build your store..."
+            type="textarea"
+            rows={3}
+          />
+          <ScalarSettingEditor
+            settingKey="community_cta_button_label"
+            label="Button label"
+            initialValue={settings.community_cta_button_label || 'Join VendoorX'}
+            placeholder="Join VendoorX"
+          />
+          <ScalarSettingEditor
+            settingKey="community_cta_button_href"
+            label="Button link"
+            description="Where the CTA button takes the visitor. Use an internal path like /auth/sign-up or a full URL."
+            initialValue={settings.community_cta_button_href || '/auth/sign-up'}
+            placeholder="/auth/sign-up"
+          />
+        </div>
       </div>
 
       <div>

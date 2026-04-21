@@ -97,6 +97,19 @@ export type SiteSettings = {
   apk_version: string
   ios_download_url: string
   ios_version: string
+  /* ── Community page ── */
+  community_hero_badge: string
+  community_hero_title_line1: string
+  community_hero_title_accent: string
+  community_hero_subtitle: string
+  community_section1_title: string
+  community_channels: string          // JSON array of CommunityChannel
+  community_section2_title: string
+  community_achievements: string      // JSON array of CommunityAchievement
+  community_cta_title: string
+  community_cta_body: string
+  community_cta_button_label: string
+  community_cta_button_href: string
   /* ── Help Center ── */
   help_hero_title: string
   help_hero_subtitle: string
@@ -295,6 +308,19 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   apk_version: '',
   ios_download_url: '',
   ios_version: '',
+  /* community page */
+  community_hero_badge: 'Community',
+  community_hero_title_line1: '50,000 sellers.',
+  community_hero_title_accent: 'One community.',
+  community_hero_subtitle: "The VendoorX community is where Nigeria's best sellers and entrepreneurs share tips, celebrate wins, support each other, and close deals together.",
+  community_section1_title: 'Join the Conversation',
+  community_channels: '',
+  community_section2_title: 'Community Recognition',
+  community_achievements: '',
+  community_cta_title: 'Start your journey today',
+  community_cta_body: 'Join VendoorX free, build your store, and connect with a community that celebrates your hustle.',
+  community_cta_button_label: 'Join VendoorX',
+  community_cta_button_href: '/auth/sign-up',
   /* help center */
   help_hero_title: 'How can we help?',
   help_hero_subtitle: 'Find answers to common questions about buying, selling, payments, and your account.',
@@ -768,4 +794,61 @@ export const LEGAL_DOCS: LegalDoc[] = [
 export function resolveLegalMarkdown(doc: LegalDoc, raw: string | undefined | null): string {
   const v = (raw ?? '').trim()
   return v || doc.defaultMarkdown
+}
+
+/* ── Community page — channels & achievements ───────────────────────────── */
+
+export type CommunityChannel = {
+  icon: string        // lucide-react name: MessageCircle, Users, Send, etc.
+  title: string
+  description: string
+  cta: string
+  href: string
+  color: string       // hex / css color used for the header band
+}
+export const DEFAULT_COMMUNITY_CHANNELS: CommunityChannel[] = [
+  {
+    icon: 'MessageCircle',
+    title: 'WhatsApp Community',
+    description: 'Join our WhatsApp community groups — organised by category and location. Get tips, ask questions, and find buyers.',
+    cta: 'Join WhatsApp Community',
+    href: 'https://wa.me/2348000000000',
+    color: '#25D366',
+  },
+  {
+    icon: 'Users',
+    title: 'Telegram Group',
+    description: 'Our Telegram channel broadcasts exclusive deals, platform updates, and seller success stories to 10,000+ members.',
+    cta: 'Join Telegram',
+    href: 'https://t.me/vendoorx',
+    color: '#2AABEE',
+  },
+]
+export function parseCommunityChannels(raw: string): CommunityChannel[] {
+  if (!raw) return DEFAULT_COMMUNITY_CHANNELS
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as CommunityChannel[]) : DEFAULT_COMMUNITY_CHANNELS
+  } catch { return DEFAULT_COMMUNITY_CHANNELS }
+}
+
+export type CommunityAchievement = {
+  icon: string         // lucide-react name: Trophy, Star, Zap, Users
+  label: string
+  description: string
+  /** Tailwind palette hint, e.g. 'amber' | 'purple' | 'blue' | 'green'. */
+  palette: string
+}
+export const DEFAULT_COMMUNITY_ACHIEVEMENTS: CommunityAchievement[] = [
+  { icon: 'Trophy', label: 'Top Seller',       description: 'Monthly award for highest-rated sellers',       palette: 'amber'  },
+  { icon: 'Star',   label: 'Rising Star',      description: 'For sellers who 10x their sales in 30 days',    palette: 'purple' },
+  { icon: 'Zap',    label: 'Speed Dealer',     description: 'Awarded for 24-hour order turnaround',          palette: 'blue'   },
+  { icon: 'Users',  label: 'Community Hero',   description: 'For members who help others in the community',  palette: 'green'  },
+]
+export function parseCommunityAchievements(raw: string): CommunityAchievement[] {
+  if (!raw) return DEFAULT_COMMUNITY_ACHIEVEMENTS
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as CommunityAchievement[]) : DEFAULT_COMMUNITY_ACHIEVEMENTS
+  } catch { return DEFAULT_COMMUNITY_ACHIEVEMENTS }
 }
