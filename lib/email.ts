@@ -768,3 +768,53 @@ export async function sendNewPaidOrderToSellerEmail(
     }),
   })
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Contact form — message from the public Contact page goes to the inbox of
+// whoever is configured as `contact_recipient_email` in site_settings.
+// ────────────────────────────────────────────────────────────────────────────
+
+export async function sendContactMessageEmail(args: {
+  to: string
+  fromName: string
+  fromEmail: string
+  subject: string
+  message: string
+  meta?: { ip?: string; userAgent?: string; campus?: string | null }
+}): Promise<SendResult> {
+  const when = new Date().toLocaleString('en-NG', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Africa/Lagos',
+  })
+  return safeSend({
+    to: args.to,
+    subject: `[VendoorX Contact] ${args.subject}`,
+    html: layout({
+      preheader: `New message from ${args.fromName} via the Contact page.`,
+      iconEmoji: '✉️',
+      iconBg: '#3b82f622',
+      iconBorder: '#3b82f644',
+      title: 'New contact message',
+      subtitle: 'Submitted via vendoorx.ng/contact',
+      bodyHtml: `
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px 18px;margin-bottom:18px">
+          <table style="width:100%;font-size:13px;color:#374151">
+            <tr><td style="padding:4px 0;color:#6b7280;width:90px">From</td><td style="font-weight:600">${esc(args.fromName)} &lt;${esc(args.fromEmail)}&gt;</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">Subject</td><td style="font-weight:600">${esc(args.subject)}</td></tr>
+            <tr><td style="padding:4px 0;color:#6b7280">When</td><td style="font-weight:600">${esc(when)}</td></tr>
+            ${args.meta?.campus ? `<tr><td style="padding:4px 0;color:#6b7280">Campus</td><td style="font-weight:600">${esc(args.meta.campus)}</td></tr>` : ''}
+            ${args.meta?.ip ? `<tr><td style="padding:4px 0;color:#6b7280">IP</td><td style="font-weight:600">${esc(args.meta.ip)}</td></tr>` : ''}
+            ${args.meta?.userAgent ? `<tr><td style="padding:4px 0;color:#6b7280">Device</td><td style="font-weight:600">${esc(args.meta.userAgent)}</td></tr>` : ''}
+          </table>
+        </div>
+        <p style="color:#111827;font-size:14px;line-height:1.7;margin:0 0 8px;font-weight:700">Message</p>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;color:#111827;font-size:14px;line-height:1.7;white-space:pre-wrap">${esc(args.message)}</div>
+        <p style="color:#9ca3af;font-size:12px;margin:14px 0 0;line-height:1.6">
+          Reply directly to this email to respond to the sender (their address is in the From row above).
+        </p>
+      `,
+      footerNote: 'You\'re receiving this because you\'re configured as the VendoorX contact-form recipient.',
+    }),
+  })
+}

@@ -2,9 +2,13 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, Instagram, Facebook, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp, ChevronRight, Phone, Mail, Loader2, CheckCircle2 } from 'lucide-react'
-import type { SiteSettings } from '@/lib/site-settings-defaults'
-import { DEFAULT_SETTINGS } from '@/lib/site-settings-defaults'
+import {
+  ArrowRight, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp,
+  ChevronRight, Phone, Mail, Loader2, CheckCircle2, Lock,
+} from 'lucide-react'
+import type { SiteSettings, FooterSocial } from '@/lib/site-settings-defaults'
+import { parseFooterSocials } from '@/lib/site-settings-defaults'
+import { getSocialChip } from '@/components/landing/social-icons'
 
 const LINKS = {
   Company: [
@@ -14,12 +18,12 @@ const LINKS = {
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
   ],
   Legal: [
-    { label: 'Trust & Safety',      href: '/trust',            icon: ShieldCheck },
-    { label: 'Privacy Policy',      href: '/privacy',          icon: ShieldCheck },
-    { label: 'Terms of Service',    href: '/terms',            icon: BookOpen },
-    { label: 'Cookie Policy',       href: '/cookies',          icon: BookOpen },
-    { label: 'Refund Policy',       href: '/refund',           icon: ShieldCheck },
-    { label: 'Dispute Resolution',  href: '/refund#disputes',  icon: Users },
+    { label: 'Trust & Safety',      href: '/trust',     icon: ShieldCheck },
+    { label: 'Privacy Policy',      href: '/privacy',   icon: ShieldCheck },
+    { label: 'Terms of Service',    href: '/terms',     icon: BookOpen },
+    { label: 'Cookie Policy',       href: '/cookies',   icon: BookOpen },
+    { label: 'Refund Policy',       href: '/refund',    icon: ShieldCheck },
+    { label: 'Dispute Resolution',  href: '/dispute',   icon: Users },
   ],
 }
 
@@ -36,22 +40,31 @@ const SPONSORS = [
   { name: 'COVENANT',full: 'Covenant University' },
 ]
 
-function NewsletterForm() {
-  const [firstName, setFirstName] = useState('')
-  const [email, setEmail]         = useState('')
+/**
+ * Newsletter form — login-gated. The server route ALWAYS uses the verified
+ * session email, so we visually lock the email input to the user's address.
+ * Visitors who aren't logged in see a "Log in to subscribe" prompt instead
+ * of an open email input — preventing spam and matching server enforcement.
+ */
+function NewsletterForm({ userEmail, userFirstName }: { userEmail?: string | null; userFirstName?: string | null }) {
+  const [firstName, setFirstName] = useState(userFirstName ?? '')
   const [status, setStatus]       = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errMsg, setErrMsg]       = useState('')
 
+  const isAuthed = !!userEmail
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!isAuthed) return
     setStatus('loading')
     setErrMsg('')
     try {
+      // Email is intentionally NOT sent — the server uses the verified
+      // session email. We pass firstName only.
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstName }),
+        body: JSON.stringify({ firstName }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -60,8 +73,6 @@ function NewsletterForm() {
         return
       }
       setStatus('success')
-      setEmail('')
-      setFirstName('')
     } catch {
       setErrMsg('Network error. Please try again.')
       setStatus('error')
@@ -80,6 +91,34 @@ function NewsletterForm() {
     )
   }
 
+  if (!isAuthed) {
+    return (
+      <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed border-border bg-muted/40 p-5">
+        <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+          <Lock className="w-4 h-4 text-primary" />
+          Sign in to subscribe
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          To stop spam, newsletter sign-ups must use your registered VendoorX email address. Log in or create your free account to get the weekly campus deals digest.
+        </p>
+        <div className="flex gap-2">
+          <Link
+            href="/auth/login?next=/"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-colors"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/auth/signup?next=/"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-border hover:border-primary hover:text-primary text-xs font-bold transition-colors"
+          >
+            Sign up free
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <form className="flex flex-col gap-2.5" onSubmit={handleSubmit}>
       <input
@@ -90,80 +129,50 @@ function NewsletterForm() {
         maxLength={60}
         className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
       />
-      <div className="flex flex-col sm:flex-row gap-2.5">
-        <div className="flex-1 min-w-0">
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="Enter your email address"
-            required
-            className="w-full px-4 py-3.5 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all"
-          />
-          {status === 'error' && (
-            <p className="text-xs text-red-500 mt-1.5">{errMsg}</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          className="px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
-        >
-          {status === 'loading'
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
-            : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
-        </button>
+      <div className="relative">
+        <input
+          type="email"
+          value={userEmail ?? ''}
+          readOnly
+          aria-label="Your registered email — used to subscribe"
+          title="Newsletter sign-ups are restricted to your registered VendoorX email."
+          className="w-full pl-4 pr-10 py-3.5 rounded-xl bg-muted/60 border-2 border-border text-sm text-foreground/80 cursor-not-allowed outline-none"
+        />
+        <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
       </div>
+      <p className="text-[11px] text-muted-foreground">
+        Locked to your registered email — only this address may subscribe.
+      </p>
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="w-full px-5 py-3.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 disabled:opacity-60 text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shrink-0 transition-all shadow-lg shadow-primary/20"
+      >
+        {status === 'loading'
+          ? <><Loader2 className="w-4 h-4 animate-spin" /> Subscribing...</>
+          : <>Subscribe <ArrowRight className="w-4 h-4" /></>}
+      </button>
+      {status === 'error' && (
+        <p className="text-xs text-red-500 mt-1">{errMsg}</p>
+      )}
     </form>
   )
 }
 
-export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }) {
-  const SOCIALS = [
-    {
-      href: settings?.social_whatsapp_url ?? DEFAULT_SETTINGS.social_whatsapp_url,
-      label: 'WhatsApp',
-      bg: '#25D366',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.533 5.85L.057 23.928a.5.5 0 0 0 .606.65l6.277-1.642A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.878 9.878 0 0 1-5.029-1.373l-.36-.214-3.733.977.998-3.645-.235-.375A9.865 9.865 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1c5.466 0 9.9 4.434 9.9 9.9 0 5.466-4.434 9.9-9.9 9.9z" />
-        </svg>
-      ),
-    },
-    {
-      href: settings?.social_instagram_url ?? DEFAULT_SETTINGS.social_instagram_url,
-      label: 'Instagram',
-      bg: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',
-      icon: <Instagram className="w-4 h-4 text-white" />,
-    },
-    {
-      href: settings?.social_facebook_url ?? DEFAULT_SETTINGS.social_facebook_url,
-      label: 'Facebook',
-      bg: '#1877F2',
-      icon: <Facebook className="w-4 h-4 text-white" />,
-    },
-    {
-      href: settings?.social_twitter_url ?? DEFAULT_SETTINGS.social_twitter_url,
-      label: 'Twitter / X',
-      bg: '#000000',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zM17.083 19.77h1.833L7.084 4.126H5.117L17.083 19.77z" />
-        </svg>
-      ),
-    },
-    {
-      href: settings?.social_tiktok_url ?? DEFAULT_SETTINGS.social_tiktok_url,
-      label: 'TikTok',
-      bg: '#010101',
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="white">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z" />
-        </svg>
-      ),
-    },
-  ]
+interface FooterProps {
+  settings?: Partial<SiteSettings>
+  userEmail?: string | null
+  userFirstName?: string | null
+}
+
+export function LandingFooter({ settings, userEmail, userFirstName }: FooterProps) {
+  // Resolve dynamic socials (admin-managed list).
+  const socials: FooterSocial[] = parseFooterSocials(settings?.footer_socials ?? '')
+    .filter(s => s.enabled !== '0' && (s.href || '').trim().length > 0)
+
+  // Resolve copyright with {year} interpolation.
+  const copyrightTemplate = settings?.footer_copyright || '© {year} VendoorX Technologies Ltd. All rights reserved.'
+  const copyright = copyrightTemplate.replace(/\{year\}/g, String(new Date().getFullYear()))
 
   return (
     <footer className="bg-background border-t border-border font-sans overflow-hidden">
@@ -209,26 +218,31 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
               </a>
             </div>
 
-            {/* Social icons */}
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">Follow us</p>
-              <div className="flex items-center gap-3">
-                {SOCIALS.map(({ href, label, bg, icon }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={label}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg shadow-sm shrink-0"
-                    style={{ background: bg }}
-                  >
-                    {icon}
-                  </a>
-                ))}
+            {/* Social icons — admin-managed */}
+            {socials.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-widest">Follow us</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {socials.map((s, i) => {
+                    const chip = getSocialChip(s.platform, s.label || s.platform)
+                    return (
+                      <a
+                        key={`${s.platform}-${i}`}
+                        href={s.href}
+                        aria-label={chip.label}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={chip.label}
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg shadow-sm shrink-0"
+                        style={{ background: chip.bg }}
+                      >
+                        {chip.icon}
+                      </a>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right — newsletter */}
@@ -242,7 +256,7 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
               <p className="text-sm text-muted-foreground">Join thousands of students getting deal alerts &amp; seller tips every week.</p>
             </div>
 
-            <NewsletterForm />
+            <NewsletterForm userEmail={userEmail} userFirstName={userFirstName} />
 
             <p className="text-xs text-muted-foreground">
               No spam. Unsubscribe anytime. We respect your privacy.
@@ -332,7 +346,7 @@ export function LandingFooter({ settings }: { settings?: Partial<SiteSettings> }
       <div className="bg-background border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground text-center sm:text-left">
-            &copy; {new Date().getFullYear()} VendoorX Technologies Ltd. All rights reserved.
+            {copyright}
           </p>
           <p className="text-xs text-muted-foreground italic hidden md:block">
             Connecting Nigerian students, one campus at a time.

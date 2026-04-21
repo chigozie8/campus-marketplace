@@ -4,7 +4,7 @@ import { createClient as createAdmin } from '@supabase/supabase-js'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { FaqSection } from '@/components/landing/faq-section'
 import { LandingNav } from '@/components/landing/landing-nav'
-import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingFooterServer } from '@/components/landing/landing-footer-server'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export const metadata: Metadata = {
@@ -41,7 +41,7 @@ export default async function PricingPage() {
         <PricingSection plans={plans} />
         <FaqSection />
       </div>
-      <LandingFooter settings={settings} />
+      <LandingFooterServer settings={settings} />
     </main>
   )
 }

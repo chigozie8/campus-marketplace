@@ -1,29 +1,57 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, CheckCircle2 } from 'lucide-react'
+import { Send, CheckCircle2, AlertCircle } from 'lucide-react'
 
 interface Props {
   subjects: string[]
   responseTime: string
   defaultSubject?: string
+  /** Pre-fill from session — passed by the parent server component when known. */
+  prefillName?: string
+  prefillEmail?: string
 }
 
-export function ContactForm({ subjects, responseTime, defaultSubject }: Props) {
+export function ContactForm({
+  subjects, responseTime, defaultSubject,
+  prefillName = '', prefillEmail = '',
+}: Props) {
   const firstSubject = defaultSubject && subjects.includes(defaultSubject)
     ? defaultSubject
     : (subjects[0] ?? '')
 
-  const [sent, setSent] = useState(false)
+  const [sent, setSent]       = useState(false)
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    name: '', email: '', subject: firstSubject, message: '',
+  const [error, setError]     = useState<string | null>(null)
+  const [form, setForm]       = useState({
+    name: prefillName,
+    email: prefillEmail,
+    subject: firstSubject,
+    message: '',
+    company: '', // honeypot
   })
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError(null)
     setLoading(true)
-    setTimeout(() => { setLoading(false); setSent(true) }, 1200)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(json?.error || 'Something went wrong. Please try again.')
+        return
+      }
+      setSent(true)
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (sent) {
@@ -34,10 +62,9 @@ export function ContactForm({ subjects, responseTime, defaultSubject }: Props) {
         <p className="text-muted-foreground text-sm leading-relaxed">
           Thanks for reaching out. We&apos;ll get back to you within{' '}
           <strong>{responseTime}</strong> during business hours.
-          Check your email for a confirmation.
         </p>
         <button
-          onClick={() => setSent(false)}
+          onClick={() => { setSent(false); setForm(f => ({ ...f, message: '' })) }}
           className="mt-8 px-6 py-3 rounded-xl border-2 border-primary/30 text-primary font-semibold text-sm hover:bg-primary/10 transition-colors"
         >
           Send another message
@@ -56,6 +83,7 @@ export function ContactForm({ subjects, responseTime, defaultSubject }: Props) {
           <input
             type="text"
             required
+            maxLength={100}
             value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
             placeholder="Adaeze Okonkwo"
@@ -67,6 +95,7 @@ export function ContactForm({ subjects, responseTime, defaultSubject }: Props) {
           <input
             type="email"
             required
+            maxLength={200}
             value={form.email}
             onChange={e => setForm({ ...form, email: e.target.value })}
             placeholder="you@university.edu.ng"
@@ -91,12 +120,32 @@ export function ContactForm({ subjects, responseTime, defaultSubject }: Props) {
         <textarea
           required
           rows={5}
+          maxLength={5000}
           value={form.message}
           onChange={e => setForm({ ...form, message: e.target.value })}
           placeholder="Describe your issue or question in detail..."
           className="px-4 py-3 rounded-xl bg-background border-2 border-border focus:border-primary text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors resize-none"
         />
       </div>
+
+      {/* Honeypot — hidden from real users, traps spam bots. */}
+      <input
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        value={form.company}
+        onChange={e => setForm({ ...form, company: e.target.value })}
+        aria-hidden="true"
+        className="hidden"
+        name="company"
+      />
+
+      {error && (
+        <div className="flex items-start gap-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/40 px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed">{error}</p>
+        </div>
+      )}
 
       <button
         type="submit"

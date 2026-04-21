@@ -8,10 +8,16 @@ import { WhatsAppSettingsForm } from '@/components/admin/whatsapp-settings-form'
 import { PlatformFeeEditor } from '@/components/admin/platform-fee-editor'
 import { JsonListEditor } from '@/components/admin/json-list-editor'
 import { SectionVisibilityEditor } from '@/components/admin/section-visibility-editor'
+import { LegalPagesEditor } from '@/components/admin/legal-pages-editor'
+import { AdPopupEditor } from '@/components/admin/ad-popup-editor'
+import { AppDownloadsEditor } from '@/components/admin/app-downloads-editor'
+import { ScalarSettingEditor } from '@/components/admin/scalar-setting-editor'
 import { getSiteSettings } from '@/lib/site-settings'
 import {
   parseHiwSteps, parseFaqs, parseHeroFeatures, parseEscrowSteps, parseSectionVisibility,
+  parseFooterSocials,
 } from '@/lib/site-settings-defaults'
+import { SOCIAL_PLATFORMS } from '@/components/landing/social-icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -154,6 +160,93 @@ export default async function AdminSettingsPage() {
       <div>
         <h3 className="text-sm font-black text-foreground mb-4">📚 Help Center</h3>
         <HelpCenterEditor initialSettings={settings} />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">⚖️ Legal Pages</h3>
+        <LegalPagesEditor
+          initialValues={{
+            legal_privacy_md: settings.legal_privacy_md,
+            legal_terms_md:   settings.legal_terms_md,
+            legal_cookies_md: settings.legal_cookies_md,
+            legal_refund_md:  settings.legal_refund_md,
+            legal_dispute_md: settings.legal_dispute_md,
+            legal_trust_md:   settings.legal_trust_md,
+          }}
+          initialLastUpdated={settings.legal_last_updated}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">✉️ Contact Form Inbox</h3>
+        <ScalarSettingEditor
+          settingKey="contact_recipient_email"
+          label="Where contact-form messages are delivered"
+          description="Every submission to /contact is forwarded to this email address."
+          initialValue={settings.contact_recipient_email || 'kenronkw@gmail.com'}
+          placeholder="kenronkw@gmail.com"
+          type="email"
+          helpText="Use a real address you check. Sent via Mailtrap with the sender's address as the Reply-To, so you can reply directly."
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">🌐 Footer — Social Links</h3>
+        <JsonListEditor
+          settingKey="footer_socials"
+          title="Social network buttons"
+          description="The coloured icons in the footer. Add, remove, reorder, or temporarily hide. Set Enabled to '0' to hide without losing the URL."
+          fields={[
+            { key: 'platform', label: 'Platform',  type: 'select', options: [...SOCIAL_PLATFORMS] },
+            { key: 'label',    label: 'Label',     placeholder: 'WhatsApp' },
+            { key: 'href',     label: 'URL',       placeholder: 'https://wa.me/15792583013' },
+            { key: 'enabled',  label: 'Enabled?',  type: 'select', options: ['1', '0'] },
+          ]}
+          initialItems={parseFooterSocials(settings.footer_socials) as unknown as { platform: string; label: string; href: string; enabled: string }[]}
+          blankItem={{ platform: 'whatsapp', label: '', href: '', enabled: '1' }}
+          maxItems={10}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">© Footer Copyright</h3>
+        <ScalarSettingEditor
+          settingKey="footer_copyright"
+          label="Copyright line"
+          description="Shown at the bottom of every page. Use {year} as a placeholder for the current year."
+          initialValue={settings.footer_copyright || '© {year} VendoorX Technologies Ltd. All rights reserved.'}
+          placeholder="© {year} VendoorX Technologies Ltd. All rights reserved."
+          helpText="Tip: include {year} so it stays current automatically every January."
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">📣 Site-wide Ad Popup</h3>
+        <AdPopupEditor
+          initialValues={{
+            enabled:       settings.ad_popup_enabled       ?? '0',
+            title:         settings.ad_popup_title         ?? '',
+            body:          settings.ad_popup_body          ?? '',
+            image_url:     settings.ad_popup_image_url     ?? '',
+            cta_label:     settings.ad_popup_cta_label     ?? '',
+            cta_href:      settings.ad_popup_cta_href      ?? '',
+            delay_ms:      settings.ad_popup_delay_ms      ?? '3000',
+            auto_close_ms: settings.ad_popup_auto_close_ms ?? '0',
+            frequency:     settings.ad_popup_frequency     ?? 'session',
+          }}
+        />
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">📱 App Downloads (APK + iOS)</h3>
+        <AppDownloadsEditor
+          initialValues={{
+            apk_download_url: settings.apk_download_url ?? '',
+            apk_version:      settings.apk_version      ?? '',
+            ios_download_url: settings.ios_download_url ?? '',
+            ios_version:      settings.ios_version      ?? '',
+          }}
+        />
       </div>
 
       <div>

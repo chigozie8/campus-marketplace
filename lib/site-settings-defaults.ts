@@ -69,6 +69,34 @@ export type SiteSettings = {
   homepage_escrow_steps: string
   homepage_sections_visible: string
   homepage_trending_enabled: string
+  /* ── Legal Pages (markdown) ── */
+  legal_privacy_md: string
+  legal_terms_md: string
+  legal_cookies_md: string
+  legal_refund_md: string
+  legal_dispute_md: string
+  legal_trust_md: string
+  legal_last_updated: string
+  /* ── Footer ── */
+  footer_socials: string         // JSON: FooterSocial[]
+  footer_copyright: string       // supports {year} placeholder
+  /* ── Contact form destination ── */
+  contact_recipient_email: string
+  /* ── Advertisement popup ── */
+  ad_popup_enabled: string       // '1' | '0'
+  ad_popup_title: string
+  ad_popup_body: string
+  ad_popup_image_url: string
+  ad_popup_cta_label: string
+  ad_popup_cta_href: string
+  ad_popup_delay_ms: string      // delay before showing
+  ad_popup_auto_close_ms: string // 0 = never auto-close
+  ad_popup_frequency: string     // 'session' | 'always' | 'once'
+  /* ── Mobile App Downloads ── */
+  apk_download_url: string
+  apk_version: string
+  ios_download_url: string
+  ios_version: string
   /* ── Help Center ── */
   help_hero_title: string
   help_hero_subtitle: string
@@ -239,6 +267,34 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   homepage_escrow_steps: '',
   homepage_sections_visible: '',
   homepage_trending_enabled: '1',
+  /* legal pages — empty defaults; built-in fallbacks live in DEFAULT_LEGAL_* below */
+  legal_privacy_md: '',
+  legal_terms_md: '',
+  legal_cookies_md: '',
+  legal_refund_md: '',
+  legal_dispute_md: '',
+  legal_trust_md: '',
+  legal_last_updated: 'April 1, 2026',
+  /* footer */
+  footer_socials: '',
+  footer_copyright: '© {year} VendoorX Technologies Ltd. All rights reserved.',
+  /* contact form */
+  contact_recipient_email: 'kenronkw@gmail.com',
+  /* ad popup — disabled by default */
+  ad_popup_enabled: '0',
+  ad_popup_title: 'Limited-time offer 🎉',
+  ad_popup_body: 'Boost your first listing for free this week. Tap below to claim it.',
+  ad_popup_image_url: '',
+  ad_popup_cta_label: 'Claim my boost',
+  ad_popup_cta_href: '/dashboard',
+  ad_popup_delay_ms: '4000',
+  ad_popup_auto_close_ms: '12000',
+  ad_popup_frequency: 'session',
+  /* mobile app downloads */
+  apk_download_url: '',
+  apk_version: '',
+  ios_download_url: '',
+  ios_version: '',
   /* help center */
   help_hero_title: 'How can we help?',
   help_hero_subtitle: 'Find answers to common questions about buying, selling, payments, and your account.',
@@ -420,4 +476,296 @@ export function parseHelpPopular(raw: string): HelpQuestion[] {
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? (parsed as HelpQuestion[]) : DEFAULT_HELP_POPULAR
   } catch { return DEFAULT_HELP_POPULAR }
+}
+
+/* ── Footer Socials ─────────────────────────────────────────────────────── */
+export type FooterSocial = {
+  platform: string  // 'whatsapp' | 'instagram' | 'facebook' | 'twitter' | 'tiktok' | 'youtube' | 'linkedin' | 'snapchat' | 'telegram' | 'threads'
+  label: string
+  href: string
+  enabled: string   // '1' | '0' (string for compatibility with JsonListEditor)
+}
+export const DEFAULT_FOOTER_SOCIALS: FooterSocial[] = [
+  { platform: 'whatsapp',  label: 'WhatsApp',     href: 'https://wa.me/15792583013',          enabled: '1' },
+  { platform: 'instagram', label: 'Instagram',    href: 'https://instagram.com/vendoorx',     enabled: '1' },
+  { platform: 'facebook',  label: 'Facebook',     href: 'https://facebook.com/vendoorx',      enabled: '1' },
+  { platform: 'twitter',   label: 'Twitter / X',  href: 'https://twitter.com/vendoorx',       enabled: '1' },
+  { platform: 'tiktok',    label: 'TikTok',       href: 'https://tiktok.com/@vendoorx',       enabled: '1' },
+]
+export function parseFooterSocials(raw: string): FooterSocial[] {
+  if (!raw) return DEFAULT_FOOTER_SOCIALS
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as FooterSocial[]) : DEFAULT_FOOTER_SOCIALS
+  } catch { return DEFAULT_FOOTER_SOCIALS }
+}
+
+/* ── Legal page default markdown ──────────────────────────────────────────
+ * These render when the admin hasn't yet customised the corresponding
+ * `legal_*_md` setting. Markdown is rendered via <MarkdownContent />.
+ */
+export const DEFAULT_LEGAL_PRIVACY_MD = `## 1. Information We Collect
+
+We collect information you provide directly and information generated as you use VendoorX.
+
+**Information you provide**
+
+- Account: full name, email, password, business name, phone number, profile photo.
+- Listings: product title, description, photos/videos, price, location, category.
+- Payment: bank details for payouts (stored by Paystack — never by VendoorX). Card details are never stored on our servers.
+- Communications: support messages, dispute submissions, reviews.
+
+**Information collected automatically**
+
+- Device data: browser, OS, device identifiers.
+- Usage data: pages visited, search queries, click patterns, listing views.
+- Approximate location (city / area) when you enable location features.
+- Cookies and similar technologies — see our Cookie Policy.
+
+## 2. How We Use Your Information
+
+- Operate, maintain, and improve VendoorX.
+- Process transactions and send purchase confirmations.
+- Verify seller identity and business legitimacy.
+- Send weekly deal digests and platform updates (opt-out anytime).
+- Detect and prevent fraud and enforce our Terms of Service.
+- Respond to support requests and dispute resolution.
+- Comply with Nigerian law.
+- Personalise your experience by surfacing relevant listings.
+
+## 3. Information Sharing
+
+We do not sell your personal data. We share it only:
+
+- **Other users:** your public profile (name, business, rating, listings) is visible to all users. Your WhatsApp number is shared with buyers only when you enable it.
+- **Payment processors:** Paystack receives payment / payout information.
+- **Service providers:** hosting, analytics, email — under confidentiality agreements.
+- **Legal requirements:** when required by Nigerian law or to protect rights.
+- **Business transfers:** in the event of a merger or acquisition.
+
+## 4. Data Retention
+
+We retain your personal data for as long as your account is active. You may request deletion at any time at Settings → Account → Delete Account, or by emailing privacy@vendoorx.ng.
+
+## 5. Your Rights
+
+You can access, correct, export, or delete your data at any time. Contact privacy@vendoorx.ng to exercise these rights.
+
+## 6. Children
+
+VendoorX is intended for users aged 16 and above.
+
+## 7. Changes to This Policy
+
+We may update this policy. Material changes will be notified via email and an in-app banner. Continued use after changes constitutes acceptance.
+
+## 8. Contact
+
+Questions? Email privacy@vendoorx.ng.`
+
+export const DEFAULT_LEGAL_TERMS_MD = `## 1. Acceptance of Terms
+
+By accessing or using VendoorX, you agree to these Terms of Service. If you don't agree, please don't use the platform.
+
+## 2. Eligibility
+
+You must be at least 16 years old and a current Nigerian university student or alumnus to use VendoorX as a seller. Buyers may be any age with parental consent.
+
+## 3. Account Responsibility
+
+- You are responsible for safeguarding your account credentials.
+- Notify us immediately of any unauthorised access.
+- You are liable for all activity under your account.
+
+## 4. Listings & Conduct
+
+Sellers must:
+
+- Post accurate descriptions and real photos.
+- Honour quoted prices and stated availability.
+- Ship or hand over items as described.
+- Not list prohibited items (weapons, drugs, counterfeit goods, illegal services).
+
+## 5. Payments & Fees
+
+- Joining and listing on VendoorX is free.
+- A flat ₦100 VAT applies to Paystack checkout orders.
+- Subscriptions (Growth / Pro) are billed monthly and may be cancelled anytime.
+
+## 6. Refunds
+
+Refer to our Refund Policy for full details.
+
+## 7. Termination
+
+We may suspend or terminate your account for breach of these Terms.
+
+## 8. Disclaimers
+
+VendoorX is provided "as is" without warranties. We are not party to transactions between buyers and sellers, except where escrow is used.
+
+## 9. Limitation of Liability
+
+To the maximum extent permitted by law, VendoorX is not liable for indirect or consequential damages.
+
+## 10. Governing Law
+
+These Terms are governed by the laws of the Federal Republic of Nigeria.
+
+## 11. Contact
+
+legal@vendoorx.ng`
+
+export const DEFAULT_LEGAL_COOKIES_MD = `## What Are Cookies?
+
+Cookies are small text files placed on your device when you visit a website. They help the site remember your actions and preferences (such as login, language, font size, and other display preferences).
+
+## How We Use Cookies
+
+VendoorX uses cookies for:
+
+- **Strictly necessary** — keep you logged in, remember your cart, secure the platform.
+- **Performance** — measure page-load times, error rates, and traffic sources (Google Analytics, Vercel Analytics).
+- **Functional** — remember your preferences (theme, campus filter).
+- **Marketing** — measure the effectiveness of our promotional campaigns.
+
+## Third-Party Cookies
+
+We work with Paystack (payments), Supabase (auth), and Google (analytics & sign-in). These providers may set their own cookies subject to their privacy policies.
+
+## Managing Cookies
+
+You can disable cookies in your browser settings. Note that some VendoorX features (like staying signed in) may not work correctly with cookies disabled.
+
+## Changes
+
+We may update this policy from time to time. The "Last updated" date at the top will reflect any change.
+
+## Contact
+
+privacy@vendoorx.ng`
+
+export const DEFAULT_LEGAL_REFUND_MD = `## When You're Eligible for a Refund
+
+You can request a refund within **24 hours** of delivery confirmation if:
+
+- The item is materially different from the listing.
+- The item arrived damaged or defective.
+- The item was never delivered.
+- You were charged the wrong amount.
+
+## When You're Not Eligible
+
+- Buyer's remorse (you simply changed your mind).
+- Damage caused by you after delivery.
+- Items used or modified after delivery.
+- Refund requested more than 24 hours after delivery.
+
+## How to Request a Refund
+
+1. Open your **Orders** dashboard.
+2. Tap **Report a problem** on the affected order.
+3. Submit photos and a brief description.
+4. Our team responds within 24 business hours.
+
+## How Refunds Are Processed
+
+- Approved refunds are released back to the original payment method.
+- Bank transfers usually arrive within 1–3 business days.
+- Card refunds may take 5–10 business days depending on your issuer.
+
+## Disputes
+
+See our Dispute Resolution policy for the full mediation process.
+
+## Contact
+
+support@vendoorx.ng`
+
+export const DEFAULT_LEGAL_DISPUTE_MD = `## How VendoorX Handles Disputes
+
+When a transaction goes wrong, our trust & safety team mediates between buyer and seller using a clear, time-bound process.
+
+## Stage 1 — Direct Resolution (0–24 h)
+
+Buyer and seller are encouraged to resolve issues directly via WhatsApp. Most disputes are settled at this stage.
+
+## Stage 2 — Escalate to VendoorX (24–72 h)
+
+If direct resolution fails, the buyer opens a formal dispute from their Orders page. VendoorX:
+
+1. Notifies the seller and freezes the escrow.
+2. Collects evidence from both sides (photos, receipts, chat logs).
+3. Reviews against our policies.
+
+## Stage 3 — Decision (within 5 business days)
+
+Our team issues a decision: refund, partial refund, or release to seller. Funds are released within 24 hours of decision.
+
+## Stage 4 — Appeal (optional, 7 days)
+
+Either party may appeal once with new evidence. A senior reviewer makes the final call.
+
+## Bad-Faith Behaviour
+
+Repeated frivolous disputes, fraudulent claims, or refusal to cooperate may result in account suspension.
+
+## Contact
+
+disputes@vendoorx.ng`
+
+export const DEFAULT_LEGAL_TRUST_MD = `## Our Promise
+
+VendoorX is built on trust. Every feature — from verified sellers to escrow — exists to make buying and selling on Nigerian campuses safe.
+
+## Verified Sellers
+
+Verified sellers complete identity and business checks. Look for the green checkmark on profiles and listings.
+
+## Escrow Protection
+
+When you check out via Paystack, your money is held in escrow. Funds release to the seller only after you confirm delivery (or 24 hours pass with no dispute).
+
+## Safe Meetups
+
+When meeting in person:
+
+- Choose busy, well-lit campus spots (libraries, student centres).
+- Bring a friend.
+- Inspect items before paying cash.
+- Use VendoorX's in-app messaging to keep a record.
+
+## Reporting Bad Actors
+
+Tap **Report** on any listing or seller profile. Our team reviews within 24 hours and bans confirmed bad actors.
+
+## Privacy & Data Security
+
+Your data is encrypted in transit and at rest. We never share personal information without your consent. See the Privacy Policy for details.
+
+## 24/7 Support
+
+Reach our trust & safety team anytime: trust@vendoorx.ng or +234 708 203 9250.`
+
+export type LegalDoc = {
+  id: 'privacy' | 'terms' | 'cookies' | 'refund' | 'dispute' | 'trust'
+  settingKey: keyof SiteSettings
+  title: string
+  description: string
+  defaultMarkdown: string
+}
+export const LEGAL_DOCS: LegalDoc[] = [
+  { id: 'privacy', settingKey: 'legal_privacy_md', title: 'Privacy Policy',      description: 'How we collect, use, and protect personal data.',  defaultMarkdown: DEFAULT_LEGAL_PRIVACY_MD },
+  { id: 'terms',   settingKey: 'legal_terms_md',   title: 'Terms of Service',    description: 'The rules everyone agrees to when using VendoorX.', defaultMarkdown: DEFAULT_LEGAL_TERMS_MD },
+  { id: 'cookies', settingKey: 'legal_cookies_md', title: 'Cookie Policy',       description: 'Cookies and similar technologies we use.',          defaultMarkdown: DEFAULT_LEGAL_COOKIES_MD },
+  { id: 'refund',  settingKey: 'legal_refund_md',  title: 'Refund Policy',       description: 'When and how refunds are issued.',                  defaultMarkdown: DEFAULT_LEGAL_REFUND_MD },
+  { id: 'dispute', settingKey: 'legal_dispute_md', title: 'Dispute Resolution',  description: 'How VendoorX mediates buyer/seller disputes.',     defaultMarkdown: DEFAULT_LEGAL_DISPUTE_MD },
+  { id: 'trust',   settingKey: 'legal_trust_md',   title: 'Trust & Safety',      description: 'How we keep buying and selling on campus safe.',   defaultMarkdown: DEFAULT_LEGAL_TRUST_MD },
+]
+
+/** Resolve a legal page's markdown — falls back to the built-in default
+ * when the admin hasn't supplied custom content yet. */
+export function resolveLegalMarkdown(doc: LegalDoc, raw: string | undefined | null): string {
+  const v = (raw ?? '').trim()
+  return v || doc.defaultMarkdown
 }

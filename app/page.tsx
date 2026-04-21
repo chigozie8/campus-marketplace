@@ -24,6 +24,7 @@ const FaqSection             = lazyLoad(() => import('@/components/landing/faq-s
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
 const StickyMobileCta        = lazyLoad(() => import('@/components/landing/sticky-mobile-cta').then(m => ({ default: m.StickyMobileCta })))
+const AdPopup                = lazyLoad(() => import('@/components/landing/ad-popup').then(m => ({ default: m.AdPopup })))
 
 export const revalidate = 300
 
@@ -162,15 +163,18 @@ export default async function Home() {
   ])
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
 
-  // Pull the visitor's campus for hero personalization (best-effort, optional).
+  // Pull the visitor's campus + name for hero/footer personalization (optional).
   let visitorCampus: string | null = null
+  let visitorFirstName: string | null = null
   if (supabase && user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('university')
+      .select('university, full_name')
       .eq('id', user.id)
       .maybeSingle()
     visitorCampus = (profile?.university as string | undefined) ?? null
+    const fullName = (profile?.full_name as string | undefined) ?? ''
+    visitorFirstName = fullName.trim().split(/\s+/)[0] || null
   }
 
   const visible = parseSectionVisibility(settings.homepage_sections_visible)
@@ -216,8 +220,23 @@ export default async function Home() {
       {visible.escrow          && <EscrowFlowSection steps={escrowSteps} />}
       {visible.faq             && <FaqSection faqs={faqs} />}
       {visible.cta             && <CtaSection user={user} />}
-      <LandingFooter settings={settings} />
+      <LandingFooter
+        settings={settings}
+        userEmail={user?.email ?? null}
+        userFirstName={visitorFirstName}
+      />
       <StickyMobileCta isAuthed={!!user} />
+      <AdPopup
+        enabled={settings.ad_popup_enabled === '1' && (settings.ad_popup_title || '').trim().length > 0}
+        title={settings.ad_popup_title || ''}
+        body={settings.ad_popup_body || ''}
+        imageUrl={settings.ad_popup_image_url || undefined}
+        ctaLabel={settings.ad_popup_cta_label || undefined}
+        ctaHref={settings.ad_popup_cta_href || undefined}
+        delayMs={Number(settings.ad_popup_delay_ms ?? 3000) || 3000}
+        autoCloseMs={Number(settings.ad_popup_auto_close_ms ?? 0) || 0}
+        frequency={(settings.ad_popup_frequency as 'session' | 'once' | 'always') || 'session'}
+      />
     </main>
   )
 }

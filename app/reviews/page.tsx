@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { LandingNav } from '@/components/landing/landing-nav'
-import { LandingFooter } from '@/components/landing/landing-footer'
+import { LandingFooterServer } from '@/components/landing/landing-footer-server'
 import { getSiteSettings } from '@/lib/site-settings'
 import { CtaSection } from '@/components/landing/cta-section'
 
@@ -33,7 +33,7 @@ export default async function ReviewsPage() {
         <TestimonialsSection />
         <CtaSection user={user} />
       </div>
-      <LandingFooter settings={settings} />
+      <LandingFooterServer settings={settings} />
     </main>
   )
 }

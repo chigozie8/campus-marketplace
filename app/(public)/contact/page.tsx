@@ -4,6 +4,7 @@ import { ArrowRight, Mail, MapPin, Clock, Phone, MessageCircle } from 'lucide-re
 import { getSiteSettings } from '@/lib/site-settings'
 import { parseContactSubjects } from '@/lib/site-settings-defaults'
 import { ContactForm } from '@/components/contact/contact-form'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,25 @@ export const metadata: Metadata = buildMetadata({
 export default async function ContactPage() {
   const settings = await getSiteSettings()
   const subjects = parseContactSubjects(settings.contact_subjects)
+
+  // Best-effort prefill from the signed-in profile.
+  let prefillName = ''
+  let prefillEmail = ''
+  try {
+    const supabase = await createClient()
+    if (supabase) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        prefillEmail = user.email ?? ''
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle()
+        prefillName = (profile?.full_name as string | undefined) ?? ''
+      }
+    }
+  } catch { /* anonymous visitors are fine */ }
 
   // Read ?subject= from URL for pre-selected subject (passed via Link hrefs elsewhere)
   // — handled client-side in ContactForm via defaultSubject prop read from searchParams
@@ -155,6 +175,8 @@ export default async function ContactPage() {
             <ContactForm
               subjects={subjects}
               responseTime={settings.contact_response_time || '2 hours'}
+              prefillName={prefillName}
+              prefillEmail={prefillEmail}
             />
           </div>
         </div>
