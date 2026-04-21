@@ -47,10 +47,10 @@ export function FloatingNav() {
           <div
             className={cn(
               'relative flex items-center gap-1 h-16 px-2.5 rounded-full',
-              'bg-white/85 dark:bg-gray-950/85 backdrop-blur-xl',
-              'border border-black/5 dark:border-white/10',
-              'shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25),0_2px_8px_-2px_rgba(0,0,0,0.08)]',
-              'dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]',
+              'bg-white dark:bg-black backdrop-blur-xl',
+              'border-2 border-black dark:border-white',
+              'shadow-[0_10px_40px_-10px_rgba(0,0,0,0.45),0_2px_8px_-2px_rgba(0,0,0,0.15)]',
+              'dark:shadow-[0_10px_40px_-10px_rgba(255,255,255,0.15)]',
             )}
           >
             {NAV_ITEMS.map((item) => {
@@ -75,7 +75,9 @@ function NavTab({ item, active }: { item: NavItem; active: boolean }) {
         className={cn(
           'relative flex items-center gap-1.5 h-11 rounded-full overflow-hidden',
           'transition-colors duration-200',
-          active ? 'bg-primary/12 dark:bg-primary/18 px-3.5' : 'px-3',
+          active
+            ? 'bg-black text-white dark:bg-white dark:text-black px-3.5'
+            : 'px-3',
         )}
       >
         <m.div
@@ -85,10 +87,10 @@ function NavTab({ item, active }: { item: NavItem; active: boolean }) {
         >
           <Icon
             className={cn(
-              'transition-all duration-200',
+              'transition-all duration-200 w-[22px] h-[22px]',
               active
-                ? 'w-[22px] h-[22px] text-primary stroke-[2.5]'
-                : 'w-[22px] h-[22px] text-gray-400 dark:text-gray-500 stroke-2',
+                ? 'text-white dark:text-black stroke-[2.75]'
+                : 'text-gray-400 dark:text-gray-500 stroke-[2.25]',
             )}
           />
         </m.div>
@@ -101,7 +103,7 @@ function NavTab({ item, active }: { item: NavItem; active: boolean }) {
               animate={{ opacity: 1, width: 'auto', x: 0 }}
               exit={{ opacity: 0, width: 0, x: -4 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="text-[13px] font-bold text-primary whitespace-nowrap overflow-hidden"
+              className="text-[13px] font-black text-white dark:text-black whitespace-nowrap overflow-hidden tracking-tight"
             >
               {item.label}
             </m.span>
@@ -124,9 +126,9 @@ function SellAction({ item, active }: { item: NavItem; active: boolean }) {
       {/* Soft glow halo */}
       <m.span
         aria-hidden
-        animate={{ scale: [1, 1.15, 1], opacity: [0.55, 0.25, 0.55] }}
+        animate={{ scale: [1, 1.15, 1], opacity: [0.45, 0.2, 0.45] }}
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-primary/40 blur-xl"
+        className="absolute inset-0 m-auto w-14 h-14 rounded-full bg-black/40 dark:bg-white/40 blur-xl"
       />
 
       {/* The button */}
@@ -136,13 +138,13 @@ function SellAction({ item, active }: { item: NavItem; active: boolean }) {
         transition={{ type: 'spring', stiffness: 400, damping: 18 }}
         className={cn(
           'relative w-14 h-14 rounded-full flex items-center justify-center',
-          'bg-gradient-to-br from-primary to-emerald-600 text-white',
-          'shadow-[0_8px_24px_-4px_rgba(22,163,74,0.55),inset_0_1px_0_0_rgba(255,255,255,0.25)]',
-          'ring-4 ring-white/90 dark:ring-gray-950/90',
-          active && 'ring-primary/30 dark:ring-primary/30',
+          'bg-black text-white dark:bg-white dark:text-black',
+          'shadow-[0_8px_24px_-4px_rgba(0,0,0,0.55),inset_0_1px_0_0_rgba(255,255,255,0.18)]',
+          'ring-4 ring-white dark:ring-black',
+          active && 'ring-gray-200 dark:ring-gray-800',
         )}
       >
-        <Icon className="w-6 h-6 stroke-[2.75]" />
+        <Icon className="w-6 h-6 stroke-[3]" />
       </m.div>
     </Link>
   )
