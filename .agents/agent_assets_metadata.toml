@@ -6,3 +6,51 @@ id = "sKvkQqXDdGl7D7tgr_C8a"
 uri = "file://exports/vendoorx-chatbot-training.txt"
 type = "text"
 title = "VendoorX AI Chatbot — Training Q&A (.txt)"
+
+[[outputs]]
+id = "ikx32TGhBuF7Y_fchnDMM"
+uri = "file://screenshots/iphone15pm-home.jpg"
+type = "image"
+title = "Home — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "72bOElyPaNqYPhNMUXOYX"
+uri = "file://screenshots/iphone15pm-browse.jpg"
+type = "image"
+title = "Browse — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "0UoUNTehz5qw1S913jC8w"
+uri = "file://screenshots/iphone15pm-categories.jpg"
+type = "image"
+title = "Categories — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "j6tQN9Rr7F-BIGCO41p_r"
+uri = "file://screenshots/iphone15pm-pricing.jpg"
+type = "image"
+title = "Pricing — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "F5PbEsmB4khzSh5Eu1R41"
+uri = "file://screenshots/iphone15pm-help.jpg"
+type = "image"
+title = "Help Center — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "50trM8Jgu6TLFiv0J0vUm"
+uri = "file://screenshots/iphone15pm-about.jpg"
+type = "image"
+title = "About — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "FM6Eiw7YeqfQsL9OP4CFH"
+uri = "file://screenshots/iphone15pm-signup.jpg"
+type = "image"
+title = "Sign Up — iPhone 15 Pro Max"
+
+[[outputs]]
+id = "nk13wF4kQqreZJEG6wkPD"
+uri = "file://screenshots/iphone15pm-login.jpg"
+type = "image"
+title = "Login — iPhone 15 Pro Max"
