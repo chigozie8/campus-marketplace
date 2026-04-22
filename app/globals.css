@@ -193,17 +193,30 @@
 
 /* ──────────────────────────────────────────────────────────────────
    Crisp chat bubble — lift above the floating bottom nav on mobile.
-   We translate the whole #crisp-chatbox wrapper upward, which works
-   regardless of Crisp's frequently-changing internal class names.
+   The bottom nav is ~88px tall with a 16px floating margin, plus we
+   leave breathing room. Total clearance ≈ 120px above the safe-area.
+   We bump --crisp-y on the launcher anchor and override Crisp's own
+   bottom positioning so it works regardless of internal class churn.
    ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  #crisp-chatbox {
-    transform: translateY(-140px) !important;
+  /* Lift the floating launcher button above the bottom nav */
+  #crisp-chatbox a[class*="cc-"][class*="launcher"],
+  #crisp-chatbox > div > a,
+  #crisp-chatbox [data-visible="true"]:not([data-chat-status="active"]) {
+    bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   }
-  /* When the chat panel is opened in fullscreen, undo the offset so the
-     panel doesn't get pushed off the bottom of the screen. */
+
+  /* Fallback: nudge the entire launcher wrapper up via transform.
+     Scoped to when the chat panel is NOT open so we don't push the
+     full chat panel off-screen. */
+  #crisp-chatbox:not([data-full-view="true"]) {
+    transform: translateY(calc(-1 * (120px + env(safe-area-inset-bottom, 0px)))) !important;
+  }
+
+  /* When the chat panel is opened in fullscreen, undo the offset */
   #crisp-chatbox[data-full-view="true"],
   #crisp-chatbox[data-visible="true"] [data-chat-status="active"] {
     transform: none !important;
+    bottom: 0 !important;
   }
 }
