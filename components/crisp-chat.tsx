@@ -1,45 +1,21 @@
 'use client'
 
 import { useEffect } from 'react'
+import { Crisp } from 'crisp-sdk-web'
 import { createClient } from '@/lib/supabase/client'
 
-/**
- * Drop-in Crisp Chat loader. Activates only when NEXT_PUBLIC_CRISP_WEBSITE_ID
- * is set in your environment — otherwise renders nothing, keeping the existing
- * in-house ChatWidget as the support surface.
- *
- * Setup:
- *   1. Create a free workspace at https://crisp.chat
- *   2. Settings → Website → copy the Website ID
- *   3. Add NEXT_PUBLIC_CRISP_WEBSITE_ID to Replit Secrets
- *   4. Refresh — that's it. The widget appears bottom-right with your branding.
- */
-const DEFAULT_CRISP_WEBSITE_ID = 'bb298b2b-c7cf-4245-89bf-951f5a8047dc'
+const CRISP_WEBSITE_ID =
+  process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID ||
+  'bb298b2b-c7cf-4245-89bf-951f5a8047dc'
 
 export function CrispChat() {
-  const websiteId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID || DEFAULT_CRISP_WEBSITE_ID
-
   useEffect(() => {
-    if (!websiteId) return
     if (typeof window === 'undefined') return
+    if (!CRISP_WEBSITE_ID) return
 
-    type CrispWindow = Window & {
-      $crisp?: unknown[]
-      CRISP_WEBSITE_ID?: string
-    }
-    const w = window as CrispWindow
+    Crisp.configure(CRISP_WEBSITE_ID)
+    Crisp.setColorTheme('green')
 
-    if (w.$crisp) return // already loaded
-
-    w.$crisp = []
-    w.CRISP_WEBSITE_ID = websiteId
-
-    const script = document.createElement('script')
-    script.src = 'https://client.crisp.chat/l.js'
-    script.async = true
-    document.head.appendChild(script)
-
-    // Identify the logged-in user to Crisp so support sees who's chatting
     ;(async () => {
       try {
         const supabase = createClient()
@@ -55,26 +31,20 @@ export function CrispChat() {
 
         const name = profile?.full_name || user.email?.split('@')[0] || 'User'
 
-        // Wait briefly for Crisp to initialize before pushing user data
-        const push = () => {
-          const $crisp = (window as CrispWindow).$crisp
-          if (!Array.isArray($crisp)) return
-          if (user.email) $crisp.push(['set', 'user:email', [user.email]])
-          if (name) $crisp.push(['set', 'user:nickname', [name]])
-          if (profile?.phone) $crisp.push(['set', 'user:phone', [profile.phone]])
-          if (profile?.avatar_url) $crisp.push(['set', 'user:avatar', [profile.avatar_url]])
-          $crisp.push([
-            'set',
-            'session:data',
-            [[['user_id', user.id], ['platform', 'web']]],
-          ])
-        }
-        setTimeout(push, 1500)
+        if (user.email) Crisp.user.setEmail(user.email)
+        if (name) Crisp.user.setNickname(name)
+        if (profile?.phone) Crisp.user.setPhone(profile.phone)
+        if (profile?.avatar_url) Crisp.user.setAvatar(profile.avatar_url)
+
+        Crisp.session.setData({
+          user_id: user.id,
+          platform: 'web',
+        })
       } catch {
         /* identification is best-effort — anonymous chat still works */
       }
     })()
-  }, [websiteId])
+  }, [])
 
   return null
 }

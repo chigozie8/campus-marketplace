@@ -1,0 +1,516 @@
+
+Chatbox SDKs | Web Chat SDK
+$crisp Methods
+Updated on January 29, 2026
+$crisp ("dollar-crisp") lets you control the Crisp chatbox from your JavaScript code. This lets you listen to Crisp events, as well as open, close the chatbox or do fancy stuff with the chatbox. This guide helps you use $crisp from your code.
+
+Just discovering Crisp and our SDK? You can learn more about our Chat SDKs right here.
+
+The $crisp JavaScript SDK is included in the Crisp chatbox. You don't need to install or enable anything, as it is built-in. You can start using it straight with no specific configuration.
+How-To Video
+How to Use the Crisp Chatbox SDK
+Available Actions
+$crisp lets you do actions on the Crisp chatbox. You have the following actions available (as JavaScript functions):
+
+Set a value: $crisp.push(["set", method, [value]]) (async-safe)
+Do something: $crisp.push(["do, method, [arguments]]) (async-safe)
+Listen for an event: $crisp.push(["on", method, callback]) (async-safe)
+Stop listening for an event: $crisp.push(["off", method]) (async-safe)
+Change runtime configuration: $crisp.push(["config", method, value]) (async-safe)
+Get a value: $crisp.get(method) (not async-safe)
+Check a state: $crisp.is(method) (returns a boolean, in any case) (not async-safe)
+Available Methods
+Set a value
+Update current message text
+Description: Pre-fill the current message text in the chatbox.
+Syntax: $crisp.push(["set", "message:text", [message_text]])
+// Example 1: set a prefilled chatbox input message
+$crisp.push(["set", "message:text", ["Hi! I'd like to get help."]]);
+Push session segments
+Description: Sets the session segments (each segment must be a string).
+Syntax: $crisp.push(["set", "session:segments", [[segment_1, segment_2, ...], overwrite?]])
+// Example 1: set a single segment
+$crisp.push(["set", "session:segments", [["customer"]]]);
+
+// Example 2: set multiple segments
+$crisp.push(["set", "session:segments", [["help", "customer"]]]);
+
+// Example 3: overwrite all segments to new segments
+$crisp.push(["set", "session:segments", [["new", "segments"], true]]);
+Push session data
+Description: Sets the session data for given key, with a value (value must be either a string, boolean or number).
+Syntax: $crisp.push(["set", "session:data", [[[key_1, value_1], [key_2, value_2], ...]]])
+// Example 1: set session data
+$crisp.push(["set", "session:data", [[
+  ["user-bill-amount", "$200"],
+  ["user-id", "abcd"]
+]]]);
+Push session events
+Description: Sets one or multiple session events, with a text and an optional data object and optional color (in red, orange, yellow, green, blue, purple, pink, brown, grey, black).
+Syntax: $crisp.push(["set", "session:event", [[[text_1, data_1, color_1], [text_2, data_2, color_2], ...]]])
+// Example 1: send session event
+$crisp.push(["set", "session:event", [[["product_bought", { price: "$200", name: "iPhone 6S" }, "red"]]]]);
+Change user email
+Description: Sets the user email (must be a valid email).
+Syntax: $crisp.push(["set", "user:email", [email]])
+// Example 1: set user email
+$crisp.push(["set", "user:email", ["john.doe@crisp.chat"]]);
+Change user phone
+Description: Sets the user phone (must be a valid phone number).
+Syntax: $crisp.push(["set", "user:phone", [phone]])
+// Example 1: set user phone
+$crisp.push(["set", "user:phone", ["+14152370800"]]);
+Change user nickname
+Description: Sets the user nickname.
+Syntax: $crisp.push(["set", "user:nickname", [nickname]])
+// Example 1: set user nickname
+$crisp.push(["set", "user:nickname", ["John Doe"]]);
+Change user avatar
+Description: Sets the user avatar.
+Syntax: $crisp.push(["set", "user:avatar", [avatar]])
+// Example 1: set user avatar
+$crisp.push(["set", "user:avatar", ["https://upload.wikimedia.org/wikipedia/commons/5/5a/John_Doe%2C_born_John_Nommensen_Duchac.jpg"]]);
+Change user company
+Description: Sets the user company (with optional user employment data).
+Syntax: $crisp.push(["set", "user:company", [name, { url, description, employment: [title, role], geolocation: [country, city] }]])
+// Example 1: set all user company details
+$crisp.push(["set", "user:company", ["Crisp", {
+  url: "https://crisp.chat/",
+  description: "Give your customer experience a human touch.",
+  employment: ["CTO", "Software Engineer"],
+  geolocation: ["FR", "Nantes"]
+}]]);
+
+// Example 2: set user company name only
+$crisp.push(["set", "user:company", ["Crisp"]]);
+
+// Example 3: set user company name and geolocation only
+$crisp.push(["set", "user:company", ["Crisp", {
+  geolocation: ["FR", "Nantes"]
+}]]);
+Perform an action
+Open chatbox
+Description: Opens the chatbox.
+Syntax: $crisp.push(["do", "chat:open", [done?]])
+Close chatbox
+Description: Closes the chatbox.
+Syntax: $crisp.push(["do", "chat:close"])
+Toggle chatbox (open or close)
+Description: Toggles the chatbox (close if opened, open if closed).
+Syntax: $crisp.push(["do", "chat:toggle"])
+Show chatbox (visible)
+Description: Shows the chatbox (restore visibility to visible).
+Syntax: $crisp.push(["do", "chat:show"])
+Hide chatbox (invisible)
+Description: Hides the chatbox (don't close it if open, sets it invisible).
+Syntax: $crisp.push(["do", "chat:hide"])
+Open helpdesk search
+Description: Opens helpdesk search interface (only if an helpdesk is configured).
+Syntax: $crisp.push(["do", "helpdesk:search"])
+View helpdesk article
+Description: Opens target helpdesk article on the page (locale and slug can be found in the full URL to the article; slug is the ID at the end of the URL; title and category are optional).
+Syntax: $crisp.push(["do", "helpdesk:article:open", [locale, slug, title?, category?]])
+// Example 1: opens an article with ID '10ud15y' for locale 'en' (English)
+$crisp.push(["do", "helpdesk:article:open", ["en", "10ud15y"]]);
+
+// Example 2: opens an article with ID '1nko1cm' for locale 'en' (English) with a title and a category
+$crisp.push(["do", "helpdesk:article:open", ["en", "1nko1cm", "How to install Crisp Live Chat on Nuxt.js", "Install Crisp"]]);
+Search in helpdesk
+Description: Queries helpdesk for articles matching search query (results are returned in event helpdesk:queried).
+Syntax: $crisp.push(["do", "helpdesk:query", [search_query]])
+Open overlay widget
+Description: Opens the overlay widget.
+Syntax: $crisp.push(["do", "overlay:open", [done?]])
+Close overlay widget
+Description: Closes the overlay widget.
+Syntax: $crisp.push(["do", "overlay:close"])
+Send message (to operators)
+Description: Sends a message as visitor to conversation (type either text or file, if text then content is message string, if file then content is file object {url, name, type}).
+Syntax: $crisp.push(["do", "message:send", [type, content]])
+// Example 1: send a text message
+$crisp.push(["do", "message:send", ["text", "Hello there!"]]);
+
+// Example 2: send a file message
+$crisp.push(["do", "message:send", ["file", {
+  name: "Europa.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Europa-moon.jpg/600px-Europa-moon.jpg",
+  type: "image/jpg"
+}]]);
+
+// Example 3: send an animation message
+$crisp.push(["do", "message:send", ["animation", {
+  url:
+  "https://media.giphy.com/media/3oz8xPjPPvOwrGjip2/giphy.gif",
+  type: "image/gif"
+}]]);
+
+// Example 4: send an audio message
+$crisp.push(["do", "message:send", ["audio", {
+  duration: 40,
+  url: "https://storage.crisp.chat/users/upload/operator/aa0b64dd-9fb4-4db9-80d6-5a49eb84087b/d70935e1-c79e-4199-9568-944541657b78.webm",
+  type: "audio/webm"
+}]]);
+Show message (local only)
+Description: Shows a message as operator in local chatbox (type either text or file, if text then content is message string, if file then content is file object {url, name, type}).
+Syntax: $crisp.push(["do", "message:show", [type, content]])
+// Example 1: show a text message
+$crisp.push(["do", "message:show", ["text", "Can I help?"]]);
+
+// Example 2: show an animation message
+$crisp.push(["do", "message:show", ["animation", {
+  url: "https://media.giphy.com/media/IThjAlJnD9WNO/giphy.gif",
+  type: "image/gif"
+}]]);
+
+// Example 3: show a picker message
+$crisp.push(["do", "message:show", ["picker", {
+  "id": "call-date",
+  "text": "Pick your date!",
+
+  "choices": [
+    {
+      "value": "1",
+      "icon": "🌸",
+      "label": "Today, 1:00PM.",
+      "selected": false
+    },
+
+    {
+      "value": "2",
+      "icon": "🌼",
+      "label": "Tomorrow, 3:45PM.",
+      "selected": false
+    }
+  ]
+}]]);
+
+// Example 4: show a field message
+$crisp.push(["do", "message:show", ["field", {
+  "id": "name-field",
+  "text": "What is your name?",
+  "explain": "Enter your name..."
+}]]);
+
+// Example 5: show a carousel message
+$crisp.push(["do", "message:show", ["carousel", {
+  "text": "Sure! Here's what I have...",
+
+  "targets": [
+    {
+      "title": "iPhone 12 Mini",
+      "description": "Refurbished iPhone 12 Mini in excellent condition.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-12"
+        }
+      ]
+    },
+
+    {
+      "title": "iPhone 13",
+      "description": "Brand new iPhone 13, coming with Apple Care.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-13"
+        }
+      ]
+    }
+  ]
+}]]);
+Mark all messages as read
+Description: Marks all unread messages as read, clearing the pending messages notification and the unread counter.
+Syntax: $crisp.push(["do", "message:read"])
+Start a chat thread
+Description: Starts a message thread in conversation, indicating operators what next messages will be about.
+Syntax: $crisp.push(["do", "message:thread:start", [text]])
+// Example 1: start a new message thread for 'Ticket #152239'
+$crisp.push(["do", "message:thread:start", ["Ticket #152239"]]);
+End a chat thread
+Description: Ends a message thread in conversation, indicating operators that a previously-started thread is now closed.
+Syntax: $crisp.push(["do", "message:thread:end", [text]])
+// Example 1: end a named message thread for 'Ticket #152239'
+$crisp.push(["do", "message:thread:end", ["Ticket #152239"]]);
+
+// Example 2: end any open message thread
+$crisp.push(["do", "message:thread:end"]);
+Reset session (clear everything)
+Description: Resets the chatbox session to a new session (reload controls whether to reload page upon reset or not; by default the page is not reloaded upon reset as this is not needed).
+Syntax: $crisp.push(["do", "session:reset", [reload?]])
+// Example 1: reset session without page reload (recommended)
+$crisp.push(["do", "session:reset"]);
+
+// Example 2: reset session with page reload (not recommended)
+$crisp.push(["do", "session:reset", [true]]);
+Run a trigger
+Description: Runs a trigger with given identifier (from configured triggers, if the Triggers plugin is enabled on your website).
+Syntax: $crisp.push(["do", "trigger:run", [identifier]])
+// Example 1: run a saved trigger identifier
+$crisp.push(["do", "trigger:run", ["growth-hack-1"]]);
+Run a Bot scenario
+Description: Runs a Bot scenario with given identifier (from configured Bot scenarios, if the Bot plugin is enabled on your website). Optionally accepts a plain object of variables (string, number or boolean values) forwarded to the scenario and available inside workflow blocks as {{ key }} templates.
+Syntax: $crisp.push(["do", "bot:scenario:run", [identifier, variables?]])
+// Example 1: run a Bot scenario
+$crisp.push(["do", "bot:scenario:run", ["scenario_a0f5822a-d94c-4545-b63c-3dd869a2ac99"]]);
+
+// Example 2: run a Bot scenario with custom variables
+// Available inside the scenario as {{ order_id }} and {{ plan }}
+$crisp.push(["do", "bot:scenario:run", [
+  "scenario_a0f5822a-d94c-4545-b63c-3dd869a2ac99",
+  { order_id: "123", plan: "pro" }
+]]);
+Check a boolean value
+The $crisp.is() method is not async-safe. Do not use it before Crisp is fully loaded (see Use $crisp Before It Is Ready).
+Is chat opened?
+Description: Returns true if the chatbox is opened, else false.
+Syntax: $crisp.is("chat:opened")
+Is chat closed?
+Description: Returns true if the chatbox is closed, else false.
+Syntax: $crisp.is("chat:closed")
+Is chat visible?
+Description: Returns true if the chatbox is visible, else false.
+Syntax: $crisp.is("chat:visible")
+Is chat hidden?
+Description: Returns true if the chatbox is hidden, else false.
+Syntax: $crisp.is("chat:hidden")
+Is chat small?
+Description: Returns true if the chatbox is small, else false.
+Syntax: $crisp.is("chat:small")
+Is chat large?
+Description: Returns true if the chatbox is large, else false.
+Syntax: $crisp.is("chat:large")
+Is session ongoing?
+Description: Returns true if a session is ongoing (ie. messages have been received or sent), else false.
+Syntax: $crisp.is("session:ongoing")
+Is website available?
+Description: Returns true if the website support is online, else false if away.
+Syntax: $crisp.is("website:available")
+Is overlay widget opened?
+Description: Returns true if the overlay widget is opened, else false.
+Syntax: $crisp.is("overlay:opened")
+Is overlay widget closed?
+Description: Returns true if the overlay widget is closed, else false.
+Syntax: $crisp.is("overlay:closed")
+Get a string or number value
+The $crisp.get() method is not async-safe. Do not use it before Crisp is fully loaded (see Use $crisp Before It Is Ready).
+Get count of unread messages
+Description: Returns the number of unread messages in chat.
+Syntax: $crisp.get("chat:unread:count")
+Get current message text
+Description: Returns the current message text entered in the chatbox but not yet sent.
+Syntax: $crisp.get("message:text")
+Get session identifier
+Description: Returns the current session identifier (or null if not yet loaded).
+Syntax: $crisp.get("session:identifier")
+Get session data value
+Description: Returns the current session data (all data if key is null, or data for given key).
+Syntax: $crisp.get("session:data", key)
+// Example 1: get a saved session data key
+$crisp.get("session:data", "user-bill-amount");
+Get user email
+Description: Returns the user email (or null if not set).
+Syntax: $crisp.get("user:email")
+Get user phone
+Description: Returns the user phone (or null if not set).
+Syntax: $crisp.get("user:phone")
+Get user nickname
+Description: Returns the user nickname (or null if not set).
+Syntax: $crisp.get("user:nickname")
+Get user avatar
+Description: Returns the user avatar (or null if not set).
+Syntax: $crisp.get("user:avatar")
+Get user company
+Description: Returns the user company (or null if not set).
+Syntax: $crisp.get("user:company")
+Register a callback on event
+Note that to unregister a callback that was previously set, simply call its off action counterpart. For instance: $crisp.push(["off", "session:loaded"]) for the session:loaded event.
+Session has loaded
+Description: Handles the session loaded event (triggers your callback function, with session_id as first argument).
+Syntax: $crisp.push(["on", "session:loaded", callback])
+Chatbox was initiated
+Description: Handles the chatbox initiated event, on the first time the user clicks on the chatbox (triggers your callback function).
+Syntax: $crisp.push(["on", "chat:initiated", callback])
+Chatbox was opened
+Description: Handles the chatbox opened event (triggers your callback function).
+Syntax: $crisp.push(["on", "chat:opened", callback])
+Chatbox was closed
+Description: Handles the chatbox closed event (triggers your callback function).
+Syntax: $crisp.push(["on", "chat:closed", callback])
+Message was sent
+Description: Handles the message sent event from the visitor (triggers your callback function, with message as first argument).
+Syntax: $crisp.push(["on", "message:sent", callback])
+Message was received
+Description: Handles the message received event from the operator (triggers your callback function, with message as first argument).
+Syntax: $crisp.push(["on", "message:received", callback])
+Message was composed (by visitor)
+Description: Handles the message compose sent event, ie. the "typing" indicator (triggers your callback function, with compose as first argument).
+Syntax: $crisp.push(["on", "message:compose:sent", callback])
+Message was composed (by operator)
+Description: Handles the message compose received event, ie. the "typing" indicator (triggers your callback function, with compose as first argument).
+Syntax: $crisp.push(["on", "message:compose:received", callback])
+User email was changed
+Description: Handles the user email changed event (triggers your callback function, with email as first argument).
+Syntax: $crisp.push(["on", "user:email:changed", callback])
+User phone was changed
+Description: Handles the user phone changed event (triggers your callback function, with phone as first argument).
+Syntax: $crisp.push(["on", "user:phone:changed", callback])
+User nickname was changed
+Description: Handles the user nickname changed event (triggers your callback function, with nickname as first argument).
+Syntax: $crisp.push(["on", "user:nickname:changed", callback])
+User avatar was changed
+Description: Handles the user avatar changed event (triggers your callback function, with avatar as first argument).
+Syntax: $crisp.push(["on", "user:avatar:changed", callback])
+Website availability was changed
+Description: Handles the website availability changed event (triggers your callback function, with is_available as first argument).
+Syntax: $crisp.push(["on", "website:availability:changed", callback])
+Helpdesk search was sent
+Description: Handles the helpdesk queried event (triggers your callback function, with search_results as first argument).
+Syntax: $crisp.push(["on", "helpdesk:queried", callback])
+Change a runtime configuration
+Toggle the availability tooltip
+Description: Changes the availability tooltip visibility value for the current page (can be true or false).
+Syntax: $crisp.push(["config", "availability:tooltip", value])
+// Example 1: disable the availability tooltip on current page
+$crisp.push(["config", "availability:tooltip", [false]]);
+Toggle vacation mode
+Description: Changes the hide chatbox for support on vacation value for the current page (can be true or false).
+Syntax: $crisp.push(["config", "hide:vacation", value])
+// Example 1: hide the chatbox if support is on vacation on current page
+$crisp.push(["config", "hide:vacation", [true]]);
+Toggle hide on away
+Description: Changes the hide on support away value for the current page (can be true or false).
+Syntax: $crisp.push(["config", "hide:on:away", value])
+// Example 1: hide the chatbox if support is away on current page
+$crisp.push(["config", "hide:on:away", [true]]);
+Toggle hide on mobile
+Description: Changes the hide chatbox on mobile devices value for the current page (can be true or false).
+Syntax: $crisp.push(["config", "hide:on:mobile", value])
+// Example 1: hide the chatbox if using a mobile device (ie. a small screen) on current page
+$crisp.push(["config", "hide:on:mobile", [true]]);
+Toggle operator count
+Description: Changes the chatbox operator count visibility for the current page.
+Syntax: $crisp.push(["config", "show:operator:count", value])
+// Example 1: hide the chatbox operator count on current page
+$crisp.push(["config", "show:operator:count", [false]]);
+Toggle chatbox reverse position
+Description: Changes the chatbox position value for the current page (can be true or false).
+Syntax: $crisp.push(["config", "position:reverse", value])
+// Example 1: reverse the chatbox position on current page
+$crisp.push(["config", "position:reverse", [true]]);
+Mute or unmute sounds
+Description: Mutes or unmutes all chatbox sounds for the current page (can be true or false).
+Syntax: $crisp.push(["config", "sound:mute", value])
+// Example 1: mutes all chatbox sounds for the current page
+$crisp.push(["config", "sound:mute", [true]]);
+Change color theme
+Description: Changes the chatbox color theme for the current page (any color variant in: default, amber, black, blue, blue_grey, light_blue, brown, cyan, green, light_green, grey, indigo, orange, deep_orange, pink, purple, deep_purple, red, teal).
+Syntax: $crisp.push(["config", "color:theme", value])
+// Example 1: change the chatbox color on current page to 'red'
+$crisp.push(["config", "color:theme", ["red"]]);
+Change color mode
+Description: Changes the chatbox color mode for the current page (either: light, dark or auto).
+Syntax: $crisp.push(["config", "color:mode", value])
+// Example 1: change the chatbox color mode to 'dark' (for Dark Mode)
+$crisp.push(["config", "color:mode", ["dark"]]);
+Change layout theme
+Description: Changes the chatbox layout theme for the current page (either: default or colorized).
+Syntax: $crisp.push(["config", "layout:theme", value])
+// Example 1: change the chatbox layout theme on current page to 'colorized'
+$crisp.push(["config", "layout:theme", ["colorized"]]);
+Change tile
+Description: Changes the chatbox tile for the current page (either: default or any existing tile value).
+Syntax: $crisp.push(["config", "tile", value])
+// Example 1: change the chatbox tile on current page to 'lisbon'
+$crisp.push(["config", "tile", ["lisbon"]]);
+Change container index
+Description: Changes the chatbox container z-index for the current page (any z-index number is valid).
+Syntax: $crisp.push(["config", "container:index", value])
+// Example 1: change the chatbox container 'z-index' on current page to '1'
+$crisp.push(["config", "container:index", [1]]);
+List All Actions
+If you want to list the supported actions, which may be useful in some debugging cases, you can open a browser Developer Tools console.
+
+Then execute: $crisp.help()
+
+It will return the list of supported actions associated to supported methods.
+
+Disable Warnings & Errors
+You may enable $crisp safe mode to prevent $crisp to throw errors when an exception occurs. An exception can be, for instance, triggered by a call such as $crisp.push(["set", "user:email", ["invalid-email"]]) in case the email value is invalid.
+
+The safe mode is disabled by default, which means you may get errors, which is actually a good practice for development purposes. By enabling safe mode, no error will ever get thrown (in any case), which makes integration with your code safe.
+
+Without safe mode, Crisp may also throw warnings in your console logs to help you address potential issues with your chatbox integration. If you choose to ignore warnings, enabling the safe mode is also the way to go.
+
+To enable safe mode: $crisp.push(["safe", true])
+
+You should call this code before using any other $crisp method.
+Use $crisp Before It Is Ready
+If you need to use $crisp before the chatbox scripts are done loading (eg: at page load), you need to use the $crisp.push() aync-safe methods.
+
+You can safely push $crisp actions anywhere in your code using the $crisp.push() call:
+
+// Set user email, async-safe
+$crisp.push(["set", "user:email", "john.doe@crisp.chat"]);
+
+// Opens chatbox
+$crisp.push(["do", "chat:open"]);
+The first argument, is the action to execute. For example, for a set action, the first value will be "set". For an on action, the first value will be "on". For a do action, the first value will be "do", etc.
+
+Also, if you need to call methods that cannot be passed to $crisp.push() because they return a value synchronously (eg. crisp.is() methods), you may use the window.CRISP_READY_TRIGGER register as such:
+
+// This callback gets executed once $crisp is fully loaded and all methods (not only $crisp.push()) are available
+window.CRISP_READY_TRIGGER = function() {
+  if ($crisp.is("chat:opened") === true) {
+    // Do something.
+  }
+};
+Create a simple bot using the $crisp SDK
+Creating simple bots using the $crisp SDK is easy. In the following example we will send a message picker and receive an update once the user select a choice
+
+The first step is sending a message picker with id a-custom-id (you can select your own id):
+
+$crisp.push(["do", "message:show", ["picker", {
+  "id": "a-custom-id",
+  "text": "What is your question about?",
+
+  "choices": [
+    {
+        "value": "sales",
+        "label": "Sales",
+        "selected": false
+    },
+
+    {
+        "value": "tech",
+        "label": "Tech",
+        "selected": false
+    }
+  ]
+}]])
+Then, you can send a follow-up response based on the selected choice:
+
+$crisp.push(["on", "message:received", function(data) {
+  // Skip responses not being updates
+  if (data.origin !== "update") {
+    return;
+  }
+
+  // Skip messages types other than pickers
+  if (data.type !== "picker") {
+    return;
+  }
+
+  // Skip other ids
+  if (data.content.id !== "a-custom-id") {
+    return;
+  }
+
+  let _choice = data.content.choices.find(choice => choice.selected)
+
+  $crisp.push(["do", "message:show", ["text", "Current choice is " + _choice.label]]);
+}])
+© 2026 Crisp IM SAS
+Documentation generated by Chappe, an open-source project from Crisp.

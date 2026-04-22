@@ -1,0 +1,678 @@
+
+Chatbox SDKs | Web Chat SDK
+NPM Package
+Updated on April 9, 2024
+The crisp-sdk-web package allows embedding Crisp chatbox using web frameworks such as React, Vue, or Angular. This SDK wraps the $crisp methods and provides TypeScript definitions.
+
+This package is a wrapper over the $crisp JavaScript SDK. It will automatically inject the Crisp chatbox in your web application and will provide more flexibility as well as autocompletion with your IDE.
+Installation
+npm install --save crisp-sdk-web
+
+Basic Implementation
+To add Crisp on your website, you will first need to create an account on the Crisp App.
+
+Once you have your Crisp Website ID, you can then embed the Crisp chatbox in your app.
+
+import { Crisp } from "crisp-sdk-web";
+
+Crisp.configure(WEBSITE_ID);
+
+// Crisp will be displayed
+Manual loading
+Deferring Crisp loading is possible, for instance, to display the chat after a login screen or on a custom button click.
+
+import { Crisp } from "crisp-sdk-web";
+
+Crisp.configure(WEBSITE_ID, {
+  autoload: false
+});
+
+// Crisp.load();
+Then, you can load Crisp using Crisp.load(). Note that methods such as Crisp.chat.open() or Crisp.chat.show() will implicitly call the Crisp.load() method.
+
+Identity Management
+You may attach user information so your customers don't need to manually fill their email address. Providing custom data is possible as well.
+
+Crisp.user.setEmail("john.doe@gmail.com");
+Crisp.user.setNickname("John Doe");
+
+Crisp.session.setData({
+  user_id : "123456",
+  plan : "free"
+});
+Pushing Events
+Crisp allows pushing custom events. Those events can then be used to trigger automated campaigns or bot scenarios.
+
+
+Crisp.session.pushEvent("signup");
+
+// Or with custom parameters
+Crisp.session.pushEvent("purchase", {
+  price: 66.66,
+  item: "XXXX_XXXX"
+});
+Session Continuity
+Crisp sessions rely on Cookies. If you want Crisp sessions to be persisted on a user basis, you can use the tokenId feature. We are strongly recommending having a look to our security recommendations before enforcing session continuity.
+
+import { Crisp } from "crisp-sdk-web";
+
+Crisp.configure(WEBSITE_ID, {
+  autoload: false
+});
+
+// await login();
+
+Crisp.setTokenId("A_VERY_UNIQUE_AND_SECURE_TOKEN");
+Crisp.user.setEmail("john.doe@gmail.com");
+Crisp.user.setNickname("John Doe");
+
+// Crisp.load();
+Also make sure to clear the user's tokenId and reset the session during your logout routine, in order to unbind the current session and start a new one.
+
+function userLogout() {
+  // Execute this sequence when your users are logging out
+  Crisp.setTokenId(); // 1. Clear the token value
+  Crisp.session.reset(); // 2. Unbind the current session
+}
+Create a simple bot
+Creating a simple bot using the Crisp SDK is easy. In the following example we will send a message picker and receive an update once the user picks a choice.
+
+The first step is sending a message picker with id a-custom-id (you can use your own id):
+
+Crisp.message.show("picker", {
+  "id": "a-custom-id",
+  "text": "What is your question about?",
+
+  "choices": [
+    {
+      "value": "sales",
+      "label": "Sales",
+      "selected": false
+    },
+
+    {
+      "value": "tech",
+      "label": "Tech",
+      "selected": false
+    }
+  ]
+});
+Then, you can send a follow-up response based on the selected choice:
+
+Crisp.message.onMessageReceived((data) => {
+  // Skip responses not being updates
+  if (data.origin !== "update") {
+    return;
+  }
+
+  // Skip messages types other than pickers
+  if (data.type !== "picker") {
+    return;
+  }
+
+  // Skip other ids
+  if (data.content.id !== "a-custom-id") {
+    return;
+  }
+
+  let _choice = data.content.choices.find(choice => choice.selected)
+
+  Crisp.message.send("text", "Current choice is " + _choice.label);
+});
+Available Methods
+Configuration
+Configure
+To load the SDK you will need to use Crisp.configure(WEBSITE_ID, options).
+
+Different options are available:
+
+autoload: Autoloads Crisp once Crisp is configured. Default: true
+tokenId: Session continuty token. Default: null
+locale: Sets a custom locale (en, fr, de, ...) Default: null
+sessionMerge: Enables session merge. Default: false
+cookieDomain: Enforces a custom domain for Cookie storage. Default: null
+cookieExpire: Enforces a custom expire time for Cookie storage. Default: null
+lockMaximized: Prevents chatbox from being closed. Default: false
+lockFullview: Enforces chatbox fullscreen mode. Default: false
+safeMode: Enforces chatbox safe mode. Default: false
+clientUrl: Use a custom chatbox loader URL. Default: https://client.crisp.chat/l.js
+For instance, the following code will open Crisp in fullscreen and will prevent it from being closed:
+
+Crisp.configure(WEBSITE_ID, {
+  lockMaximized: true,
+  lockFullview: true
+});
+Manual Loading
+This methods needs to be used if autoload is disabled. To load the chatbox manually use:
+
+Crisp.load();
+Set Token Identifier
+This method is used to set a tokenId, to enable session continuity.
+
+Crisp.setTokenId(tokenId);
+Set Z-Index
+This method wil update the Chatbox z-index:
+
+Crisp.setZIndex(99999);
+Set Color Theme
+You can use different colors themes, including: default, amber, black, blue, blue_grey, light_blue, brown, cyan, green, light_green, grey, indigo, orange, deep_orange, pink, purple, deep_purple, red, teal
+
+You can for instance set the chatbox color to green by calling:
+
+Crisp.setColorTheme("green");
+Hide On Away
+This method will hide the Crisp chatbox when no one is available to answer.
+
+Crisp.setHideOnAway(true);
+Hide on Mobile
+This method will hide the Crisp chatbox on mobile.
+
+Crisp.setHideOnMobile(true);
+Set Position (Left or Right)
+This method will switch the Crisp chatbox position to the left or to the right position.
+
+Crisp.setPosition("left");
+Enable/Disable Availability Tooltip
+This method will enable or disable the Crisp chatbox availability tooltip.
+
+Crisp.setAvailabilityTooltip(false);
+Enable/Disable Vacation Mode
+This method will hide completely hide the Crisp chatbox when enabled.
+
+Crisp.setVacationMode(true);
+Mute Sounds
+This method will hide mute notification sounds when enabled.
+
+Crisp.muteSound(true);
+Enable/Disable Operator Count
+This method will stop displaying the operator count.
+
+Crisp.toggleOperatorCount(true);
+Safe Mode
+This method will turn off all errors generated by the $crisp SDK
+
+Crisp.setSafeMode(true);
+Website Availability Callback
+Crisp.onWebsiteAvailabilityChanged((is_available) => {
+  // Executed once the website availability has changed (online or offline)
+
+  if (is_available) {
+    // triggers once the website changes to "online"
+  } else {
+    // triggers once the website changes to "offline"
+  }
+})
+Crisp.offWebsiteAvailabilityChanged() // can be called in order to turn the callback off
+Chat
+Show the Chat
+This method will show the Crisp chatbox.
+
+Crisp.chat.show();
+Hide the Chat
+This method will hide the Crisp chatbox.
+
+Crisp.chat.hide();
+Open the Chat
+This method will open the Crisp chatbox.
+
+Crisp.chat.open();
+Close the Chat
+This method will close the Crisp chatbox.
+
+Crisp.chat.close();
+Set Overlay View
+This method will display the overlay view in the chatbox.
+
+Crisp.chat.setOverlayView();
+Set Helpdesk View
+This method will display the helpdesk view in the chatbox.
+
+Crisp.chat.setHelpdeskView();
+View a Helpdesk Article
+This method will open a helpdesk article in the chatbox.
+
+Crisp.chat.openHelpdeskArticle(locale, slug, title?, category?);
+
+// Example of this method to open an article
+Crisp.chat.openHelpdeskArticle(
+  "en",
+  "10wcj3l",
+  "How to add a live chat to my website?", // optional
+  "Getting Started" // optional
+);
+Query the Helpdesk
+This method will search for helpdesk articles matching the query.
+
+Crisp.chat.queryHelpdesk(query);
+Get the Unread Count
+This method will fetch unread the message count.
+
+var count = Crisp.chat.unreadCount();
+Check if the Chat is Opened
+This method will return is the chat is opened.
+
+var isOpened = Crisp.chat.isChatOpened();
+Check if the Chat is Visible
+This method will return is the chat is visible.
+
+var isVisibleOpened = Crisp.chat.isVisible();
+Chat Initiated Callback
+Crisp.chat.onChatInitiated(() => {
+  // Executed once the chat was initiated from the user
+})
+Crisp.chat.offChatInitiated() // can be called in order to turn the callback off
+Chat Opened Callback
+Crisp.chat.onChatOpened(() => {
+  // Executed once the chat was opened
+})
+Crisp.chat.offChatOpened() // can be called in order to turn the callback off
+Chat Closed Callback
+Crisp.chat.onChatClosed(() => {
+  // Executed once the chat was closed
+})
+Crisp.chat.offChatClosed() // can be called in order to turn the callback off
+Helpdesk Queried Callback
+Crisp.chat.onHelpdeskQueried((data) => {
+  // Executed once a helpdesk search has been queried
+})
+Crisp.chat.offHelpdeskQueried() // can be called in order to turn the callback off
+Message
+Pre-fill a Text Message
+Pre-fill the current message text in the chatbox.
+
+Crisp.message.setMessageText("I have a question");
+Send a Message (Generic)
+Sends a message as visitor to conversation.
+
+// Example 1: send a text message
+Crisp.message.send("text", "Hello there!");
+
+// Example 2: send a file message
+Crisp.message.send("file", {
+  name: "Europa.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Europa-moon.jpg/600px-Europa-moon.jpg",
+  type: "image/jpg"
+});
+
+// Example 3: send an animation message
+Crisp.message.send("animation", {
+  url: "https://media.giphy.com/media/3oz8xPjPPvOwrGjip2/giphy.gif",
+  type: "image/gif"
+});
+
+// Example 4: send an audio message
+Crisp.message.send("audio", {
+  duration: 40,
+  url: "https://storage.crisp.chat/users/upload/operator/aa0b64dd-9fb4-4db9-80d6-5a49eb84087b/d70935e1-c79e-4199-9568-944541657b78.webm",
+  type: "audio/webm"
+});
+Send a Text Message
+Sends a text message as visitor to conversation.
+
+Crisp.message.sendText("Hello there!");
+Send a File Message
+Sends a file message as visitor to conversation.
+
+Crisp.message.sendFile("Hello there!", {
+  name: "Europa.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Europa-moon.jpg/600px-Europa-moon.jpg",
+  type: "image/jpg"
+});
+Send an Animation Message
+Sends a animation message as visitor to conversation.
+
+Crisp.message.sendAnimation("Hello there!", {
+  url: "https://media.giphy.com/media/3oz8xPjPPvOwrGjip2/giphy.gif",
+  type: "image/gif"
+});
+Send an Audio Message
+Sends a audio message as visitor to conversation.
+
+Crisp.message.sendAudio("Hello there!", {
+  duration: 40,
+  url: "https://storage.crisp.chat/users/upload/operator/aa0b64dd-9fb4-4db9-80d6-5a49eb84087b/d70935e1-c79e-4199-9568-944541657b78.webm",
+  type: "audio/webm"
+});
+Show a Message (Generic)
+Shows a message as operator in local chatbox.
+
+// Example 1: show a text message
+Crisp.message.show("text", "Can I help?!");
+
+// Example 2: show a file message
+Crisp.message.show("file", {
+  name: "Europa.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Europa-moon.jpg/600px-Europa-moon.jpg",
+  type: "image/jpg"
+});
+
+// Example 3: show a picker message
+Crisp.message.show("picker", {
+  "id": "call-date",
+  "text": "Pick your date!",
+
+  "choices": [
+    {
+      "value": "1",
+      "label": "Today, 1:00PM.",
+      "selected": false
+    },
+
+    {
+      "value": "2",
+      "label": "Tomorrow, 3:45PM.", "selected": false
+    }
+  ]
+});
+
+// Example 4: show a field message
+Crisp.message.show("field", {
+  "id": "name-field",
+  "text": "What is your name?",
+  "explain": "Enter your name..."
+});
+
+// Example 5: show a carousel message
+Crisp.message.show("carousel", {
+  "text": "Sure! Here's what I have...",
+
+  "targets": [
+    {
+      "title": "iPhone 12 Mini",
+      "description": "Refurbished iPhone 12 Mini in excellent condition.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-12"
+        }
+      ]
+    },
+
+    {
+      "title": "iPhone 13",
+      "description": "Brand new iPhone 13, coming with Apple Care.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-13"
+        }
+      ]
+    }
+  ]
+});
+Show a Text Message
+Shows a text message as operator in local chatbox.
+
+Crisp.message.showText("Can I help?!");
+Show a File Message
+Shows a file message as operator in local chatbox.
+
+Crisp.message.showFile({
+  name: "Europa.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Europa-moon.jpg/600px-Europa-moon.jpg",
+  type: "image/jpg"
+});
+Show a Picker Message
+Shows a picker message as operator in local chatbox.
+
+Crisp.message.showPicker({
+  "id": "call-date",
+  "text": "Pick your date!",
+
+  "choices": [
+    {
+      "value": "1",
+      "label": "Today, 1:00PM.",
+      "selected": false
+    },
+
+    {
+      "value": "2",
+      "label": "Tomorrow, 3:45PM.",
+      "selected": false
+    }
+  ]
+});
+Show a Field Message
+Shows a field message as operator in local chatbox.
+
+Crisp.message.showField({
+  "id": "call-date",
+  "text": "Pick your date!",
+
+  "choices": [
+    {
+      "value": "1",
+      "label": "Today, 1:00PM.",
+      "selected": false
+    },
+
+    {
+      "value": "2",
+      "label": "Tomorrow, 3:45PM.",
+      "selected": false
+    }
+  ]
+});
+Show a Carousel Message
+Shows a carousel message as operator in local chatbox.
+
+Crisp.message.showCarousel({
+  "text": "Sure! Here's what I have...",
+
+  "targets": [
+    {
+      "title": "iPhone 12 Mini",
+      "description": "Refurbished iPhone 12 Mini in excellent condition.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-12"
+        }
+      ]
+    },
+
+    {
+      "title": "iPhone 13",
+      "description": "Brand new iPhone 13, coming with Apple Care.",
+
+      "actions": [
+        {
+          "label": "View Product",
+          "url": "https://www.apple.com/shop/buy-iphone/iphone-13"
+        }
+      ]
+    }
+  ]
+});
+Mark as Read
+Marks all messages as read
+
+Crisp.message.markAsRead();
+Start a Thread
+This method starts a conversation thread
+
+Crisp.message.startThread("Ticket #152239");
+End a Thread
+This method ends a conversation thread
+
+// Exemple 1: end the thread named 'Ticket #152239'
+Crisp.message.endThread("Ticket #152239");
+
+// Exemple 2: end any opened thread
+Crisp.message.endThread();
+Message Sent Callback
+Crisp.message.onMessageSent((data) => {
+  // Executed once a message is submitted by the visitor
+})
+Crisp.message.offMessageSent() // can be called in order to turn the callback off
+Message Received Callback
+Crisp.message.onMessageReceived((data) => {
+  // Executed once a message is received by the visitor
+})
+Crisp.message.offMessageReceived() // can be called in order to turn the callback off
+Message Compose Sent Callback
+Crisp.message.onMessageComposeSent(() => {
+  // Executed once a message compose event is submitted by the visitor
+})
+Crisp.message.offMessageComposeSent() // can be called in order to turn the callback off
+Message Compose Received Callback
+Crisp.message.onMessageComposeReceived(() => {
+  // Executed once a message compose event is received by the visitor
+})
+Crisp.message.offMessageComposeReceived() // can be called in order to turn the callback off
+User
+Set User Nickname
+This method will update user's name.
+
+Crisp.user.setNickname("John Doe");
+Set User Email
+This method will update user's email.
+
+Crisp.user.setEmail("john.doe@gmail.com");
+If you want to enable session verification, please check our documentation here.
+
+You can set your computed HMAC using:
+
+Crisp.user.setEmail("john.doe@gmail.com", HMAC);
+Set User Phone
+This method will update user's phone number.
+
+Crisp.user.setPhone("0044346354635");
+Set User Avatar
+This method will will update user's avatar.
+
+Crisp.user.setAvatar("https://pbs.twimg.com/profile_images/834424630630817795/TfyS4uXb_400x400.jpg");
+Set User Company
+Example 1: set user company name only:
+
+Crisp.user.setCompany("Stripe");
+Example 2: set user company name and location:
+
+Crisp.user.setCompany("Stripe", {
+  geolocation: {
+    city: "San Fransisco",
+    country: "US"
+  }
+});
+Example 3: set all user company details:
+
+Crisp.user.setCompany("Stripe", {
+  url: "https://stripe.com",
+  description: "Payments infrastructure for the internet",
+
+  employment: {
+    title: "CTO",
+    role: "Software Engineer",
+  },
+
+  geolocation: {
+    city: "San Fransisco",
+    country: "US"
+  }
+});
+Get User Nickname
+This method will gets user's name.
+
+var nickname = Crisp.user.getNickname();
+Get User Email
+This method will gets user's email.
+
+var email = Crisp.user.getEmail();
+Get User Phone
+This method will gets user's phone.
+
+var phone = Crisp.user.getPhone();
+Get User Avatar
+This method will gets user's avatar.
+
+var avatar = Crisp.user.getAvatar();
+Get User Company
+This method will gets user's company.
+
+var company = Crisp.user.getCompany();
+User Nickname Changed Callback
+Crisp.user.onNicknameChanged(() => {
+  // Executed once user's nickname is changed
+})
+Crisp.user.offNicknameChanged() // can be called in order to turn the callback off
+User Email Changed Callback
+Crisp.user.onEmailChanged(() => {
+  // Executed once user's email is changed
+})
+Crisp.user.offEmailChanged() // can be called in order to turn the callback off
+User Phone Changed Callback
+Crisp.user.onPhoneChanged(() => {
+  // Executed once user's phone is changed
+})
+Crisp.user.offPhoneChanged() // can be called in order to turn the callback off
+User Avatar Changed Callback
+Crisp.user.onAvatarChanged(() => {
+  // Executed once user's avatar is changed
+})
+Crisp.user.offAvatarChanged() // can be called in order to turn the callback off
+Session
+Reset a Session
+This method will reset the user's session.
+
+Crisp.session.reset();
+Set Session Segments
+This method will set the user's session segments:
+
+Crisp.session.setSegments(["bug", "ios"]); // appens `bug` and `ios` segments
+Alternatively, you may override segments by using:
+
+Crisp.session.setSegments(["bug", "ios"], true);
+Set Session Data
+This method will add custom data to the current session.
+
+Crisp.session.setData({
+  user_id : "123456",
+  plan : "free"
+});
+Push Session Events
+Crisp allows pushing custom events. Those events can then be used to trigger automated campaigns or bot scenarios.
+
+Crisp.session.pushEvent("signup");
+
+// Or with custom parameters
+Crisp.session.pushEvent("purchase", {
+  price: 66.66,
+  item: "XXXX_XXXX"
+});
+Get Session Data
+Will get custom data key
+
+var key = Crisp.session.getData("user_id");
+Get Session Identifier
+Will get current session identifier (session_id)
+
+var sessionId = Crisp.session.getIdentifier();
+Session Loaded Callback
+Crisp.session.onLoaded((sessionId) => {
+  // Executed once the Crisp session is loaded
+
+  console.log(sessionId);
+})
+Crisp.session.offLoaded() // can be called in order to turn the callback off
+Trigger
+Run a Trigger
+This method will run a custom trigger.
+
+Crisp.trigger.run("growth_hack"); // will run the `growth_hack` trigger
+Workflow
+Run a Workflow
+This method will run a custom workflow (scenario). It optionally accepts a plain object of variables (string, number or boolean values) forwarded to the workflow and available inside scenario blocks as {{ key }} templates.
+
+Crisp.scenario.run("ea7340c8-5b8e-480c-913d-9d3adc79f4c4"); // will run the workflow matching that identifier
+
+// With custom variables (available inside the scenario as {{ order_id }} and {{ plan }})
+Crisp.scenario.run("ea7340c8-5b8e-480c-913d-9d3adc79f4c4", {
+  order_id: "123",
+  plan: "pro"
+});
+© 2026 Crisp IM SAS
+Documentation generated by Chappe, an open-source project from Crisp.
