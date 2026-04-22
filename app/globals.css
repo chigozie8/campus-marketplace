@@ -192,14 +192,18 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────
-   Crisp chat bubble — lift above the floating bottom nav on mobile
-   so the green bubble doesn't block navigation buttons.
-   The floating-nav is ~h-16 (64px) + safe-area + bottom padding.
+   Crisp chat bubble — lift above the floating bottom nav on mobile.
+   We translate the whole #crisp-chatbox wrapper upward, which works
+   regardless of Crisp's frequently-changing internal class names.
    ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf,
-  #crisp-chatbox > div > a[class*="cc-"],
-  #crisp-chatbox a {
-    bottom: 96px !important;
+  #crisp-chatbox {
+    transform: translateY(-140px) !important;
+  }
+  /* When the chat panel is opened in fullscreen, undo the offset so the
+     panel doesn't get pushed off the bottom of the screen. */
+  #crisp-chatbox[data-full-view="true"],
+  #crisp-chatbox[data-visible="true"] [data-chat-status="active"] {
+    transform: none !important;
   }
 }
