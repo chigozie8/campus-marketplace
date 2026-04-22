@@ -190,3 +190,16 @@
     letter-spacing: -0.03em;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────
+   Crisp chat bubble — lift above the floating bottom nav on mobile
+   so the green bubble doesn't block navigation buttons.
+   The floating-nav is ~h-16 (64px) + safe-area + bottom padding.
+   ──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf,
+  #crisp-chatbox > div > a[class*="cc-"],
+  #crisp-chatbox a {
+    bottom: 96px !important;
+  }
+}
