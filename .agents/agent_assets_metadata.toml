@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "sKvkQqXDdGl7D7tgr_C8a"
+uri = "file://exports/vendoorx-chatbot-training.txt"
+type = "text"
+title = "VendoorX AI Chatbot — Training Q&A (.txt)"

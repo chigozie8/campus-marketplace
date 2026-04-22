@@ -1,0 +1,356 @@
+================================================================================
+VENDOORX AI CHATBOT — COMPLETE TRAINING Q&A BANK
+150+ real customer questions with model answers
+Last updated: April 2026
+================================================================================
+
+This document is structured for direct ingestion into:
+- Crisp Knowledge Base (paste each category as a separate article)
+- Intercom Fin / Zendesk AI training
+- Custom GPT / OpenAI Assistant knowledge files
+- Any FAQ-driven chatbot platform
+
+Bot persona: "Vendy" — friendly, warm, Nigerian-aware AI assistant
+Brand: VendoorX — Nigeria's WhatsApp-first campus marketplace
+
+================================================================================
+CATEGORY 1: GETTING STARTED & ACCOUNT
+================================================================================
+
+Q: How do I sign up?
+A: Tap Sign Up → enter your email → check your inbox for a 6-digit code → done in under 60 seconds. You can sign up with any Nigerian email (Gmail, Yahoo, school email, etc.).
+
+Q: I didn't receive my OTP code
+A: Check your spam/junk folder first. If still nothing after 2 minutes, tap Resend Code. Make sure your email is typed correctly. If MTN/Glo/Airtel network is slow, the SMS may take a minute.
+
+Q: My email isn't being accepted
+A: Make sure you're using a real email (no typos like "gmail.con" or "yahooo.com"). School emails (.edu.ng) work fine.
+
+Q: Can I sign up with phone only, no email?
+A: Right now we need an email so we can send you order receipts and delivery codes. You can use any free email — Gmail takes 30 seconds to set up if you don't have one.
+
+Q: I forgot my password
+A: Tap Forgot Password on the login screen → enter your email → we'll send you a reset link. Check spam if you don't see it within 2 minutes.
+
+Q: Can I change my email?
+A: Yes — go to Profile → Settings → Change Email and confirm with the OTP we send.
+
+Q: Why do you need my campus / school?
+A: So we show you sellers from your own campus first — closer means faster delivery and easier returns. You can change campus anytime in Settings.
+
+Q: My campus isn't on the list
+A: We're adding new schools every week! Sign up anyway and pick the closest school — we'll notify you the moment your campus goes live.
+
+Q: Can non-students use VendoorX?
+A: Absolutely! Anyone in Nigeria can buy. We just started on campuses because that's where we have the strongest seller network.
+
+Q: Is VendoorX free?
+A: 100% free to sign up, browse, and list products. We only charge a small ₦100 platform fee per order, paid by the buyer at checkout.
+
+Q: How do I delete my account?
+A: Go to Settings → Account → Delete Account. Note: this permanently removes your wallet balance, listings, and order history. Withdraw any funds first.
+
+================================================================================
+CATEGORY 2: BUYING & ORDERS
+================================================================================
+
+Q: How do I place an order?
+A: Find what you want → tap Buy Now → choose delivery or pickup → pay with card, transfer, or USSD → done! Your money sits safely in escrow until you confirm delivery.
+
+Q: What payment methods can I use?
+A: We accept all Nigerian payment options through Paystack:
+- Debit/credit cards (Verve, Visa, Mastercard)
+- Bank transfer
+- USSD (*737#, *966#, *894# etc.)
+- Bank account direct debit
+
+Q: Can I pay on delivery?
+A: We don't offer cash-on-delivery directly — but our escrow system gives you the same protection. You pay upfront, but the seller doesn't get the money until YOU confirm you've received and you're happy.
+
+Q: How long does delivery take?
+A: Most campus orders arrive same day (1–6 hours). Cross-campus or cross-state delivery takes 1–3 days depending on distance.
+
+Q: How do I track my order?
+A: Go to Dashboard → My Orders → tap any order. You'll see the status (Pending → Shipped → Delivered) plus the seller's WhatsApp to chat directly.
+
+Q: My order says "Shipped" but I haven't received anything
+A: Reach out to the seller directly via the WhatsApp button on the order page. If they don't respond within 24 hours, tap Report Issue and our team will step in.
+
+Q: I received the wrong item
+A: Tap your order → Report Issue → choose "Wrong Item Received" → upload a photo. Our team reviews within 3 business days, and your money stays in escrow throughout.
+
+Q: The item is damaged / fake / not as described
+A: Same process: order → Report Issue → choose the reason → add photos. Don't confirm delivery until the issue is sorted. Your money is safe.
+
+Q: Can I cancel my order?
+A: Yes, before the seller marks it as shipped — tap Cancel Order and you'll get an instant full refund. After it's shipped, you'll need to coordinate with the seller or report an issue.
+
+Q: How do I get a refund?
+A: If the order qualifies (item not delivered, wrong item, damaged), refund is automatic to your original payment method within 3–7 business days after dispute resolution.
+
+Q: How long do refunds take?
+A: Once approved: 3–7 business days for cards, 1–3 days for bank transfers. Paystack handles the actual transfer.
+
+================================================================================
+CATEGORY 3: ESCROW & DELIVERY CONFIRMATION
+================================================================================
+
+Q: What is escrow? / How does escrow work?
+A: Escrow is our safety system. When you pay, your money goes into our secure wallet — NOT to the seller. Only after you confirm delivery (with a 6-digit code we send you) does the seller get paid. If something goes wrong, your money is fully refundable.
+
+Q: How do I confirm delivery?
+A: When the seller hands you the item, they'll ask for your 6-digit delivery code — we send it to your email + SMS the moment they mark "Shipped". Give them the code only after you've inspected the item and you're happy.
+
+Q: I didn't get my delivery code
+A: Check email + spam folder. Also check your in-app notification bell (top-right). If still missing, tap Resend Code on the order page.
+
+Q: The seller is asking for the code before delivering
+A: WARNING: NEVER share your delivery code before you've physically received and checked the item. Sharing the code releases their payment immediately. If they pressure you, decline and report it.
+
+Q: What if I never confirm delivery?
+A: After 7 days with no dispute, the system auto-releases the money to the seller (assuming they marked it as shipped). If the item never arrived, open a dispute BEFORE that 7-day window closes.
+
+Q: Can I dispute after I've confirmed delivery?
+A: Once you give the delivery code, escrow releases. Disputes after that point are harder but possible — contact support immediately with evidence.
+
+================================================================================
+CATEGORY 4: SELLING ON VENDOORX
+================================================================================
+
+Q: How do I become a seller?
+A: From your dashboard → tap Become a Seller → fill in your name, campus, bank details → upload your first product → you're live in under 5 minutes! No fees, no KYC delays.
+
+Q: Do I need a business name to sell?
+A: Nope! You can sell as an individual student. If you want to use a brand name (like "Tomi's Sneakers"), just enter it in the seller-name field.
+
+Q: How much does it cost to sell?
+A: Listing is completely free. We only charge ₦100 per successful order, paid by the buyer (not you). You keep 100% of your asking price.
+
+Q: How do I list a product?
+A: Dashboard → Add Listing → upload 1–6 photos → write a title + description → set price → choose category → publish. Takes 2 minutes.
+
+Q: How many products can I list?
+A: Unlimited! Free accounts can have as many active listings as they want.
+
+Q: How do I get more sales?
+A: Top tips:
+1. Clear photos — natural lighting, plain background, multiple angles
+2. Detailed descriptions — size, color, condition, what's included
+3. Fair pricing — check similar items on VendoorX first
+4. Reply fast — buyers go to whoever responds within minutes
+5. Boost listings — for ₦200–₦500, your item appears at the top of search
+
+Q: When do I get paid?
+A: The moment the buyer confirms delivery (or after 7 days with no dispute), the money lands in your VendoorX wallet. From there, withdraw to any Nigerian bank.
+
+Q: How do I withdraw my earnings?
+A: Dashboard → Wallet → Withdraw → enter amount → pick your bank → confirm. Money arrives in your bank within 5–30 minutes (Paystack instant transfer).
+
+Q: Why is my withdrawal pending?
+A: Withdrawals take 5–30 minutes normally. If yours has been pending for over 1 hour during banking hours (8am–6pm Mon–Fri), reach out and we'll check.
+
+Q: Minimum withdrawal amount?
+A: ₦1,000. Below that, your earnings stay in your wallet until you reach the minimum.
+
+Q: What's the difference between "Available" and "Pending" balance?
+A: Pending = orders not yet delivered/confirmed. Available = money you can withdraw right now.
+
+Q: Can I sell services (haircuts, tutoring, designs)?
+A: Yes! List them under the Services category. Set your price, schedule, and what's included.
+
+Q: What can I NOT sell?
+A: Forbidden items: drugs, weapons, alcohol (underage), counterfeit goods, stolen items, exam papers/leaks, ATM cards, account login info, sex services. Listing these gets your account banned permanently.
+
+================================================================================
+CATEGORY 5: WALLET, PAYMENTS & FEES
+================================================================================
+
+Q: What is the platform fee?
+A: ₦100 per order, paid by the buyer at checkout. Sellers keep 100% of their asking price.
+
+Q: Are there any other hidden fees?
+A: None. No monthly fees, no listing fees, no withdrawal fees beyond what your bank charges (usually ₦0–₦50).
+
+Q: How do I see my wallet balance?
+A: Dashboard → Wallet — shows Available balance (withdrawable) and Pending balance (still in escrow).
+
+Q: My payment was successful but the order didn't go through
+A: Sorry about that! Share your order reference (or the email you used to pay), and I'll escalate to our payments team — they typically resolve these within a few hours and refund automatically if needed.
+
+Q: I was charged twice for one order
+A: This is rare but happens with bank network glitches. Take a screenshot of both debits, send to us, and we'll refund the duplicate within 24 hours.
+
+Q: Do you accept Bitcoin / USDT / crypto?
+A: Not yet — but it's on our roadmap. For now, we focus on Naira payments through Paystack.
+
+Q: Can I receive payments from outside Nigeria?
+A: Yes, international cards work through Paystack (additional FX fee may apply by the cardholder's bank).
+
+================================================================================
+CATEGORY 6: DISPUTES & TRUST
+================================================================================
+
+Q: How do I report a seller?
+A: Open the order → Report Issue → choose your reason (didn't deliver, wrong item, damaged, scam) → add details and photos. Our dispute team reviews within 3 business days.
+
+Q: How long does dispute resolution take?
+A: Up to 3 business days for a decision. Your money stays safely in escrow throughout — neither side gets it until we decide.
+
+Q: What happens if I win the dispute?
+A: Full refund to your original payment method within 3–7 business days. The seller's account may also receive a strike or ban depending on severity.
+
+Q: How do you verify sellers?
+A: We verify identity via BVN-linked bank accounts (only the bank account, not the BVN itself), email confirmation, and progressive trust scores based on completed orders + reviews.
+
+Q: How do I avoid getting scammed?
+A: Always pay through VendoorX (escrow protects you). Never send money directly to a seller's bank account. Never share your delivery code before receiving the item. Check seller ratings + reviews before buying. Report anything suspicious immediately.
+
+Q: Someone is trying to scam me on WhatsApp
+A: Don't engage. Screenshot the conversation, tap Report User on their profile, and forward the screenshot to our support. We ban scammers within 24 hours.
+
+================================================================================
+CATEGORY 7: ACCOUNT SECURITY
+================================================================================
+
+Q: I think someone hacked my account
+A: Immediately: change your password → log out of all devices (Settings → Security → Sign Out Everywhere) → contact us. We'll freeze your wallet within minutes pending review.
+
+Q: I'm getting login attempts I didn't make
+A: Change your password right away and enable 2-factor authentication (Settings → Security → 2FA). We also email you every time a new device logs in.
+
+Q: Can I enable two-factor authentication (2FA)?
+A: Yes! Settings → Security → Two-Factor Authentication. We send a code to your email or phone whenever you log in from a new device.
+
+================================================================================
+CATEGORY 8: TECHNICAL / APP ISSUES
+================================================================================
+
+Q: The app is slow / not loading
+A: Try: 1) close and reopen the app 2) check your internet (try opening google.com) 3) clear cache (Settings → Clear Cache) 4) update the app to the latest version. If still broken, tell me what page is slow.
+
+Q: I can't upload photos
+A: Make sure each photo is under 5MB. Use JPG or PNG (not HEIC). If using iPhone, go to Settings → Camera → Formats → Most Compatible to default to JPG.
+
+Q: Notifications aren't working
+A: Go to your phone's Settings → Apps → VendoorX → Notifications and enable all. Also check inside the VendoorX app: Settings → Notifications.
+
+Q: The chat / WhatsApp button doesn't open
+A: Make sure WhatsApp is installed on your phone. If you're on web, you'll be redirected to WhatsApp Web — make sure you're logged in there.
+
+Q: My listing photos are sideways
+A: Re-upload using a landscape photo or rotate before uploading. We're improving auto-rotate in the next update.
+
+================================================================================
+CATEGORY 9: NIGERIA-SPECIFIC COMMON QUESTIONS
+================================================================================
+
+Q: Can I use my school email?
+A: Yes! .edu.ng emails (UNILAG, OAU, UI, etc.) work perfectly fine.
+
+Q: Do you deliver outside my campus?
+A: Yes — sellers can ship anywhere in Nigeria. Within-campus delivery is fastest (hours), inter-state delivery uses GIG, Kwik, or seller-arranged riders (1–5 days).
+
+Q: Why does the page take long to load?
+A: Slow network is the #1 cause. Try switching from mobile data to WiFi, or move closer to a window for better signal. We optimize the app to work on 2G/3G.
+
+Q: Is VendoorX safer than Jiji / Instagram DMs?
+A: Yes — those platforms have NO escrow. You pay sellers directly with zero protection. On VendoorX, your money is held safely until you confirm delivery, and our dispute team has your back if anything goes wrong.
+
+Q: What if I'm in NYSC, can I still sell?
+A: Of course! NYSC corpers are some of our most active sellers — perfect side income during service year. Just register with your PPA address.
+
+Q: Do you have an Android app? iOS app?
+A: Yes — we have a Progressive Web App (PWA) that installs straight from the browser (look for "Add to Home Screen") AND native apps coming soon to Play Store and App Store.
+
+Q: How do I report harassment from another user?
+A: Profile → Report User OR email support@vendoorx.ng with screenshots. Harassment = immediate account ban. We take this seriously.
+
+Q: Do you charge VAT?
+A: The ₦100 platform fee already includes any applicable VAT.
+
+================================================================================
+CATEGORY 10: FRIENDLY / CONVERSATIONAL
+================================================================================
+
+Q: Hi / Hello / Hey
+A: Hey there! I'm Vendy from VendoorX! What can I help you with today — buying, selling, payments, or something else?
+
+Q: How are you?
+A: I'm doing great, thanks for asking! Ready to help — what brings you here today?
+
+Q: Are you a real person?
+A: I'm Vendy, VendoorX's AI assistant. I can answer most questions instantly, and if I can't, I'll connect you with a real human teammate.
+
+Q: You're useless / This bot sucks
+A: Sorry I couldn't help! Let me connect you with a human teammate right now — they'll take care of you.
+
+Q: Thank you / Thanks
+A: Anytime! Glad I could help. Anything else you need?
+
+Q: Bye
+A: Bye for now! Come back anytime — happy buying & selling on VendoorX!
+
+================================================================================
+CATEGORY 11: EDGE CASES & TRICKY QUESTIONS
+================================================================================
+
+Q: Can I sell my used textbook?
+A: Absolutely — used textbooks sell amazingly well on campus! List under Books & Study Materials, mention the edition, condition, and any highlighting/notes inside.
+
+Q: What if my buyer is unreasonable?
+A: We see it sometimes. Stay professional — never insult them. Document everything (screenshots of WhatsApp). If they file a false dispute, we review chat history and protect honest sellers.
+
+Q: Can two people share one VendoorX account?
+A: Not recommended — accounts are tied to one bank account for payouts. Each person should have their own.
+
+Q: Can I sell food / homemade snacks?
+A: Yes — under Food & Snacks. Make sure you list ingredients clearly and follow basic food hygiene. Buyers appreciate "made fresh today" tags.
+
+Q: I'm a graphic designer / video editor / photographer — can I sell my services?
+A: 100%! List under Services → Creative. Show samples in the photos, set a starting price (e.g. "Logo Design from ₦5,000"), and clearly state turnaround time.
+
+Q: Can I list my hostel room for rent?
+A: Yes — under Accommodation. You'll need to verify the property exists (a quick photo of the room + building). Rentals are super popular every semester.
+
+Q: How do I become a featured seller?
+A: Maintain a 4.5+ star rating, fulfill 20+ orders without disputes, and we'll automatically feature you in your campus's "Top Sellers" section.
+
+Q: Are there any seller training resources?
+A: Yes! Visit our /help page → "Selling Guide" for free tutorials on photography, pricing, and customer service. We also send weekly seller tips by email.
+
+================================================================================
+HOW TO USE THIS PACK
+================================================================================
+
+1. Copy each category into your Crisp Knowledge Base as separate articles
+   (Crisp's AI ingests these directly)
+
+2. Paste the most-asked 20 Qs as Saved Replies in Crisp for instant 1-tap
+   responses by your human team
+
+3. Train Crisp Bot on the full document by uploading it as a .txt or .md file
+
+4. Update monthly — track which questions Vendy can't answer, then add them here
+
+5. Add new sections as you add features (e.g. when you launch crypto, add a
+   Crypto Q&A category)
+
+================================================================================
+TOP 10 QUESTIONS TO AUTO-TRIGGER AS BOT SUGGESTIONS
+================================================================================
+
+These appear as clickable bubbles when users open the chat:
+1. How do I place an order?
+2. How do I become a seller?
+3. How does escrow protect me?
+4. When do I get paid?
+5. Where is my order?
+6. I want to cancel my order
+7. I have a problem with a seller
+8. How do I withdraw money?
+9. I forgot my password
+10. Talk to a human
+
+================================================================================
+END OF DOCUMENT
+================================================================================
