@@ -191,40 +191,53 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-     Global icon micro-interactions.
-     Lucide icons render as inline <svg class="lucide …">.
-     We give every icon a smooth transition + a subtle hover
-     pop when it (or its parent button/link) is hovered.
+     Global icon animations.
+     Every Lucide icon (rendered as <svg class="lucide …">)
+     gently "breathes" — a slow, calm scale loop that adds life
+     without being distracting. Hovering pops it bigger.
+     Add the `no-icon-anim` class to opt any icon out.
      ───────────────────────────────────────────────────────── */
-  svg.lucide {
-    transition:
-      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-      color 0.2s ease;
-    transform-origin: center;
-    will-change: transform;
-  }
-  /* Hover directly OR hover the surrounding button / link */
-  svg.lucide:hover,
-  button:hover > svg.lucide,
-  a:hover > svg.lucide,
-  button:hover svg.lucide:not(.no-icon-anim),
-  a:hover svg.lucide:not(.no-icon-anim) {
-    transform: scale(1.18) rotate(-4deg);
-  }
-  button:active svg.lucide,
-  a:active svg.lucide {
-    transform: scale(0.92);
-    transition-duration: 0.08s;
+  @keyframes vendoorx-icon-breathe {
+    0%,
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+    50% {
+      transform: scale(1.08) rotate(-2deg);
+    }
   }
 
-  /* Respect reduced-motion preference */
+  svg.lucide:not(.no-icon-anim) {
+    animation: vendoorx-icon-breathe 3s ease-in-out infinite;
+    transform-origin: center;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Promote to its own layer only while interacting (saves memory across
+     hundreds of background icons). */
+  svg.lucide:not(.no-icon-anim):hover,
+  button:hover svg.lucide:not(.no-icon-anim),
+  a:hover svg.lucide:not(.no-icon-anim) {
+    will-change: transform;
+  }
+
+  /* Hover pause + pop so the icon under the cursor feels reactive.
+     Uses a descendant selector so icons wrapped in spans/motion divs
+     also react when the surrounding button or link is hovered. */
+  svg.lucide:not(.no-icon-anim):hover,
+  button:hover svg.lucide:not(.no-icon-anim),
+  a:hover svg.lucide:not(.no-icon-anim) {
+    animation-play-state: paused;
+    transform: scale(1.2) rotate(-6deg);
+  }
+
+  /* Respect reduced-motion users — kill the loop entirely */
   @media (prefers-reduced-motion: reduce) {
-    svg.lucide,
-    svg.lucide:hover,
-    button:hover svg.lucide,
-    a:hover svg.lucide,
-    button:active svg.lucide,
-    a:active svg.lucide {
+    svg.lucide:not(.no-icon-anim),
+    svg.lucide:not(.no-icon-anim):hover,
+    button:hover > svg.lucide:not(.no-icon-anim),
+    a:hover > svg.lucide:not(.no-icon-anim) {
+      animation: none;
       transition: none;
       transform: none;
     }
