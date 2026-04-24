@@ -13,6 +13,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { useNotificationSound } from '@/hooks/use-notification-sound'
 import { formatDistanceToNow } from 'date-fns'
+import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion'
 
 interface Notification {
   id: string; type: string; title: string; body: string | null
@@ -79,6 +80,9 @@ export function NotificationBell() {
   const [dropTop, setDropTop]             = useState(0)
   const [dropRight, setDropRight]         = useState(16)
   const [dropWidth, setDropWidth]         = useState(368)
+  // Bumps every time a brand-new notification arrives, used to (re)trigger
+  // the bell-shake + badge-pop animations.
+  const [pulseKey, setPulseKey]           = useState(0)
   const { playNotification }             = useNotificationSound()
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -114,20 +118,64 @@ export function NotificationBell() {
       if (!active || !session?.user) return
       const userId = session.user.id
       channelRef = supabase.channel(channelName)
+        // New notification arrives → prepend, ping sound, trigger pop animation.
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'notifications',
           filter: `user_id=eq.${userId}`,
         }, payload => {
           if (!active) return
-          setNotifications(p => [payload.new as Notification, ...p])
-          playNotification()
+          const incoming = payload.new as Notification
+          // Only pulse + sound when this is a genuinely new row (not a
+          // duplicate delivery from a websocket reconnect).
+          setNotifications(p => {
+            if (p.some(n => n.id === incoming.id)) return p
+            if (!incoming.read) {
+              setPulseKey(k => k + 1)
+              playNotification()
+            }
+            return [incoming, ...p]
+          })
+        })
+        // Notification updated (e.g. marked read in another tab) → sync row.
+        .on('postgres_changes', {
+          event: 'UPDATE', schema: 'public', table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        }, payload => {
+          if (!active) return
+          const updated = payload.new as Notification
+          setNotifications(p => p.map(n => n.id === updated.id ? { ...n, ...updated } : n))
+        })
+        // Notification deleted elsewhere → drop it.
+        .on('postgres_changes', {
+          event: 'DELETE', schema: 'public', table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        }, payload => {
+          if (!active) return
+          const old = payload.old as { id?: string }
+          if (old?.id) setNotifications(p => p.filter(n => n.id !== old.id))
         })
         .subscribe()
     }).catch(() => {})
 
-    const iv = setInterval(fetchNotifications, 30_000)
-    return () => { active = false; clearInterval(iv); if (channelRef) supabase.removeChannel(channelRef) }
-  }, [fetchNotifications])
+    // Resync whenever the user comes back to the tab. Fixes "stale count
+    // after a delay" — websockets can sleep on backgrounded tabs and we
+    // want the badge to be accurate the moment focus returns.
+    const onVisible = () => { if (document.visibilityState === 'visible') fetchNotifications() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', fetchNotifications)
+    window.addEventListener('online', fetchNotifications)
+
+    // Safety-net polling, faster than before so the count never drifts.
+    const iv = setInterval(fetchNotifications, 15_000)
+    return () => {
+      active = false
+      clearInterval(iv)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', fetchNotifications)
+      window.removeEventListener('online', fetchNotifications)
+      if (channelRef) supabase.removeChannel(channelRef)
+    }
+  }, [fetchNotifications, playNotification])
 
   useEffect(() => {
     if (!open) return
@@ -177,6 +225,7 @@ export function NotificationBell() {
   const sharedProps = { notifications, loading, unread, markingAll, markAllRead, markOneRead, onClose: () => setOpen(false) }
 
   return (
+    <LazyMotion features={domAnimation}>
     <div data-notif-root="" className="relative">
 
       <button
@@ -185,12 +234,70 @@ export function NotificationBell() {
         className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-        {unread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center text-[9px] font-black bg-red-500 text-white rounded-full px-0.5 leading-none border-2 border-white dark:border-background shadow">
-            {unread > 9 ? '9+' : unread}
-          </span>
-        )}
+        {/* Bell — gently shakes whenever a fresh, unread notification lands. */}
+        <m.span
+          key={`bell-${pulseKey}`}
+          animate={pulseKey > 0 ? {
+            rotate: [0, -18, 14, -10, 6, -3, 0],
+            transition: { duration: 0.7, ease: 'easeInOut' },
+          } : { rotate: 0 }}
+          style={{ transformOrigin: '50% 10%', display: 'inline-block' }}
+        >
+          <Bell className={`w-5 h-5 transition-colors ${
+            unread > 0
+              ? 'text-[#16a34a] dark:text-[#22c55e]'
+              : 'text-gray-500 dark:text-gray-400'
+          }`} />
+        </m.span>
+
+        {/* Outward expanding pulse ring on new notification. */}
+        <AnimatePresence>
+          {pulseKey > 0 && (
+            <m.span
+              key={`ring-${pulseKey}`}
+              initial={{ scale: 0.6, opacity: 0.6 }}
+              animate={{ scale: 2.2, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.1, ease: 'easeOut' }}
+              className="pointer-events-none absolute inset-0 m-auto w-5 h-5 rounded-full bg-red-500/40"
+              style={{ filter: 'blur(0.5px)' }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Badge — pops/bounces in & morphs as the count changes. */}
+        <AnimatePresence>
+          {unread > 0 && (
+            <m.span
+              key="badge"
+              initial={{ scale: 0, rotate: -120, opacity: 0 }}
+              animate={{
+                scale: pulseKey > 0
+                  ? [1.6, 0.85, 1.15, 1]
+                  : 1,
+                rotate: 0,
+                opacity: 1,
+              }}
+              exit={{ scale: 0, opacity: 0, transition: { duration: 0.18 } }}
+              transition={{
+                type: 'spring',
+                stiffness: 520,
+                damping: 18,
+                duration: pulseKey > 0 ? 0.55 : undefined,
+              }}
+              className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-black bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-full px-1 leading-none border-2 border-white dark:border-background shadow-lg shadow-red-500/40"
+            >
+              <m.span
+                key={`count-${unread}`}
+                initial={{ y: -8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.22 }}
+              >
+                {unread > 9 ? '9+' : unread}
+              </m.span>
+            </m.span>
+          )}
+        </AnimatePresence>
       </button>
 
       {mounted && open && createPortal(
@@ -225,6 +332,7 @@ export function NotificationBell() {
       )}
 
     </div>
+    </LazyMotion>
   )
 }
 
