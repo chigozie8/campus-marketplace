@@ -215,7 +215,6 @@ export function BuyerDashboardView({
             })}
           </ul>
         </div>
-      )}
       </AnimatedSection>
 
       {/* Recent orders */}
