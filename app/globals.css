@@ -193,14 +193,17 @@
 
 /* ──────────────────────────────────────────────────────────────────
    LiveChatAI floating widget — lift above the floating bottom nav on
-   mobile. Their script injects an iframe whose src matches
-   livechatai.com — we target it by attribute so it survives any
-   future class-name changes on their side.
+   mobile. LiveChatAI uses class names prefixed with `live-chat-ai-`
+   — confirmed in their embed.js source. The launcher button defaults
+   to `bottom: 1rem`; we override it on small screens so it clears
+   our floating bottom navigation.
    ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  iframe[src*="livechatai.com"],
-  #livechatai-iframe,
-  div[id^="livechatai"] {
+  .live-chat-ai-button,
+  .live-chat-ai-animation-canvas,
+  .live-chat-ai-wrapper .live-chat-ai-button,
+  .live-chat-ai-wrapper .live-chat-ai-animation-canvas,
+  iframe[src*="livechatai.com"] {
     bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
