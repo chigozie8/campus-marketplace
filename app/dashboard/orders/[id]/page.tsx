@@ -19,7 +19,7 @@ import { TrackingDisplay } from '@/components/orders/tracking-display'
 import { BuyerProblemPanel } from '@/components/orders/buyer-problem-panel'
 import { createClient } from '@/lib/supabase/client'
 
-const PLATFORM_FEE_NAIRA = 100
+const PLATFORM_FEE_NAIRA = 0 // Platform fee removed from buyer-facing breakdown.
 
 function buildTimestamps(order: BackendOrder): OrderStatusTimestamps {
   // We don't have explicit per-step timestamps in the schema, so we derive

@@ -2,7 +2,11 @@
 // We hit the REST endpoint directly with fetch() so no SDK is needed.
 const MAILTRAP_TOKEN = process.env.MAILTRAP_API_TOKEN
 const MAILTRAP_ENDPOINT = 'https://send.api.mailtrap.io/api/send'
-const FROM_EMAIL = process.env.MAILTRAP_SENDER_EMAIL || 'notifications@vendoorx.ng'
+// Hardcoded sender so we don't depend on an env var being set correctly.
+// IMPORTANT: vendoorx.ng must be a verified sending domain in Mailtrap with
+// SPF/DKIM/DMARC records published, otherwise messages are accepted by the
+// API but never delivered to real inboxes.
+const FROM_EMAIL = 'noreply@vendoorx.ng'
 const FROM_NAME = 'VendoorX'
 const SITE_URL = 'https://vendoorx.ng'
 
