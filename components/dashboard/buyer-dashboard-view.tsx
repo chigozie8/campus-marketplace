@@ -219,18 +219,18 @@ export function BuyerDashboardView({
 
       {/* Recent orders */}
       <AnimatedSection delay={0.7}>
-      <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-primary" />
-            <p className="text-sm font-black text-gray-900 dark:text-white">Recent orders</p>
+        <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4 text-primary" />
+              <p className="text-sm font-black text-gray-900 dark:text-white">Recent orders</p>
+            </div>
+            <Link href="/orders" className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
+              View all <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <Link href="/orders" className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
-            View all <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
 
-        {recentOrders.length === 0 ? (
+          {recentOrders.length === 0 ? (
           <div className="text-center py-10 px-5">
             <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-muted flex items-center justify-center mx-auto mb-3">
               <ShoppingBag className="w-6 h-6 text-gray-400" />
