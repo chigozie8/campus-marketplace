@@ -8,39 +8,53 @@ const LIVECHAT_AI_ID =
   process.env.NEXT_PUBLIC_LIVECHAT_AI_ID || 'cmocanyz400ggjl04oqfx0n20'
 
 const MOBILE_BREAKPOINT = 768
-const MOBILE_BOTTOM_OFFSET = '120px'
-const DESKTOP_BOTTOM_OFFSET = '1rem'
+const MOBILE_BOTTOM_OFFSET = 140
+const DESKTOP_BOTTOM_OFFSET = 16
 
 const TARGET_SELECTORS = [
   '.live-chat-ai-button',
   '.live-chat-ai-animation-canvas',
   '.live-chat-ai-wrapper',
+  '.live-chat-ai-button-logo-wrapper',
 ]
 
-function findTargets(root: ParentNode): Element[] {
-  const found: Element[] = []
-  for (const sel of TARGET_SELECTORS) {
-    root.querySelectorAll(sel).forEach((el) => found.push(el))
-  }
-  document.querySelectorAll('*').forEach((el) => {
-    const sr = (el as HTMLElement).shadowRoot
+function collectShadowRoots(root: Document | ShadowRoot, acc: ShadowRoot[]) {
+  const all = root.querySelectorAll('*')
+  for (let i = 0; i < all.length; i++) {
+    const el = all[i] as HTMLElement
+    const sr = el.shadowRoot
     if (sr) {
-      for (const sel of TARGET_SELECTORS) {
-        sr.querySelectorAll(sel).forEach((node) => found.push(node))
-      }
+      acc.push(sr)
+      collectShadowRoots(sr, acc)
     }
-  })
+  }
+}
+
+function findTargets(): HTMLElement[] {
+  const found: HTMLElement[] = []
+  const roots: (Document | ShadowRoot)[] = [document]
+  const shadows: ShadowRoot[] = []
+  collectShadowRoots(document, shadows)
+  roots.push(...shadows)
+
+  for (const root of roots) {
+    for (const sel of TARGET_SELECTORS) {
+      root.querySelectorAll(sel).forEach((el) => found.push(el as HTMLElement))
+    }
+  }
   return found
 }
 
 function applyOffset() {
   const isMobile = window.innerWidth <= MOBILE_BREAKPOINT
-  const offset = isMobile
-    ? `calc(${MOBILE_BOTTOM_OFFSET} + env(safe-area-inset-bottom, 0px))`
-    : DESKTOP_BOTTOM_OFFSET
+  const offsetPx = isMobile ? MOBILE_BOTTOM_OFFSET : DESKTOP_BOTTOM_OFFSET
+  const value = isMobile
+    ? `calc(${offsetPx}px + env(safe-area-inset-bottom, 0px))`
+    : `${offsetPx}px`
 
-  findTargets(document).forEach((el) => {
-    ;(el as HTMLElement).style.setProperty('bottom', offset, 'important')
+  const targets = findTargets()
+  targets.forEach((el) => {
+    el.style.setProperty('bottom', value, 'important')
   })
 }
 
@@ -59,22 +73,33 @@ export function LiveChatAI() {
     }
 
     schedule()
-    const interval = window.setInterval(schedule, 1000)
+
+    const fastInterval = window.setInterval(schedule, 250)
+    const slowDownTimer = window.setTimeout(() => {
+      window.clearInterval(fastInterval)
+      window.setInterval(schedule, 1500)
+    }, 10000)
 
     const observer = new MutationObserver(schedule)
-    observer.observe(document.body, { childList: true, subtree: true })
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    })
 
     window.addEventListener('resize', schedule)
     window.addEventListener('orientationchange', schedule)
 
     return () => {
       cancelAnimationFrame(raf)
-      window.clearInterval(interval)
+      window.clearInterval(fastInterval)
+      window.clearTimeout(slowDownTimer)
       observer.disconnect()
       window.removeEventListener('resize', schedule)
       window.removeEventListener('orientationchange', schedule)
     }
-  }, [])
+  }, [isHome])
 
   if (!LIVECHAT_AI_ID) return null
   if (!isHome) return null
