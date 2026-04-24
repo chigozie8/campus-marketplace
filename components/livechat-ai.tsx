@@ -20,7 +20,7 @@ const POSITION_CSS = `
 `
 
 function getHost(): HTMLElement | null {
-  return document.querySelector('live-chat-ai-host') as HTMLElement | null
+  return document.getElementById('live-chat-ai-host')
 }
 
 function injectShadowStyle(): boolean {
