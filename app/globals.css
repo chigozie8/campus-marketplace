@@ -191,8 +191,3 @@
   }
 }
 
-/* LiveChatAI position fix is injected directly into its shadow DOM
-   from components/livechat-ai.tsx — no global CSS needed because the
-   widget lives inside an open shadow root that global styles cannot
-   reach. Keeping a global rule here would only hit the (rare) iframe
-   fallback path and create off-by-pixels conflicts. */
