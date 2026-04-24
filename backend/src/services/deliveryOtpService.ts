@@ -151,7 +151,7 @@ export async function sendDeliveryOtpToBuyer(
       type: 'admin_alert',
       title: '⚠️ Delivery OTP delivery failed',
       body: `Email + SMS both failed for Order #${shortOrderId}. Buyer (${buyerId.slice(0, 8)}) has been given the code via in-app bell, but please reach out to confirm.`,
-      data: { url: `/admin/orders/${orderId}`, orderId, buyerId },
+      data: { url: `/admin/orders`, orderId, buyerId },
     })
     return { success: true, channel: 'in_app_only', reason: 'fallback_in_app_only' }
   }
@@ -163,7 +163,7 @@ export async function sendDeliveryOtpToBuyer(
       type: 'admin_alert',
       title: '⚠️ Buyer missing email + phone',
       body: `Order #${shortOrderId} buyer has no email or phone on file. Code was placed in their in-app bell only.`,
-      data: { url: `/admin/orders/${orderId}`, orderId, buyerId },
+      data: { url: `/admin/orders`, orderId, buyerId },
     })
     return { success: true, channel: 'in_app_only', reason: 'no_contact_in_app_only' }
   }

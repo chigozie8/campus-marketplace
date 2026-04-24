@@ -39,7 +39,7 @@ async function runProfileCompletionCheck() {
         type: 'profile_incomplete',
         title: '📸 Add a profile photo',
         body: 'Profiles with photos get up to 3× more responses. Add yours in 30 seconds.',
-        data: { url: '/dashboard/profile' },
+        data: { url: '/profile' },
       })
       sent++
     }
