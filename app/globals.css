@@ -192,31 +192,15 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────
-   Crisp chat bubble — lift above the floating bottom nav on mobile.
-   The bottom nav is ~88px tall with a 16px floating margin, plus we
-   leave breathing room. Total clearance ≈ 120px above the safe-area.
-   We bump --crisp-y on the launcher anchor and override Crisp's own
-   bottom positioning so it works regardless of internal class churn.
+   LiveChatAI floating widget — lift above the floating bottom nav on
+   mobile. Their script injects an iframe whose src matches
+   livechatai.com — we target it by attribute so it survives any
+   future class-name changes on their side.
    ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Lift the floating launcher button above the bottom nav */
-  #crisp-chatbox a[class*="cc-"][class*="launcher"],
-  #crisp-chatbox > div > a,
-  #crisp-chatbox [data-visible="true"]:not([data-chat-status="active"]) {
+  iframe[src*="livechatai.com"],
+  #livechatai-iframe,
+  div[id^="livechatai"] {
     bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  /* Fallback: nudge the entire launcher wrapper up via transform.
-     Scoped to when the chat panel is NOT open so we don't push the
-     full chat panel off-screen. */
-  #crisp-chatbox:not([data-full-view="true"]) {
-    transform: translateY(calc(-1 * (120px + env(safe-area-inset-bottom, 0px)))) !important;
-  }
-
-  /* When the chat panel is opened in fullscreen, undo the offset */
-  #crisp-chatbox[data-full-view="true"],
-  #crisp-chatbox[data-visible="true"] [data-chat-status="active"] {
-    transform: none !important;
-    bottom: 0 !important;
   }
 }
