@@ -1,13 +1,26 @@
+'use client'
+
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
+import { useGsapReveal } from '@/hooks/use-gsap-reveal'
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+type CardProps = React.ComponentProps<'div'> & {
+  /** Set to false to opt out of GSAP scroll reveal. */
+  reveal?: boolean
+  /** Optional stagger delay (seconds) when revealing. */
+  revealDelay?: number
+}
+
+function Card({ className, reveal = true, revealDelay = 0, ...props }: CardProps) {
+  const ref = useGsapReveal<HTMLDivElement>({ delay: revealDelay })
+
   return (
     <div
+      ref={reveal ? ref : undefined}
       data-slot="card"
       className={cn(
-        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
+        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm transition-shadow duration-300 hover:shadow-lg',
         className,
       )}
       {...props}
