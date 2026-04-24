@@ -221,8 +221,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
   press_contact_email: 'press@vendoorx.ng',
   press_assets: '',
-  /* platform fee — disabled (no longer charged to buyers) */
-  platform_fee_amount: '0',
+  /* platform fee */
+  platform_fee_amount: '100',
   platform_fee_label: 'VAT & Service Fee',
   min_withdrawal_ngn: '1000',
   /* contact */

@@ -52,8 +52,13 @@ export async function POST(req: Request) {
     const itemTotal = product.price * quantity
     const deliveryFee = Number(product.delivery_fee ?? 0)
 
-    // Platform fee removed — buyers no longer pay an escrow/service fee.
-    const platformFee = 0
+    // Read the VAT amount from site_settings (falls back to ₦100)
+    const { data: feeRows } = await admin
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['platform_fee_amount'])
+    const feeMap = Object.fromEntries((feeRows ?? []).map((r: { key: string; value: string }) => [r.key, r.value]))
+    const platformFee = Math.max(0, Number(feeMap.platform_fee_amount ?? '100'))
 
     const discount = Math.max(0, Math.min(Number(coupon_discount ?? 0), itemTotal))
     const totalAmount = Math.max(0, itemTotal + deliveryFee + platformFee - discount)

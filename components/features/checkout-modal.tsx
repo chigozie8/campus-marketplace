@@ -46,10 +46,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const [addressLabel, setAddressLabel] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [orderId, setOrderId] = useState<string | null>(null)
-  // Platform fee removed from buyer breakdown — kept as 0 so the math stays
-  // intact and the line is hidden by the `platformFee > 0` guard below.
-  const [platformFee] = useState(0)
-  const [platformFeeLabel] = useState('')
+  const [platformFee, setPlatformFee] = useState(100)
+  const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
 
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
@@ -59,7 +57,15 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
 
-  // Platform fee fetch removed — fee no longer charged to buyers.
+  useEffect(() => {
+    fetch('/api/platform-fee')
+      .then(r => r.json())
+      .then(d => {
+        if (typeof d.amount === 'number') setPlatformFee(d.amount)
+        if (d.label) setPlatformFeeLabel(d.label)
+      })
+      .catch(() => {})
+  }, [])
 
   const subtotal = product.price * quantity
   const deliveryFee = product.delivery_fee ?? 0
