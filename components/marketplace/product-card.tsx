@@ -6,13 +6,14 @@ import { Heart, MessageCircle, MapPin, Star, BadgeCheck, GraduationCap } from 'l
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { m, LazyMotion, domAnimation } from 'framer-motion'
+import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { AdminBadgesList } from '@/components/TrustBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { EASE, SPRING_TAP } from '@/lib/motion'
 
 interface ProductCardProps {
   product: Product
@@ -44,6 +45,8 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
   const selfManaged = !onToggleFavorite
   const [localFav, setLocalFav] = useState(isFavorited)
   const [favLoading, setFavLoading] = useState(false)
+  // Heart-burst particles — re-key to retrigger on each tap
+  const [burstId, setBurstId] = useState(0)
 
   useEffect(() => {
     if (!selfManaged) return
@@ -87,6 +90,8 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
       if (!res.ok) throw new Error('Failed')
       const data = await res.json().catch(() => ({}))
       if (typeof data.favorited === 'boolean') setLocalFav(data.favorited)
+      // Trigger heart burst only when adding (feels delightful, not noisy on remove)
+      if (next) setBurstId((n) => n + 1)
       toast.success(next ? '❤️ Saved to favourites' : 'Removed from favourites')
     } catch {
       setLocalFav(!next) // revert
@@ -119,20 +124,83 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
   return (
     <LazyMotion features={domAnimation}>
     <m.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
-      className="group rounded-2xl border border-border/50 bg-card overflow-hidden flex flex-col hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transition-all duration-300"
+      initial={{ opacity: 0, y: 24, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        delay: Math.min(index * 0.06, 0.6),
+        ease: EASE.out,
+      }}
+      whileHover={{ y: -6 }}
+      className={cn(
+        'group relative rounded-2xl border border-border/50 bg-card flex flex-col',
+        'shadow-sm transition-shadow duration-300 hover:shadow-2xl hover:shadow-primary/10',
+        'hover:border-primary/30',
+      )}
     >
+      {/* Glossy shimmer sweep — GPU-only translate on a tilted gradient bar.
+           The wrapper clips the gradient so it doesn't bleed past the card. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-30 overflow-hidden rounded-2xl"
+      >
+        <span
+          className={cn(
+            'absolute inset-y-0 left-0 h-full w-2/3 -translate-x-[150%] will-change-transform',
+            'bg-gradient-to-r from-transparent via-white/40 to-transparent',
+            'skew-x-[-20deg] transition-transform duration-700 ease-out',
+            'group-hover:translate-x-[200%]',
+            'dark:via-white/10',
+          )}
+        />
+      </span>
+
+      {/* Heart-burst overlay — sits at card root above all clipped layers
+           so particles can radiate freely past the image edge. Anchored to
+           the favorite button's position (top-right). */}
+      <AnimatePresence>
+        {burstId > 0 && (
+          <m.span
+            key={burstId}
+            aria-hidden
+            className="pointer-events-none absolute z-40"
+            style={{ top: '1.625rem', right: '1.625rem' }}
+            initial={false}
+            exit={{ opacity: 0 }}
+          >
+            {[...Array(6)].map((_, i) => {
+              const angle = (i / 6) * Math.PI * 2
+              const dist = 32
+              return (
+                <m.span
+                  key={i}
+                  className="absolute"
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 0.5 }}
+                  animate={{
+                    x: Math.cos(angle) * dist,
+                    y: Math.sin(angle) * dist,
+                    opacity: 0,
+                    scale: 1.3,
+                  }}
+                  transition={{ duration: 0.7, ease: EASE.out }}
+                >
+                  <Heart className="w-3 h-3 fill-red-500 text-red-500 drop-shadow" />
+                </m.span>
+              )
+            })}
+          </m.span>
+        )}
+      </AnimatePresence>
+
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary/30">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-secondary/30">
         <Link href={`/marketplace/${product.id}`} className="absolute inset-0">
           <Image
             src={imageUrl}
             alt={product.title}
             fill
             priority={index === 0}
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         </Link>
@@ -150,20 +218,31 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
           </Badge>
         </div>
 
-        {/* Favourite button */}
+        {/* Favourite button (burst layer is rendered outside image's
+             overflow-hidden so particles can radiate freely) */}
         <m.button
-          whileTap={{ scale: 0.85 }}
+          whileTap={{ scale: 0.8 }}
+          whileHover={{ scale: 1.08 }}
+          transition={SPRING_TAP}
           onClick={handleFavoriteClick}
           disabled={favLoading}
-          className="absolute top-2.5 right-2.5 z-10 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-md disabled:opacity-70"
+          className="absolute top-2.5 right-2.5 z-20 w-9 h-9 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors shadow-md disabled:opacity-70"
           aria-label={showFav ? 'Remove from favourites' : 'Add to favourites'}
         >
-          <Heart
-            className={cn(
-              'w-4 h-4 transition-colors',
-              showFav ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
-            )}
-          />
+          <m.span
+            key={showFav ? 'on' : 'off'}
+            initial={{ scale: showFav ? 0.4 : 1 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+            className="inline-flex"
+          >
+            <Heart
+              className={cn(
+                'w-4 h-4 transition-colors',
+                showFav ? 'fill-red-500 text-red-500' : 'text-muted-foreground',
+              )}
+            />
+          </m.span>
         </m.button>
 
         {/* WhatsApp hover overlay */}
