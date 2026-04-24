@@ -13,7 +13,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { useNotificationSound } from '@/hooks/use-notification-sound'
 import { formatDistanceToNow } from 'date-fns'
-import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion'
+import { m, AnimatePresence, LazyMotion, domAnimation, useDragControls } from 'framer-motion'
 
 interface Notification {
   id: string; type: string; title: string; body: string | null
@@ -300,39 +300,91 @@ export function NotificationBell() {
         </AnimatePresence>
       </button>
 
-      {mounted && open && createPortal(
-        <div id="notif-overlay">
-          <div className="sm:hidden">
-            <div
-              className="fixed inset-0 bg-black/50"
-              style={{ zIndex: 99998 }}
-              onClick={() => setOpen(false)}
-            />
-            <div
-              className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
-              style={{ maxHeight: '85svh', zIndex: 99999 }}
-            >
-              <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-gray-200 dark:bg-muted" />
-              </div>
-              <PanelContent {...sharedProps} />
-            </div>
-          </div>
+      {mounted && createPortal(
+        <AnimatePresence>
+          {open && (
+            <div id="notif-overlay">
+              <MobileSheet sharedProps={sharedProps} onClose={() => setOpen(false)} />
 
-          <div className="hidden sm:block">
-            <div
-              className="fixed flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden"
-              style={{ top: dropTop, right: dropRight, width: dropWidth, maxHeight: 520, zIndex: 99999 }}
-            >
-              <PanelContent {...sharedProps} />
+              <div className="hidden sm:block">
+                <m.div
+                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  className="fixed flex flex-col bg-white dark:bg-card border border-gray-100 dark:border-border rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 overflow-hidden origin-top-right"
+                  style={{ top: dropTop, right: dropRight, width: dropWidth, maxHeight: 520, zIndex: 99999 }}
+                >
+                  <PanelContent {...sharedProps} />
+                </m.div>
+              </div>
             </div>
-          </div>
-        </div>,
+          )}
+        </AnimatePresence>,
         document.body
       )}
 
     </div>
     </LazyMotion>
+  )
+}
+
+/**
+ * Mobile bottom-sheet with a real, draggable handle. Only the handle (and
+ * the top header strip) initiates the drag — the inner notification list
+ * still scrolls normally because we use `useDragControls` + `dragListener=false`
+ * instead of slapping `touch-none` on the whole sheet.
+ *
+ * Dismissal triggers when the user drags the sheet > 120px down OR flicks
+ * faster than 450px/s.
+ */
+function MobileSheet({ sharedProps, onClose }: { sharedProps: PanelProps; onClose: () => void }) {
+  const dragControls = useDragControls()
+
+  return (
+    <div className="sm:hidden">
+      <m.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 bg-black/50"
+        style={{ zIndex: 99998 }}
+        onClick={onClose}
+      />
+      <m.div
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.6 }}
+        dragMomentum={false}
+        onDragEnd={(_, info) => {
+          if (info.offset.y > 120 || info.velocity.y > 450) onClose()
+        }}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="fixed bottom-0 left-0 right-0 bg-white dark:bg-card rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ maxHeight: '85svh', zIndex: 99999 }}
+      >
+        {/* Drag-handle strip — this is the only thing that starts a drag.
+             It widens & glows on press for a satisfying tactile feel. */}
+        <div
+          onPointerDown={(e) => dragControls.start(e)}
+          className="flex-shrink-0 flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none select-none"
+        >
+          <m.div
+            whileHover={{ scaleX: 1.4, scaleY: 1.6 }}
+            whileTap={{ scaleX: 1.7, scaleY: 1.9, backgroundColor: '#16a34a' }}
+            transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+            className="w-10 h-1.5 rounded-full bg-gray-300 dark:bg-muted-foreground/40"
+          />
+        </div>
+        <PanelContent {...sharedProps} />
+      </m.div>
+    </div>
   )
 }
 

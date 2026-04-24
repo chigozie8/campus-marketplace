@@ -331,8 +331,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   help_popular: '',
   help_contact_title: 'Still need help?',
   help_contact_subtitle: 'Our Nigerian support team is available Mon–Sat 8am–10pm WAT. We typically respond within 2 hours.',
-  help_contact_phone: '07082039250',
-  help_contact_whatsapp_url: 'https://wa.me/2347082039250?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
+  help_contact_phone: '07082039150',
+  help_contact_whatsapp_url: 'https://wa.me/2347082039150?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
   help_contact_email: 'support@vendoorx.ng',
 }
 
