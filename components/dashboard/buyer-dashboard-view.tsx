@@ -1,10 +1,14 @@
+'use client'
+
 import Link from 'next/link'
 import {
   ShoppingBag, Truck, Heart, Wallet, Package, ChevronRight, TrendingDown,
   Clock, CheckCircle2, AlertCircle,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { StatCard } from '@/components/dashboard/stat-card'
+import { AnimatedSection } from '@/components/dashboard/animated-section'
 
 export type BuyerOrder = {
   id: string
@@ -54,24 +58,28 @@ export function BuyerDashboardView({
       {/* Stat tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 [&>*]:min-w-0">
         <StatCard
+          index={0}
           icon={Truck} label="Active orders" value={activeOrdersCount}
           sub={activeOrdersCount === 0 ? 'Browse the marketplace' : 'Pending or in transit'}
           color="text-violet-600" bg="bg-violet-50 dark:bg-violet-950/30"
           border="border-violet-100 dark:border-violet-900/40"
         />
         <StatCard
+          index={1}
           icon={CheckCircle2} label="Delivered" value={deliveredCount}
           sub={deliveredCount === 1 ? 'Order received' : 'Orders received'}
           color="text-emerald-600" bg="bg-emerald-50 dark:bg-emerald-950/30"
           border="border-emerald-100 dark:border-emerald-900/40"
         />
         <StatCard
+          index={2}
           icon={Heart} label="Wishlist" value={wishlistCount}
           sub={wishlistDrops.length > 0 ? `${wishlistDrops.length} just dropped in price` : 'Saved items'}
           color="text-rose-600" bg="bg-rose-50 dark:bg-rose-950/30"
           border="border-rose-100 dark:border-rose-900/40"
         />
         <StatCard
+          index={3}
           icon={Wallet} label="Total spent" value={`₦${totalSpent.toLocaleString()}`}
           sub="Lifetime"
           color="text-amber-600" bg="bg-amber-50 dark:bg-amber-950/30"
@@ -80,15 +88,21 @@ export function BuyerDashboardView({
       </div>
 
       {/* In-transit orders */}
-      <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
+      <AnimatedSection delay={0.5}>
+        <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border">
           <div className="flex items-center gap-2">
             <Truck className="w-4 h-4 text-sky-500" />
             <p className="text-sm font-black text-gray-900 dark:text-white">In transit</p>
             {inTransitOrders.length > 0 && (
-              <span className="bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 200 }}
+                className="bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 text-[10px] font-bold px-2 py-0.5 rounded-full"
+              >
                 {inTransitOrders.length}
-              </span>
+              </motion.span>
             )}
           </div>
           <Link href="/orders" className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80">
@@ -104,12 +118,34 @@ export function BuyerDashboardView({
             </Button>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-50 dark:divide-border">
-            {inTransitOrders.map(order => {
+          <motion.ul
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.3,
+                },
+              },
+            }}
+            className="divide-y divide-gray-50 dark:divide-border"
+          >
+            {inTransitOrders.map((order, idx) => {
               const status = STATUS_LABEL[order.status] || STATUS_LABEL.pending
               const StatusIcon = status.icon
               return (
-                <li key={order.id}>
+                <motion.li
+                  key={order.id}
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
+                  transition={{ type: 'spring', stiffness: 100 }}
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)' }}
+                >
                   <Link href={`/orders/${order.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/70 dark:hover:bg-muted/30 transition-colors">
                     <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
                       {order.product_image
@@ -133,9 +169,11 @@ export function BuyerDashboardView({
           </ul>
         )}
       </div>
+      </AnimatedSection>
 
       {/* Wishlist price drops */}
       {wishlistDrops.length > 0 && (
+        <AnimatedSection delay={0.6}>
         <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-2xl overflow-hidden">
           <div className="px-5 py-3 border-b border-rose-200/70 dark:border-rose-900/30 flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-rose-600" />
@@ -178,8 +216,10 @@ export function BuyerDashboardView({
           </ul>
         </div>
       )}
+      </AnimatedSection>
 
       {/* Recent orders */}
+      <AnimatedSection delay={0.7}>
       <div className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border">
           <div className="flex items-center gap-2">
@@ -206,7 +246,7 @@ export function BuyerDashboardView({
             {recentOrders.slice(0, 6).map(order => {
               const status = STATUS_LABEL[order.status] || STATUS_LABEL.pending
               return (
-                <li key={order.id}>
+                <motion.li key={order.id}>
                   <Link href={`/orders/${order.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/70 dark:hover:bg-muted/30 transition-colors">
                     <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
                       {order.product_image
@@ -229,6 +269,7 @@ export function BuyerDashboardView({
           </ul>
         )}
       </div>
+      </AnimatedSection>
 
     </div>
   )

@@ -437,6 +437,7 @@ export default async function DashboardPage({
             {/* 4 Stat Cards (now with deltas + sparkline) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 [&>*]:min-w-0">
               <StatCard
+                index={0}
                 icon={Package} label="Active Listings" value={activeCount}
                 sub={`${allProducts.length} total`}
                 delta={deltaLabel(listingsThisWeek, listingsPriorWeek, 'this week')}
@@ -444,18 +445,21 @@ export default async function DashboardPage({
                 border="border-violet-100 dark:border-violet-900/40"
               />
               <StatCard
+                index={1}
                 icon={Eye} label="Total Views" value={totalViews.toLocaleString()}
                 sub={`${overallCTR}% click rate`}
                 color="text-sky-600" bg="bg-sky-50 dark:bg-sky-950/30"
                 border="border-sky-100 dark:border-sky-900/40"
               />
               <StatCard
+                index={2}
                 icon={MessageCircle} label="WA Inquiries" value={totalClicks.toLocaleString()}
                 sub="Buyer contacts"
                 color="text-emerald-600" bg="bg-emerald-50 dark:bg-emerald-950/30"
                 border="border-emerald-100 dark:border-emerald-900/40"
               />
               <StatCard
+                index={3}
                 icon={Wallet} label="Earnings" value={`₦${totalEarnings.toLocaleString()}`}
                 sub={`${sellerOrders.length} completed order${sellerOrders.length !== 1 ? 's' : ''}`}
                 delta={
