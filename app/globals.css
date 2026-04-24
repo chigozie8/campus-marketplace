@@ -189,58 +189,5 @@
     color: oklch(0.08 0.01 150);
     letter-spacing: -0.03em;
   }
-
-  /* ─────────────────────────────────────────────────────────
-     Global icon animations.
-     Every Lucide icon (rendered as <svg class="lucide …">)
-     gently "breathes" — a slow, calm scale loop that adds life
-     without being distracting. Hovering pops it bigger.
-     Add the `no-icon-anim` class to opt any icon out.
-     ───────────────────────────────────────────────────────── */
-  @keyframes vendoorx-icon-breathe {
-    0%,
-    100% {
-      transform: scale(1) rotate(0deg);
-    }
-    50% {
-      transform: scale(1.08) rotate(-2deg);
-    }
-  }
-
-  svg.lucide:not(.no-icon-anim) {
-    animation: vendoorx-icon-breathe 3s ease-in-out infinite;
-    transform-origin: center;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  /* Promote to its own layer only while interacting (saves memory across
-     hundreds of background icons). */
-  svg.lucide:not(.no-icon-anim):hover,
-  button:hover svg.lucide:not(.no-icon-anim),
-  a:hover svg.lucide:not(.no-icon-anim) {
-    will-change: transform;
-  }
-
-  /* Hover pause + pop so the icon under the cursor feels reactive.
-     Uses a descendant selector so icons wrapped in spans/motion divs
-     also react when the surrounding button or link is hovered. */
-  svg.lucide:not(.no-icon-anim):hover,
-  button:hover svg.lucide:not(.no-icon-anim),
-  a:hover svg.lucide:not(.no-icon-anim) {
-    animation-play-state: paused;
-    transform: scale(1.2) rotate(-6deg);
-  }
-
-  /* Respect reduced-motion users — kill the loop entirely */
-  @media (prefers-reduced-motion: reduce) {
-    svg.lucide:not(.no-icon-anim),
-    svg.lucide:not(.no-icon-anim):hover,
-    button:hover > svg.lucide:not(.no-icon-anim),
-    a:hover > svg.lucide:not(.no-icon-anim) {
-      animation: none;
-      transition: none;
-      transform: none;
-    }
-  }
 }
 
