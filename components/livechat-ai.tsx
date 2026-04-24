@@ -2,6 +2,7 @@
 
 import Script from 'next/script'
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 const LIVECHAT_AI_ID =
   process.env.NEXT_PUBLIC_LIVECHAT_AI_ID || 'cmocanyz400ggjl04oqfx0n20'
@@ -44,8 +45,12 @@ function applyOffset() {
 }
 
 export function LiveChatAI() {
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (!isHome) return
 
     let raf = 0
     const schedule = () => {
@@ -72,6 +77,7 @@ export function LiveChatAI() {
   }, [])
 
   if (!LIVECHAT_AI_ID) return null
+  if (!isHome) return null
 
   return (
     <Script
