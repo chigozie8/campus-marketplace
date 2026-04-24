@@ -9,6 +9,7 @@ import {
   Repeat, X, CheckSquare, Square,
 } from 'lucide-react'
 import { useVendorOrders } from '@/hooks/use-orders'
+import { useOrdersRealtime } from '@/hooks/use-orders-realtime'
 import { type BackendOrder, type OrderStatus, ordersApi } from '@/lib/api'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -399,6 +400,10 @@ export default function SellerOrdersPage() {
   const [bulkBusy, setBulkBusy] = useState<null | 'mark_shipped' | 'cancel'>(null)
   const qc = useQueryClient()
   const { data, isLoading, isFetching, isError, error, refetch } = useVendorOrders(page)
+
+  // Live updates — buyer payments, delivery confirmations and admin actions
+  // refresh this list instantly without a page refresh.
+  useOrdersRealtime(sellerId ?? undefined, 'seller_id')
 
   function toggleId(id: string) {
     setSelectedIds(prev => {

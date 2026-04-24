@@ -20,6 +20,7 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
   const [auth, setAuth] = useState<AuthState>({ kind: 'loading' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  const [alreadySubscribed, setAlreadySubscribed] = useState<boolean | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -62,6 +63,19 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
     return () => { cancelled = true; sub.subscription.unsubscribe() }
   }, [])
 
+  // Fetch current subscription status whenever we land in the "user" auth
+  // state. Lets us flip the button to "Already subscribed ✓" before they
+  // even click — no double-subscribe attempts.
+  useEffect(() => {
+    if (auth.kind !== 'user') { setAlreadySubscribed(null); return }
+    let cancelled = false
+    fetch('/api/newsletter/subscribe/status', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : { subscribed: false })
+      .then(d => { if (!cancelled) setAlreadySubscribed(!!d.subscribed) })
+      .catch(() => { if (!cancelled) setAlreadySubscribed(false) })
+    return () => { cancelled = true }
+  }, [auth])
+
   function handleGuestClick(e: React.MouseEvent | React.FormEvent) {
     e.preventDefault()
     toast.error('Please log in to subscribe to our newsletter — we only allow verified accounts to subscribe to keep things spam-free. 🛡️', {
@@ -72,6 +86,10 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (auth.kind !== 'user') { handleGuestClick(e); return }
+    if (alreadySubscribed) {
+      toast.info("You're already subscribed — thanks! 💚")
+      return
+    }
     setStatus('loading')
     try {
       const res = await fetch('/api/newsletter/subscribe', {
@@ -141,11 +159,16 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
             </div>
             <button
               type="submit"
-              disabled={status === 'loading'}
-              className="flex items-center justify-center gap-2 w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60"
+              disabled={status === 'loading' || alreadySubscribed === true}
+              title={alreadySubscribed ? "You're already on the list" : undefined}
+              className="flex items-center justify-center gap-2 w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Subscribe
+              {status === 'loading'
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : alreadySubscribed
+                  ? <CheckCircle2 className="w-4 h-4" />
+                  : <Send className="w-4 h-4" />}
+              {alreadySubscribed ? 'Already subscribed' : 'Subscribe'}
             </button>
             {status === 'error' && (
               <p className="text-xs text-red-400">{message}</p>
@@ -192,11 +215,16 @@ export function NewsletterForm({ className = '', variant = 'inline' }: Newslette
         </div>
         <button
           type="submit"
-          disabled={status === 'loading'}
-          className="flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-60 flex-shrink-0"
+          disabled={status === 'loading' || alreadySubscribed === true}
+          title={alreadySubscribed ? "You're already on the list" : undefined}
+          className="flex items-center gap-1.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex-shrink-0"
         >
-          {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          <span className="hidden sm:inline">Subscribe</span>
+          {status === 'loading'
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : alreadySubscribed
+              ? <CheckCircle2 className="w-4 h-4" />
+              : <Send className="w-4 h-4" />}
+          <span className="hidden sm:inline">{alreadySubscribed ? 'Subscribed' : 'Subscribe'}</span>
         </button>
       </div>
       {status === 'error' && (

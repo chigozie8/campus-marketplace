@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ShoppingBag, Package, RefreshCw, ChevronRight, AlertOctagon, Loader2, Wallet, CheckCircle2, Timer, Shield, Flag, Download } from 'lucide-react'
 import { useMyOrders } from '@/hooks/use-orders'
+import { useOrdersRealtime } from '@/hooks/use-orders-realtime'
 import { OrderStatusTracker, OrderStatusBadge } from '@/components/features/order-status-tracker'
 import { Button } from '@/components/ui/button'
 import type { BackendOrder } from '@/lib/api'
@@ -554,6 +555,10 @@ export default function OrdersPage() {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? undefined))
   }, [])
+
+  // Live updates — when paid → shipped → delivered → completed/cancelled
+  // happens server-side, the list refreshes instantly without a page refresh.
+  useOrdersRealtime(currentUserId, 'buyer_id')
 
   function handleRefund(_id: string) {
     refetch()
