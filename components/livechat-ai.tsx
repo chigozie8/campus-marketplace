@@ -7,55 +7,40 @@ import { usePathname } from 'next/navigation'
 const LIVECHAT_AI_ID =
   process.env.NEXT_PUBLIC_LIVECHAT_AI_ID || 'cmocanyz400ggjl04oqfx0n20'
 
-const MOBILE_BREAKPOINT = 768
-const MOBILE_BOTTOM_OFFSET = 140
-const DESKTOP_BOTTOM_OFFSET = 16
+const STYLE_ID = 'vendoorx-lcai-position-fix'
 
-const TARGET_SELECTORS = [
-  '.live-chat-ai-button',
-  '.live-chat-ai-animation-canvas',
-  '.live-chat-ai-wrapper',
-  '.live-chat-ai-button-logo-wrapper',
-]
-
-function collectShadowRoots(root: Document | ShadowRoot, acc: ShadowRoot[]) {
-  const all = root.querySelectorAll('*')
-  for (let i = 0; i < all.length; i++) {
-    const el = all[i] as HTMLElement
-    const sr = el.shadowRoot
-    if (sr) {
-      acc.push(sr)
-      collectShadowRoots(sr, acc)
+const POSITION_CSS = `
+  @media (max-width: 768px) {
+    .live-chat-ai-button,
+    .live-chat-ai-animation-canvas,
+    .live-chat-ai-button-logo-wrapper {
+      bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important;
     }
   }
+`
+
+function getHost(): HTMLElement | null {
+  return document.querySelector('live-chat-ai-host') as HTMLElement | null
 }
 
-function findTargets(): HTMLElement[] {
-  const found: HTMLElement[] = []
-  const roots: (Document | ShadowRoot)[] = [document]
-  const shadows: ShadowRoot[] = []
-  collectShadowRoots(document, shadows)
-  roots.push(...shadows)
+function injectShadowStyle(): boolean {
+  const host = getHost()
+  const shadow = host?.shadowRoot
+  if (!host || !shadow) return false
 
-  for (const root of roots) {
-    for (const sel of TARGET_SELECTORS) {
-      root.querySelectorAll(sel).forEach((el) => found.push(el as HTMLElement))
-    }
-  }
-  return found
+  host.style.display = ''
+
+  if (shadow.getElementById(STYLE_ID)) return true
+  const style = document.createElement('style')
+  style.id = STYLE_ID
+  style.textContent = POSITION_CSS
+  shadow.appendChild(style)
+  return true
 }
 
-function applyOffset() {
-  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT
-  const offsetPx = isMobile ? MOBILE_BOTTOM_OFFSET : DESKTOP_BOTTOM_OFFSET
-  const value = isMobile
-    ? `calc(${offsetPx}px + env(safe-area-inset-bottom, 0px))`
-    : `${offsetPx}px`
-
-  const targets = findTargets()
-  targets.forEach((el) => {
-    el.style.setProperty('bottom', value, 'important')
-  })
+function hideHost() {
+  const host = getHost()
+  if (host) host.style.display = 'none'
 }
 
 export function LiveChatAI() {
@@ -64,40 +49,24 @@ export function LiveChatAI() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    if (!isHome) return
 
-    let raf = 0
-    const schedule = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(applyOffset)
+    if (!isHome) {
+      hideHost()
+      return
     }
 
-    schedule()
+    if (injectShadowStyle()) return
 
-    const fastInterval = window.setInterval(schedule, 250)
-    const slowDownTimer = window.setTimeout(() => {
-      window.clearInterval(fastInterval)
-      window.setInterval(schedule, 1500)
-    }, 10000)
-
-    const observer = new MutationObserver(schedule)
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class'],
-    })
-
-    window.addEventListener('resize', schedule)
-    window.addEventListener('orientationchange', schedule)
+    let attempts = 0
+    const interval = window.setInterval(() => {
+      attempts += 1
+      if (injectShadowStyle() || attempts > 60) {
+        window.clearInterval(interval)
+      }
+    }, 500)
 
     return () => {
-      cancelAnimationFrame(raf)
-      window.clearInterval(fastInterval)
-      window.clearTimeout(slowDownTimer)
-      observer.disconnect()
-      window.removeEventListener('resize', schedule)
-      window.removeEventListener('orientationchange', schedule)
+      window.clearInterval(interval)
     }
   }, [isHome])
 

@@ -191,19 +191,8 @@
   }
 }
 
-/* ──────────────────────────────────────────────────────────────────
-   LiveChatAI floating widget — lift above the floating bottom nav on
-   mobile. LiveChatAI uses class names prefixed with `live-chat-ai-`
-   — confirmed in their embed.js source. The launcher button defaults
-   to `bottom: 1rem`; we override it on small screens so it clears
-   our floating bottom navigation.
-   ──────────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .live-chat-ai-button,
-  .live-chat-ai-animation-canvas,
-  .live-chat-ai-wrapper .live-chat-ai-button,
-  .live-chat-ai-wrapper .live-chat-ai-animation-canvas,
-  iframe[src*="livechatai.com"] {
-    bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-}
+/* LiveChatAI position fix is injected directly into its shadow DOM
+   from components/livechat-ai.tsx — no global CSS needed because the
+   widget lives inside an open shadow root that global styles cannot
+   reach. Keeping a global rule here would only hit the (rare) iframe
+   fallback path and create off-by-pixels conflicts. */
