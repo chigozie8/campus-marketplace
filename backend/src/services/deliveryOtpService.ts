@@ -38,7 +38,13 @@ async function sendOtpEmailViaApp(args: {
   code: string
   orderShortId: string
 }): Promise<boolean> {
-  const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
+  // Service-to-service call: backend (Express :3001) → frontend (Next.js :5000).
+  // Both processes run in the same Replit container in dev AND in single-deploy
+  // production, so localhost is the right hop. INTERNAL_APP_URL is the escape
+  // hatch if the two are ever split across hosts. We deliberately do NOT fall
+  // back to FRONTEND_URL here — that resolves to the public proxy URL and may
+  // point to a stale Repl, breaking internal email/notification delivery.
+  const appUrl = process.env.INTERNAL_APP_URL ?? 'http://localhost:5000'
   const internalKey = process.env.INTERNAL_API_KEY ?? ''
   if (!internalKey) {
     logger.error('[deliveryOtp] INTERNAL_API_KEY not set — cannot send delivery OTP email')

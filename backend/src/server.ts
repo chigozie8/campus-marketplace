@@ -15,11 +15,13 @@ import { initDb } from './config/db.js'
 
 const PORT = Number(process.env.PORT) || 3001
 
-const REQUIRED_FOR_MILESTONES = ['INTERNAL_API_KEY', 'FRONTEND_URL']
-for (const key of REQUIRED_FOR_MILESTONES) {
-  if (!process.env[key]) {
-    logger.warn(`[startup] ${key} is not set — milestone trigger calls to Next.js will fail`)
-  }
+// INTERNAL_API_KEY is required for backend → Next.js service-to-service calls
+// (delivery OTP emails, milestone checks, push notifications, etc.). The host
+// for those calls is INTERNAL_APP_URL when set, otherwise localhost:5000 (the
+// in-container default that works in dev and in single-deploy production).
+// FRONTEND_URL is for user-facing URLs only (Paystack callback, bot links).
+if (!process.env.INTERNAL_API_KEY) {
+  logger.warn('[startup] INTERNAL_API_KEY is not set — backend → Next.js internal calls (OTP emails, milestones, push) will fail')
 }
 
 initDb()

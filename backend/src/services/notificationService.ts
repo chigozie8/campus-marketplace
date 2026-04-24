@@ -71,7 +71,7 @@ export async function notify(opts: NotifyOptions): Promise<void> {
     }
 
     // Fire-and-forget push notification via Next.js API
-    const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
+    const appUrl = process.env.INTERNAL_APP_URL ?? 'http://localhost:5000'
     fetch(`${appUrl}/api/push/send`, {
       method: 'POST',
       headers: {

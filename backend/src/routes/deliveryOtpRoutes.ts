@@ -12,7 +12,7 @@ router.use(authenticate)
 
 async function triggerMilestoneCheck(userId: string, role: 'buyer' | 'seller'): Promise<void> {
   try {
-    const appUrl = process.env.FRONTEND_URL ?? 'http://localhost:5000'
+    const appUrl = process.env.INTERNAL_APP_URL ?? 'http://localhost:5000'
     const res = await fetch(`${appUrl}/api/internal/check-milestones`, {
       method: 'POST',
       headers: {

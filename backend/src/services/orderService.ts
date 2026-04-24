@@ -190,10 +190,10 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
         try {
           const totalAmount = Number((order as any).total_amount ?? 0)
           const points = Math.max(1, Math.floor(totalAmount / 100))
-          const frontendUrl = process.env.FRONTEND_URL ?? ''
+          const appUrl = process.env.INTERNAL_APP_URL ?? 'http://localhost:5000'
           const internalKey = process.env.INTERNAL_API_KEY ?? ''
-          if (frontendUrl && internalKey) {
-            await fetch(`${frontendUrl}/api/loyalty/earn`, {
+          if (internalKey) {
+            await fetch(`${appUrl}/api/loyalty/earn`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'x-internal-key': internalKey },
               body: JSON.stringify({ user_id: order.buyer_id, points, description: `Order #${shortId} completed`, order_id: id }),

@@ -8,7 +8,7 @@ import logger from '../utils/logger.js'
  * with the shared internal key. Errors are logged, never thrown.
  */
 async function postInternal(path: string, body: unknown): Promise<void> {
-  const appUrl = process.env.FRONTEND_URL ?? process.env.APP_URL ?? 'http://localhost:5000'
+  const appUrl = process.env.INTERNAL_APP_URL ?? 'http://localhost:5000'
   const internalKey = process.env.INTERNAL_API_KEY ?? ''
   if (!internalKey) {
     logger.warn(`[orderEmail] INTERNAL_API_KEY not set — skipping email POST to ${path}`)

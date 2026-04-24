@@ -27,12 +27,34 @@ function extractFcmToken(endpoint: string): string {
 
 export async function POST(req: Request) {
   try {
+    // Two ways in:
+    //   1. Backend service-to-service: presents `x-internal-key` matching
+    //      INTERNAL_API_KEY. We then trust `userId` in the body and target
+    //      that user's push subscriptions directly. No session required.
+    //   2. Browser: authenticated user. Falls back to their own id when no
+    //      `userId` is provided. Cannot push to OTHER users from the browser.
+    const internalKeyHeader = req.headers.get('x-internal-key') ?? ''
+    const expectedInternalKey = process.env.INTERNAL_API_KEY ?? ''
+    const isInternalCall = !!expectedInternalKey && internalKeyHeader === expectedInternalKey
+
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    let callerId: string | null = null
+    if (!isInternalCall) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      callerId = user.id
+    }
 
     const { userId, title, body, url, icon } = await req.json()
-    const targetId = userId || user.id
+    const targetId = userId || callerId
+    if (!targetId) {
+      return NextResponse.json({ error: 'Missing userId for internal push call.' }, { status: 400 })
+    }
+    // Browser callers can ONLY push to themselves. Internal-key callers may
+    // target any user (that's the whole point — backend dispatches notifs).
+    if (!isInternalCall && userId && userId !== callerId) {
+      return NextResponse.json({ error: 'Forbidden: cannot push to another user.' }, { status: 403 })
+    }
 
     const { data: subs } = await supabase
       .from('push_subscriptions')
