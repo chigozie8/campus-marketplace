@@ -263,7 +263,7 @@ export function BuyerDashboardView({
                       {status.label}
                     </span>
                   </Link>
-                </li>
+                </motion.li>
               )
             })}
           </ul>
