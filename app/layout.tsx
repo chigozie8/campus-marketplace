@@ -13,6 +13,7 @@ import { CookieConsent } from '@/components/cookie-consent'
 import { LiveChatAI } from '@/components/livechat-ai'
 import { PushNotificationPrompt } from '@/components/push-notification-prompt'
 import { CapacitorInit } from '@/components/capacitor-init'
+import { PageTransitionWrapper } from '@/components/motion/page-transition-wrapper'
 import { NetworkToast } from '@/components/network-toast'
 import { SITE_URL, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo'
 import { Providers } from '@/components/providers'
@@ -432,7 +433,7 @@ export default function RootLayout({
             <NetworkToast />
             <SplashScreen />
             <NavigationProgress />
-            {children}
+            <PageTransitionWrapper>{children}</PageTransitionWrapper>
             <FloatingNav />
             <ServiceWorkerRegistration />
             <PwaInstallPrompt />
