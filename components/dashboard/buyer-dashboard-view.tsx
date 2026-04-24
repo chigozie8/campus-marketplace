@@ -174,7 +174,7 @@ export function BuyerDashboardView({
       {/* Wishlist price drops */}
       {wishlistDrops.length > 0 && (
         <AnimatedSection delay={0.6}>
-        <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-2xl overflow-hidden">
+          <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-2xl overflow-hidden">
           <div className="px-5 py-3 border-b border-rose-200/70 dark:border-rose-900/30 flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-rose-600" />
             <p className="text-sm font-black text-rose-900 dark:text-rose-200">Price drops on your wishlist</p>
@@ -215,7 +215,8 @@ export function BuyerDashboardView({
             })}
           </ul>
         </div>
-      </AnimatedSection>
+        </AnimatedSection>
+      )}
 
       {/* Recent orders */}
       <AnimatedSection delay={0.7}>
