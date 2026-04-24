@@ -10,6 +10,40 @@ function db() {
 }
 
 /**
+ * Tell the Express backend to credit the seller's pending wallet balance.
+ * Fire-and-forget — failures are logged but never block the rest of the
+ * payment-completion flow (emails, order flip, etc.). The backend endpoint
+ * is idempotent, so a duplicate call from a retried webhook is harmless.
+ */
+async function creditSellerWalletViaBackend(
+  sellerId: string,
+  orderId: string,
+  totalPaid: number,
+): Promise<void> {
+  const backendBase = process.env.BACKEND_URL ?? 'http://localhost:3001'
+  const internalKey = process.env.INTERNAL_API_KEY ?? ''
+  if (!internalKey) {
+    console.warn('[markOrderPaid] INTERNAL_API_KEY not set — skipping wallet credit')
+    return
+  }
+  try {
+    const res = await fetch(`${backendBase}/api/internal/credit-seller-pending`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-internal-key': internalKey },
+      body: JSON.stringify({ sellerId, orderId, totalPaid }),
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '')
+      console.warn(`[markOrderPaid] wallet credit returned ${res.status}: ${txt.slice(0, 200)}`)
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.warn(`[markOrderPaid] wallet credit fetch failed: ${msg}`)
+  }
+}
+
+/**
  * Idempotently flip an order from 'pending' → 'paid' and send buyer + seller
  * confirmation emails. Safe to call from BOTH the Paystack webhook and the
  * post-redirect verify endpoint — whichever arrives first wins; the other is
@@ -43,6 +77,14 @@ export async function markOrderPaidAndNotify(
 
   const row = Array.isArray(updated) ? updated[0] : null
   if (!row) return false // Already paid/cancelled or not found — no-op (expected in race).
+
+  // Credit the seller's pending wallet (idempotent on the backend side).
+  // Fire-and-forget: emails should still go out even if the wallet hop hiccups.
+  creditSellerWalletViaBackend(
+    row.seller_id as string,
+    row.id as string,
+    Number(row.total_amount ?? 0),
+  ).catch(() => {})
 
   const [
     { data: buyerAuth },
