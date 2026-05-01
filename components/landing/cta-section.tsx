@@ -240,7 +240,7 @@ export function CtaSection({ user }: CtaSectionProps) {
               </Button>
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Trust line */}
         <p className="text-white/30 text-sm mt-10 tracking-wide">
