@@ -50,34 +50,35 @@ export function ProblemSolutionSection() {
 
           {/* Before card */}
           <FadeInView variant="fadeLeft" delay={0.1}>
-          <div className="rounded-t-3xl lg:rounded-3xl border border-border bg-muted/40 dark:bg-muted/20 p-8 lg:p-10 flex flex-col gap-6">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
-                <X className="w-5 h-5 text-red-500" />
+            <div className="rounded-t-3xl lg:rounded-3xl border border-border bg-muted/40 dark:bg-muted/20 p-8 lg:p-10 flex flex-col gap-6 h-full">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+                  <X className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-red-500/80 mb-1">Before VendoorX</p>
+                  <h3 className="text-xl font-bold text-foreground">Selling through chat</h3>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-red-500/80 mb-1">Before VendoorX</p>
-                <h3 className="text-xl font-bold text-foreground">Selling through chat</h3>
+
+              <ul className="flex flex-col gap-3.5">
+                {BEFORE.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center mt-0.5">
+                      <X className="w-3 h-3 text-red-500" />
+                    </div>
+                    <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-auto pt-6 border-t border-border">
+                <p className="text-sm font-semibold text-red-500/80">
+                  Result: Missed sales, burnout, and a business that can&apos;t grow past your DMs.
+                </p>
               </div>
             </div>
-
-            <ul className="flex flex-col gap-3.5">
-              {BEFORE.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center mt-0.5">
-                    <X className="w-3 h-3 text-red-500" />
-                  </div>
-                  <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto pt-6 border-t border-border">
-              <p className="text-sm font-semibold text-red-500/80">
-                Result: Missed sales, burnout, and a business that can&apos;t grow past your DMs.
-              </p>
-            </div>
-          </div>
+          </FadeInView>
 
           {/* Mobile VS divider */}
           <div className="flex lg:hidden items-center justify-center gap-4 py-4 bg-background relative z-10">
@@ -87,49 +88,51 @@ export function ProblemSolutionSection() {
           </div>
 
           {/* After card */}
-          <div className="rounded-b-3xl lg:rounded-3xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10 p-8 lg:p-10 flex flex-col gap-6 relative overflow-hidden">
-            {/* Subtle background glow */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl" />
-            </div>
-
-            <div className="flex items-start gap-4 relative z-10">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
-                <Check className="w-5 h-5 text-primary" />
+          <FadeInView variant="fadeRight" delay={0.2}>
+            <div className="rounded-b-3xl lg:rounded-3xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10 p-8 lg:p-10 flex flex-col gap-6 relative overflow-hidden h-full">
+              {/* Subtle background glow */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl" />
               </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">With VendoorX</p>
-                <h3 className="text-xl font-bold text-foreground">A real store that works for you</h3>
+
+              <div className="flex items-start gap-4 relative z-10">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Check className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">With VendoorX</p>
+                  <h3 className="text-xl font-bold text-foreground">A real store that works for you</h3>
+                </div>
+              </div>
+
+              <ul className="flex flex-col gap-3.5 relative z-10">
+                {AFTER.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center mt-0.5">
+                      <Check className="w-3 h-3 text-primary" />
+                    </div>
+                    <span className="text-sm text-foreground/80 font-medium leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-auto pt-6 border-t border-primary/20 relative z-10">
+                <p className="text-sm font-semibold text-primary mb-4">
+                  Result: More sales, less stress, and a business that actually grows.
+                </p>
+                <Button
+                  size="sm"
+                  className="group rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02]"
+                  asChild
+                >
+                  <Link href="/auth/sign-up">
+                    Start for free — takes 2 minutes
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
             </div>
-
-            <ul className="flex flex-col gap-3.5 relative z-10">
-              {AFTER.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center mt-0.5">
-                    <Check className="w-3 h-3 text-primary" />
-                  </div>
-                  <span className="text-sm text-foreground/80 font-medium leading-relaxed">{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto pt-6 border-t border-primary/20 relative z-10">
-              <p className="text-sm font-semibold text-primary mb-4">
-                Result: More sales, less stress, and a business that actually grows.
-              </p>
-              <Button
-                size="sm"
-                className="group rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02]"
-                asChild
-              >
-                <Link href="/auth/sign-up">
-                  Start for free — takes 2 minutes
-                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+          </FadeInView>
         </div>
       </div>
     </section>

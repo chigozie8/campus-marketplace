@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Users, GraduationCap, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
 import type { User } from '@supabase/supabase-js'
 
 interface CtaSectionProps {
@@ -113,24 +114,42 @@ export function CtaSection({ user }: CtaSectionProps) {
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8"
+        >
           <Zap className="w-4 h-4 text-[#16a34a]" />
           <span className="text-sm font-semibold text-[#16a34a] tracking-wide">
             {isAuthed ? 'Your campus store is live and ready to grow' : 'The marketplace built for Nigerian university campuses'}
           </span>
-        </div>
+        </motion.div>
 
         {/* Headline */}
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight">
+        <motion.h2
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight"
+        >
           {isAuthed ? (
             <>Keep growing your{' '}<span className="text-[#16a34a]">campus store.</span></>
           ) : (
             <>Your campus side-hustle{' '}<span className="text-[#16a34a]">starts here.</span></>
           )}
-        </h2>
+        </motion.h2>
 
         {/* Sub-copy */}
-        <p className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-10">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-10"
+        >
           {isAuthed ? (
             <>
               Everything you need is in your dashboard. Boost your listings, track your orders, and{' '}
@@ -144,7 +163,7 @@ export function CtaSection({ user }: CtaSectionProps) {
               and <span className="text-[#16a34a] font-semibold">free to start selling</span> — right now.
             </>
           )}
-        </p>
+        </motion.p>
 
         {/* Stats */}
         <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mb-12">
@@ -154,17 +173,29 @@ export function CtaSection({ user }: CtaSectionProps) {
         </div>
 
         {/* Perks row */}
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-12"
+        >
           {PERKS.map((perk) => (
             <div key={perk} className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
               <span className="text-sm text-white/70 font-medium">{perk}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
 
         {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.55, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center"
+        >
           {isAuthed ? (
             <>
               <Button
