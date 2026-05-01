@@ -3,12 +3,6 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { sendFcmNotification } from '@/lib/firebase-admin'
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
-
 interface PushSubscription {
   endpoint: string
   p256dh: string
@@ -27,6 +21,13 @@ function extractFcmToken(endpoint: string): string {
 
 export async function POST(req: Request) {
   try {
+    // Defer VAPID initialisation to request time so the build does not fail
+    // when env vars are absent (they are only injected at runtime on Vercel).
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:admin@vendoorx.com',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    )
     // Two ways in:
     //   1. Backend service-to-service: presents `x-internal-key` matching
     //      INTERNAL_API_KEY. We then trust `userId` in the body and target
