@@ -1,6 +1,9 @@
+'use client'
+
 import { X, Check, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { FadeInView } from '@/components/landing/fade-in-view'
 
 const BEFORE = [
   'Buried under 60+ unread chats you\'ll never catch up on',
@@ -25,7 +28,7 @@ export function ProblemSolutionSection() {
     <section className="py-24 sm:py-32 px-4 sm:px-6 bg-background">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-14">
+        <FadeInView variant="fadeUp" className="text-center mb-14">
           <span className="inline-block text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Sound Familiar?
           </span>
@@ -36,7 +39,7 @@ export function ProblemSolutionSection() {
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-pretty">
             You have the hustle. You have the customers. But managing everything through chat alone is costing you real money — and you might not even realise it.
           </p>
-        </div>
+        </FadeInView>
 
         {/* Comparison cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6 relative">
@@ -46,6 +49,7 @@ export function ProblemSolutionSection() {
           </div>
 
           {/* Before card */}
+          <FadeInView variant="fadeLeft" delay={0.1}>
           <div className="rounded-t-3xl lg:rounded-3xl border border-border bg-muted/40 dark:bg-muted/20 p-8 lg:p-10 flex flex-col gap-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center">

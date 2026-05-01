@@ -1,5 +1,8 @@
+'use client'
+
 import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2, type LucideIcon } from 'lucide-react'
 import type { HiwStep } from '@/lib/site-settings-defaults'
+import { FadeInView, StaggerContainer, StaggerItem } from '@/components/landing/fade-in-view'
 
 const STEP_ICONS: LucideIcon[] = [UserPlus, Camera, Share2, MessageCircle]
 const STEP_COLORS = [
@@ -37,7 +40,7 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16 sm:mb-20">
+        <FadeInView variant="fadeUp" className="text-center mb-16 sm:mb-20">
           <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold uppercase tracking-widest mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             <CheckCircle2 className="w-4 h-4" />
             How it works
@@ -48,14 +51,15 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
           <p className="text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto text-pretty leading-relaxed">
             {subtitle ?? 'No technical knowledge needed. No complicated setup. Just four simple steps between you and your next sale — powered by AI on WhatsApp.'}
           </p>
-        </div>
+        </FadeInView>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" staggerDelay={0.12}>
           {STEPS.map((step, index) => {
             const Icon = step.icon
             return (
-              <div key={step.step} className="relative flex flex-col group">
+              <StaggerItem key={step.step} variant="fadeUp">
+              <div className="relative flex flex-col group h-full">
                 {/* Connector line for desktop */}
                 {index < STEPS.length - 1 && (
                   <div className="hidden lg:block absolute top-10 left-[calc(50%+3rem)] w-[calc(100%-6rem)] h-[2px]">
@@ -86,9 +90,10 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
                   </p>
                 </div>
               </div>
+              </StaggerItem>
             )
           })}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   )

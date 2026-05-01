@@ -1,3 +1,5 @@
+'use client'
+
 import {
   MessageCircle,
   LayoutDashboard,
@@ -8,6 +10,7 @@ import {
   Users,
   Bot,
 } from 'lucide-react'
+import { FadeInView, StaggerContainer, StaggerItem } from '@/components/landing/fade-in-view'
 
 const features = [
   {
@@ -80,7 +83,7 @@ export function Features() {
   return (
     <section id="features" className="py-24 bg-background scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <FadeInView variant="fadeUp" className="text-center mb-16">
           <p className="text-primary font-semibold text-sm uppercase tracking-widest mb-3">Built for You</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-balance mb-4">
             Every tool your business needs to sell on WhatsApp
@@ -88,22 +91,21 @@ export function Features() {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance leading-relaxed">
             Stop duct-taping your business together with manual chats and spreadsheets. VendoorX gives you one powerful AI-driven platform to sell, automate, and grow.
           </p>
-        </div>
+        </FadeInView>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08}>
           {features.map(({ icon: Icon, title, description, color, bg }) => (
-            <div
-              key={title}
-              className="p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group"
-            >
-              <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
-                <Icon className={`w-5 h-5 ${color}`} />
+            <StaggerItem key={title} variant="fadeUp">
+              <div className="h-full p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
+                <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
+                  <Icon className={`w-5 h-5 ${color}`} />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   )
