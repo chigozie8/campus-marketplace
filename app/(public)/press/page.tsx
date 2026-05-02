@@ -66,6 +66,10 @@ export default async function PressPage() {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-12">
 
             <div className="flex-1">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-6">
+                <FileText className="w-3 h-3" />
+                Media &amp; Press
+              </span>
               <h1 className="text-5xl sm:text-6xl lg:text-8xl font-black text-foreground leading-[0.92] tracking-tighter mb-5">
                 News<span className="text-primary">room</span>
               </h1>
