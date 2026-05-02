@@ -51,10 +51,10 @@ export default async function PressPage() {
   ]
 
   const quickFacts = [
-    { label: 'Founded',        value: '2022',                        icon: Building2 },
-    { label: 'Headquarters',   value: 'Victoria Island, Lagos',      icon: Globe },
-    { label: 'Model',          value: 'WhatsApp Commerce SaaS',      icon: Zap },
-    { label: 'Stage',          value: 'Growth — Series A Ready',     icon: Award },
+    { label: 'Founded',        value: settings.press_founded      || '2022',                     icon: Building2 },
+    { label: 'Headquarters',   value: settings.press_headquarters || 'Victoria Island, Lagos',   icon: Globe },
+    { label: 'Model',          value: settings.press_model        || 'WhatsApp Commerce SaaS',   icon: Zap },
+    { label: 'Stage',          value: settings.press_stage        || 'Growth — Series A Ready',  icon: Award },
   ]
 
   return (
