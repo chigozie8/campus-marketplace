@@ -24,7 +24,7 @@ const FaqSection             = lazyLoad(() => import('@/components/landing/faq-s
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
 const StickyMobileCta        = lazyLoad(() => import('@/components/landing/sticky-mobile-cta').then(m => ({ default: m.StickyMobileCta })))
-const AdPopup                = lazyLoad(() => import('@/components/landing/ad-popup').then(m => ({ default: m.AdPopup })), { ssr: false })
+import { AdPopupClient as AdPopup } from '@/components/landing/ad-popup-client'
 
 export const revalidate = 300
 
