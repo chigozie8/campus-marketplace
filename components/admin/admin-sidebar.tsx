@@ -63,6 +63,7 @@ const NAV_ITEMS = [
   { label: 'Boost Pricing',   href: '/admin/boost',             icon: Zap },
   { label: 'Platform Stats',   href: '/admin/platform-stats',    icon: TrendingUp },
   { label: 'Broadcast',       href: '/admin/broadcast',         icon: Megaphone },
+  { label: 'Email Blast',     href: '/admin/email-blast',       icon: Mail },
   { label: 'Newsletter',      href: '/admin/newsletter',        icon: Mail },
   { label: 'Dummy Data',      href: '/admin/dummy',             icon: Sparkles },
   { label: 'Newsroom',        href: '/admin/press',             icon: FileText },
