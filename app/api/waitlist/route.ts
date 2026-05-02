@@ -36,15 +36,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: 'Already registered.' })
     }
 
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from('waitlist')
       .insert({ email: normalised })
 
-    if (error) throw error
+    if (insertError) {
+      // Unique-violation means they already signed up — treat as success
+      if (insertError.code === '23505') {
+        return NextResponse.json({ success: true, message: 'Already registered.' })
+      }
+      console.error('[waitlist] insert error:', insertError.code, insertError.message, insertError.details)
+      return NextResponse.json(
+        { error: 'Could not save your email. Please try again.' },
+        { status: 500 },
+      )
+    }
 
     return NextResponse.json({ success: true })
   } catch (err: unknown) {
-    console.error('[waitlist] POST error:', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[waitlist] POST unexpected error:', msg)
     return NextResponse.json({ error: 'Could not save your email. Please try again.' }, { status: 500 })
   }
 }
