@@ -95,17 +95,31 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
           <span className="text-primary italic">{heroAccent}</span>
         </h1>
 
-        {/* Subtitle — supports {campuses} placeholder for personalization */}
+        {/* Subtitle — supports {campuses} placeholder or any {literal, names} in braces */}
         <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
           {heroSubtitle.includes('{campuses}')
             ? (
               <>
                 {heroSubtitle.split('{campuses}')[0]}
-                <span className="text-primary font-semibold">{campusList.join(', ')}</span>
+                <span className="text-primary font-bold">{campusList.join(', ')}</span>
                 {heroSubtitle.split('{campuses}')[1]}
               </>
             )
-            : heroSubtitle
+            : (() => {
+                // Render any {…} segment as green bold text so manually-entered
+                // campus names like {EBSU, FUNIA} still get the correct styling.
+                const braceMatch = heroSubtitle.match(/^([\s\S]*?)\{([^}]+)\}([\s\S]*)$/)
+                if (braceMatch) {
+                  return (
+                    <>
+                      {braceMatch[1]}
+                      <span className="text-primary font-bold">{braceMatch[2]}</span>
+                      {braceMatch[3]}
+                    </>
+                  )
+                }
+                return heroSubtitle
+              })()
           }
         </p>
 
