@@ -6,7 +6,7 @@ import { Save, Loader2, CheckCircle2, Phone, Share2, BarChart3, ImageIcon, Type,
 import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 
-type SettingRow = { key: keyof SiteSettings; label: string; placeholder?: string; type?: 'url' | 'text' | 'image-url' | 'textarea' | 'toggle' }
+type SettingRow = { key: keyof SiteSettings; label: string; placeholder?: string; type?: 'url' | 'text' | 'image-url' | 'textarea' | 'toggle'; hint?: string }
 
 const SECTIONS: { title: string; desc: string; icon: React.ReactNode; settings: SettingRow[] }[] = [
   {
@@ -17,7 +17,7 @@ const SECTIONS: { title: string; desc: string; icon: React.ReactNode; settings: 
       { key: 'hero_badge',         label: 'Badge / Trust Pill',     placeholder: 'Built for Nigerian university campuses', type: 'text' },
       { key: 'hero_line1',         label: 'Headline Line 1',         placeholder: 'Your campus', type: 'text' },
       { key: 'hero_accent',        label: 'Headline Accent Word',    placeholder: 'marketplace.', type: 'text' },
-      { key: 'hero_subtitle',      label: 'Subtitle',                placeholder: 'Buy and sell with classmates...', type: 'textarea' },
+      { key: 'hero_subtitle',      label: 'Subtitle',                placeholder: 'Buy and sell with classmates from {campuses} and 100+ more universities...', type: 'textarea', hint: 'Use {campuses} where you want the green university names to appear (e.g. "…from {campuses} and 100+ more…").' },
       { key: 'hero_cta_primary',   label: 'Primary CTA Label',       placeholder: 'Get Started Free', type: 'text' },
       { key: 'hero_cta_secondary', label: 'Secondary CTA Label',     placeholder: 'See How It Works', type: 'text' },
     ],
@@ -159,7 +159,7 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
           </div>
 
           <div className="p-5 space-y-5">
-            {section.settings.map(({ key, label, placeholder, type }) => (
+            {section.settings.map(({ key, label, placeholder, type, hint }) => (
               <div key={key}>
                 {type === 'image-url' ? (
                   <div className="flex items-end gap-3">
@@ -245,6 +245,11 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
                           : <><Save className="w-3.5 h-3.5" /> Save</>}
                       </button>
                     </div>
+                    {hint && (
+                      <p className="mt-1.5 text-xs text-muted-foreground/70 leading-relaxed">
+                        {hint}
+                      </p>
+                    )}
                   </>
                 ) : (
                   <>
