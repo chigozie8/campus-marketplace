@@ -5,6 +5,17 @@ export type PressAsset = {
   url: string
 }
 
+export type CoFounder = {
+  name: string
+  title: string
+  initials: string
+  photo: string
+  bio: string
+  quote: string
+  linkedinUrl: string
+  twitterUrl: string
+}
+
 export type SiteSettings = {
   /* ── Press Kit ── */
   press_company_description: string
@@ -17,6 +28,7 @@ export type SiteSettings = {
   press_founder_quote: string
   press_contact_email: string
   press_assets: string
+  press_cofounders: string   // JSON: CoFounder[]
   /* ── Platform Fee ── */
   platform_fee_amount: string
   platform_fee_label: string
@@ -209,6 +221,16 @@ export function parsePressAssets(raw: string): PressAsset[] {
   try { return JSON.parse(raw) as PressAsset[] } catch { return DEFAULT_PRESS_ASSETS }
 }
 
+export const DEFAULT_COFOUNDERS: CoFounder[] = []
+
+export function parseCoFounders(raw: string): CoFounder[] {
+  if (!raw) return DEFAULT_COFOUNDERS
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) ? (v as CoFounder[]) : DEFAULT_COFOUNDERS
+  } catch { return DEFAULT_COFOUNDERS }
+}
+
 export const DEFAULT_SETTINGS: SiteSettings = {
   /* press */
   press_company_description: "VendoorX is Nigeria's #1 campus marketplace, connecting students across 120+ universities to buy and sell everything from electronics and textbooks to food and services — all powered by WhatsApp and Paystack.",
@@ -221,6 +243,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_founder_quote: 'Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.',
   press_contact_email: 'press@vendoorx.ng',
   press_assets: '',
+  press_cofounders: '',
   /* platform fee */
   platform_fee_amount: '100',
   platform_fee_label: 'VAT & Service Fee',

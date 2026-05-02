@@ -40,7 +40,9 @@ export function CountUp({
           }
         }
       },
-      { threshold: 0.3 },
+      // 0.1 threshold ensures animation fires on mobile where tall elements
+      // may only partially enter the viewport before the user scrolls past
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
     )
     obs.observe(node)
 
