@@ -52,10 +52,11 @@ export async function PUT(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidateTag('site-settings')
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   revalidatePath('/press')
   revalidatePath('/pricing')
   revalidatePath('/about')
   revalidatePath('/contact')
+  revalidatePath('/admin/settings')
   return NextResponse.json({ ok: true })
 }

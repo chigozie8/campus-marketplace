@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Save, Loader2, CheckCircle2, Phone, Share2, BarChart3, ImageIcon, Type, Layers } from 'lucide-react'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
@@ -85,10 +86,17 @@ const SECTIONS: { title: string; desc: string; icon: React.ReactNode; settings: 
 ]
 
 export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteSettings }) {
+  const router = useRouter()
   const [values, setValues] = useState<SiteSettings>(initialSettings)
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Re-sync local state whenever the server re-renders with fresh settings
+  // (e.g. after router.refresh() or a full navigation to this page).
+  useEffect(() => {
+    setValues(initialSettings)
+  }, [initialSettings])
 
   async function saveSetting(key: keyof SiteSettings) {
     setSaving(key)
@@ -101,6 +109,7 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Save failed')
       setSaved(key)
+      router.refresh()
       setTimeout(() => setSaved(null), 2500)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Save failed')
@@ -120,6 +129,7 @@ export function SiteSettingsEditor({ initialSettings }: { initialSettings: SiteS
       })
       if (!res.ok) throw new Error((await res.json()).error || 'Save failed')
       setSaved(key)
+      router.refresh()
       setTimeout(() => setSaved(null), 2500)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Auto-save failed')
