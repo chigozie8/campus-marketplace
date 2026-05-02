@@ -62,9 +62,6 @@ export default async function PressPage() {
 
       {/* ── HERO BANNER ── */}
       <section className="relative overflow-hidden bg-card border-b border-border">
-        {/* Top green stripe */}
-        <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-12">
 
