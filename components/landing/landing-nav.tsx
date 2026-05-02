@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Tag, Info, HelpCircle, BarChart3, ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Tag, Info, HelpCircle, BarChart3, ChevronDown, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
 interface LandingNavProps {
@@ -37,9 +39,19 @@ function VxLogo() {
 }
 
 export function LandingNav({ user }: LandingNavProps) {
+  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeLink, setActiveLink] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -129,6 +141,15 @@ export function LandingNav({ user }: LandingNavProps) {
                       )}
                     </div>
                   </Link>
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    title="Sign out"
+                    className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -274,6 +295,14 @@ export function LandingNav({ user }: LandingNavProps) {
                       Go to Dashboard
                     </Button>
                   </Link>
+                  <button
+                    onClick={() => { setMenuOpen(false); handleLogout() }}
+                    disabled={loggingOut}
+                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-red-200 dark:border-red-900/50 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 font-semibold text-sm transition-colors disabled:opacity-50"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {loggingOut ? 'Signing out…' : 'Sign Out'}
+                  </button>
                 </>
               ) : (
                 <>
