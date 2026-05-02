@@ -16,6 +16,7 @@ import { getSiteSettings } from '@/lib/site-settings'
 import {
   parseHiwSteps, parseFaqs, parseHeroFeatures, parseEscrowSteps, parseSectionVisibility,
   parseFooterSocials, parseCommunityChannels, parseCommunityAchievements,
+  parseStatusServices, parseStatusIncidents, parsePartnershipTypes,
 } from '@/lib/site-settings-defaults'
 import { SOCIAL_PLATFORMS } from '@/components/landing/social-icons'
 
@@ -386,6 +387,109 @@ export default async function AdminSettingsPage() {
             ios_version:      settings.ios_version      ?? '',
           }}
         />
+      </div>
+
+      {/* ── Status Page ── */}
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">System Status Page</h3>
+        <div className="space-y-3">
+          <ScalarSettingEditor
+            settingKey="status_overall_message"
+            label="Override headline"
+            description="Leave blank to auto-generate ('All Systems Operational' or 'Some Services Affected') based on service statuses below."
+            initialValue={settings.status_overall_message || ''}
+            placeholder="All Systems Operational"
+          />
+        </div>
+        <div className="mt-3">
+          <JsonListEditor
+            settingKey="status_services"
+            title="Services"
+            description="Each row is a service card shown on the /status page. Status: operational | degraded | outage."
+            fields={[
+              { key: 'name',   label: 'Service name',  placeholder: 'Marketplace & Listings' },
+              { key: 'status', label: 'Status',        type: 'select', options: ['operational', 'degraded', 'outage'] },
+              { key: 'detail', label: 'Detail message', placeholder: 'All systems working normally.', type: 'textarea' },
+            ]}
+            initialItems={parseStatusServices(settings.status_services) as unknown as { name: string; status: string; detail: string }[]}
+            blankItem={{ name: '', status: 'operational', detail: '' }}
+            maxItems={20}
+          />
+        </div>
+        <div className="mt-3">
+          <JsonListEditor
+            settingKey="status_incidents"
+            title="Past Incidents"
+            description="Incidents shown in the 'Past Incidents' section. Leave empty for the '99.9% uptime' placeholder."
+            fields={[
+              { key: 'date',       label: 'Date',        placeholder: '2 May 2026' },
+              { key: 'title',      label: 'Title',       placeholder: 'Elevated payment errors' },
+              { key: 'resolution', label: 'Resolution',  placeholder: 'Issue resolved after 45 min.', type: 'textarea' },
+            ]}
+            initialItems={parseStatusIncidents(settings.status_incidents) as unknown as { date: string; title: string; resolution: string }[]}
+            blankItem={{ date: '', title: '', resolution: '' }}
+            maxItems={20}
+          />
+        </div>
+      </div>
+
+      {/* ── Partnerships Page ── */}
+      <div>
+        <h3 className="text-sm font-black text-foreground mb-4">Partnerships Page</h3>
+        <div className="space-y-3">
+          <ScalarSettingEditor
+            settingKey="partnerships_hero_title"
+            label="Hero headline"
+            initialValue={settings.partnerships_hero_title || "Grow with VendoorX's commerce network."}
+            placeholder="Grow with VendoorX's commerce network."
+          />
+          <ScalarSettingEditor
+            settingKey="partnerships_hero_subtitle"
+            label="Hero subtitle"
+            initialValue={settings.partnerships_hero_subtitle || ''}
+            placeholder="We're building a network of partners..."
+            type="textarea"
+            rows={3}
+          />
+          <ScalarSettingEditor
+            settingKey="partnerships_cta_title"
+            label="Bottom CTA heading"
+            initialValue={settings.partnerships_cta_title || 'Ready to partner with us?'}
+            placeholder="Ready to partner with us?"
+          />
+          <ScalarSettingEditor
+            settingKey="partnerships_cta_body"
+            label="Bottom CTA body text"
+            initialValue={settings.partnerships_cta_body || ''}
+            placeholder="Tell us about your organisation..."
+            type="textarea"
+            rows={2}
+          />
+          <ScalarSettingEditor
+            settingKey="partnerships_contact_subject"
+            label="Contact form subject"
+            description="Pre-fills the subject field on /contact when visitors click 'Get in Touch'."
+            initialValue={settings.partnerships_contact_subject || 'Partnership Enquiry'}
+            placeholder="Partnership Enquiry"
+          />
+        </div>
+        <div className="mt-3">
+          <JsonListEditor
+            settingKey="partnerships_types"
+            title="Partnership type cards"
+            description="The cards on the partnerships page. Icon names from lucide-react: Zap, Building2, Megaphone, ShieldCheck, Star, Heart, Globe. Color: green | blue | rose | purple | amber | teal."
+            fields={[
+              { key: 'icon',  label: 'Icon (lucide-react)',   placeholder: 'Zap' },
+              { key: 'title', label: 'Title',                  placeholder: 'Business & Brand Partnerships' },
+              { key: 'desc',  label: 'Description',            placeholder: 'Reach Nigeria\'s most active buyers...', type: 'textarea' },
+              { key: 'cta',   label: 'CTA link label',         placeholder: 'Explore brand partnerships' },
+              { key: 'color', label: 'Color',                  type: 'select', options: ['green', 'blue', 'rose', 'purple', 'amber', 'teal'] },
+            ]}
+            initialItems={parsePartnershipTypes(settings.partnerships_types) as unknown as { icon: string; title: string; desc: string; cta: string; color: string }[]}
+            blankItem={{ icon: 'Zap', title: '', desc: '', cta: '', color: 'green' }}
+            maxItems={8}
+          />
+        </div>
       </div>
 
       <div>

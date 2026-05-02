@@ -24,7 +24,7 @@ const FaqSection             = lazyLoad(() => import('@/components/landing/faq-s
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
 const StickyMobileCta        = lazyLoad(() => import('@/components/landing/sticky-mobile-cta').then(m => ({ default: m.StickyMobileCta })))
-const AdPopup                = lazyLoad(() => import('@/components/landing/ad-popup').then(m => ({ default: m.AdPopup })))
+const AdPopup                = lazyLoad(() => import('@/components/landing/ad-popup').then(m => ({ default: m.AdPopup })), { ssr: false })
 
 export const revalidate = 300
 
@@ -233,8 +233,8 @@ export default async function Home() {
         imageUrl={settings.ad_popup_image_url || undefined}
         ctaLabel={settings.ad_popup_cta_label || undefined}
         ctaHref={settings.ad_popup_cta_href || undefined}
-        delayMs={Number(settings.ad_popup_delay_ms ?? 3000) || 3000}
-        autoCloseMs={Number(settings.ad_popup_auto_close_ms ?? 0) || 0}
+        delayMs={settings.ad_popup_delay_ms !== undefined && settings.ad_popup_delay_ms !== '' ? Number(settings.ad_popup_delay_ms) : 3000}
+        autoCloseMs={settings.ad_popup_auto_close_ms !== undefined && settings.ad_popup_auto_close_ms !== '' ? Number(settings.ad_popup_auto_close_ms) : 0}
         frequency={(settings.ad_popup_frequency as 'session' | 'once' | 'always') || 'session'}
       />
     </main>

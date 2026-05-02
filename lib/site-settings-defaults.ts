@@ -139,6 +139,17 @@ export type SiteSettings = {
   help_contact_phone: string
   help_contact_whatsapp_url: string
   help_contact_email: string
+  /* ── Status Page ── */
+  status_overall_message: string      // e.g. 'All Systems Operational'
+  status_services: string             // JSON: StatusService[]
+  status_incidents: string            // JSON: StatusIncident[]
+  /* ── Partnerships Page ── */
+  partnerships_hero_title: string
+  partnerships_hero_subtitle: string
+  partnerships_types: string          // JSON: PartnershipType[]
+  partnerships_cta_title: string
+  partnerships_cta_body: string
+  partnerships_contact_subject: string
 }
 
 /* ── Typed shapes for JSON array fields ── */
@@ -366,6 +377,80 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   help_contact_phone: '07082039150',
   help_contact_whatsapp_url: 'https://wa.me/2347082039150?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
   help_contact_email: 'support@vendoorx.ng',
+  /* Status page */
+  status_overall_message: '',
+  status_services: '',
+  status_incidents: '',
+  /* Partnerships page */
+  partnerships_hero_title: 'Grow with VendoorX\'s commerce network.',
+  partnerships_hero_subtitle: 'We\'re building a network of partners — brands, agencies, creators, and tech companies — who believe in the power of AI-driven commerce across messaging channels in Nigeria and beyond.',
+  partnerships_types: '',
+  partnerships_cta_title: 'Ready to partner with us?',
+  partnerships_cta_body: 'Tell us about your organisation and what you have in mind. Our partnerships team responds within 2 business days.',
+  partnerships_contact_subject: 'Partnership Enquiry',
+}
+
+/* ── Status Page Types ── */
+export type StatusService = {
+  name: string
+  status: 'operational' | 'degraded' | 'outage'
+  detail: string
+}
+export type StatusIncident = {
+  date: string
+  title: string
+  resolution: string
+}
+
+export const DEFAULT_STATUS_SERVICES: StatusService[] = [
+  { name: 'Marketplace & Listings',      status: 'operational', detail: 'All product pages, search, and filters are working normally.' },
+  { name: 'Seller Dashboard',            status: 'operational', detail: 'Dashboard, analytics, and listing management are fully operational.' },
+  { name: 'Paystack Checkout',           status: 'operational', detail: 'Payment processing, escrow, and wallet transfers are operating normally.' },
+  { name: 'WhatsApp Integration',        status: 'operational', detail: 'WhatsApp order links are generating correctly.' },
+  { name: 'User Authentication',         status: 'operational', detail: 'Login, registration, and session management are working.' },
+  { name: 'File Uploads (Images/Video)', status: 'operational', detail: 'Photo and video uploads are operating normally.' },
+  { name: 'Email Notifications',         status: 'operational', detail: 'Order confirmations and alerts are sending.' },
+  { name: 'API & Backend',               status: 'operational', detail: 'All backend services are responding within normal latency ranges.' },
+]
+
+export function parseStatusServices(raw: string): StatusService[] {
+  if (!raw) return DEFAULT_STATUS_SERVICES
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as StatusService[]) : DEFAULT_STATUS_SERVICES
+  } catch { return DEFAULT_STATUS_SERVICES }
+}
+
+export function parseStatusIncidents(raw: string): StatusIncident[] {
+  if (!raw) return []
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) ? (v as StatusIncident[]) : []
+  } catch { return [] }
+}
+
+/* ── Partnerships Page Types ── */
+export type PartnershipType = {
+  icon: string
+  title: string
+  desc: string
+  cta: string
+  color: string
+}
+
+export const DEFAULT_PARTNERSHIP_TYPES: PartnershipType[] = [
+  { icon: 'Zap',        title: 'Business & Brand Partnerships',    desc: 'Reach Nigeria\'s most active buyers and sellers on WhatsApp. Partner through sponsored listings, category features, and co-branded campaigns.', cta: 'Explore brand partnerships',  color: 'green' },
+  { icon: 'Building2',  title: 'Reseller & Agency Partnerships',   desc: 'Are you a digital agency or growth consultant? Resell VendoorX, earn recurring commissions, and help businesses automate WhatsApp sales.', cta: 'Become a reseller',           color: 'blue' },
+  { icon: 'Megaphone',  title: 'Affiliate & Creator Partnerships', desc: 'Are you an influencer or community leader? Join our affiliate programme, earn referral bonuses, and get exclusive creator perks.', cta: 'Become an affiliate',         color: 'rose' },
+  { icon: 'ShieldCheck',title: 'Technology Integrations',          desc: 'Want to integrate your payment, logistics, fintech, or AI product with VendoorX? We offer open APIs for complementary tech companies.', cta: 'Explore integration',         color: 'purple' },
+]
+
+export function parsePartnershipTypes(raw: string): PartnershipType[] {
+  if (!raw) return DEFAULT_PARTNERSHIP_TYPES
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) && v.length ? (v as PartnershipType[]) : DEFAULT_PARTNERSHIP_TYPES
+  } catch { return DEFAULT_PARTNERSHIP_TYPES }
 }
 
 /* ── Helpers ── */
