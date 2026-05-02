@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server-admin'
+import { createServiceClient } from '@/lib/supabase/service'
 
-const DEFAULTS = {
+const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
   hero_badge:        'Something exciting is coming',
   hero_title_line1:  'Your Campus',
@@ -14,7 +14,11 @@ const DEFAULTS = {
 
 export async function GET() {
   try {
-    const supabase = createAdminClient()
+    const supabase = createServiceClient()
+    if (!supabase) {
+      return NextResponse.json({ config: DEFAULTS })
+    }
+
     const { data, error } = await supabase
       .from('community_settings')
       .select('key, value')
@@ -24,7 +28,7 @@ export async function GET() {
       return NextResponse.json({ config: DEFAULTS })
     }
 
-    const config = { ...DEFAULTS } as Record<string, string>
+    const config = { ...DEFAULTS }
     for (const row of data ?? []) {
       config[row.key] = row.value
     }
