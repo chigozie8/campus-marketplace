@@ -1,157 +1,307 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
 import {
-  ArrowRight, Users, MessageCircle, Star, Zap, Trophy, Send, Phone,
-  Heart, Sparkles, Globe, Instagram, Facebook, Youtube, Linkedin,
-  type LucideIcon,
+  Users, Bell, ArrowRight, MessageCircle, Star,
+  Zap, Trophy, Heart, Sparkles, CheckCircle2,
 } from 'lucide-react'
-import { getSiteSettings } from '@/lib/site-settings'
-import {
-  parseCommunityChannels, parseCommunityAchievements,
-  DEFAULT_SETTINGS,
-} from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
+const AVATARS = [
+  { initials: 'AO', color: 'bg-emerald-500', delay: '0s',   top: '15%', left: '8%'  },
+  { initials: 'TK', color: 'bg-green-400',   delay: '0.4s', top: '25%', left: '88%' },
+  { initials: 'NB', color: 'bg-teal-500',    delay: '0.8s', top: '65%', left: '6%'  },
+  { initials: 'CI', color: 'bg-lime-500',    delay: '1.2s', top: '70%', left: '90%' },
+  { initials: 'EM', color: 'bg-emerald-600', delay: '0.2s', top: '45%', left: '3%'  },
+  { initials: 'RS', color: 'bg-green-600',   delay: '1s',   top: '40%', left: '94%' },
+]
 
-export const metadata: Metadata = {
-  title: 'Community | VendoorX',
-  description: 'Join the VendoorX community of 50,000+ sellers and entrepreneurs. Connect, learn, and grow together.',
+const FEATURES = [
+  { icon: MessageCircle, label: 'Campus Forums',        desc: 'Discuss, discover & connect with students at your school' },
+  { icon: Trophy,        label: 'Vendor Leaderboards',  desc: 'Top sellers earn badges & get highlighted across the feed' },
+  { icon: Zap,           label: 'Flash Deals Feed',     desc: 'Community-curated deals that disappear fast'              },
+  { icon: Star,          label: 'Peer Reviews',         desc: 'Honest ratings from real students you can trust'          },
+  { icon: Heart,         label: 'Saved Collections',    desc: 'Share wishlists and discover what your friends love'      },
+  { icon: Sparkles,      label: 'Events & Giveaways',   desc: 'Exclusive campus drops and community giveaways'           },
+]
+
+function useCountdown(targetDate: Date) {
+  const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  useEffect(() => {
+    const tick = () => {
+      const diff = targetDate.getTime() - Date.now()
+      if (diff <= 0) {
+        setTime({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+        return
+      }
+      setTime({
+        days:    Math.floor(diff / 86_400_000),
+        hours:   Math.floor((diff % 86_400_000) / 3_600_000),
+        minutes: Math.floor((diff % 3_600_000)  / 60_000),
+        seconds: Math.floor((diff % 60_000)     / 1_000),
+      })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [targetDate])
+
+  return time
 }
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Users, MessageCircle, Star, Zap, Trophy, Send, Phone,
-  Heart, Sparkles, Globe, Instagram, Facebook, Youtube, Linkedin,
-}
-function iconFor(name: string): LucideIcon {
-  return ICON_MAP[name] ?? Star
-}
+function CountdownUnit({ value, label }: { value: number; label: string }) {
+  const prev = useRef(value)
+  const [flip, setFlip] = useState(false)
 
-/** Map an admin-friendly palette name to Tailwind utility classes. */
-function paletteClasses(p: string): { color: string; bg: string } {
-  switch ((p || '').toLowerCase()) {
-    case 'amber':   return { color: 'text-amber-500',   bg: 'bg-amber-50 dark:bg-amber-950/30'   }
-    case 'purple':  return { color: 'text-purple-500',  bg: 'bg-purple-50 dark:bg-purple-950/30' }
-    case 'blue':    return { color: 'text-blue-500',    bg: 'bg-blue-50 dark:bg-blue-950/30'     }
-    case 'green':   return { color: 'text-green-600',   bg: 'bg-green-50 dark:bg-green-950/30'   }
-    case 'red':     return { color: 'text-red-500',     bg: 'bg-red-50 dark:bg-red-950/30'       }
-    case 'pink':    return { color: 'text-pink-500',    bg: 'bg-pink-50 dark:bg-pink-950/30'     }
-    case 'teal':    return { color: 'text-teal-600',    bg: 'bg-teal-50 dark:bg-teal-950/30'     }
-    case 'cyan':    return { color: 'text-cyan-600',    bg: 'bg-cyan-50 dark:bg-cyan-950/30'     }
-    case 'orange':  return { color: 'text-orange-500',  bg: 'bg-orange-50 dark:bg-orange-950/30' }
-    default:        return { color: 'text-primary',     bg: 'bg-primary/10'                      }
-  }
-}
-
-export default async function CommunityPage() {
-  const settings = await getSiteSettings()
-
-  const heroBadge   = settings.community_hero_badge        || DEFAULT_SETTINGS.community_hero_badge
-  const titleLine1  = settings.community_hero_title_line1  || DEFAULT_SETTINGS.community_hero_title_line1
-  const titleAccent = settings.community_hero_title_accent || DEFAULT_SETTINGS.community_hero_title_accent
-  const subtitle    = settings.community_hero_subtitle     || DEFAULT_SETTINGS.community_hero_subtitle
-  const sec1Title   = settings.community_section1_title    || DEFAULT_SETTINGS.community_section1_title
-  const sec2Title   = settings.community_section2_title    || DEFAULT_SETTINGS.community_section2_title
-  const ctaTitle    = settings.community_cta_title         || DEFAULT_SETTINGS.community_cta_title
-  const ctaBody     = settings.community_cta_body          || DEFAULT_SETTINGS.community_cta_body
-  const ctaLabel    = settings.community_cta_button_label  || DEFAULT_SETTINGS.community_cta_button_label
-  const ctaHref     = settings.community_cta_button_href   || DEFAULT_SETTINGS.community_cta_button_href
-
-  const channels     = parseCommunityChannels(settings.community_channels)
-  const achievements = parseCommunityAchievements(settings.community_achievements)
+  useEffect(() => {
+    if (prev.current !== value) {
+      prev.current = value
+      setFlip(true)
+      const t = setTimeout(() => setFlip(false), 300)
+      return () => clearTimeout(t)
+    }
+  }, [value])
 
   return (
-    <div className="bg-background">
-      <section className="py-20 px-4 bg-gradient-to-br from-green-50 via-background to-background dark:from-green-950/20 border-b border-border">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6">
-            <Users className="w-3.5 h-3.5" />
-            {heroBadge}
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-foreground mb-5 leading-tight">
-            {titleLine1}<br />
-            <span className="text-primary">{titleAccent}</span>
-          </h1>
-          <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">
-            {subtitle}
-          </p>
-        </div>
-      </section>
-
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col gap-14">
-
-          {/* Join channels */}
-          {channels.length > 0 && (
-            <div>
-              <h2 className="text-xl font-black text-foreground mb-6">{sec1Title}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {channels.map((c, i) => {
-                  const Icon = iconFor(c.icon)
-                  return (
-                    <a
-                      key={`${c.title}-${i}`}
-                      href={c.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group rounded-2xl border-2 border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all overflow-hidden"
-                    >
-                      <div className="h-16 flex items-center px-6 gap-3" style={{ background: c.color || '#16a34a' }}>
-                        <Icon className="w-6 h-6 text-white" />
-                        <p className="text-white font-black text-base">{c.title}</p>
-                      </div>
-                      <div className="p-5">
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{c.description}</p>
-                        <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary group-hover:gap-2.5 transition-all">
-                          {c.cta} <ArrowRight className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
-                    </a>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Community achievements */}
-          {achievements.length > 0 && (
-            <div>
-              <h2 className="text-xl font-black text-foreground mb-6">{sec2Title}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {achievements.map((a, i) => {
-                  const Icon = iconFor(a.icon)
-                  const { color, bg } = paletteClasses(a.palette)
-                  return (
-                    <div key={`${a.label}-${i}`} className="flex items-start gap-4 p-5 rounded-2xl border border-border bg-card hover:border-primary/20 transition-all">
-                      <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center shrink-0`}>
-                        <Icon className={`w-6 h-6 ${color}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-foreground">{a.label}</p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{a.description}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* CTA */}
-          <div className="text-center rounded-2xl border border-primary/20 bg-primary/5 py-12 px-6">
-            <h2 className="text-2xl font-black text-foreground mb-3">{ctaTitle}</h2>
-            <p className="text-muted-foreground text-sm mb-8 leading-relaxed max-w-md mx-auto">
-              {ctaBody}
-            </p>
-            <Link
-              href={ctaHref}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] shadow-xl shadow-primary/25"
-            >
-              {ctaLabel} <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-        </div>
-      </section>
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className={`
+          w-16 h-16 sm:w-20 sm:h-20 rounded-2xl
+          bg-white border-2 border-green-100
+          flex items-center justify-center
+          shadow-lg shadow-green-100/60
+          transition-transform duration-300
+          ${flip ? 'scale-90' : 'scale-100'}
+        `}
+      >
+        <span className="text-2xl sm:text-3xl font-black text-green-600 tabular-nums leading-none">
+          {String(value).padStart(2, '0')}
+        </span>
+      </div>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">{label}</span>
     </div>
+  )
+}
+
+export default function CommunityComingSoonPage() {
+  const [email, setEmail]       = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+
+  // Launch: 60 days from a fixed date so SSR/CSR match
+  const launchDate = new Date('2025-09-01T00:00:00Z')
+  const { days, hours, minutes, seconds } = useCountdown(launchDate)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'community' }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Something went wrong. Try again.')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-white flex flex-col">
+
+      {/* ── Background decoration ── */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        {/* Large soft green circle – top-left */}
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-green-50 opacity-80" />
+        {/* Large soft circle – bottom-right */}
+        <div className="absolute -bottom-52 -right-52 w-[700px] h-[700px] rounded-full bg-emerald-50 opacity-70" />
+        {/* Subtle grid */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right,#16a34a 1px,transparent 1px),linear-gradient(to bottom,#16a34a 1px,transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+      </div>
+
+      {/* ── Floating student avatars ── */}
+      <div aria-hidden className="pointer-events-none hidden lg:block">
+        {AVATARS.map(({ initials, color, delay, top, left }) => (
+          <div
+            key={initials}
+            className={`absolute w-11 h-11 rounded-full ${color} flex items-center justify-center text-white text-xs font-black shadow-lg`}
+            style={{
+              top, left,
+              animation: `float 4s ease-in-out ${delay} infinite`,
+            }}
+          >
+            {initials}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Main content ── */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 py-20">
+        <div className="w-full max-w-2xl flex flex-col items-center text-center gap-8">
+
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold tracking-widest uppercase px-4 py-2 rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Something exciting is coming
+          </div>
+
+          {/* Headline */}
+          <div>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-gray-950 leading-[1.05] tracking-tight text-balance">
+              Your Campus<br />
+              <span className="text-green-500">Community</span> Awaits
+            </h1>
+            <p className="mt-5 text-gray-500 text-base sm:text-lg leading-relaxed max-w-lg mx-auto text-pretty">
+              We&apos;re building a vibrant space where campus buyers, vendors, and deal-hunters come together. Forums, leaderboards, exclusive drops — all in one place.
+            </p>
+          </div>
+
+          {/* Countdown */}
+          <div className="flex items-center gap-3 sm:gap-5">
+            <CountdownUnit value={days}    label="Days"    />
+            <Dot />
+            <CountdownUnit value={hours}   label="Hours"   />
+            <Dot />
+            <CountdownUnit value={minutes} label="Mins"    />
+            <Dot />
+            <CountdownUnit value={seconds} label="Secs"    />
+          </div>
+
+          {/* Email signup */}
+          <div className="w-full bg-white border-2 border-green-100 rounded-3xl p-6 sm:p-8 shadow-xl shadow-green-50">
+            <div className="flex items-center gap-2 justify-center mb-1">
+              <Bell className="w-4 h-4 text-green-500" />
+              <p className="text-sm font-bold text-gray-800">Get early access</p>
+            </div>
+            <p className="text-xs text-gray-400 mb-5">
+              Join {' '}
+              <span className="text-green-600 font-semibold">2,400+ students</span>
+              {' '}already on the waitlist. No spam, ever.
+            </p>
+
+            {!submitted ? (
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2.5">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  disabled={loading}
+                  required
+                  className="flex-1 min-w-0 bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 active:scale-95 disabled:opacity-60 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all whitespace-nowrap shadow-md shadow-green-200"
+                >
+                  {loading ? 'Saving…' : (
+                    <>Notify Me <ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center justify-center gap-2.5 py-2 text-green-600 font-semibold text-sm">
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                You&apos;re on the list! We&apos;ll reach out soon.
+              </div>
+            )}
+
+            {error && <p className="mt-2 text-xs text-red-500 text-left">{error}</p>}
+          </div>
+
+          {/* Features grid */}
+          <div className="w-full">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">
+              What&apos;s coming
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {FEATURES.map(({ icon: Icon, label, desc }) => (
+                <div
+                  key={label}
+                  className="flex items-start gap-3 p-4 rounded-2xl border border-gray-100 bg-white hover:border-green-200 hover:shadow-md hover:shadow-green-50 transition-all text-left"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">{label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Social proof avatars */}
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2.5">
+              {['AO','TK','NB','CI','EM'].map((init, i) => (
+                <div
+                  key={init}
+                  className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-black text-white ${
+                    ['bg-emerald-500','bg-green-400','bg-teal-500','bg-lime-500','bg-green-600'][i]
+                  }`}
+                >
+                  {init}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">
+              <span className="font-bold text-gray-700">2,400+ students</span> waiting to join
+            </p>
+          </div>
+
+        </div>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="relative z-10 border-t border-gray-100 py-5 px-5 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-1">
+          <Users className="w-3.5 h-3.5 text-green-500" />
+          <span className="text-xs font-black text-gray-800 tracking-tight">
+            Vendoor<span className="text-green-500">X</span> Community
+          </span>
+        </div>
+        <p className="text-[11px] text-gray-400">
+          &copy; {new Date().getFullYear()} VendoorX &middot; Building Nigeria&apos;s campus marketplace
+        </p>
+      </footer>
+
+      {/* ── Float keyframes ── */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px);   }
+          50%       { transform: translateY(-12px); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+function Dot() {
+  return (
+    <span className="text-2xl font-black text-green-300 leading-none select-none mb-6">:</span>
   )
 }
