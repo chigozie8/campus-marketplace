@@ -22,7 +22,7 @@ const AVATAR_META: Omit<AvatarMeta, 'src'>[] = [
   { alt: 'Online seller Nigeria',          fallback: 'FA', color: 'bg-cyan-600' },
 ]
 
-const DEFAULT_CAMPUSES_LIST = ['UNILAG', 'ABU', 'UI', 'OAU', 'BUK']
+const DEFAULT_CAMPUSES_LIST = ['UNILAG', 'ABU', 'UI', 'OAU', 'BUK', 'EBSU', 'AE-FUNIA']
 
 interface HeroSectionProps {
   user?: User | null

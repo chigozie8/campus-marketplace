@@ -3,11 +3,18 @@ import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { sendFcmNotification } from '@/lib/firebase-admin'
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+const vapidReady =
+  !!process.env.VAPID_SUBJECT &&
+  !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
+  !!process.env.VAPID_PRIVATE_KEY
+
+if (vapidReady) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  )
+}
 
 interface PushSubscription {
   endpoint: string
@@ -84,7 +91,7 @@ export async function POST(req: Request) {
     let webSent = 0
     const expiredEndpoints: string[] = []
 
-    if (webSubs.length > 0) {
+    if (webSubs.length > 0 && vapidReady) {
       const results = await Promise.allSettled(
         webSubs.map((sub) =>
           webpush.sendNotification(
