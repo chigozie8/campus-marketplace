@@ -61,7 +61,7 @@ export default async function PressPage() {
     <div className="bg-background min-h-screen">
 
       {/* ── HERO BANNER ── */}
-      <section className="relative overflow-hidden bg-foreground">
+      <section className="relative overflow-hidden bg-card border-b border-border">
         {/* Top green stripe */}
         <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
@@ -73,10 +73,10 @@ export default async function PressPage() {
                 <FileText className="w-3 h-3" />
                 Media &amp; Press
               </span>
-              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-black text-white leading-[0.92] tracking-tighter mb-5">
+              <h1 className="text-5xl sm:text-6xl lg:text-8xl font-black text-foreground leading-[0.92] tracking-tighter mb-5">
                 News<span className="text-primary">room</span>
               </h1>
-              <p className="text-white/55 text-sm sm:text-base leading-relaxed max-w-lg">
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-lg">
                 Writing about VendoorX? We&apos;ve got everything you need — brand assets, key statistics, company background, founder details, and media contact.
               </p>
             </div>
@@ -91,7 +91,7 @@ export default async function PressPage() {
               </a>
               <Link
                 href="/contact?subject=Press Enquiry"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border border-white/20 hover:border-primary/60 text-white/80 hover:text-white font-semibold text-sm transition-all"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border border-border hover:border-primary/60 text-foreground/80 hover:text-foreground font-semibold text-sm transition-all"
               >
                 Send Press Enquiry <ArrowRight className="w-4 h-4" />
               </Link>
@@ -99,8 +99,6 @@ export default async function PressPage() {
 
           </div>
         </div>
-
-        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
       </section>
 
       {/* ── STATS STRIP ── */}
@@ -213,7 +211,7 @@ export default async function PressPage() {
                             unoptimized
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-foreground text-white text-2xl sm:text-3xl font-black">
+                          <div className="w-full h-full flex items-center justify-center bg-primary text-white text-2xl sm:text-3xl font-black">
                             {founder.initials || founder.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                         )}
@@ -363,7 +361,7 @@ export default async function PressPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             {[
-              { store: 'App Store',    label: 'Download on the', bg: 'bg-foreground', url: settings.ios_download_url },
+              { store: 'App Store',    label: 'Download on the', bg: 'bg-primary',    url: settings.ios_download_url },
               { store: 'Google Play',  label: 'Get it on',       bg: 'bg-[#01875f]',  url: settings.apk_download_url },
             ].map(({ store, label, bg, url }) => (
               <div
@@ -442,7 +440,7 @@ export default async function PressPage() {
                   )}
                   <Link
                     href="/contact?subject=Press Enquiry"
-                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-foreground hover:bg-foreground/90 text-white font-bold text-sm transition-all"
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all"
                   >
                     Send Press Enquiry <ArrowRight className="w-4 h-4" />
                   </Link>
