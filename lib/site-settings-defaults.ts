@@ -29,6 +29,11 @@ export type SiteSettings = {
   press_contact_email: string
   press_assets: string
   press_cofounders: string   // JSON: CoFounder[]
+  /* ── Company Snapshot ── */
+  press_founded: string
+  press_headquarters: string
+  press_model: string
+  press_stage: string
   /* ── Platform Fee ── */
   platform_fee_amount: string
   platform_fee_label: string
@@ -244,6 +249,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   press_contact_email: 'press@vendoorx.ng',
   press_assets: '',
   press_cofounders: '',
+  press_founded: '2022',
+  press_headquarters: 'Victoria Island, Lagos',
+  press_model: 'WhatsApp Commerce SaaS',
+  press_stage: 'Growth — Series A Ready',
   /* platform fee */
   platform_fee_amount: '100',
   platform_fee_label: 'VAT & Service Fee',

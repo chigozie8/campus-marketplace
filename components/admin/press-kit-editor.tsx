@@ -86,6 +86,10 @@ export function PressKitEditor({ initialSettings }: Props) {
         press_founder_bio2: settings.press_founder_bio2,
         press_founder_quote: settings.press_founder_quote,
         press_contact_email: settings.press_contact_email,
+        press_founded: settings.press_founded,
+        press_headquarters: settings.press_headquarters,
+        press_model: settings.press_model,
+        press_stage: settings.press_stage,
         press_assets: JSON.stringify(assets),
         press_cofounders: JSON.stringify(cofounders),
       }
@@ -125,6 +129,47 @@ export function PressKitEditor({ initialSettings }: Props) {
             onChange={e => set('press_company_description', e.target.value)}
           />
         </Field>
+      </Section>
+
+      {/* ── Company Snapshot ── */}
+      <Section icon={<FileText className="w-4 h-4" />} title="Company Snapshot">
+        <p className="text-xs text-muted-foreground mb-4">
+          These appear as the four quick-fact chips on the Newsroom page (Founded, Headquarters, Model, Stage).
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Founded">
+            <input
+              className={inputCls}
+              placeholder="e.g. 2022"
+              value={settings.press_founded}
+              onChange={e => set('press_founded', e.target.value)}
+            />
+          </Field>
+          <Field label="Headquarters">
+            <input
+              className={inputCls}
+              placeholder="e.g. Victoria Island, Lagos"
+              value={settings.press_headquarters}
+              onChange={e => set('press_headquarters', e.target.value)}
+            />
+          </Field>
+          <Field label="Business Model">
+            <input
+              className={inputCls}
+              placeholder="e.g. WhatsApp Commerce SaaS"
+              value={settings.press_model}
+              onChange={e => set('press_model', e.target.value)}
+            />
+          </Field>
+          <Field label="Stage">
+            <input
+              className={inputCls}
+              placeholder="e.g. Growth — Series A Ready"
+              value={settings.press_stage}
+              onChange={e => set('press_stage', e.target.value)}
+            />
+          </Field>
+        </div>
       </Section>
 
       {/* ── Primary Founder ── */}
