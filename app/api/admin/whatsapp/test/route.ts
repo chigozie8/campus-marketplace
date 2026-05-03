@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${backendUrl}/webhook/simulate`, {
+    const res = await fetch(`${backendUrl}/api/webhooks/simulate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
