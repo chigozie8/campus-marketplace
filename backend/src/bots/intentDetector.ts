@@ -51,10 +51,17 @@ export function detectIntent(text: string): IntentResult {
   if (BUY_WORD.test(t))  return { intent: 'buy_prompt', payload: null }
   if (PRICE_WORD.test(t)) return { intent: 'price',     payload: { query: t } }
 
-  const matched = SEARCH_KEYWORDS.find((kw) => t.toLowerCase().includes(kw))
+  const tLower = t.toLowerCase()
+  const matched = SEARCH_KEYWORDS.find((kw) => tLower.includes(kw))
   if (matched) return { intent: 'search', payload: { keyword: matched } }
 
-  if (t.split(' ').length >= 2) return { intent: 'search', payload: { keyword: t } }
+  // Only treat short (1-3 word) messages with no question words as a product search.
+  // Longer conversational messages fall through to 'help' so the AI can answer them.
+  const QUESTION_WORDS = /\b(how|why|what|when|where|who|can|could|would|should|is|are|do|does|did|will|please|tell|explain|show|about|which|safe|legit|trust|scam|issue|problem|error)\b/i
+  const wordCount = t.split(/\s+/).length
+  if (wordCount <= 3 && !QUESTION_WORDS.test(t)) {
+    return { intent: 'search', payload: { keyword: t } }
+  }
 
   return { intent: 'help', payload: null }
 }
