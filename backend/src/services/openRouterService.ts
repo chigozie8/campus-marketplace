@@ -2,7 +2,7 @@ import axios from 'axios'
 import logger from '../utils/logger.js'
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'openai/gpt-3.5-turbo' // free-tier model on OpenRouter
+const MODEL = 'openai/gpt-oss-120b:free' // OpenAI GPT-OSS 120B — free tier on OpenRouter
 
 const SYSTEM_PROMPT = `You are the VendoorX WhatsApp assistant — a helpful, friendly, and concise AI bot for Nigeria's #1 campus marketplace.
 
