@@ -32,6 +32,29 @@ function extractFcmToken(endpoint: string): string {
   return parts.slice(2).join(':')
 }
 
+/** Retry a push attempt up to `maxAttempts` times with exponential backoff. */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 300,
+): Promise<T> {
+  let lastErr: unknown
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn()
+    } catch (err: unknown) {
+      lastErr = err
+      // 410 Gone = subscription expired — don't retry, surface immediately
+      const status = (err as { statusCode?: number })?.statusCode
+      if (status === 410 || status === 404) throw err
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, baseDelayMs * 2 ** (attempt - 1)))
+      }
+    }
+  }
+  throw lastErr
+}
+
 export async function POST(req: Request) {
   try {
     // Two ways in:
@@ -94,18 +117,28 @@ export async function POST(req: Request) {
     if (webSubs.length > 0 && vapidReady) {
       const results = await Promise.allSettled(
         webSubs.map((sub) =>
-          webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            webPayload
+          withRetry(() =>
+            webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+              webPayload,
+            )
           )
         )
       )
 
       webSubs.forEach((sub, i) => {
-        if (results[i].status === 'fulfilled') {
+        const r = results[i]
+        if (r.status === 'fulfilled') {
           webSent++
         } else {
-          expiredEndpoints.push(sub.endpoint)
+          const status = (r.reason as { statusCode?: number })?.statusCode
+          if (status === 410 || status === 404) {
+            // Subscription genuinely expired — remove it
+            expiredEndpoints.push(sub.endpoint)
+          } else {
+            // Transient error after all retries — log but don't delete the subscription
+            console.error('[push/send] Web push failed after retries:', sub.endpoint, r.reason)
+          }
         }
       })
 

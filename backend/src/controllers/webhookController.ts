@@ -95,6 +95,30 @@ export async function whatsAppWebhook(req: Request, res: Response, next: NextFun
   }
 }
 
+// ─── Admin bot simulation ────────────────────────────────────────────────────
+
+export async function simulateBotMessage(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const internalKey = req.headers['x-internal-key']
+    if (!internalKey || internalKey !== process.env.INTERNAL_API_KEY) {
+      res.status(401).json({ success: false, message: 'Unauthorized' })
+      return
+    }
+
+    const { phone, message } = req.body as { phone?: string; message?: string }
+    if (!phone || !message) {
+      res.status(400).json({ success: false, message: 'phone and message are required' })
+      return
+    }
+
+    logger.info(`[Bot Simulate] Admin triggered test message to ${phone}: "${message}"`)
+    await addMessageJob({ from: phone, text: message, platform: 'whatsapp' })
+    res.status(200).json({ ok: true })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // ─── Instagram ──────────────────────────────────────────────────────────────
 
 export function verifyInstagram(req: Request, res: Response): void {
