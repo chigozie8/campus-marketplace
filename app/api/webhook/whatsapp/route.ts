@@ -26,6 +26,7 @@ import {
   getSessionStatus,
   getInboundStats,
   getGlobalDailyCount,
+  canSendTosReminder,
 } from '@/lib/whatsapp/consent'
 import {
   TOS_PROMPT_MSG,
@@ -187,12 +188,18 @@ async function handleMessage(from: string, text: string) {
       await sendWhatsApp(from, OPTED_OUT_MSG(), { bypassSafety: true, immediate: true })
       return
     }
-    // Re-send the TOS reminder (polite, not spammy)
-    await sendWhatsApp(from, TOS_PENDING_REMINDER_MSG(), { bypassSafety: true })
+    // Re-send the TOS reminder — but only once per 60 s so it's not spammy
+    const allowed = await canSendTosReminder(from)
+    if (allowed) {
+      await sendWhatsApp(from, TOS_PENDING_REMINDER_MSG(), { bypassSafety: true })
+    }
     return
   }
 
   // ── 5. Fully opted-in — run the full bot ─────────────────────────
+  // Mark session as connected on first real message (shows up in admin health check)
+  setSessionStatus('connected').catch(() => {})
+
   try {
     const reply = await buildReply(from, text)
 

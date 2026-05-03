@@ -120,6 +120,19 @@ export function isValidPhone(phone: string): boolean {
   return PHONE_RE.test(cleaned)
 }
 
+// ─── TOS reminder cooldown ────────────────────────────────────────────────────
+// Don't re-send the TOS prompt more than once per minute per user.
+// Prevents the bot feeling spammy to users who take time to read the terms.
+const TOS_REMINDER_COOLDOWN = 60 // seconds
+
+export async function canSendTosReminder(phone: string): Promise<boolean> {
+  const k = key(phone, 'tos_reminder')
+  const exists = await rGet(k)
+  if (exists) return false
+  await rSet(k, '1', TOS_REMINDER_COOLDOWN)
+  return true
+}
+
 // ─── Admin / test helpers ─────────────────────────────────────────────────────
 
 /** Full consent reset for a user (admin / testing only). */

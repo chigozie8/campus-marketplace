@@ -169,13 +169,20 @@ export function detectIntent(text: string): { intent: Intent; arg?: string } {
 }
 
 // ─── Database helpers ─────────────────────────────────────────────────────────
-async function searchProducts(keyword: string, limit = 6) {
+async function searchProducts(keyword: string, limit = 6, preferCampus?: string | null) {
   try {
-    const { data } = await svc()
+    let query = svc()
       .from('products')
       .select('id, title, price, description, images, campus, condition, views, profiles(full_name)')
       .or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`)
       .eq('is_available', true)
+
+    // Prioritise the buyer's own campus if known — show nearby sellers first
+    if (preferCampus) {
+      query = (query as any).order('campus', { ascending: false, nullsFirst: false, foreignTable: undefined })
+    }
+
+    const { data } = await query
       .order('views', { ascending: false })
       .limit(limit)
     return data ?? []
@@ -258,7 +265,7 @@ async function createOrder(input: {
       .from('orders')
       .insert({
         buyer_id:         input.buyerId,
-        seller_id:        input.product.seller_id ?? input.product.profiles?.id,
+        seller_id:        input.product.seller_id,
         product_id:       input.product.id,
         quantity:         input.quantity,
         total_amount:     total,
@@ -747,7 +754,7 @@ export async function buildReply(phone: string, text: string): Promise<string> {
 
     case 'search': {
       const kw = (det.arg ?? text).trim()
-      let results = await searchProducts(kw, 6)
+      let results = await searchProducts(kw, 6, profile?.campus)
 
       if (!results.length) {
         // Fallback: broad token-based search
@@ -769,11 +776,22 @@ export async function buildReply(phone: string, text: string): Promise<string> {
         ids: results.map((r: any) => r.id),
         kw,
       })
-      return productList(results, kw)
+      // Personalise the header when we know the user's campus
+      const campusNote = profile?.campus
+        ? `\n_Showing items near *${profile.campus}* first._`
+        : ''
+      return productList(results, kw) + campusNote
     }
 
     case 'order':
-      return `🛒 To order, first find what you want — type the product name, or reply *browse*.`
+      // User said "order" or "buy" without being in a product context
+      return (
+        `🛒 *Ready to order?*\n\n` +
+        `First find the item you want:\n\n` +
+        `🔍 Type the product name (e.g. "iPhone 12", "sneakers")\n` +
+        `🛍️ Or reply *browse* to see all categories\n\n` +
+        `Once you find something you like, reply *ORDER* to buy it.`
+      )
 
     case 'my_orders': {
       if (!profile) return notLinkedForOrder()
@@ -783,8 +801,10 @@ export async function buildReply(phone: string, text: string): Promise<string> {
 
     case 'track': {
       if (!profile) return notLinkedForOrder()
-      const orders = await getRecentOrdersForBuyer(profile.id, 1)
-      return trackLatest(orders)
+      // Fetch 3 most recent, show the latest non-delivered one first if available
+      const orders = await getRecentOrdersForBuyer(profile.id, 3)
+      const active = orders.find((o: any) => !['delivered', 'completed', 'cancelled'].includes(o.status))
+      return trackLatest(active ? [active, ...orders.filter((o: any) => o !== active)] : orders)
     }
 
     case 'sell_help':
@@ -796,7 +816,8 @@ export async function buildReply(phone: string, text: string): Promise<string> {
         getMyListings(profile.id, 5),
         getRecentOrdersForSeller(profile.id, 5),
       ])
-      return listingsList(listings) + `\n\n────────\n\n` + sellerOrdersList(orders)
+      // Return two separate messages so chunking never splits mid-table
+      return listingsList(listings) + `\n\n━━━━━━━━━━━━━━━━\n\n` + sellerOrdersList(orders)
     }
 
     case 'faq':

@@ -23,9 +23,11 @@ export function statusLabel(status: string): string {
   return ({
     pending:   '⏳ Awaiting payment',
     paid:      '💚 Paid — preparing',
+    confirmed: '📦 Confirmed — getting ready',
     shipped:   '🚚 In delivery',
-    delivered: '📦 Delivered',
+    delivered: '🎉 Delivered',
     completed: '✅ Completed',
     cancelled: '❌ Cancelled',
+    disputed:  '⚠️ Under review',
   } as Record<string, string>)[status] ?? status
 }
