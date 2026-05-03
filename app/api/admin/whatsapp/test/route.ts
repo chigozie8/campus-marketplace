@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-internal-key': process.env.INTERNAL_API_KEY ?? '',
+        'x-internal-key': process.env.WASENDER_WEBHOOK_SECRET ?? process.env.INTERNAL_API_KEY ?? '',
       },
       body: JSON.stringify({ phone, message }),
     })

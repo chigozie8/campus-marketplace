@@ -99,8 +99,10 @@ export async function whatsAppWebhook(req: Request, res: Response, next: NextFun
 
 export async function simulateBotMessage(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const internalKey = req.headers['x-internal-key']
-    if (!internalKey || internalKey !== process.env.INTERNAL_API_KEY) {
+    // Reuse WASENDER_WEBHOOK_SECRET as the internal key — already required in .env
+    const expectedKey = process.env.WASENDER_WEBHOOK_SECRET ?? process.env.INTERNAL_API_KEY
+    const providedKey = req.headers['x-internal-key']
+    if (!expectedKey || !providedKey || !safeEqual(String(providedKey), expectedKey)) {
       res.status(401).json({ success: false, message: 'Unauthorized' })
       return
     }
