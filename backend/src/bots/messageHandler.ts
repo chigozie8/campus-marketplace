@@ -45,7 +45,7 @@ function resolveMenuShortcut(text: string): string | null {
     '2': 'order',
     '3': 'refund',
     '4': 'contact seller',
-    '5': 'how does vendoorx work',
+    '5': 'how does vendoor x work',
     '6': 'agent',
   }
   return map[t] ?? null
