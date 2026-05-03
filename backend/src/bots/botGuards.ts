@@ -26,7 +26,7 @@ const MAX_MESSAGES_PER_WINDOW = 10
 const WINDOW_SECONDS = 60
 
 /** How long (seconds) to remember a message for deduplication. */
-const DEDUP_TTL_SECONDS = 30
+const DEDUP_TTL_SECONDS = 10
 
 // ─── In-process fallback stores (used when Upstash is unavailable) ───────────
 
