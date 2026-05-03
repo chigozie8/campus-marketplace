@@ -68,29 +68,61 @@ function verifyWasenderSignature(req: Request, rawBody: Buffer | string | undefi
 
 function extractFromWasender(body: any): { from: string; text: string } | null {
   if (!body) return null
-  const msg = body?.data?.messages?.[0] ?? body?.messages?.[0]
-  if (msg) {
-    if (msg?.key?.fromMe) return null
-    const remoteJid: string = msg?.key?.remoteJid ?? msg?.remoteJid ?? ''
-    const phone = remoteJid.split('@')[0] ?? ''
-    if (!phone) return null
 
-    const m = msg?.message ?? {}
-    const text: string =
-      m?.conversation ??
-      m?.extendedTextMessage?.text ??
-      m?.imageMessage?.caption ??
-      m?.videoMessage?.caption ??
-      m?.buttonsResponseMessage?.selectedDisplayText ??
-      m?.listResponseMessage?.title ??
+  logger.info('[WhatsApp] Raw webhook body: ' + JSON.stringify(body))
+
+  // WaSender sends data.messages as a single object (not an array)
+  // Ref: https://wasenderapi.com/api-docs/webhooks/webhook-message-received
+  const rawMsg = body?.data?.messages ?? body?.data?.message
+  // Support both object and array formats defensively
+  const msg = Array.isArray(rawMsg) ? rawMsg[0] : rawMsg
+
+  if (msg) {
+    // Ignore messages sent by the bot itself
+    if (msg?.key?.fromMe === true) {
+      logger.info('[WhatsApp] Ignoring outgoing message (fromMe=true)')
+      return null
+    }
+
+    // WaSender recommends cleanedSenderPn for private chats
+    const phone: string =
+      msg?.key?.cleanedSenderPn ??
+      msg?.key?.senderPn?.replace('@s.whatsapp.net', '') ??
+      msg?.key?.remoteJid?.split('@')[0] ??
       ''
-    if (!text) return null
-    return { from: phone, text }
+
+    if (!phone) {
+      logger.warn('[WhatsApp] Could not extract phone from message key: ' + JSON.stringify(msg?.key))
+      return null
+    }
+
+    // WaSender sends text in messageBody (top-level) and also in message.conversation
+    const text: string =
+      msg?.messageBody ??
+      msg?.message?.conversation ??
+      msg?.message?.extendedTextMessage?.text ??
+      msg?.message?.imageMessage?.caption ??
+      msg?.message?.videoMessage?.caption ??
+      msg?.message?.buttonsResponseMessage?.selectedDisplayText ??
+      msg?.message?.listResponseMessage?.title ??
+      ''
+
+    if (!text.trim()) {
+      logger.info('[WhatsApp] Skipping message with no text content')
+      return null
+    }
+
+    return { from: phone, text: text.trim() }
   }
 
+  // Fallback: some integrations send a flat structure
   const directFrom = body?.from ?? body?.sender ?? body?.phone
-  const directText = body?.text ?? body?.message ?? body?.body
-  if (directFrom && directText) return { from: String(directFrom), text: String(directText) }
+  const directText = body?.text ?? body?.message ?? body?.body ?? body?.messageBody
+  if (directFrom && directText) {
+    return { from: String(directFrom), text: String(directText).trim() }
+  }
+
+  logger.warn('[WhatsApp] Could not extract message from payload — unknown format')
   return null
 }
 
