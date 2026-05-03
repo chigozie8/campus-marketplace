@@ -118,10 +118,16 @@ export interface WhatsAppMessage {
   text?: { body: string }
 }
 
+export interface BotSessionAiMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export interface BotSession {
   phone: string
   lastIntent?: string
   lastProductId?: string
+  aiHistory?: BotSessionAiMessage[]
   updatedAt: number
 }
 

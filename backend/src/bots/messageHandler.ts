@@ -5,6 +5,7 @@ import { sendMessage } from '../services/whatsappService.js'
 import { redis } from '../config/redisClient.js'
 import logger from '../utils/logger.js'
 import { BotSession } from '../types/index.js'
+import { askOpenRouter, ChatMessage } from '../services/openRouterService.js'
 
 const inMemorySessions = new Map<string, BotSession>()
 const SESSION_TTL = 1800 // 30 minutes
@@ -116,8 +117,30 @@ export async function handleIncomingMessage(phone: string, rawText: string): Pro
         session.lastIntent = 'human'
         break
 
-      default:
-        reply = rb.buildHelp()
+      default: {
+        // Build conversation history for the AI (user/assistant pairs only)
+        const history: ChatMessage[] = (session.aiHistory ?? []).map((m) => ({
+          role: m.role,
+          content: m.content,
+        }))
+
+        const aiReply = await askOpenRouter(text, history)
+
+        if (aiReply) {
+          reply = aiReply
+          // Store the exchange in session history (keep last 6 messages = 3 turns)
+          const updatedHistory = [
+            ...(session.aiHistory ?? []),
+            { role: 'user' as const, content: text },
+            { role: 'assistant' as const, content: aiReply },
+          ].slice(-6)
+          session.aiHistory = updatedHistory
+        } else {
+          reply = rb.buildHelp()
+        }
+        session.lastIntent = 'ai'
+        break
+      }
     }
   } catch (err) {
     logger.error(`[Bot] Handler error for ${phone}:`, err)
