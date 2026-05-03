@@ -91,6 +91,6 @@ export async function sendTemplate(
   _templateId: string,
   params: string[] = [],
 ): Promise<void> {
-  const text = params.length ? params.join(' ') : 'Hello from VendoorX'
+  const text = params.length ? params.join(' ') : 'Hello from Vendoor X'
   await sendMessage(to, text)
 }

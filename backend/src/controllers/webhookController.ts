@@ -19,24 +19,50 @@ function safeEqual(a: string, b: string): boolean {
   catch { return false }
 }
 
-function verifyWasenderSignature(rawBody: Buffer | string | undefined, signature: string | undefined): boolean {
+function verifyWasenderSignature(req: Request, rawBody: Buffer | string | undefined): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
-  if (!secret) {
-    // Fail-closed in production, permissive in dev for initial setup
-    return process.env.NODE_ENV !== 'production'
+
+  // Log every header in dev so we can see exactly what WaSender sends
+  if (process.env.NODE_ENV !== 'production') {
+    logger.info('[WhatsApp] Webhook headers: ' + JSON.stringify(req.headers))
   }
-  if (!rawBody || !signature) return false
 
-  const sig     = signature.replace(/^sha256=/i, '').trim()
-  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : rawBody
+  // If no secret is configured, allow all (useful during initial setup)
+  if (!secret) {
+    logger.warn('[WhatsApp] WASENDER_WEBHOOK_SECRET not set — accepting all webhooks')
+    return true
+  }
 
-  // A) Raw secret token sent as the signature (older WaSender)
-  if (safeEqual(sig, secret)) return true
-  // B) HMAC-SHA256 hex
-  if (safeEqual(sig, crypto.createHmac('sha256', secret).update(payload).digest('hex'))) return true
-  // C) HMAC-SHA256 base64
-  if (safeEqual(sig, crypto.createHmac('sha256', secret).update(payload).digest('base64'))) return true
+  // Collect every possible signature header WaSender might send
+  const candidates: string[] = [
+    req.headers['x-webhook-signature'],
+    req.headers['x-wasender-signature'],
+    req.headers['webhook-signature'],
+    req.headers['signature'],
+    req.headers['x-hub-signature-256'],
+    req.headers['authorization'],
+    req.headers['x-webhook-token'],
+    req.headers['x-api-key'],
+  ]
+    .filter(Boolean)
+    .map((h) => String(h).replace(/^(Bearer |sha256=)/i, '').trim())
 
+  if (candidates.length === 0) {
+    logger.warn('[WhatsApp] No signature header found — accepting (check WaSender webhook config)')
+    return true
+  }
+
+  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : (rawBody ?? '')
+  const hmacHex    = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+  const hmacBase64 = crypto.createHmac('sha256', secret).update(payload).digest('base64')
+
+  for (const sig of candidates) {
+    if (safeEqual(sig, secret))      return true  // raw token match
+    if (safeEqual(sig, hmacHex))     return true  // HMAC-SHA256 hex
+    if (safeEqual(sig, hmacBase64))  return true  // HMAC-SHA256 base64
+  }
+
+  logger.warn('[WhatsApp] Signature mismatch — candidates: ' + JSON.stringify(candidates))
   return false
 }
 
@@ -70,14 +96,10 @@ function extractFromWasender(body: any): { from: string; text: string } | null {
 
 export async function whatsAppWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const signature =
-      (req.headers['x-webhook-signature'] as string | undefined) ??
-      (req.headers['x-wasender-signature'] as string | undefined) ??
-      (req.headers['webhook-signature']   as string | undefined) ??
-      (req.headers['signature']           as string | undefined)
     const rawBody = (req as AuthRequest & { rawBody?: Buffer }).rawBody
 
-    if (!verifyWasenderSignature(rawBody, signature)) {
+    if (!verifyWasenderSignature(req, rawBody)) {
+      logger.warn(`[WhatsApp] Rejected webhook from ${req.ip} — invalid signature`)
       res.status(401).json({ success: false, message: 'Invalid signature.' })
       return
     }
