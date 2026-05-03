@@ -4,6 +4,8 @@ import { addMessageJob } from '../queues/messageQueue.js'
 import { AuthRequest } from '../types/index.js'
 import logger from '../utils/logger.js'
 
+// NOTE: AuthRequest is still used for the Paystack rawBody extraction below
+
 // ─── WhatsApp (WaSenderAPI) ──────────────────────────────────────────────────
 
 import crypto from 'crypto'
@@ -19,50 +21,29 @@ function safeEqual(a: string, b: string): boolean {
   catch { return false }
 }
 
-function verifyWasenderSignature(req: Request, rawBody: Buffer | string | undefined): boolean {
+function verifyWasenderSignature(req: Request): boolean {
   const secret = process.env.WASENDER_WEBHOOK_SECRET
 
-  // Log every header in dev so we can see exactly what WaSender sends
-  if (process.env.NODE_ENV !== 'production') {
-    logger.info('[WhatsApp] Webhook headers: ' + JSON.stringify(req.headers))
-  }
+  // Always log the incoming signature header so Railway logs show it
+  const incoming = req.headers['x-webhook-signature'] as string | undefined
+  logger.info(`[WhatsApp] Webhook received — X-Webhook-Signature: "${incoming ?? 'none'}"`)
 
-  // If no secret is configured, allow all (useful during initial setup)
+  // If no secret is configured, accept everything
   if (!secret) {
     logger.warn('[WhatsApp] WASENDER_WEBHOOK_SECRET not set — accepting all webhooks')
     return true
   }
 
-  // Collect every possible signature header WaSender might send
-  const candidates: string[] = [
-    req.headers['x-webhook-signature'],
-    req.headers['x-wasender-signature'],
-    req.headers['webhook-signature'],
-    req.headers['signature'],
-    req.headers['x-hub-signature-256'],
-    req.headers['authorization'],
-    req.headers['x-webhook-token'],
-    req.headers['x-api-key'],
-  ]
-    .filter(Boolean)
-    .map((h) => String(h).replace(/^(Bearer |sha256=)/i, '').trim())
-
-  if (candidates.length === 0) {
-    logger.warn('[WhatsApp] No signature header found — accepting (check WaSender webhook config)')
+  // Per WaSender docs: X-Webhook-Signature is sent as a plain secret token
+  // Docs example: if (!signature || !webhookSecret || signature !== webhookSecret) return false
+  if (!incoming) {
+    logger.warn('[WhatsApp] No X-Webhook-Signature header — accepting (configure secret in WaSender dashboard)')
     return true
   }
 
-  const payload = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : (rawBody ?? '')
-  const hmacHex    = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-  const hmacBase64 = crypto.createHmac('sha256', secret).update(payload).digest('base64')
+  if (safeEqual(incoming.trim(), secret.trim())) return true
 
-  for (const sig of candidates) {
-    if (safeEqual(sig, secret))      return true  // raw token match
-    if (safeEqual(sig, hmacHex))     return true  // HMAC-SHA256 hex
-    if (safeEqual(sig, hmacBase64))  return true  // HMAC-SHA256 base64
-  }
-
-  logger.warn('[WhatsApp] Signature mismatch — candidates: ' + JSON.stringify(candidates))
+  logger.warn(`[WhatsApp] Signature mismatch — rejecting webhook`)
   return false
 }
 
@@ -126,13 +107,27 @@ function extractFromWasender(body: any): { from: string; text: string } | null {
   return null
 }
 
+// Incoming message events we care about — all others are status/session updates
+const INCOMING_MESSAGE_EVENTS = new Set([
+  'messages.received',
+  'messages-personal.received',
+  'messages.upsert',
+])
+
 export async function whatsAppWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const rawBody = (req as AuthRequest & { rawBody?: Buffer }).rawBody
-
-    if (!verifyWasenderSignature(req, rawBody)) {
+    if (!verifyWasenderSignature(req)) {
       logger.warn(`[WhatsApp] Rejected webhook from ${req.ip} — invalid signature`)
       res.status(401).json({ success: false, message: 'Invalid signature.' })
+      return
+    }
+
+    const event: string = req.body?.event ?? ''
+    logger.info(`[WhatsApp] Webhook event: "${event}"`)
+
+    // Only process actual incoming message events — ignore status, session, group, etc.
+    if (!INCOMING_MESSAGE_EVENTS.has(event)) {
+      res.sendStatus(200)
       return
     }
 
