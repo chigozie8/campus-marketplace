@@ -10,8 +10,14 @@
  * avoid leaking phone numbers / PII into Upstash & Vercel access logs.
  */
 
-const URL_BASE = process.env.UPSTASH_REDIS_REST_URL
-const TOKEN    = process.env.UPSTASH_REDIS_REST_TOKEN
+// Support both the Vercel Upstash integration env var names (KV_REST_API_*)
+// and the legacy UPSTASH_REDIS_REST_* names used in some setups.
+const URL_BASE =
+  process.env.KV_REST_API_URL ??
+  process.env.UPSTASH_REDIS_REST_URL
+const TOKEN =
+  process.env.KV_REST_API_TOKEN ??
+  process.env.UPSTASH_REDIS_REST_TOKEN
 
 function ok() { return Boolean(URL_BASE && TOKEN) }
 
