@@ -6,6 +6,12 @@ import { redis } from '../config/redisClient.js'
 import logger from '../utils/logger.js'
 import { BotSession } from '../types/index.js'
 import { askOpenRouter, ChatMessage } from '../services/openRouterService.js'
+import { isRateLimited, isDuplicate } from './botGuards.js'
+import {
+  upsertConversation,
+  addMessage,
+  incrementUnread,
+} from '../services/conversationService.js'
 
 const inMemorySessions = new Map<string, BotSession>()
 const SESSION_TTL = 1800 // 30 minutes
@@ -47,6 +53,15 @@ function resolveMenuShortcut(text: string): string | null {
 
 export async function handleIncomingMessage(phone: string, rawText: string): Promise<void> {
   logger.info(`[Bot] Incoming from ${phone}: "${rawText}"`)
+
+  // Guard 1: Deduplication — drop webhook retries silently
+  if (await isDuplicate(phone, rawText)) return
+
+  // Guard 2: Rate limiting — warn the user and drop the message
+  if (await isRateLimited(phone)) {
+    await sendMessage(phone, 'You are sending messages too fast. Please wait a moment before trying again.')
+    return
+  }
 
   const text = resolveMenuShortcut(rawText) ?? rawText
   const { intent, payload } = detectIntent(text)
@@ -149,4 +164,21 @@ export async function handleIncomingMessage(phone: string, rawText: string): Pro
 
   await saveSession(session)
   await sendMessage(phone, reply)
+
+  // Persist conversation to Supabase (non-blocking — errors are swallowed so
+  // a DB hiccup never takes down the bot response).
+  try {
+    const conversationId = await upsertConversation({
+      platform: 'whatsapp',
+      externalId: phone,
+      customerPhone: phone,
+    })
+    if (conversationId) {
+      await addMessage({ conversationId, direction: 'incoming', content: rawText, platform: 'whatsapp' })
+      await incrementUnread(conversationId)
+      await addMessage({ conversationId, direction: 'outgoing', content: reply, platform: 'whatsapp' })
+    }
+  } catch (persistErr) {
+    logger.warn('[Bot] Failed to persist conversation to Supabase:', persistErr)
+  }
 }

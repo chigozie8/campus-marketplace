@@ -1,8 +1,25 @@
 import axios from 'axios'
 import logger from '../utils/logger.js'
+import { upstashCache } from '../config/redisClient.js'
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const MODEL = 'openai/gpt-oss-120b:free' // OpenAI GPT-OSS 120B — free tier on OpenRouter
+
+/** Cache TTL in seconds for AI responses (1 hour). */
+const CACHE_TTL = 3600
+
+/**
+ * Normalise a user message for use as a cache key:
+ * lowercase, collapse whitespace, strip punctuation.
+ * Only used for cache lookup — NOT sent to the API.
+ */
+function normaliseForCache(text: string): string {
+  return text.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim()
+}
+
+function cacheKey(text: string): string {
+  return `bot:ai:${normaliseForCache(text)}`
+}
 
 const SYSTEM_PROMPT = `You are the VendoorX WhatsApp assistant — a helpful, friendly, and concise AI bot for Nigeria's #1 campus marketplace.
 
@@ -38,6 +55,22 @@ export async function askOpenRouter(
     return ''
   }
 
+  // ── Cache lookup (only for fresh questions with no prior conversation) ──────
+  // We skip the cache when there is conversation history because the same
+  // question can have a different meaning mid-conversation.
+  const shouldCache = upstashCache && conversationHistory.length === 0
+  if (shouldCache) {
+    try {
+      const cached = await upstashCache!.get(cacheKey(userMessage))
+      if (cached) {
+        logger.info(`[OpenRouter] Cache hit for "${userMessage.slice(0, 40)}…"`)
+        return cached
+      }
+    } catch (cacheErr) {
+      logger.warn('[OpenRouter] Cache read error:', cacheErr)
+    }
+  }
+
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...conversationHistory.slice(-6), // keep last 3 exchanges (6 messages) for context
@@ -65,7 +98,26 @@ export async function askOpenRouter(
     )
 
     const reply: string = response.data?.choices?.[0]?.message?.content?.trim() ?? ''
-    logger.info(`[OpenRouter] AI replied (${reply.length} chars)`)
+
+    // ── Fix #7: Log token usage so we can monitor free-tier consumption ──────
+    const usage = response.data?.usage as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | undefined
+    if (usage) {
+      logger.info(
+        `[OpenRouter] Token usage — prompt: ${usage.prompt_tokens ?? '?'}, completion: ${usage.completion_tokens ?? '?'}, total: ${usage.total_tokens ?? '?'} | model: ${MODEL}`,
+      )
+    } else {
+      logger.info(`[OpenRouter] AI replied (${reply.length} chars) — no token usage returned`)
+    }
+
+    // ── Store in cache if eligible ───────────────────────────────────────────
+    if (shouldCache && reply) {
+      try {
+        await upstashCache!.set(cacheKey(userMessage), reply, CACHE_TTL)
+      } catch (cacheErr) {
+        logger.warn('[OpenRouter] Cache write error:', cacheErr)
+      }
+    }
+
     return reply
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {

@@ -52,6 +52,7 @@ const NAV_ITEMS = [
   { label: 'Reviews',         href: '/admin/reviews',           icon: Star },
   { label: 'Messages',        href: '/admin/messages',          icon: MessageSquare },
   { label: 'Chat Monitor',    href: '/admin/chats',             icon: MessageCircle },
+  { label: 'WhatsApp Bot',   href: '/admin/whatsapp',          icon: MessageSquare },
   { label: 'Live Locations',  href: '/admin/locations',         icon: MapPin },
   { label: 'Analytics',       href: '/admin/analytics',         icon: BarChart3 },
   { label: 'Blog',            href: '/admin/blog',              icon: BookOpen },

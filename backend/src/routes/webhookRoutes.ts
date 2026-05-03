@@ -29,6 +29,9 @@ router.post(
 router.get('/whatsapp', webhookController.verifyWhatsApp)
 router.post('/whatsapp', webhookLimiter, webhookController.whatsAppWebhook)
 
+// ─── Admin bot simulation (internal key protected) ───────────────────────────
+router.post('/simulate', webhookController.simulateBotMessage)
+
 // ─── Instagram ───────────────────────────────────────────────────────────────
 router.get('/instagram', webhookController.verifyInstagram)
 router.post('/instagram', webhookLimiter, webhookController.instagramWebhook)
