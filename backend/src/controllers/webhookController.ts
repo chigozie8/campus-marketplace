@@ -107,13 +107,6 @@ function extractFromWasender(body: any): { from: string; text: string } | null {
   return null
 }
 
-// Incoming message events we care about — all others are status/session updates
-const INCOMING_MESSAGE_EVENTS = new Set([
-  'messages.received',
-  'messages-personal.received',
-  'messages.upsert',
-])
-
 export async function whatsAppWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!verifyWasenderSignature(req)) {
@@ -122,22 +115,20 @@ export async function whatsAppWebhook(req: Request, res: Response, next: NextFun
       return
     }
 
-    const event: string = req.body?.event ?? ''
-    logger.info(`[WhatsApp] Webhook event: "${event}"`)
+    // Log every webhook so Railway shows exactly what WaSender sends
+    logger.info(`[WhatsApp] Webhook hit — event: "${req.body?.event ?? 'none'}" body keys: ${Object.keys(req.body ?? {}).join(', ')}`)
 
-    // Only process actual incoming message events — ignore status, session, group, etc.
-    if (!INCOMING_MESSAGE_EVENTS.has(event)) {
-      res.sendStatus(200)
-      return
-    }
-
+    // Let extractFromWasender decide if this is an actionable message.
+    // We do NOT filter by event name because WaSender event names vary by plan/version.
     const parsed = extractFromWasender(req.body)
     if (parsed) {
-      logger.info(`[WhatsApp] Inbound from ${parsed.from}: "${parsed.text}"`)
+      logger.info(`[WhatsApp] Dispatching message from ${parsed.from}: "${parsed.text}"`)
       await addMessageJob({ from: parsed.from, text: parsed.text, platform: 'whatsapp' })
+    } else {
+      logger.info(`[WhatsApp] Non-message webhook — ignored`)
     }
 
-    // Always respond 200 quickly — provider retries if it doesn't get 200
+    // Always respond 200 quickly so WaSender does not retry
     res.sendStatus(200)
   } catch (err) {
     next(err)
