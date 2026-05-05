@@ -44,16 +44,12 @@ type Step = 'address' | 'confirm' | 'paying' | 'success'
 declare global {
   interface Window {
     PaystackPop?: {
-      setup: (config: {
+      newTransaction: (config: {
         key: string
-        email: string
-        amount: number
-        ref: string
-        currency?: string
-        channels?: string[]
-        onClose: () => void
-        callback: (response: { reference: string }) => void
-      }) => { openIframe: () => void }
+        accessCode: string
+        onSuccess: (transaction: { reference: string }) => void
+        onCancel: () => void
+      }) => void
     }
   }
 }
@@ -83,10 +79,10 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   useEffect(() => {
     if (window.PaystackPop) { setPaystackReady(true); return }
     const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v1/inline.js'
+    script.src = 'https://js.paystack.co/v2/inline.js'
     script.async = true
     script.onload = () => setPaystackReady(true)
-    script.onerror = () => console.log('[v0] Paystack script failed to load')
+    script.onerror = () => toast.error('Could not load payment service. Check your internet connection.')
     document.head.appendChild(script)
   }, [])
 
@@ -179,39 +175,33 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setStep('paying')
 
     try {
+      // The server initializes the transaction and returns an access_code
+      // which already has email, amount, and reference embedded — no need
+      // to pass them again to the inline popup.
       const result = await initPayment.mutateAsync(orderId)
-
-      const userRes = await fetch('/api/me')
-      const userData = await userRes.json()
-      const userEmail = userData?.data?.email || userData?.email || ''
+      const { access_code, reference } = result.data
 
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ''
 
-      // Directly call PaystackPop.setup with all values known — no state lag
-      const handler = window.PaystackPop.setup({
+      window.PaystackPop.newTransaction({
         key: publicKey,
-        email: userEmail,
-        amount: Math.round(total * 100), // naira → kobo
-        ref: result.data.reference,
-        currency: 'NGN',
-        channels: ['card', 'bank', 'ussd', 'bank_transfer'],
-        onClose: () => {
-          setStep('confirm')
-          toast.info('Payment cancelled')
-        },
-        callback: (response: { reference: string }) => {
+        accessCode: access_code,
+        onSuccess: (transaction: { reference: string }) => {
           hapticNotification('success')
-          setPaymentReference(response.reference)
+          setPaymentReference(transaction.reference || reference)
           setStep('success')
           toast.success('Payment successful!')
           setTimeout(() => {
             onClose()
-            router.push(`/orders?ref=${response.reference}`)
+            router.push(`/orders?ref=${transaction.reference || reference}`)
           }, 2500)
+        },
+        onCancel: () => {
+          setStep('confirm')
+          toast.info('Payment cancelled')
         },
       })
 
-      handler.openIframe()
       onPaystackRedirect?.()
     } catch {
       setStep('confirm')
