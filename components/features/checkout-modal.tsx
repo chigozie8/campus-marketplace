@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X, CreditCard, Sparkles } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,6 +11,8 @@ import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
 import { hapticImpact, hapticNotification } from '@/lib/capacitor'
 import { SavedAddressesPicker } from '@/components/orders/saved-addresses-picker'
+import { usePaystackPayment } from 'react-paystack'
+import { useRouter } from 'next/navigation'
 
 export interface CheckoutProduct {
   id: string
@@ -37,9 +39,50 @@ interface AppliedCoupon {
   discount: number
 }
 
-type Step = 'address' | 'confirm' | 'paying'
+type Step = 'address' | 'confirm' | 'paying' | 'success'
+
+interface PaystackConfig {
+  reference: string
+  email: string
+  amount: number
+  publicKey: string
+  channels?: ('card' | 'bank' | 'ussd' | 'qr' | 'mobile_money' | 'bank_transfer')[]
+}
+
+// Beautiful Paystack Inline Button Component
+function PaystackInlineButton({ 
+  config, 
+  onSuccess, 
+  onClose: onPaymentClose,
+  total 
+}: { 
+  config: PaystackConfig
+  onSuccess: (reference: { reference: string }) => void
+  onClose: () => void
+  total: number
+}) {
+  const initializePayment = usePaystackPayment(config)
+
+  const handlePayment = () => {
+    initializePayment({
+      onSuccess,
+      onClose: onPaymentClose,
+    })
+  }
+
+  return (
+    <Button
+      onClick={handlePayment}
+      className="w-full h-14 rounded-2xl font-bold text-base gap-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+    >
+      <Lock className="w-5 h-5" />
+      Pay ₦{total.toLocaleString()} Now
+    </Button>
+  )
+}
 
 export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
+  const router = useRouter()
   const [step, setStep] = useState<Step>('address')
   const [address, setAddress] = useState('')
   const [saveAddress, setSaveAddress] = useState(false)
@@ -48,6 +91,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
   const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
+  const [paymentConfig, setPaymentConfig] = useState<PaystackConfig | null>(null)
+  const [paymentReference, setPaymentReference] = useState<string | null>(null)
 
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
@@ -135,18 +180,48 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     }
   }
 
+  // Paystack success callback
+  const onPaymentSuccess = useCallback((reference: { reference: string }) => {
+    hapticNotification('success')
+    setPaymentReference(reference.reference)
+    setStep('success')
+    toast.success('Payment successful!')
+    // Redirect to order confirmation after brief success animation
+    setTimeout(() => {
+      handleClose()
+      router.push(`/orders?ref=${reference.reference}`)
+    }, 2500)
+  }, [router])
+
+  // Paystack close callback
+  const onPaymentClose = useCallback(() => {
+    setStep('confirm')
+    toast.info('Payment cancelled')
+  }, [])
+
   async function handlePay() {
     if (!orderId) return
     hapticNotification('success')
     setStep('paying')
     try {
       const result = await initPayment.mutateAsync(orderId)
+      
+      // Get user email from API response or use a fallback
+      const userRes = await fetch('/api/me')
+      const userData = await userRes.json()
+      const userEmail = userData?.data?.email || 'customer@vendoorx.ng'
+      
+      // Configure inline payment
+      const config: PaystackConfig = {
+        reference: result.data.reference,
+        email: userEmail,
+        amount: Math.round(total * 100), // Convert to kobo
+        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+        channels: ['card', 'bank', 'ussd', 'bank_transfer'],
+      }
+      
+      setPaymentConfig(config)
       onPaystackRedirect?.()
-      // Close the modal BEFORE navigating so it is never frozen open in the
-      // browser's back-forward cache. If the user returns via back button or
-      // Paystack cancels back to this page, the modal is already shut.
-      handleClose()
-      window.location.href = result.data.authorization_url
     } catch {
       setStep('confirm')
     }
@@ -162,6 +237,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setCouponCode('')
     setAppliedCoupon(null)
     setShowCouponInput(false)
+    setPaymentConfig(null)
+    setPaymentReference(null)
     onClose()
   }
 
@@ -172,7 +249,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
           <DialogTitle className="text-lg font-black">
             {step === 'address' && 'Complete Your Order'}
             {step === 'confirm' && 'Confirm & Pay'}
-            {step === 'paying' && 'Redirecting to Payment…'}
+            {step === 'paying' && 'Secure Payment'}
+            {step === 'success' && 'Order Confirmed!'}
           </DialogTitle>
         </DialogHeader>
 
@@ -394,11 +472,85 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
         )}
 
         {step === 'paying' && (
-          <div className="flex flex-col items-center gap-4 py-6">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground text-center">
-              Opening Paystack secure payment…
-            </p>
+          <div className="space-y-4">
+            {/* Beautiful Payment Header */}
+            <div className="text-center py-4">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <CreditCard className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-lg font-black text-foreground">Complete Payment</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Pay securely with card, bank transfer, or USSD
+              </p>
+            </div>
+
+            {/* Amount Display */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/30 border border-emerald-200 dark:border-emerald-800">
+              <div className="text-center">
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Total Amount</p>
+                <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300 mt-1">
+                  ₦{total.toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Inline Payment Button */}
+            {paymentConfig && (
+              <PaystackInlineButton
+                config={paymentConfig}
+                onSuccess={onPaymentSuccess}
+                onClose={onPaymentClose}
+                total={total}
+              />
+            )}
+
+            {!paymentConfig && (
+              <div className="flex flex-col items-center gap-4 py-6">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <p className="text-sm text-muted-foreground">Preparing secure payment...</p>
+              </div>
+            )}
+
+            {/* Security Badges */}
+            <div className="flex items-center justify-center gap-4 pt-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>256-bit SSL</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                <span>PCI DSS Compliant</span>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              onClick={() => setStep('confirm')}
+              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+            >
+              ← Back to order summary
+            </button>
+          </div>
+        )}
+
+        {step === 'success' && (
+          <div className="flex flex-col items-center gap-4 py-8">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/30 animate-bounce">
+              <Sparkles className="w-10 h-10 text-white" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-black text-foreground">Payment Successful!</h3>
+              <p className="text-sm text-muted-foreground mt-2">
+                Your order has been placed successfully.
+              </p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-3">
+                Ref: {paymentReference}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Redirecting to your orders...</span>
+            </div>
           </div>
         )}
       </DialogContent>
