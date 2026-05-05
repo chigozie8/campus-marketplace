@@ -181,12 +181,9 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
       const result = await initPayment.mutateAsync(orderId)
       const { access_code, reference } = result.data
 
-      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ''
-      if (!publicKey) {
-        toast.error('Payment is not configured. Please contact support.')
-        setStep('confirm')
-        return
-      }
+      const publicKey =
+        process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ||
+        'pk_live_77ab98bc87c205ec76cb2f7d534cff02df034c8e'
 
       window.PaystackPop.newTransaction({
         key: publicKey,
