@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X, CreditCard, Sparkles } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -49,38 +49,6 @@ interface PaystackConfig {
   channels?: ('card' | 'bank' | 'ussd' | 'qr' | 'mobile_money' | 'bank_transfer')[]
 }
 
-// Beautiful Paystack Inline Button Component
-function PaystackInlineButton({ 
-  config, 
-  onSuccess, 
-  onClose: onPaymentClose,
-  total 
-}: { 
-  config: PaystackConfig
-  onSuccess: (reference: { reference: string }) => void
-  onClose: () => void
-  total: number
-}) {
-  const initializePayment = usePaystackPayment(config)
-
-  const handlePayment = () => {
-    initializePayment({
-      onSuccess,
-      onClose: onPaymentClose,
-    })
-  }
-
-  return (
-    <Button
-      onClick={handlePayment}
-      className="w-full h-14 rounded-2xl font-bold text-base gap-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-    >
-      <Lock className="w-5 h-5" />
-      Pay ₦{total.toLocaleString()} Now
-    </Button>
-  )
-}
-
 export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
   const router = useRouter()
   const [step, setStep] = useState<Step>('address')
@@ -91,7 +59,13 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
   const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
-  const [paymentConfig, setPaymentConfig] = useState<PaystackConfig | null>(null)
+  const [paymentConfig, setPaymentConfig] = useState<PaystackConfig>({
+    reference: '',
+    email: '',
+    amount: 0,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+  })
+  const [paymentReady, setPaymentReady] = useState(false)
   const [paymentReference, setPaymentReference] = useState<string | null>(null)
 
   const [couponCode, setCouponCode] = useState('')
@@ -101,6 +75,14 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
 
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
+
+  // usePaystackPayment MUST always be called at top level — never conditionally.
+  // We pass a live config object; the hook re-reads it each time initializePayment() is called.
+  const initializePayment = usePaystackPayment(paymentConfig)
+
+  // Stable refs so callbacks never go stale inside useEffect
+  const onPaymentSuccessRef = useRef<(ref: { reference: string }) => void>(() => {})
+  const onPaymentCloseRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     fetch('/api/platform-fee')
@@ -180,24 +162,32 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     }
   }
 
-  // Paystack success callback
-  const onPaymentSuccess = useCallback((reference: { reference: string }) => {
+  // Keep refs always up to date with latest closures
+  onPaymentSuccessRef.current = useCallback((reference: { reference: string }) => {
     hapticNotification('success')
     setPaymentReference(reference.reference)
     setStep('success')
     toast.success('Payment successful!')
-    // Redirect to order confirmation after brief success animation
     setTimeout(() => {
-      handleClose()
+      onClose()
       router.push(`/orders?ref=${reference.reference}`)
     }, 2500)
-  }, [router])
+  }, [router, onClose])
 
-  // Paystack close callback
-  const onPaymentClose = useCallback(() => {
+  onPaymentCloseRef.current = useCallback(() => {
+    setPaymentReady(false)
     setStep('confirm')
     toast.info('Payment cancelled')
   }, [])
+
+  // When paymentReady flips to true, open the Paystack popup
+  useEffect(() => {
+    if (!paymentReady) return
+    initializePayment({
+      onSuccess: (ref) => onPaymentSuccessRef.current(ref as { reference: string }),
+      onClose: () => onPaymentCloseRef.current(),
+    })
+  }, [paymentReady, initializePayment])
 
   async function handlePay() {
     if (!orderId) return
@@ -205,22 +195,24 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setStep('paying')
     try {
       const result = await initPayment.mutateAsync(orderId)
-      
-      // Get user email from API response or use a fallback
+
+      // The API returns the reference and access_code; email comes from the
+      // authenticated session on the server — fetch it from /api/me.
       const userRes = await fetch('/api/me')
       const userData = await userRes.json()
-      const userEmail = userData?.data?.email || 'customer@vendoorx.ng'
-      
-      // Configure inline payment
-      const config: PaystackConfig = {
+      const userEmail = userData?.data?.email || userData?.email || ''
+
+      // Update the static config object the hook already holds
+      setPaymentConfig({
         reference: result.data.reference,
         email: userEmail,
-        amount: Math.round(total * 100), // Convert to kobo
+        amount: Math.round(total * 100), // naira → kobo
         publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
         channels: ['card', 'bank', 'ussd', 'bank_transfer'],
-      }
-      
-      setPaymentConfig(config)
+      })
+
+      // Signal the useEffect to fire the popup AFTER config state has settled
+      setPaymentReady(true)
       onPaystackRedirect?.()
     } catch {
       setStep('confirm')
@@ -237,7 +229,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setCouponCode('')
     setAppliedCoupon(null)
     setShowCouponInput(false)
-    setPaymentConfig(null)
+    setPaymentConfig({ reference: '', email: '', amount: 0, publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '' })
+    setPaymentReady(false)
     setPaymentReference(null)
     onClose()
   }
@@ -494,17 +487,19 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
               </div>
             </div>
 
-            {/* Inline Payment Button */}
-            {paymentConfig && (
-              <PaystackInlineButton
-                config={paymentConfig}
-                onSuccess={onPaymentSuccess}
-                onClose={onPaymentClose}
-                total={total}
-              />
-            )}
-
-            {!paymentConfig && (
+            {/* Pay button — shown once config is ready */}
+            {paymentReady ? (
+              <Button
+                onClick={() => initializePayment({
+                  onSuccess: (ref) => onPaymentSuccessRef.current(ref as { reference: string }),
+                  onClose: () => onPaymentCloseRef.current(),
+                })}
+                className="w-full h-14 rounded-2xl font-bold text-base gap-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Lock className="w-5 h-5" />
+                Pay &#8358;{total.toLocaleString()} Now
+              </Button>
+            ) : (
               <div className="flex flex-col items-center gap-4 py-6">
                 <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
                 <p className="text-sm text-muted-foreground">Preparing secure payment...</p>
