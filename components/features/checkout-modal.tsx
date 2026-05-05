@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X, CreditCard, Sparkles } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,6 @@ import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
 import { hapticImpact, hapticNotification } from '@/lib/capacitor'
 import { SavedAddressesPicker } from '@/components/orders/saved-addresses-picker'
-import { usePaystackPayment } from 'react-paystack'
 import { useRouter } from 'next/navigation'
 
 export interface CheckoutProduct {
@@ -41,12 +40,22 @@ interface AppliedCoupon {
 
 type Step = 'address' | 'confirm' | 'paying' | 'success'
 
-interface PaystackConfig {
-  reference: string
-  email: string
-  amount: number
-  publicKey: string
-  channels?: ('card' | 'bank' | 'ussd' | 'qr' | 'mobile_money' | 'bank_transfer')[]
+// Extend window type to include Paystack inline script
+declare global {
+  interface Window {
+    PaystackPop?: {
+      setup: (config: {
+        key: string
+        email: string
+        amount: number
+        ref: string
+        currency?: string
+        channels?: string[]
+        onClose: () => void
+        callback: (response: { reference: string }) => void
+      }) => { openIframe: () => void }
+    }
+  }
 }
 
 export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
@@ -59,14 +68,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
   const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
-  const [paymentConfig, setPaymentConfig] = useState<PaystackConfig>({
-    reference: '',
-    email: '',
-    amount: 0,
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
-  })
-  const [paymentReady, setPaymentReady] = useState(false)
   const [paymentReference, setPaymentReference] = useState<string | null>(null)
+  const [paystackReady, setPaystackReady] = useState(false)
 
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
@@ -76,13 +79,16 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
 
-  // usePaystackPayment MUST always be called at top level — never conditionally.
-  // We pass a live config object; the hook re-reads it each time initializePayment() is called.
-  const initializePayment = usePaystackPayment(paymentConfig)
-
-  // Stable refs so callbacks never go stale inside useEffect
-  const onPaymentSuccessRef = useRef<(ref: { reference: string }) => void>(() => {})
-  const onPaymentCloseRef = useRef<() => void>(() => {})
+  // Load Paystack inline script once on mount
+  useEffect(() => {
+    if (window.PaystackPop) { setPaystackReady(true); return }
+    const script = document.createElement('script')
+    script.src = 'https://js.paystack.co/v1/inline.js'
+    script.async = true
+    script.onload = () => setPaystackReady(true)
+    script.onerror = () => console.log('[v0] Paystack script failed to load')
+    document.head.appendChild(script)
+  }, [])
 
   useEffect(() => {
     fetch('/api/platform-fee')
@@ -162,60 +168,54 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     }
   }
 
-  // Keep refs always up to date with latest closures
-  onPaymentSuccessRef.current = useCallback((reference: { reference: string }) => {
-    hapticNotification('success')
-    setPaymentReference(reference.reference)
-    setStep('success')
-    toast.success('Payment successful!')
-    setTimeout(() => {
-      onClose()
-      router.push(`/orders?ref=${reference.reference}`)
-    }, 2500)
-  }, [router, onClose])
-
-  onPaymentCloseRef.current = useCallback(() => {
-    setPaymentReady(false)
-    setStep('confirm')
-    toast.info('Payment cancelled')
-  }, [])
-
-  // When paymentReady flips to true, open the Paystack popup
-  useEffect(() => {
-    if (!paymentReady) return
-    initializePayment({
-      onSuccess: (ref) => onPaymentSuccessRef.current(ref as { reference: string }),
-      onClose: () => onPaymentCloseRef.current(),
-    })
-  }, [paymentReady, initializePayment])
-
   async function handlePay() {
     if (!orderId) return
+    if (!paystackReady || !window.PaystackPop) {
+      toast.error('Payment service not ready yet, please try again.')
+      return
+    }
+
     hapticNotification('success')
     setStep('paying')
+
     try {
       const result = await initPayment.mutateAsync(orderId)
 
-      // The API returns the reference and access_code; email comes from the
-      // authenticated session on the server — fetch it from /api/me.
       const userRes = await fetch('/api/me')
       const userData = await userRes.json()
       const userEmail = userData?.data?.email || userData?.email || ''
 
-      // Update the static config object the hook already holds
-      setPaymentConfig({
-        reference: result.data.reference,
+      const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ''
+
+      // Directly call PaystackPop.setup with all values known — no state lag
+      const handler = window.PaystackPop.setup({
+        key: publicKey,
         email: userEmail,
         amount: Math.round(total * 100), // naira → kobo
-        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+        ref: result.data.reference,
+        currency: 'NGN',
         channels: ['card', 'bank', 'ussd', 'bank_transfer'],
+        onClose: () => {
+          setStep('confirm')
+          toast.info('Payment cancelled')
+        },
+        callback: (response: { reference: string }) => {
+          hapticNotification('success')
+          setPaymentReference(response.reference)
+          setStep('success')
+          toast.success('Payment successful!')
+          setTimeout(() => {
+            onClose()
+            router.push(`/orders?ref=${response.reference}`)
+          }, 2500)
+        },
       })
 
-      // Signal the useEffect to fire the popup AFTER config state has settled
-      setPaymentReady(true)
+      handler.openIframe()
       onPaystackRedirect?.()
     } catch {
       setStep('confirm')
+      toast.error('Failed to initialize payment. Please try again.')
     }
   }
 
@@ -229,8 +229,6 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setCouponCode('')
     setAppliedCoupon(null)
     setShowCouponInput(false)
-    setPaymentConfig({ reference: '', email: '', amount: 0, publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '' })
-    setPaymentReady(false)
     setPaymentReference(null)
     onClose()
   }
@@ -487,24 +485,11 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
               </div>
             </div>
 
-            {/* Pay button — shown once config is ready */}
-            {paymentReady ? (
-              <Button
-                onClick={() => initializePayment({
-                  onSuccess: (ref) => onPaymentSuccessRef.current(ref as { reference: string }),
-                  onClose: () => onPaymentCloseRef.current(),
-                })}
-                className="w-full h-14 rounded-2xl font-bold text-base gap-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Lock className="w-5 h-5" />
-                Pay &#8358;{total.toLocaleString()} Now
-              </Button>
-            ) : (
-              <div className="flex flex-col items-center gap-4 py-6">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-                <p className="text-sm text-muted-foreground">Preparing secure payment...</p>
-              </div>
-            )}
+            {/* Loading indicator while Paystack iframe opens */}
+            <div className="flex flex-col items-center gap-4 py-2">
+              <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              <p className="text-sm text-muted-foreground">Opening secure payment window...</p>
+            </div>
 
             {/* Security Badges */}
             <div className="flex items-center justify-center gap-4 pt-2">
