@@ -75,7 +75,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
       {/* Dark mode subtle glow only */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full dark:bg-green-500/5 blur-[120px] pointer-events-none" />
 
-      <div className="relative w-full max-w-4xl mx-auto px-6 pt-32 pb-20 flex flex-col items-center text-center gap-6">
+      <div className="relative w-full max-w-4xl mx-auto px-6 pt-24 pb-12 flex flex-col items-center text-center gap-5">
 
         {/* Trust badge pill */}
         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
@@ -89,14 +89,14 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] text-balance">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.05] text-balance">
           <span className="text-gray-950 dark:text-white">{heroLine1}</span>
           <br />
           <span className="text-primary italic">{heroAccent}</span>
         </h1>
 
         {/* Subtitle — supports {campuses} placeholder or any {literal, names} in braces */}
-        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed text-pretty max-w-2xl">
           {heroSubtitle.includes('{campuses}')
             ? (
               <>

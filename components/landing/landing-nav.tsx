@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Tag, Info, HelpCircle, BarChart3, ChevronDown, LogOut } from 'lucide-react'
+import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Info, HelpCircle, ChevronDown, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { NotificationBell } from '@/components/notifications/notification-bell'
@@ -18,10 +18,8 @@ interface LandingNavProps {
 const NAV_LINKS = [
   { href: '/features', label: 'Features' },
   { href: '/marketplace', label: 'Browse' },
-  { href: '/categories', label: 'Categories' },
   { href: '/pricing', label: 'Pricing' },
-  { href: '/reviews', label: 'Reviews' },
-  { href: '/blog', label: 'Blog' },
+  { href: '/about', label: 'About' },
 ]
 
 const MOBILE_NAV_EXTRAS = [
@@ -101,13 +99,13 @@ export function LandingNav({ user }: LandingNavProps) {
                   onClick={() => setActiveLink(href)}
                   className={`relative text-sm font-medium px-3.5 py-2 rounded-xl transition-all duration-200 ${
                     activeLink === href
-                      ? 'text-[#16a34a] bg-green-50 dark:bg-green-950/40'
+                      ? 'text-primary bg-primary/10 dark:bg-primary/15'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900/60'
                   }`}
                 >
                   {label}
                   {activeLink === href && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#16a34a]" />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
                   )}
                 </Link>
               ))}
@@ -123,7 +121,7 @@ export function LandingNav({ user }: LandingNavProps) {
                   <Link href="/dashboard">
                     <Button
                       size="sm"
-                      className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 h-9 gap-1.5 shadow-md shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-lg hover:shadow-green-200 active:scale-95"
+                      className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 h-9 gap-1.5 shadow-md shadow-primary/20 transition-all hover:shadow-lg active:scale-95"
                     >
                       <LayoutDashboard className="w-3.5 h-3.5" />
                       Dashboard
@@ -131,11 +129,11 @@ export function LandingNav({ user }: LandingNavProps) {
                   </Link>
                   {/* Avatar */}
                   <Link href="/profile" className="shrink-0">
-                    <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#16a34a]/30 hover:ring-[#16a34a]/60 transition-all">
+                    <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-primary/30 hover:ring-primary/60 transition-all">
                       {avatarUrl ? (
                         <Image src={avatarUrl} alt={fullName} width={36} height={36} className="object-cover w-full h-full" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#16a34a] to-emerald-600 flex items-center justify-center text-white text-xs font-black">
+                        <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-black">
                           {initials}
                         </div>
                       )}
@@ -165,15 +163,7 @@ export function LandingNav({ user }: LandingNavProps) {
                   <Link href="/auth/sign-up">
                     <Button
                       size="sm"
-                      className="rounded-xl bg-gray-950 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-950 font-bold px-4 h-9 gap-1.5 transition-all active:scale-95"
-                    >
-                      Join Free
-                    </Button>
-                  </Link>
-                  <Link href="/auth/sign-up">
-                    <Button
-                      size="sm"
-                      className="rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold px-4 h-9 gap-1.5 shadow-md shadow-green-200 dark:shadow-green-900/30 transition-all hover:shadow-lg active:scale-95"
+                      className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 h-9 gap-1.5 shadow-md shadow-primary/20 transition-all hover:shadow-lg active:scale-95"
                     >
                       Start Selling <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
@@ -231,20 +221,20 @@ export function LandingNav({ user }: LandingNavProps) {
 
             {/* User info (if authenticated) */}
             {user && (
-              <div className="px-5 py-4 bg-green-50 dark:bg-green-950/30 border-b border-green-100 dark:border-green-900/30">
+              <div className="px-5 py-4 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 dark:border-primary/20">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-2 ring-[#16a34a]/30">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-2 ring-primary/30">
                     {avatarUrl ? (
                       <Image src={avatarUrl} alt={fullName} width={40} height={40} className="object-cover w-full h-full" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#16a34a] to-emerald-600 flex items-center justify-center text-white text-sm font-black">
+                      <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-black">
                         {initials}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{fullName}</p>
-                    <p className="text-xs text-[#16a34a] font-medium">Logged in</p>
+                    <p className="text-xs text-primary font-medium">Logged in</p>
                   </div>
                 </div>
               </div>
@@ -256,7 +246,7 @@ export function LandingNav({ user }: LandingNavProps) {
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center justify-between text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-[#16a34a] dark:hover:text-[#16a34a] hover:bg-green-50 dark:hover:bg-green-950/30 px-4 py-3 rounded-xl transition-colors"
+                  className="flex items-center justify-between text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-primary/8 dark:hover:bg-primary/15 px-4 py-3 rounded-xl transition-colors"
                   onClick={() => { setMenuOpen(false); setActiveLink(href) }}
                 >
                   {label}
@@ -290,7 +280,7 @@ export function LandingNav({ user }: LandingNavProps) {
                     </Button>
                   </Link>
                   <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-11 gap-2 shadow-md shadow-green-200 dark:shadow-green-900/30">
+                    <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-11 gap-2 shadow-md shadow-primary/20">
                       <LayoutDashboard className="w-4 h-4" />
                       Go to Dashboard
                     </Button>
@@ -312,19 +302,8 @@ export function LandingNav({ user }: LandingNavProps) {
                     </Button>
                   </Link>
                   <Link href="/auth/sign-up" onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-11 gap-1.5 shadow-md shadow-green-200 dark:shadow-green-900/30">
-                      Join for Free <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
-                    <span className="text-xs text-gray-400 font-medium px-2">or</span>
-                    <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
-                  </div>
-                  <Link href="/auth/sign-up" onClick={() => setMenuOpen(false)}>
-                    <Button className="w-full rounded-xl bg-gray-950 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-950 font-bold h-11 gap-1.5">
-                      <Tag className="w-4 h-4" />
-                      Start Selling Today
+                    <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-11 gap-1.5 shadow-md shadow-primary/20">
+                      Start Selling Today <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                 </>
