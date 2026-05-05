@@ -182,6 +182,11 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
       const { access_code, reference } = result.data
 
       const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || ''
+      if (!publicKey) {
+        toast.error('Payment is not configured. Please contact support.')
+        setStep('confirm')
+        return
+      }
 
       window.PaystackPop.newTransaction({
         key: publicKey,
@@ -203,7 +208,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
       })
 
       onPaystackRedirect?.()
-    } catch {
+    } catch (err) {
+      console.error('[Paystack] Payment initialization failed:', err)
       setStep('confirm')
       toast.error('Failed to initialize payment. Please try again.')
     }
