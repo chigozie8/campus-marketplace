@@ -4,6 +4,7 @@ import { ArrowRight, Target, Heart, Zap, Shield, Users, Globe, TrendingUp, Check
 import { getSiteSettings } from '@/lib/site-settings'
 import { buildMetadata } from '@/lib/seo'
 import { CountUp } from '@/components/ui/count-up'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,7 +57,12 @@ const MILESTONES = [
 const STAT_ICONS = [Users, Globe, TrendingUp, Target]
 
 export default async function AboutPage() {
-  const settings = await getSiteSettings()
+  const [settings, supabase] = await Promise.all([
+    getSiteSettings(),
+    createClient(),
+  ])
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null
+  const isLoggedIn = !!user
 
   const STATS = [
     { value: settings.stat_active_vendors, label: 'Active Vendors',    icon: Users },
@@ -85,12 +91,21 @@ export default async function AboutPage() {
             VendoorX started as a late-night idea to fix online commerce in Nigeria and grew into the country&apos;s most trusted WhatsApp commerce platform — connecting buyers and sellers across 36+ states nationwide.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/sign-up"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] shadow-xl shadow-primary/25"
-            >
-              Join VendoorX <ArrowRight className="w-4 h-4" />
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] shadow-xl shadow-primary/25"
+              >
+                Go to Dashboard <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <Link
+                href="/auth/sign-up"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition-all hover:scale-[1.02] shadow-xl shadow-primary/25"
+              >
+                Join VendoorX <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
             <Link
               href="/marketplace"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl border-2 border-border hover:border-primary/40 text-foreground font-semibold text-base transition-all hover:bg-muted/50"
@@ -188,18 +203,40 @@ export default async function AboutPage() {
       <section className="py-20 sm:py-28 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-5">
-            Ready to be part of<br />
-            <span className="text-primary">the movement?</span>
+            {isLoggedIn ? (
+              <>
+                Continue building<br />
+                <span className="text-primary">your business</span>
+              </>
+            ) : (
+              <>
+                Ready to be part of<br />
+                <span className="text-primary">the movement?</span>
+              </>
+            )}
           </h2>
           <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
-            Join <CountUp value={settings.stat_active_vendors} /> sellers already building their businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.
+            {isLoggedIn ? (
+              <>You&apos;re part of the <CountUp value={settings.stat_active_vendors} /> sellers building their businesses on VendoorX. Keep the momentum going!</>
+            ) : (
+              <>Join <CountUp value={settings.stat_active_vendors} /> sellers already building their businesses on VendoorX. It takes 2 minutes and costs absolutely nothing.</>
+            )}
           </p>
-          <Link
-            href="/auth/sign-up"
-            className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-primary/25"
-          >
-            Join VendoorX for Free <ArrowRight className="w-5 h-5" />
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-primary/25"
+            >
+              Go to Dashboard <ArrowRight className="w-5 h-5" />
+            </Link>
+          ) : (
+            <Link
+              href="/auth/sign-up"
+              className="inline-flex items-center gap-2 px-10 py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg transition-all hover:scale-[1.02] shadow-2xl shadow-primary/25"
+            >
+              Join VendoorX for Free <ArrowRight className="w-5 h-5" />
+            </Link>
+          )}
         </div>
       </section>
 
