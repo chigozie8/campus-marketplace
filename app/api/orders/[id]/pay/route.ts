@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createClient as createAdmin, createClient as createBrowserClient } from '@supabase/supabase-js'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
 const PAYSTACK_BASE = 'https://api.paystack.co'
@@ -29,11 +29,28 @@ export async function POST(
       return NextResponse.json({ success: false, message: 'Payment system is not configured' }, { status: 503 })
     }
 
-    const supabase = await createClient()
-    if (!supabase) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    // Support both cookie-based auth (SSR) and Bearer token (client directRequest).
+    let user: { id: string; email?: string } | null = null
 
-    // getUser() already includes the email — no separate admin lookup needed
-    const { data: { user } } = await supabase.auth.getUser()
+    const authHeader = req.headers.get('authorization') ?? ''
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+
+    if (bearerToken) {
+      // Client sent a Bearer token — verify it using the anon client
+      const anonClient = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { persistSession: false } },
+      )
+      const { data } = await anonClient.auth.getUser(bearerToken)
+      user = data.user ?? null
+    } else {
+      // Cookie-based auth (SSR / same-origin)
+      const supabase = await createClient()
+      const { data } = await supabase.auth.getUser()
+      user = data.user ?? null
+    }
+
     if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
 
     const email = user.email

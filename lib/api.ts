@@ -146,11 +146,18 @@ export const ordersApi = {
       method: 'POST',
     }),
 
-  // Uses the direct Next.js API route — works in production without the Express backend.
-  initializePayment: (id: string) =>
-    directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(`/api/orders/${id}/pay`, {
-      method: 'POST',
-    }),
+  // Uses the direct Next.js API route — must include auth token so the
+  // server-side Supabase client can identify the buyer.
+  initializePayment: async (id: string) => {
+    const token = await getAuthToken()
+    return directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(
+      `/api/orders/${id}/pay`,
+      {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
+    )
+  },
 
   // Uses the direct Next.js API route — works in production without the Express backend.
   verifyPayment: (reference: string) =>
