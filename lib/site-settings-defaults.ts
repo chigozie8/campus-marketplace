@@ -110,6 +110,15 @@ export type SiteSettings = {
   ad_popup_delay_ms: string      // delay before showing
   ad_popup_auto_close_ms: string // 0 = never auto-close
   ad_popup_frequency: string     // 'session' | 'always' | 'once'
+  /* ── Hero Mockup Card ── */
+  hero_earnings_amount: string
+  hero_earnings_badge: string
+  hero_mockup_stat1_value: string
+  hero_mockup_stat1_label: string
+  hero_mockup_stat2_value: string
+  hero_mockup_stat2_label: string
+  hero_mockup_stat3_value: string
+  hero_mockup_stat3_label: string
   /* ── Mobile App Downloads ── */
   apk_download_url: string
   apk_version: string
@@ -348,6 +357,15 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   ad_popup_delay_ms: '4000',
   ad_popup_auto_close_ms: '12000',
   ad_popup_frequency: 'session',
+  /* hero mockup card */
+  hero_earnings_amount: '₦287,500',
+  hero_earnings_badge: '+12%',
+  hero_mockup_stat1_value: '1,240',
+  hero_mockup_stat1_label: 'Orders today',
+  hero_mockup_stat2_value: '50K+',
+  hero_mockup_stat2_label: 'Active sellers',
+  hero_mockup_stat3_value: '< 2 min',
+  hero_mockup_stat3_label: 'Avg. response',
   /* mobile app downloads */
   apk_download_url: '',
   apk_version: '',

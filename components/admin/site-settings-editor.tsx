@@ -23,6 +23,21 @@ const SECTIONS: { title: string; desc: string; icon: React.ReactNode; settings: 
     ],
   },
   {
+    title: 'Hero Mockup Card',
+    desc: 'The floating "Today\'s earnings" card and the three mini-stats at the bottom of the live activity mockup.',
+    icon: <BarChart3 className="w-4 h-4" />,
+    settings: [
+      { key: 'hero_earnings_amount', label: 'Earnings Amount',        placeholder: '₦287,500', type: 'text' },
+      { key: 'hero_earnings_badge',  label: 'Earnings Badge (e.g. +12%)', placeholder: '+12%',  type: 'text' },
+      { key: 'hero_mockup_stat1_value', label: 'Stat 1 Value',        placeholder: '1,240',    type: 'text' },
+      { key: 'hero_mockup_stat1_label', label: 'Stat 1 Label',        placeholder: 'Orders today', type: 'text' },
+      { key: 'hero_mockup_stat2_value', label: 'Stat 2 Value',        placeholder: '50K+',     type: 'text' },
+      { key: 'hero_mockup_stat2_label', label: 'Stat 2 Label',        placeholder: 'Active sellers', type: 'text' },
+      { key: 'hero_mockup_stat3_value', label: 'Stat 3 Value',        placeholder: '< 2 min',  type: 'text' },
+      { key: 'hero_mockup_stat3_label', label: 'Stat 3 Label',        placeholder: 'Avg. response', type: 'text' },
+    ],
+  },
+  {
     title: 'How It Works — Header',
     desc: 'Title and subtitle above the 4-step diagram. Use the JSON editor below to manage the steps themselves.',
     icon: <Layers className="w-4 h-4" />,

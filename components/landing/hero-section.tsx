@@ -79,6 +79,15 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
   const heroCtaPrimary   = settings?.hero_cta_primary   || DEFAULT_SETTINGS.hero_cta_primary
   const heroCtaSecondary = settings?.hero_cta_secondary || DEFAULT_SETTINGS.hero_cta_secondary
 
+  const heroEarningsAmount   = settings?.hero_earnings_amount   || DEFAULT_SETTINGS.hero_earnings_amount
+  const heroEarningsBadge    = settings?.hero_earnings_badge    || DEFAULT_SETTINGS.hero_earnings_badge
+  const heroStat1Value       = settings?.hero_mockup_stat1_value || DEFAULT_SETTINGS.hero_mockup_stat1_value
+  const heroStat1Label       = settings?.hero_mockup_stat1_label || DEFAULT_SETTINGS.hero_mockup_stat1_label
+  const heroStat2Value       = settings?.hero_mockup_stat2_value || DEFAULT_SETTINGS.hero_mockup_stat2_value
+  const heroStat2Label       = settings?.hero_mockup_stat2_label || DEFAULT_SETTINGS.hero_mockup_stat2_label
+  const heroStat3Value       = settings?.hero_mockup_stat3_value || DEFAULT_SETTINGS.hero_mockup_stat3_value
+  const heroStat3Label       = settings?.hero_mockup_stat3_label || DEFAULT_SETTINGS.hero_mockup_stat3_label
+
   const isAuthed  = !!user
   const firstName = (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] || null
 
@@ -283,10 +292,10 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground font-medium leading-none mb-0.5">Today&apos;s earnings</p>
-              <p className="text-base font-black text-foreground leading-none">₦287,500</p>
+              <p className="text-base font-black text-foreground leading-none">{heroEarningsAmount}</p>
             </div>
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 ml-1">
-              <span className="text-[10px] font-bold text-primary">+12%</span>
+              <span className="text-[10px] font-bold text-primary">{heroEarningsBadge}</span>
             </div>
           </div>
 
@@ -325,9 +334,9 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
             {/* Mini stats footer */}
             <div className="grid grid-cols-3 divide-x divide-border border-t border-border bg-muted/20">
               {[
-                { label: 'Orders today', value: '1,240' },
-                { label: 'Active sellers', value: '50K+' },
-                { label: 'Avg. response', value: '< 2 min' },
+                { label: heroStat1Label, value: heroStat1Value },
+                { label: heroStat2Label, value: heroStat2Value },
+                { label: heroStat3Label, value: heroStat3Value },
               ].map(({ label, value }) => (
                 <div key={label} className="flex flex-col items-center py-3 gap-0.5">
                   <span className="text-sm font-black text-foreground tabular-nums">{value}</span>
