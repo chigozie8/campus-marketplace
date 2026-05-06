@@ -40,16 +40,21 @@ interface AppliedCoupon {
 
 type Step = 'address' | 'confirm' | 'paying' | 'success'
 
-// Extend window type to include Paystack inline script
+// Extend window type to include Paystack inline script (v2 API)
 declare global {
   interface Window {
     PaystackPop?: {
-      newTransaction: (config: {
+      setup: (config: {
         key: string
-        accessCode: string
-        onSuccess: (transaction: { reference: string }) => void
-        onCancel: () => void
-      }) => void
+        email?: string
+        amount?: number
+        ref?: string
+        access_code?: string
+        onClose: () => void
+        callback: (response: { reference: string; status: string; trans: string; transaction: string; trxref: string }) => void
+      }) => {
+        openIframe: () => void
+      }
     }
   }
 }
@@ -195,24 +200,26 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
         throw new Error('No access_code or authorization_url returned from server')
       }
 
-      window.PaystackPop.newTransaction({
+      // Use Paystack v2 API: setup() returns an object with openIframe()
+      const handler = window.PaystackPop.setup({
         key: publicKey,
-        accessCode: access_code,
-        onSuccess: (transaction: { reference: string }) => {
+        access_code: access_code,
+        callback: (response: { reference: string }) => {
           hapticNotification('success')
-          setPaymentReference(transaction.reference || reference)
+          setPaymentReference(response.reference || reference)
           setStep('success')
           toast.success('Payment successful!')
           setTimeout(() => {
             onClose()
-            router.push(`/orders?ref=${transaction.reference || reference}`)
+            router.push(`/orders?ref=${response.reference || reference}`)
           }, 2500)
         },
-        onCancel: () => {
+        onClose: () => {
           setStep('confirm')
           toast.info('Payment cancelled')
         },
       })
+      handler.openIframe()
 
       onPaystackRedirect?.()
     } catch (err) {
