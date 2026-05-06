@@ -44,7 +44,7 @@ export function EscrowFlowSection({ steps = DEFAULT_ESCROW_STEPS }: { steps?: Es
               <li key={i} className="relative">
                 {/* Connector arrow on desktop */}
                 {i < Math.min(steps.length, 4) - 1 && (
-                  <span aria-hidden="true" className="hidden md:block absolute top-8 left-[calc(100%-1.5rem)] w-6 h-px bg-gradient-to-r from-primary/40 to-transparent" />
+                  <span aria-hidden="true" className="hidden md:block absolute top-8 left-[calc(100%-1.5rem)] w-6 h-px bg-primary/30" />
                 )}
                 <div className="h-full p-6 rounded-3xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all">
                   <div className="flex items-center gap-3 mb-4">

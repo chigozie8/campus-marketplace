@@ -86,11 +86,11 @@ function StatCard({
       <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-2 transition-transform duration-300 group-hover:scale-110">
         <Icon className="w-4 h-4 text-primary" />
       </div>
-      <p className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight tabular-nums">
+      <p className="text-2xl sm:text-3xl font-black text-foreground tracking-tight tabular-nums">
         {display}
       </p>
-      <p className="text-xs sm:text-sm text-foreground font-semibold text-center">{stat.label}</p>
-      <p className="text-[11px] text-muted-foreground text-center leading-tight">{stat.sublabel}</p>
+      <p className="text-xs sm:text-sm text-foreground font-bold text-center leading-tight">{stat.label}</p>
+      <p className="text-[11px] text-muted-foreground text-center leading-tight mt-0.5">{stat.sublabel}</p>
     </div>
   )
 }

@@ -229,9 +229,9 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
           {/* Activity feed rows */}
           <div className="divide-y divide-border">
             {[
-              { icon: ShoppingBag, color: 'text-primary bg-primary/10', label: 'New order received', detail: 'Airpods Pro · ₦45,000', time: 'just now' },
-              { icon: MessageCircle, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/30', label: 'AI replied to buyer', detail: '"Is this available?" → Yes, confirmed', time: '2m ago' },
-              { icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30', label: 'Delivery confirmed', detail: 'Jumper XL · ₦8,500 released', time: '5m ago' },
+              { icon: ShoppingBag, color: 'text-primary bg-primary/10', label: 'New order received', detail: 'Infinix Hot 40 · ₦135,000', time: 'just now' },
+              { icon: MessageCircle, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/30', label: 'AI replied to buyer', detail: '"Still available?" → Yes! DM to order', time: '2m ago' },
+              { icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30', label: 'Delivery confirmed', detail: 'Ankara fabric 6yds · ₦12,000 released', time: '5m ago' },
             ].map(({ icon: Icon, color, label, detail, time }) => (
               <div key={label} className="flex items-center gap-3 px-4 py-3">
                 <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center shrink-0`}>

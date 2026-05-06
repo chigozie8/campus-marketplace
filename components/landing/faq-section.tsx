@@ -58,10 +58,10 @@ const DEFAULT_FAQS: FaqItemType[] = [
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Getting Started': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Payments': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Platform': 'bg-violet-50 text-violet-700 border-violet-200',
-  'Billing': 'bg-amber-50 text-amber-700 border-amber-200',
+  'Getting Started': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800',
+  'Payments': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800',
+  'Platform': 'bg-primary/10 text-primary border-primary/20',
+  'Billing': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
 }
 
 function FaqItem({ faq, index }: { faq: FaqItemType; index: number }) {
