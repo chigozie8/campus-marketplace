@@ -10,7 +10,7 @@ import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { CookieConsent } from '@/components/cookie-consent'
-import { PushNotificationPrompt } from '@/components/push-notification-prompt'
+
 import { CapacitorInit } from '@/components/capacitor-init'
 import { PageTransitionWrapper } from '@/components/motion/page-transition-wrapper'
 import { NetworkToast } from '@/components/network-toast'
@@ -436,7 +436,6 @@ export default function RootLayout({
             <FloatingNav />
             <ServiceWorkerRegistration />
             <PwaInstallPrompt />
-            <PushNotificationPrompt />
             <CookieConsent />
             <Toaster richColors position="top-right" />
             {process.env.NODE_ENV === 'production' && <Analytics />}
