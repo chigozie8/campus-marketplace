@@ -138,9 +138,9 @@ export function TrustSection() {
               Your Money Is Safe
             </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-950 dark:text-white mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-4 tracking-tight">
             Built so{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
+            <span className="text-primary">
               every Nigerian
             </span>{' '}
             can trade with confidence
