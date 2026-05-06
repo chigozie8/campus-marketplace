@@ -83,17 +83,10 @@ function OutgoingBubble({ children, time }: { children: React.ReactNode; time: s
 export function WhatsappMockupSection() {
   return (
     <section className="relative bg-background overflow-hidden py-24 sm:py-32">
-      {/* Subtle background radials */}
+      {/* Subtle background tint — no gradients */}
       <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 50% 100%, oklch(0.45 0.22 155 / 0.08) 0%, transparent 60%)',
-          }}
-        />
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-5xl mx-auto px-6 flex flex-col items-center gap-8">
@@ -115,10 +108,7 @@ export function WhatsappMockupSection() {
         {/* ── iPhone mockup ── */}
         <div className="mt-8 relative">
           {/* Ambient glow behind phone */}
-          <div
-            className="absolute inset-0 blur-3xl rounded-full scale-75"
-            style={{ background: 'radial-gradient(ellipse, rgba(37,211,102,0.25) 0%, transparent 70%)' }}
-          />
+          <div className="absolute inset-0 blur-3xl rounded-full scale-75 bg-primary/20" />
 
           {/* ── Outer phone chassis ── */}
           <div

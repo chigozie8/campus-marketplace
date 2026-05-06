@@ -2,11 +2,11 @@ import { UserPlus, Camera, Share2, MessageCircle, CheckCircle2, type LucideIcon 
 import type { HiwStep } from '@/lib/site-settings-defaults'
 
 const STEP_ICONS: LucideIcon[] = [UserPlus, Camera, Share2, MessageCircle]
-const STEP_COLORS = [
-  'from-emerald-500 to-green-600',
-  'from-teal-500 to-cyan-600',
-  'from-cyan-500 to-blue-600',
-  'from-green-500 to-emerald-600',
+const STEP_BG_COLORS = [
+  'bg-primary',
+  'bg-teal-600',
+  'bg-cyan-600',
+  'bg-emerald-700',
 ]
 
 const FALLBACK_STEPS: HiwStep[] = [
@@ -26,7 +26,7 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
   const STEPS = (steps && steps.length ? steps : FALLBACK_STEPS).map((s, i) => ({
     ...s,
     icon: STEP_ICONS[i % STEP_ICONS.length],
-    color: STEP_COLORS[i % STEP_COLORS.length],
+    bgColor: STEP_BG_COLORS[i % STEP_BG_COLORS.length],
   }))
   return (
     <section id="how-it-works" className="py-24 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden scroll-mt-24">
@@ -56,17 +56,20 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
             const Icon = step.icon
             return (
               <div key={step.step} className="relative flex flex-col group">
-                {/* Connector line for desktop — sits between cards, not inside them */}
+                {/* Connector line + arrowhead for desktop */}
                 {index < STEPS.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 left-[calc(100%-0.5rem)] w-8 h-[2px] bg-primary/30 z-10" />
+                  <div className="hidden lg:flex absolute top-10 left-[calc(100%-0.5rem)] w-8 items-center z-10">
+                    <div className="flex-1 h-[2px] bg-primary/30" />
+                    <div className="w-0 h-0 border-t-[4px] border-b-[4px] border-l-[5px] border-t-transparent border-b-transparent border-l-primary/40" />
+                  </div>
                 )}
 
                 {/* Card */}
                 <div className="flex flex-col items-center text-center p-8 rounded-3xl border border-border bg-card/50 backdrop-blur-sm hover:bg-card hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 group-hover:-translate-y-2">
-                  {/* Icon with gradient background */}
+                  {/* Icon with solid background */}
                   <div className="relative mb-6">
                     <div
-                      className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                      className={`w-20 h-20 rounded-2xl ${step.bgColor} flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
                     >
                       <Icon className="w-9 h-9 text-white" />
                     </div>

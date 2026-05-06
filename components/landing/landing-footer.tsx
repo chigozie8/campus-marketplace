@@ -4,13 +4,27 @@ import Link from 'next/link'
 import { useState } from 'react'
 import {
   ArrowRight, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp,
-  ChevronRight, Phone, Mail, Loader2, CheckCircle2, Lock,
+  ChevronRight, Phone, Mail, Loader2, CheckCircle2, Lock, ShoppingBag, Tag,
+  LayoutDashboard, HelpCircle,
 } from 'lucide-react'
 import type { SiteSettings, FooterSocial } from '@/lib/site-settings-defaults'
 import { parseFooterSocials } from '@/lib/site-settings-defaults'
 import { getSocialChip } from '@/components/landing/social-icons'
 
 const LINKS = {
+  Marketplace: [
+    { label: 'Browse Listings',      href: '/marketplace',            icon: ShoppingBag },
+    { label: 'Categories',           href: '/marketplace?view=cats',  icon: Tag },
+    { label: 'Start Selling',        href: '/seller/new',             icon: TrendingUp },
+    { label: 'Seller Dashboard',     href: '/dashboard',              icon: LayoutDashboard },
+    { label: 'My Orders',            href: '/orders',                 icon: ShoppingBag },
+  ],
+  Support: [
+    { label: 'Help Centre',          href: '/help',                   icon: HelpCircle },
+    { label: 'Chat on WhatsApp',     href: 'https://wa.me/15792583013', icon: Phone },
+    { label: 'Trust & Safety',       href: '/trust',                  icon: ShieldCheck },
+    { label: 'Dispute Resolution',   href: '/dispute',                icon: Users },
+  ],
   Company: [
     { label: 'About VendoorX',   href: '/about',        icon: ShieldCheck },
     { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
@@ -18,12 +32,10 @@ const LINKS = {
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
   ],
   Legal: [
-    { label: 'Trust & Safety',      href: '/trust',     icon: ShieldCheck },
     { label: 'Privacy Policy',      href: '/privacy',   icon: ShieldCheck },
     { label: 'Terms of Service',    href: '/terms',     icon: BookOpen },
     { label: 'Cookie Policy',       href: '/cookies',   icon: BookOpen },
     { label: 'Refund Policy',       href: '/refund',    icon: ShieldCheck },
-    { label: 'Dispute Resolution',  href: '/dispute',   icon: Users },
   ],
 }
 
@@ -291,7 +303,7 @@ export function LandingFooter({ settings, userEmail, userFirstName }: FooterProp
       {/* ── LINK COLUMNS ── */}
       <div className="bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-2 gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10">
             {Object.entries(LINKS).map(([category, links]) => (
               <div key={category}>
                 <h4 className="text-xs font-black uppercase tracking-widest text-foreground mb-5">

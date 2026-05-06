@@ -68,8 +68,8 @@ function StatCard({
         transition: 'opacity 0.55s ease, transform 0.55s ease',
       }}
     >
-      <div className="w-10 h-10 rounded-xl bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-        <Icon className="w-5 h-5 text-[#16a34a]" />
+      <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        <Icon className="w-5 h-5 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
         {fmt(val)}
@@ -96,26 +96,26 @@ export function CtaSection({ user }: CtaSectionProps) {
   }, [])
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0a0a] py-24 sm:py-36">
-      {/* Subtle grid texture */}
+    <section className="relative overflow-hidden bg-foreground py-24 sm:py-36">
+      {/* Subtle dot grid texture */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.06]"
         style={{
-          backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`,
-          backgroundSize: '48px 48px',
+          backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
+          backgroundSize: '32px 32px',
         }}
       />
 
       {/* Green glow */}
-      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#16a34a]/20 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[400px] h-[300px] rounded-full bg-[#16a34a]/10 blur-[80px] pointer-events-none" />
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/20 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[400px] h-[300px] rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#16a34a]/40 bg-[#16a34a]/10 mb-8">
-          <Zap className="w-4 h-4 text-[#16a34a]" />
-          <span className="text-sm font-semibold text-[#16a34a] tracking-wide">
+        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/40 bg-primary/10 mb-8">
+          <Zap className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold text-primary tracking-wide">
             {isAuthed ? 'Your campus store is live and ready to grow' : 'The marketplace built for Nigerian university campuses'}
           </span>
         </div>
@@ -123,25 +123,25 @@ export function CtaSection({ user }: CtaSectionProps) {
         {/* Headline */}
         <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight">
           {isAuthed ? (
-            <>Keep growing your{' '}<span className="text-[#16a34a]">campus store.</span></>
+            <>Keep growing your{' '}<span className="text-primary">campus store.</span></>
           ) : (
-            <>Your campus side-hustle{' '}<span className="text-[#16a34a]">starts here.</span></>
+            <>Your campus side-hustle{' '}<span className="text-primary">starts here.</span></>
           )}
         </h2>
 
         {/* Sub-copy */}
         <p className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-10">
           {isAuthed ? (
-            <>
+              <>
               Everything you need is in your dashboard. Boost your listings, track your orders, and{' '}
-              <span className="text-[#16a34a] font-semibold">keep growing your campus store</span>.
+              <span className="text-primary font-semibold">keep growing your campus store</span>.
             </>
           ) : (
             <>
               Join <span className="text-white font-bold">50,000+ students</span> already making money selling to classmates on VendoorX.
               It&apos;s{' '}
-              <span className="text-[#16a34a] font-semibold">free to join</span>{' '}
-              and <span className="text-[#16a34a] font-semibold">free to start selling</span> — right now.
+              <span className="text-primary font-semibold">free to join</span>{' '}
+              and <span className="text-primary font-semibold">free to start selling</span> — right now.
             </>
           )}
         </p>
@@ -169,7 +169,7 @@ export function CtaSection({ user }: CtaSectionProps) {
             <>
               <Button
                 size="lg"
-                className="group bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-[#16a34a]/30 hover:shadow-[#16a34a]/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
                 asChild
               >
                 <Link href="/dashboard">
@@ -191,7 +191,7 @@ export function CtaSection({ user }: CtaSectionProps) {
             <>
               <Button
                 size="lg"
-                className="group bg-[#16a34a] hover:bg-[#15803d] text-white font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-[#16a34a]/30 hover:shadow-[#16a34a]/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
+                className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
                 asChild
               >
                 <Link href="/auth/sign-up">
