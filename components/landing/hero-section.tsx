@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { GraduationCap, ArrowRight, Play, Shield, Zap, LayoutDashboard, Users, Star, Heart, Phone, Sparkles, type LucideIcon } from 'lucide-react'
+import { GraduationCap, ArrowRight, Play, Shield, Zap, LayoutDashboard, Users, Star, Heart, Phone, Sparkles, MessageCircle, ShoppingBag, CheckCircle2, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
@@ -189,6 +189,11 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
           )}
         </div>
 
+        {/* Reassurance note */}
+        <p className="text-xs text-muted-foreground">
+          Free to start &bull; No credit card required &bull; Live in under 5 minutes
+        </p>
+
         {/* Social proof row */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 pt-6 border-t border-border/50">
           <HeroAvatarStack avatars={AVATARS} />
@@ -203,6 +208,42 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
             <span className="text-sm text-muted-foreground font-medium">
               <span className="text-foreground font-bold">{vendorCount}</span> active sellers
             </span>
+          </div>
+        </div>
+
+        {/* Live activity mockup strip — gives the hero visual proof the platform is alive */}
+        <div className="w-full max-w-2xl mt-10 rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-xl shadow-black/5 overflow-hidden">
+          {/* Mockup header bar */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+            </div>
+            <span className="text-xs font-semibold text-muted-foreground">Live on VendoorX right now</span>
+            <span className="flex items-center gap-1.5 text-xs font-bold text-primary">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              Live
+            </span>
+          </div>
+          {/* Activity feed rows */}
+          <div className="divide-y divide-border">
+            {[
+              { icon: ShoppingBag, color: 'text-primary bg-primary/10', label: 'New order received', detail: 'Airpods Pro · ₦45,000', time: 'just now' },
+              { icon: MessageCircle, color: 'text-teal-600 bg-teal-50 dark:bg-teal-950/30', label: 'AI replied to buyer', detail: '"Is this available?" → Yes, confirmed', time: '2m ago' },
+              { icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30', label: 'Delivery confirmed', detail: 'Jumper XL · ₦8,500 released', time: '5m ago' },
+            ].map(({ icon: Icon, color, label, detail, time }) => (
+              <div key={label} className="flex items-center gap-3 px-4 py-3">
+                <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-foreground truncate">{label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{detail}</p>
+                </div>
+                <span className="text-[10px] text-muted-foreground shrink-0">{time}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

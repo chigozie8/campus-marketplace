@@ -56,11 +56,9 @@ export function HowItWorksSection({ title, subtitle, steps }: Props = {}) {
             const Icon = step.icon
             return (
               <div key={step.step} className="relative flex flex-col group">
-                {/* Connector line for desktop */}
+                {/* Connector line for desktop — sits between cards, not inside them */}
                 {index < STEPS.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 left-[calc(50%+3rem)] w-[calc(100%-6rem)] h-[2px]">
-                    <div className="h-full bg-gradient-to-r from-primary/50 to-primary/20" />
-                  </div>
+                  <div className="hidden lg:block absolute top-10 left-[calc(100%-0.5rem)] w-8 h-[2px] bg-primary/30 z-10" />
                 )}
 
                 {/* Card */}

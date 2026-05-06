@@ -38,7 +38,7 @@ export async function TrendingProducts() {
   if (products.length === 0) return null
 
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-background">
+    <section className="py-20 sm:py-24 px-4 sm:px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between gap-4 mb-8">
           <div>
@@ -63,7 +63,7 @@ export async function TrendingProducts() {
             <Link
               key={p.id}
               href={`/products/${p.id}`}
-              className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all"
+              className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative aspect-square bg-muted overflow-hidden">
                 {p.images?.[0] ? (
@@ -72,21 +72,27 @@ export async function TrendingProducts() {
                     alt={p.title}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 280px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.08]"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                     No image
                   </div>
                 )}
+                {/* Price badge overlaid on image */}
+                <div className="absolute bottom-2 left-2 px-2 py-1 rounded-lg bg-background/90 backdrop-blur-sm border border-border shadow-sm">
+                  <p className="text-xs sm:text-sm font-black text-primary leading-none">
+                    ₦{Number(p.price ?? 0).toLocaleString()}
+                  </p>
+                </div>
               </div>
               <div className="p-3">
-                <p className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug">
+                <p className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                   {p.title}
                 </p>
-                <p className="text-sm sm:text-base font-black text-primary mt-1.5">
-                  ₦{Number(p.price ?? 0).toLocaleString()}
-                </p>
+                {p.category && (
+                  <p className="text-[10px] text-muted-foreground mt-1 capitalize">{p.category}</p>
+                )}
               </div>
             </Link>
           ))}

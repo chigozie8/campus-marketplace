@@ -84,7 +84,7 @@ function StatCard({
       }}
     >
       <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 mb-2 transition-transform duration-300 group-hover:scale-110">
-        <Icon className="w-4.5 h-4.5 text-primary" />
+        <Icon className="w-4 h-4 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight tabular-nums">
         {display}
