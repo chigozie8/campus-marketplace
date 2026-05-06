@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 const BUCKET = 'product-images'
 
@@ -29,6 +30,16 @@ const ALLOWED_TYPES = [
 
 export async function POST(req: Request) {
   try {
+    // Only authenticated users may upload files
+    const serverClient = await createServerClient()
+    if (!serverClient) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { data: { user } } = await serverClient.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'You must be logged in to upload files.' }, { status: 401 })
+    }
+
     const admin = await getAdminClient()
     await ensureBucket(admin)
 
