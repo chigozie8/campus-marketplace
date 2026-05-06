@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { ImageUploadField } from '@/components/admin/image-upload-field'
 import {
   Save, Loader2, CheckCircle2, AlertCircle, Users,
-  CalendarDays, Type, Image as ImageIcon, Bell, ListChecks,
+  CalendarDays, Type, Image as ImageIcon, Bell, ListChecks, Smile,
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -18,6 +18,11 @@ interface CommunityConfig {
   waitlist_count:    string
   hero_image_url:    string
   launch_date_label: string
+  avatar_1_url:      string
+  avatar_2_url:      string
+  avatar_3_url:      string
+  avatar_4_url:      string
+  avatar_5_url:      string
 }
 
 const DEFAULTS: CommunityConfig = {
@@ -29,6 +34,11 @@ const DEFAULTS: CommunityConfig = {
   waitlist_count:    '2,400+',
   hero_image_url:    '',
   launch_date_label: 'Expected Launch',
+  avatar_1_url:      '',
+  avatar_2_url:      '',
+  avatar_3_url:      '',
+  avatar_4_url:      '',
+  avatar_5_url:      '',
 }
 
 // ── Field components ──────────────────────────────────────────────────────────
@@ -287,6 +297,30 @@ export default function AdminCommunitySettingsPage() {
             label=""
           />
         </FieldGroup>
+      </Section>
+
+      {/* Waitlist avatars section */}
+      <Section icon={Smile} title="Waitlist Avatars">
+        <p className="text-xs text-muted-foreground mb-4">
+          Upload profile images for the 5 students shown in the social proof section. These will replace the placeholder circles.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[1, 2, 3, 4, 5].map(i => (
+            <FieldGroup
+              key={`avatar_${i}`}
+              label={`Avatar ${i}`}
+              hint="Student profile image"
+            >
+              <ImageUploadField
+                value={config[`avatar_${i}_url` as keyof CommunityConfig]}
+                onChange={set(`avatar_${i}_url` as keyof CommunityConfig)}
+                shape="circle"
+                previewSize={48}
+                label=""
+              />
+            </FieldGroup>
+          ))}
+        </div>
       </Section>
 
       {/* Live preview link */}

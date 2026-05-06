@@ -10,6 +10,11 @@ const DEFAULTS: Record<string, string> = {
   waitlist_count:    '2,400+',
   hero_image_url:    '',
   launch_date_label: 'Expected Launch',
+  avatar_1_url:      '',
+  avatar_2_url:      '',
+  avatar_3_url:      '',
+  avatar_4_url:      '',
+  avatar_5_url:      '',
 }
 
 export async function GET() {
