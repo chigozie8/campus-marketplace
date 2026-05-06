@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X, CreditCard, Sparkles } from 'lucide-react'
+import { Loader2, MapPin, ShoppingCart, Shield, Lock, Phone, Tag, CheckCircle2, X, CreditCard } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,7 +11,7 @@ import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
 import { toast } from 'sonner'
 import { hapticImpact, hapticNotification } from '@/lib/capacitor'
 import { SavedAddressesPicker } from '@/components/orders/saved-addresses-picker'
-import { useRouter } from 'next/navigation'
+
 
 export interface CheckoutProduct {
   id: string
@@ -38,29 +38,9 @@ interface AppliedCoupon {
   discount: number
 }
 
-type Step = 'address' | 'confirm' | 'paying' | 'success'
-
-// Extend window type to include Paystack inline script (v2 API)
-declare global {
-  interface Window {
-    PaystackPop?: {
-      setup: (config: {
-        key: string
-        email?: string
-        amount?: number
-        ref?: string
-        access_code?: string
-        onClose: () => void
-        callback: (response: { reference: string; status: string; trans: string; transaction: string; trxref: string }) => void
-      }) => {
-        openIframe: () => void
-      }
-    }
-  }
-}
+type Step = 'address' | 'confirm' | 'paying'
 
 export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: CheckoutModalProps) {
-  const router = useRouter()
   const [step, setStep] = useState<Step>('address')
   const [address, setAddress] = useState('')
   const [saveAddress, setSaveAddress] = useState(false)
@@ -69,8 +49,6 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
   const [orderId, setOrderId] = useState<string | null>(null)
   const [platformFee, setPlatformFee] = useState(100)
   const [platformFeeLabel, setPlatformFeeLabel] = useState('VAT & Service Fee')
-  const [paymentReference, setPaymentReference] = useState<string | null>(null)
-  const [paystackReady, setPaystackReady] = useState(false)
 
   const [couponCode, setCouponCode] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
@@ -79,17 +57,6 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
 
   const createOrder = useCreateOrder()
   const initPayment = useInitializePayment()
-
-  // Load Paystack inline script once on mount
-  useEffect(() => {
-    if (window.PaystackPop) { setPaystackReady(true); return }
-    const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v2/inline.js'
-    script.async = true
-    script.onload = () => setPaystackReady(true)
-    script.onerror = () => toast.error('Could not load payment service. Check your internet connection.')
-    document.head.appendChild(script)
-  }, [])
 
   useEffect(() => {
     fetch('/api/platform-fee')
@@ -171,59 +138,21 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
 
   async function handlePay() {
     if (!orderId) return
-    if (!paystackReady || !window.PaystackPop) {
-      toast.error('Payment service not ready yet, please try again.')
-      return
-    }
 
     hapticNotification('success')
     setStep('paying')
 
     try {
-      // The server initializes the transaction and returns an access_code
-      // which already has email, amount, and reference embedded — no need
-      // to pass them again to the inline popup.
       const result = await initPayment.mutateAsync(orderId)
-      const { access_code, reference, authorization_url } = result.data
+      const { authorization_url } = result.data
 
-      const publicKey =
-        process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ||
-        'pk_live_77ab98bc87c205ec76cb2f7d534cff02df034c8e'
-
-      // If access_code is missing fall back to a full-page redirect
-      if (!access_code) {
-        if (authorization_url) {
-          onPaystackRedirect?.()
-          window.location.href = authorization_url
-          return
-        }
-        throw new Error('No access_code or authorization_url returned from server')
+      if (!authorization_url) {
+        throw new Error('No authorization URL returned from server')
       }
 
-      // Use Paystack v2 API: setup() returns an object with openIframe()
-      const handler = window.PaystackPop.setup({
-        key: publicKey,
-        access_code: access_code,
-        callback: (response: { reference: string }) => {
-          hapticNotification('success')
-          setPaymentReference(response.reference || reference)
-          setStep('success')
-          toast.success('Payment successful!')
-          setTimeout(() => {
-            onClose()
-            router.push(`/orders?ref=${response.reference || reference}`)
-          }, 2500)
-        },
-        onClose: () => {
-          setStep('confirm')
-          toast.info('Payment cancelled')
-        },
-      })
-      handler.openIframe()
-
       onPaystackRedirect?.()
+      window.location.href = authorization_url
     } catch (err) {
-      console.error('[Paystack] Payment initialization failed:', err)
       setStep('confirm')
       const msg = err instanceof Error ? err.message : 'Failed to initialize payment. Please try again.'
       toast.error(msg)
@@ -240,7 +169,6 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     setCouponCode('')
     setAppliedCoupon(null)
     setShowCouponInput(false)
-    setPaymentReference(null)
     onClose()
   }
 
@@ -251,8 +179,7 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
           <DialogTitle className="text-lg font-black">
             {step === 'address' && 'Complete Your Order'}
             {step === 'confirm' && 'Confirm & Pay'}
-            {step === 'paying' && 'Secure Payment'}
-            {step === 'success' && 'Order Confirmed!'}
+            {step === 'paying' && 'Redirecting to Paystack…'}
           </DialogTitle>
         </DialogHeader>
 
@@ -496,10 +423,10 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
               </div>
             </div>
 
-            {/* Loading indicator while Paystack iframe opens */}
+            {/* Loading indicator while redirecting */}
             <div className="flex flex-col items-center gap-4 py-2">
               <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
-              <p className="text-sm text-muted-foreground">Opening secure payment window...</p>
+              <p className="text-sm text-muted-foreground">Redirecting to Paystack...</p>
             </div>
 
             {/* Security Badges */}
@@ -512,35 +439,6 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
                 <Shield className="w-3.5 h-3.5 text-emerald-600" />
                 <span>PCI DSS Compliant</span>
               </div>
-            </div>
-
-            {/* Cancel Button */}
-            <button
-              onClick={() => setStep('confirm')}
-              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-            >
-              ← Back to order summary
-            </button>
-          </div>
-        )}
-
-        {step === 'success' && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/30 animate-bounce">
-              <Sparkles className="w-10 h-10 text-white" />
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-black text-foreground">Payment Successful!</h3>
-              <p className="text-sm text-muted-foreground mt-2">
-                Your order has been placed successfully.
-              </p>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono mt-3">
-                Ref: {paymentReference}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Redirecting to your orders...</span>
             </div>
           </div>
         )}
