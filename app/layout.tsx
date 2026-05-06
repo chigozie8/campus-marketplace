@@ -28,8 +28,8 @@ const siteUrl = SITE_URL
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
-    template: '%s | VendoorX',
+    default: 'Vendoor X — Nigeria\'s #1 WhatsApp Vendor Marketplace',
+    template: '%s | Vendoor X',
   },
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'VendoorX',
+    'apple-mobile-web-app-title': 'Vendoor X',
     'mobile-web-app-capable': 'yes',
     'msapplication-TileColor': '#16a34a',
   },
