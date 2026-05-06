@@ -150,7 +150,7 @@ export const ordersApi = {
   // server-side Supabase client can identify the buyer.
   initializePayment: async (id: string) => {
     const token = await getAuthToken()
-    return directRequest<{ success: boolean; data: { authorization_url: string; reference: string } }>(
+    return directRequest<{ success: boolean; data: { authorization_url: string; reference: string; access_code: string } }>(
       `/api/orders/${id}/pay`,
       {
         method: 'POST',
