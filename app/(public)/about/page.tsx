@@ -84,10 +84,7 @@ export default async function AboutPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
             We&apos;re building the{' '}
-            <span className="relative inline-block">
-              <span className="relative z-10 text-primary-foreground dark:text-primary">economic backbone</span>
-              <span className="absolute inset-0 -mx-2 -my-0.5 rounded-lg bg-primary dark:bg-transparent" aria-hidden="true" />
-            </span>{' '}
+            <span className="text-primary">economic backbone</span>{' '}
             across Nigeria.
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
@@ -141,10 +138,7 @@ export default async function AboutPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Our Mission</p>
             <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-6 leading-tight">
               Every Nigerian seller deserves a{' '}
-              <span className="relative inline-block">
-                <span className="relative z-10 text-primary-foreground dark:text-primary">powerful platform</span>
-                <span className="absolute inset-0 -mx-1.5 -my-0.5 rounded-md bg-primary dark:bg-transparent" aria-hidden="true" />
-              </span>{' '}
+              <span className="text-primary">powerful platform</span>{' '}
               to sell what they have.
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-6">
