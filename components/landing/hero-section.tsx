@@ -172,13 +172,17 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
 
           {/* Feature badges */}
           {FEATURES.length > 0 && (
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2.5">
-              {FEATURES.map(({ Icon, text }) => (
+            <div className="grid grid-cols-2 justify-items-center lg:justify-items-start gap-2.5 w-full max-w-sm lg:max-w-none">
+              {FEATURES.map(({ Icon, text }, i) => (
                 <div
                   key={text}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary${
+                    FEATURES.length % 2 !== 0 && i === FEATURES.length - 1
+                      ? ' col-span-2 justify-self-center lg:justify-self-start'
+                      : ''
+                  }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
                   {text}
                 </div>
               ))}
