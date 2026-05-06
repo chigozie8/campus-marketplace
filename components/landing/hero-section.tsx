@@ -271,9 +271,9 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
         {/* ════════════════════════════
             RIGHT — live mockup column
         ════════════════════════════ */}
-        <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
+        <div className="flex-1 w-full max-w-lg lg:max-w-none relative pt-14 pb-14">
           {/* Floating earnings card — top-left of the mockup */}
-          <div className="absolute -top-4 -left-4 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
+          <div className="absolute top-0 left-2 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4 text-primary" />
             </div>
@@ -334,7 +334,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
           </div>
 
           {/* Floating verified badge — bottom-right */}
-          <div className="absolute -bottom-4 -right-4 z-20 flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
+          <div className="absolute bottom-0 right-2 z-20 flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
             <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
