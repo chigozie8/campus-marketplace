@@ -27,6 +27,7 @@ const LINKS = {
   ],
   Company: [
     { label: 'About VendoorX',   href: '/about',        icon: ShieldCheck },
+    { label: 'Community',        href: '/community',    icon: Users },
     { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
     { label: 'Careers',          href: '/careers',      icon: Users },
     { label: 'Press Kit',        href: '/press',        icon: TrendingUp },
