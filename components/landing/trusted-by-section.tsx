@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 const SELLER_TYPES = [
   { name: 'Fashion & Clothing', abbr: 'Fashion' },
   { name: 'Electronics & Gadgets', abbr: 'Electronics' },
@@ -50,8 +52,14 @@ const MARQUEE_ROW1 = [...SELLER_TYPES, ...SELLER_TYPES]
 const MARQUEE_ROW2 = [...CITIES, ...CITIES]
 
 export function TrustedBySection() {
+  const [paused, setPaused] = useState(false)
+
   return (
-    <section className="py-14 sm:py-16 overflow-hidden bg-background border-y border-border/40">
+    <section
+      className="py-14 sm:py-16 overflow-hidden bg-background border-y border-border/40"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       <div className="max-w-5xl mx-auto px-4 mb-8 text-center">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground/70 mb-2">
           Powering sellers in every category, across every city in Nigeria
@@ -69,7 +77,7 @@ export function TrustedBySection() {
         <div className="flex overflow-hidden">
           <div
             className="flex gap-4 shrink-0"
-            style={{ animation: 'marquee-left 35s linear infinite' }}
+            style={{ animation: 'marquee-left 35s linear infinite', animationPlayState: paused ? 'paused' : 'running' }}
           >
             {MARQUEE_ROW1.map((item, i) => (
               <div
@@ -90,7 +98,7 @@ export function TrustedBySection() {
           </div>
           <div
             className="flex gap-4 shrink-0"
-            style={{ animation: 'marquee-left 35s linear infinite' }}
+            style={{ animation: 'marquee-left 35s linear infinite', animationPlayState: paused ? 'paused' : 'running' }}
             aria-hidden
           >
             {MARQUEE_ROW1.map((item, i) => (
@@ -121,7 +129,7 @@ export function TrustedBySection() {
         <div className="flex overflow-hidden">
           <div
             className="flex gap-4 shrink-0"
-            style={{ animation: 'marquee-right 45s linear infinite' }}
+            style={{ animation: 'marquee-right 45s linear infinite', animationPlayState: paused ? 'paused' : 'running' }}
           >
             {[...MARQUEE_ROW2].reverse().map((item, i) => (
               <div
@@ -142,7 +150,7 @@ export function TrustedBySection() {
           </div>
           <div
             className="flex gap-4 shrink-0"
-            style={{ animation: 'marquee-right 45s linear infinite' }}
+            style={{ animation: 'marquee-right 45s linear infinite', animationPlayState: paused ? 'paused' : 'running' }}
             aria-hidden
           >
             {[...MARQUEE_ROW2].reverse().map((item, i) => (
