@@ -1,8 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import {
   GraduationCap, ArrowRight, Play, Shield, Zap, LayoutDashboard, Users,
   Star, Heart, Phone, Sparkles, MessageCircle, ShoppingBag, CheckCircle2,
-  TrendingUp, type LucideIcon,
+  TrendingUp, Trophy, Wifi, type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { User } from '@supabase/supabase-js'
@@ -27,6 +29,13 @@ const AVATAR_META: Omit<AvatarMeta, 'src'>[] = [
 ]
 
 const DEFAULT_CAMPUSES_LIST = ['UNILAG', 'ABU', 'UI', 'OAU', 'BUK', 'EBSU', 'AE-FUNIA']
+
+// Full marquee list — duplicated for seamless loop
+const MARQUEE_CAMPUSES = [
+  'UNILAG', 'ABU', 'UI', 'OAU', 'BUK', 'EBSU', 'AE-FUNIA',
+  'FUTA', 'LASU', 'UNIBEN', 'UNN', 'UNIPORT', 'FUNAAB', 'ATBU',
+  'COOU', 'UNIZIK', 'UNICAL', 'FUTO', 'BSU', 'NOUN',
+]
 
 const ACTIVITY_ROWS = [
   {
@@ -59,7 +68,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps) {
-  const vendorCount     = settings?.stat_active_vendors ?? DEFAULT_SETTINGS.stat_active_vendors
+  const vendorCount = settings?.stat_active_vendors ?? DEFAULT_SETTINGS.stat_active_vendors
   const avatarSrcs = [
     settings?.hero_avatar_1 ?? DEFAULT_SETTINGS.hero_avatar_1,
     settings?.hero_avatar_2 ?? DEFAULT_SETTINGS.hero_avatar_2,
@@ -86,7 +95,6 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
     ? [visitorCampus, ...DEFAULT_CAMPUSES_LIST.filter(c => c !== visitorCampus)].slice(0, 5)
     : DEFAULT_CAMPUSES_LIST
 
-  /* ── subtitle renderer ── */
   function renderSubtitle() {
     if (heroSubtitle.includes('{campuses}')) {
       const [before, after] = heroSubtitle.split('{campuses}')
@@ -116,38 +124,45 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
       id="hero"
       className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white dark:bg-background"
     >
-      {/* Subtle background glow (dark mode only) */}
+      {/* Subtle dark-mode glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full dark:bg-green-500/5 blur-[120px] pointer-events-none" />
 
-      {/* ── Split layout container ── */}
-      <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-16 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      {/* ── Split layout ── */}
+      <div className="relative w-full max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
-        {/* ════════════════════════════
+        {/* ═══════════════════════════
             LEFT — text column
-        ════════════════════════════ */}
-        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-6">
+        ═══════════════════════════ */}
+        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
 
-          {/* Trust badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-lg shadow-primary/5 text-sm text-muted-foreground font-medium">
-            <GraduationCap className="w-4 h-4 text-primary shrink-0" />
-            {isAuthed && firstName
-              ? `Welcome back, ${firstName}! Your campus store awaits`
-              : visitorCampus
-                ? `Built for ${visitorCampus} students`
-                : heroBadge}
+          {/* Top badge row: brand badge + live users pill */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-sm text-sm text-muted-foreground font-medium">
+              <GraduationCap className="w-4 h-4 text-primary shrink-0" />
+              {isAuthed && firstName
+                ? `Welcome back, ${firstName}!`
+                : visitorCampus
+                  ? `Built for ${visitorCampus} students`
+                  : heroBadge}
+            </div>
+            {/* Live users counter */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary">
+              <Wifi className="w-3 h-3" />
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse inline-block" />
+              2,847 online now
+            </div>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] xl:text-[5rem] font-black tracking-tight leading-[1.05] text-balance">
+          {/* Headline — two-line with accent on second line */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] xl:text-[4.5rem] font-black tracking-tight leading-[1.05] text-balance">
             <span className="text-foreground">{heroLine1}</span>
             <br />
-            {/* Accent word with decorative underline */}
-            <span className="relative inline-block text-primary italic">
+            <span className="relative inline-block text-primary italic pb-2">
               {heroAccent}
-              {/* SVG squiggle underline */}
+              {/* Squiggle underline */}
               <svg
                 aria-hidden="true"
-                className="absolute -bottom-2 left-0 w-full"
+                className="absolute -bottom-1 left-0 w-full"
                 viewBox="0 0 220 10"
                 fill="none"
                 preserveAspectRatio="none"
@@ -159,11 +174,32 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   fill="none"
-                  opacity="0.45"
+                  opacity="0.5"
                 />
               </svg>
             </span>
           </h1>
+
+          {/* Campus marquee ticker */}
+          <div className="w-full max-w-xl overflow-hidden">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-medium">Active at 120+ campuses including:</span>
+            </div>
+            <div className="relative overflow-hidden rounded-lg border border-border bg-muted/30 py-2">
+              {/* fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-muted/30 to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-muted/30 to-transparent z-10 pointer-events-none" />
+              <div className="flex gap-6 animate-marquee whitespace-nowrap">
+                {[...MARQUEE_CAMPUSES, ...MARQUEE_CAMPUSES].map((campus, i) => (
+                  <span key={`${campus}-${i}`} className="text-xs font-bold text-foreground/70 shrink-0">
+                    {campus}
+                    <span className="text-primary/40 ml-6">·</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed text-pretty max-w-xl">
@@ -172,7 +208,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
 
           {/* Feature badges */}
           {FEATURES.length > 0 && (
-            <div className="flex flex-wrap justify-center lg:justify-start gap-2.5">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2">
               {FEATURES.map(({ Icon, text }) => (
                 <div
                   key={text}
@@ -268,11 +304,12 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
           </div>
         </div>
 
-        {/* ════════════════════════════
+        {/* ═══════════════════════════
             RIGHT — live mockup column
-        ════════════════════════════ */}
+        ═══════════════════════════ */}
         <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
-          {/* Floating earnings card — top-left of the mockup */}
+
+          {/* Floating earnings card — top-left */}
           <div className="absolute -top-4 -left-4 z-20 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4 text-primary" />
@@ -286,8 +323,19 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
             </div>
           </div>
 
+          {/* Floating top seller card — top-right */}
+          <div className="absolute -top-4 -right-4 z-20 flex items-center gap-2.5 px-3.5 py-3 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center shrink-0">
+              <Trophy className="w-4 h-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground font-medium leading-none mb-0.5">Top seller this week</p>
+              <p className="text-sm font-black text-foreground leading-none">₦1.2M earned</p>
+            </div>
+          </div>
+
           {/* Live activity mockup card */}
-          <div className="w-full rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-2xl shadow-black/8 overflow-hidden">
+          <div className="w-full rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-2xl shadow-black/8 overflow-hidden mt-6">
             {/* Mockup header bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
               <div className="flex items-center gap-1.5">
@@ -333,7 +381,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
             </div>
           </div>
 
-          {/* Floating verified badge — bottom-right */}
+          {/* Floating escrow badge — bottom-right */}
           <div className="absolute -bottom-4 -right-4 z-20 flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-card border border-border shadow-xl shadow-black/8">
             <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />

@@ -202,13 +202,23 @@
     letter-spacing: -0.03em;
   }
 
+  /* Campus name marquee */
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
   /* Accessibility — disable our decorative shimmer/breathe animations
      for users who opt out via OS settings. Functional indicators
      (toasts, spinners, progress bars) keep working. Components built
      on the motion system check the preference via useReducedMotionPref. */
   @media (prefers-reduced-motion: reduce) {
     .animate-shimmer,
-    [class*='animate-shimmer'] {
+    [class*='animate-shimmer'],
+    .animate-marquee {
       animation: none !important;
     }
     html {
