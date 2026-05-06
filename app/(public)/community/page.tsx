@@ -26,6 +26,11 @@ interface CommunityConfig {
   waitlist_count: string
   hero_image_url: string
   launch_date_label: string
+  avatar_1_url: string
+  avatar_2_url: string
+  avatar_3_url: string
+  avatar_4_url: string
+  avatar_5_url: string
 }
 
 const DEFAULT_CONFIG: CommunityConfig = {
@@ -38,6 +43,11 @@ const DEFAULT_CONFIG: CommunityConfig = {
   waitlist_count: '2,400+',
   hero_image_url: '',
   launch_date_label: 'Expected Launch',
+  avatar_1_url: '',
+  avatar_2_url: '',
+  avatar_3_url: '',
+  avatar_4_url: '',
+  avatar_5_url: '',
 }
 
 const FEATURES = [
@@ -257,18 +267,41 @@ export default function CommunityComingSoonPage() {
           {/* Social proof */}
           <div className="inline-flex items-center gap-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 backdrop-blur-sm rounded-full px-5 py-2.5 shadow-sm">
             <div className="flex -space-x-2" aria-hidden>
-              {['AO', 'TK', 'NB', 'CI', 'EM'].map((init, i) => (
-                <div
-                  key={init}
-                  className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center text-[9px] font-black text-white shrink-0"
-                  style={{
-                    background: i % 2 === 0 ? '#16a34a' : '#94a3b8',
-                    zIndex: 5 - i,
-                  }}
-                >
-                  {init}
-                </div>
-              ))}
+              {[1, 2, 3, 4, 5].map((num, i) => {
+                const avatarUrl = config[`avatar_${num}_url` as keyof CommunityConfig]
+                const INITIALS = ['AO', 'TK', 'NB', 'CI', 'EM']
+                
+                if (avatarUrl) {
+                  return (
+                    <div
+                      key={num}
+                      className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 flex-shrink-0 overflow-hidden relative flex items-center justify-center"
+                      style={{ zIndex: 5 - i }}
+                    >
+                      <Image
+                        src={avatarUrl}
+                        alt={`Avatar ${num}`}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  )
+                } else {
+                  return (
+                    <div
+                      key={num}
+                      className="w-7 h-7 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center text-[9px] font-black text-white shrink-0"
+                      style={{
+                        background: i % 2 === 0 ? '#16a34a' : '#94a3b8',
+                        zIndex: 5 - i,
+                      }}
+                    >
+                      {INITIALS[i]}
+                    </div>
+                  )
+                }
+              })}
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400">
               <span className="font-bold text-slate-900 dark:text-white">{config.waitlist_count}</span> students already waiting
