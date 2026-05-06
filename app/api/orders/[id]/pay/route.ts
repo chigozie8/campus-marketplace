@@ -26,7 +26,8 @@ export async function POST(
     const { id: orderId } = await params
 
     if (!PAYSTACK_SECRET_KEY) {
-      return NextResponse.json({ success: false, message: 'Payment system is not configured' }, { status: 503 })
+      console.error('[pay] PAYSTACK_SECRET_KEY is not set in environment variables')
+      return NextResponse.json({ success: false, message: 'Payment not configured — contact support (missing PAYSTACK_SECRET_KEY)' }, { status: 503 })
     }
 
     // Support both cookie-based auth (SSR) and Bearer token (client directRequest).
@@ -131,10 +132,13 @@ export async function POST(
     })
 
     const paystackData = await paystackRes.json()
+    console.log('[pay] Paystack response status:', paystackRes.status, 'body:', JSON.stringify(paystackData))
 
     if (!paystackRes.ok || !paystackData?.data?.authorization_url) {
+      const errMsg = paystackData?.message ?? 'Payment initialization failed'
+      console.error('[pay] Paystack error:', errMsg)
       return NextResponse.json(
-        { success: false, message: paystackData?.message ?? 'Payment initialization failed' },
+        { success: false, message: errMsg },
         { status: 502 },
       )
     }

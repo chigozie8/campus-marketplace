@@ -218,7 +218,8 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
     } catch (err) {
       console.error('[Paystack] Payment initialization failed:', err)
       setStep('confirm')
-      toast.error('Failed to initialize payment. Please try again.')
+      const msg = err instanceof Error ? err.message : 'Failed to initialize payment. Please try again.'
+      toast.error(msg)
     }
   }
 
@@ -432,7 +433,7 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
               <div>
                 <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Escrow Protected — Your Money Is Safe</p>
                 <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 leading-relaxed">
-                  Payment goes to VendoorX escrow — not the seller. Released only after you confirm delivery.
+                  Payment goes to Vendoor X escrow — not the seller. Released only after you confirm delivery.
                   Full refund if anything goes wrong.
                 </p>
               </div>
