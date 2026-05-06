@@ -179,11 +179,21 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
       // which already has email, amount, and reference embedded — no need
       // to pass them again to the inline popup.
       const result = await initPayment.mutateAsync(orderId)
-      const { access_code, reference } = result.data
+      const { access_code, reference, authorization_url } = result.data
 
       const publicKey =
         process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ||
         'pk_live_77ab98bc87c205ec76cb2f7d534cff02df034c8e'
+
+      // If access_code is missing fall back to a full-page redirect
+      if (!access_code) {
+        if (authorization_url) {
+          onPaystackRedirect?.()
+          window.location.href = authorization_url
+          return
+        }
+        throw new Error('No access_code or authorization_url returned from server')
+      }
 
       window.PaystackPop.newTransaction({
         key: publicKey,
