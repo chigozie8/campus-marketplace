@@ -83,9 +83,7 @@ export default async function AboutPage() {
             Our Story
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
-            We&apos;re building the{' '}
-            <span className="text-primary">economic backbone</span>{' '}
-            across Nigeria.
+            We&apos;re building the economic backbone across Nigeria.
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10">
             VendoorX started as a late-night idea to fix online commerce in Nigeria and grew into the country&apos;s most trusted WhatsApp commerce platform — connecting buyers and sellers across 36+ states nationwide.
