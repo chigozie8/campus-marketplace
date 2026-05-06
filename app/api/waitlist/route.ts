@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 function adminDb() {
   return createAdminClient(
@@ -11,6 +13,16 @@ function adminDb() {
 
 export async function POST(req: Request) {
   try {
+    // Rate-limit: 3 attempts per IP per hour
+    const ip = clientIp(req)
+    const { allowed } = await rateLimit({ key: `waitlist:${ip}`, limit: 3, windowSeconds: 3600 })
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many attempts. Please try again in an hour.' },
+        { status: 429 },
+      )
+    }
+
     const { email } = await req.json()
 
     if (!email || typeof email !== 'string') {
@@ -60,8 +72,15 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
-  // Admin-only endpoint — protected by the admin layout, not exposed publicly
+export async function GET(req: Request) {
+  // Admin-only — verify session + admin_roles before returning any data
+  const supabase = await createServerClient()
+  if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: role } = await adminDb().from('admin_roles').select('role').eq('user_id', user.id).single()
+  if (!role) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     const supabase = adminDb()
     const { data, error } = await supabase

@@ -1,6 +1,28 @@
 import type { NextConfig } from 'next'
 
+// CSP: tighten what scripts / styles / connections are permitted.
+// 'unsafe-inline' is required by Next.js for its own injected style tags.
+// 'unsafe-eval' is required in dev for HMR (webpack eval source maps).
+const isDev = process.env.NODE_ENV !== 'production'
+
+const cspDirectives = [
+  `default-src 'self'`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+  `font-src 'self' https://fonts.gstatic.com`,
+  `img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in https://images.unsplash.com https://api.dicebear.com https://placeholder.com https://hebbkx1anhila5yf.public.blob.vercel-storage.com`,
+  `connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co`,
+  `media-src 'self' blob: https://*.supabase.co`,
+  `object-src 'none'`,
+  `base-uri 'self'`,
+  `form-action 'self'`,
+  `frame-ancestors 'self'`,
+  `upgrade-insecure-requests`,
+].join('; ')
+
 const securityHeaders = [
+  // Content-Security-Policy — prevents XSS and data injection attacks
+  { key: 'Content-Security-Policy', value: cspDirectives },
   // Prevents clickjacking
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   // Prevents MIME sniffing — improves security score
@@ -29,9 +51,6 @@ const apiHeaders = [
   { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
   { key: 'Cache-Control', value: 'no-store, max-age=0' },
 ]
-
-
-const isDev = process.env.NODE_ENV !== 'production'
 
 const nextConfig: NextConfig = {
   // Allow Replit's proxied domain to access Next.js dev resources (HMR, webpack)
