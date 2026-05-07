@@ -51,19 +51,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
     }
 
+    // First, delete all existing records
+    const { error: deleteError } = await supabase
+      .from('community_settings')
+      .delete()
+      .neq('key', '') // This deletes all records
+
+    if (deleteError) {
+      console.error('[admin/community-settings] DELETE error:', deleteError.message)
+      return NextResponse.json({ 
+        error: 'Failed to clear existing settings.',
+        details: process.env.NODE_ENV === 'development' ? deleteError.message : undefined,
+      }, { status: 500 })
+    }
+
+    // Then insert new records
     const rows = Object.entries(body as Record<string, string>).map(([key, value]) => ({
       key,
       value: String(value),
       updated_at: new Date().toISOString(),
     }))
 
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from('community_settings')
-      .upsert(rows, { onConflict: 'key' })
+      .insert(rows)
 
-    if (error) {
-      console.error('[admin/community-settings] POST error:', error.message)
-      return NextResponse.json({ error: 'Failed to save settings.' }, { status: 500 })
+    if (insertError) {
+      console.error('[admin/community-settings] INSERT error:', {
+        message: insertError.message,
+        code: insertError.code,
+        details: insertError.details,
+        hint: insertError.hint,
+      })
+      return NextResponse.json({ 
+        error: 'Failed to save settings.',
+        details: process.env.NODE_ENV === 'development' ? insertError.message : undefined,
+      }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
