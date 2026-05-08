@@ -20,21 +20,30 @@ const DEFAULTS: Record<string, string> = {
 export async function GET() {
   try {
     const supabase = createServiceClient()
-    if (!supabase) return NextResponse.json({ config: DEFAULTS })
+    if (!supabase) {
+      console.log('[community-settings] No supabase client, returning defaults')
+      return NextResponse.json({ config: DEFAULTS })
+    }
 
     const { data, error } = await supabase
       .from('community_settings')
       .select('key, value')
 
-    if (error) throw error
+    if (error) {
+      console.error('[community-settings] GET error:', error.message)
+      // Table doesn't exist or other error - return defaults
+      return NextResponse.json({ config: DEFAULTS })
+    }
 
     const config = { ...DEFAULTS }
-    for (const row of data ?? []) {
-      config[row.key] = row.value
+    if (data && Array.isArray(data)) {
+      for (const row of data) {
+        config[row.key] = row.value
+      }
     }
     return NextResponse.json({ config })
   } catch (err) {
-    console.error('[admin/community-settings] GET error:', err)
+    console.error('[community-settings] GET unexpected error:', err)
     return NextResponse.json({ config: DEFAULTS })
   }
 }
@@ -48,41 +57,48 @@ export async function POST(req: Request) {
 
     const supabase = createServiceClient()
     if (!supabase) {
+      console.error('[community-settings] No supabase client')
       return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
     }
 
-    // Use upsert for each setting individually to ensure updates work correctly
-    const entries = Object.entries(body as Record<string, string>)
-    const errors: string[] = []
+    // Try to delete all existing rows first
+    const { error: deleteError } = await supabase
+      .from('community_settings')
+      .delete()
+      .gt('id', '00000000-0000-0000-0000-000000000000') // Delete all rows
 
-    for (const [key, value] of entries) {
-      const { error: upsertError } = await supabase
-        .from('community_settings')
-        .upsert(
-          {
-            key,
-            value: String(value),
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: ['key'] }
-        )
-
-      if (upsertError) {
-        console.error(`[admin/community-settings] UPSERT error for ${key}:`, upsertError.message)
-        errors.push(`${key}: ${upsertError.message}`)
-      }
+    if (deleteError && deleteError.code !== 'PGRST116') {
+      // PGRST116 means table doesn't exist, which is ok
+      console.error('[community-settings] DELETE error:', deleteError.message)
+      // Don't fail here, try to insert anyway
     }
 
-    if (errors.length > 0) {
-      return NextResponse.json({ 
-        error: 'Failed to save some settings.',
-        details: process.env.NODE_ENV === 'development' ? errors : undefined,
+    // Insert all new values
+    const entries = Object.entries(body as Record<string, string>)
+    const rowsToInsert = entries.map(([key, value]) => ({
+      key,
+      value: String(value),
+      updated_at: new Date().toISOString(),
+    }))
+
+    const { error: insertError, data: insertedData } = await supabase
+      .from('community_settings')
+      .insert(rowsToInsert)
+      .select()
+
+    if (insertError) {
+      console.error('[community-settings] INSERT error:', insertError)
+      return NextResponse.json({
+        error: `Failed to save settings: ${insertError.message}`,
+        code: insertError.code,
       }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    console.log('[community-settings] Successfully saved', rowsToInsert.length, 'settings')
+    return NextResponse.json({ success: true, saved: insertedData?.length || 0 })
   } catch (err) {
-    console.error('[admin/community-settings] unexpected error:', err)
-    return NextResponse.json({ error: 'Unexpected error.' }, { status: 500 })
+    console.error('[community-settings] POST unexpected error:', err)
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    return NextResponse.json({ error: `Unexpected error: ${message}` }, { status: 500 })
   }
 }
