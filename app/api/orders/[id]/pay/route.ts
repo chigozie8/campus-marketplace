@@ -40,7 +40,7 @@ export async function POST(
       // Client sent a Bearer token — verify it using the anon client
       const anonClient = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycnZkeGJkeWp3dnZicnBlZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTU4MDIsImV4cCI6MjA5MDkzMTgwMn0.BLPvQAH9cj7PnFapdtC4wTeAXfotcFhGFz-rFWXzhrg',
         { auth: { persistSession: false } },
       )
       const { data } = await anonClient.auth.getUser(bearerToken)
