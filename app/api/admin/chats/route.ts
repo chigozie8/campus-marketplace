@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
+function makeAdminDb() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 async function getAdminUser() {
+  const adminDb = makeAdminDb()
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
@@ -17,6 +20,7 @@ async function getAdminUser() {
 }
 
 export async function GET() {
+  const adminDb = makeAdminDb()
   const adminUser = await getAdminUser()
   if (!adminUser) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 

@@ -2,18 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
+function makeAdminDb() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 async function ensureTable() {
+  const adminDb = makeAdminDb()
   // vendor_locations: one row per vendor, upserted on each update
   await adminDb.from('vendor_locations').select('vendor_id').limit(1).catch(() => null)
 }
 
 // POST /api/location  — vendor updates their location
 export async function POST(req: NextRequest) {
+  const adminDb = makeAdminDb()
   const supabase = await createClient()
   if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -72,6 +76,7 @@ export async function POST(req: NextRequest) {
 
 // GET /api/location  — admin gets all active vendor locations
 export async function GET() {
+  const adminDb = makeAdminDb()
   const supabase = await createClient()
   if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -109,6 +114,7 @@ export async function GET() {
 
 // PATCH /api/location  — vendor marks themselves inactive (offline)
 export async function PATCH() {
+  const adminDb = makeAdminDb()
   const supabase = await createClient()
   if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

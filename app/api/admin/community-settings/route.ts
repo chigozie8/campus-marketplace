@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdmin } from '@supabase/supabase-js'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -17,30 +18,47 @@ const DEFAULTS: Record<string, string> = {
   avatar_5_url:      '',
 }
 
+function svcClient() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
+}
+
+async function requireAdmin() {
+  const supabase = await createClient()
+  if (!supabase) return null
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data } = await svcClient()
+    .from('admin_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single()
+  if (!data) return null
+  return user
+}
+
 export async function GET() {
   try {
-    const supabase = createServiceClient()
-    if (!supabase) {
-      console.log('[community-settings] No supabase client, returning defaults')
-      return NextResponse.json({ config: DEFAULTS })
-    }
+    const user = await requireAdmin()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data, error } = await supabase
+    const { data, error } = await svcClient()
       .from('community_settings')
       .select('key, value')
 
     if (error) {
       console.error('[community-settings] GET error:', error.message)
-      // Table doesn't exist or other error - return defaults
       return NextResponse.json({ config: DEFAULTS })
     }
 
     const config = { ...DEFAULTS }
-    if (data && Array.isArray(data)) {
-      for (const row of data) {
-        config[row.key] = row.value
-      }
+    for (const row of data ?? []) {
+      config[row.key] = row.value
     }
+
     return NextResponse.json({ config })
   } catch (err) {
     console.error('[community-settings] GET unexpected error:', err)
@@ -50,52 +68,33 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const user = await requireAdmin()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const body = await req.json()
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    const supabase = createServiceClient()
-    if (!supabase) {
-      console.error('[community-settings] No supabase client')
-      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
-    }
-
-    // Try to delete all existing rows first
-    const { error: deleteError } = await supabase
-      .from('community_settings')
-      .delete()
-      .gt('id', '00000000-0000-0000-0000-000000000000') // Delete all rows
-
-    if (deleteError && deleteError.code !== 'PGRST116') {
-      // PGRST116 means table doesn't exist, which is ok
-      console.error('[community-settings] DELETE error:', deleteError.message)
-      // Don't fail here, try to insert anyway
-    }
-
-    // Insert all new values
-    const entries = Object.entries(body as Record<string, string>)
-    const rowsToInsert = entries.map(([key, value]) => ({
+    const rows = Object.entries(body as Record<string, string>).map(([key, value]) => ({
       key,
       value: String(value),
       updated_at: new Date().toISOString(),
     }))
 
-    const { error: insertError, data: insertedData } = await supabase
+    const { error } = await svcClient()
       .from('community_settings')
-      .insert(rowsToInsert)
-      .select()
+      .upsert(rows, { onConflict: 'key' })
 
-    if (insertError) {
-      console.error('[community-settings] INSERT error:', insertError)
-      return NextResponse.json({
-        error: `Failed to save settings: ${insertError.message}`,
-        code: insertError.code,
-      }, { status: 500 })
+    if (error) {
+      console.error('[community-settings] UPSERT error:', error)
+      return NextResponse.json(
+        { error: `Failed to save settings: ${error.message}`, code: error.code },
+        { status: 500 },
+      )
     }
 
-    console.log('[community-settings] Successfully saved', rowsToInsert.length, 'settings')
-    return NextResponse.json({ success: true, saved: insertedData?.length || 0 })
+    return NextResponse.json({ success: true, saved: rows.length })
   } catch (err) {
     console.error('[community-settings] POST unexpected error:', err)
     const message = err instanceof Error ? err.message : 'Unknown error'
