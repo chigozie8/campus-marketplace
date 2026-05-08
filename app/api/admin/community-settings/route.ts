@@ -51,36 +51,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
     }
 
-    // Delete all existing settings and insert new ones for a clean save
+    // Use upsert for each setting individually to ensure updates work correctly
     const entries = Object.entries(body as Record<string, string>)
     const errors: string[] = []
 
-    // First, delete all existing records
-    const { error: deleteError } = await supabase
-      .from('community_settings')
-      .delete()
-      .neq('key', '') // Delete all rows by using a condition that matches everything
-
-    if (deleteError) {
-      console.error('[admin/community-settings] DELETE error:', deleteError.message)
-      errors.push(`Failed to clear settings: ${deleteError.message}`)
-    }
-
-    // Then insert all new settings
-    if (errors.length === 0) {
-      const { error: insertError } = await supabase
+    for (const [key, value] of entries) {
+      const { error: upsertError } = await supabase
         .from('community_settings')
-        .insert(
-          entries.map(([key, value]) => ({
+        .upsert(
+          {
             key,
             value: String(value),
             updated_at: new Date().toISOString(),
-          }))
+          },
+          { onConflict: 'key' }
         )
 
-      if (insertError) {
-        console.error('[admin/community-settings] INSERT error:', insertError.message)
-        errors.push(`Failed to save settings: ${insertError.message}`)
+      if (upsertError) {
+        console.error(`[admin/community-settings] UPSERT error for ${key}:`, upsertError.message)
+        errors.push(`${key}: ${upsertError.message}`)
       }
     }
 
