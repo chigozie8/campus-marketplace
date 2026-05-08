@@ -28,6 +28,7 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
       const blob = await res.blob()
       const file = new File([blob], `${slug(storeName)}-vendoorx.png`, { type: 'image/png' })
 
+      // Try native sharing first
       const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean }
       if (typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
         await navigator.share({
@@ -35,22 +36,23 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
           title: `${storeName} on VendoorX`,
           text: `Check out my store on VendoorX 🛍️\n${storeUrl}`,
         })
-        toast.success('Shared!')
+        toast.success('Shared to WhatsApp!')
         return
       }
 
-      // Fallback: trigger a plain download.
-      const url = URL.createObjectURL(blob)
+      // Fallback: trigger a download
+      const downloadUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = url
+      a.href = downloadUrl
       a.download = file.name
       document.body.appendChild(a)
       a.click()
       a.remove()
-      URL.revokeObjectURL(url)
-      toast.success('Image downloaded — share it to your status!')
+      URL.revokeObjectURL(downloadUrl)
+      toast.success('Image downloaded — share it to WhatsApp!')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not generate the share image.')
+      console.error('[share-store] error:', err)
+      toast.error(err instanceof Error ? err.message : 'Could not share the store image.')
     } finally {
       setLoading(false)
     }
