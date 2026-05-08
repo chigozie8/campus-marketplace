@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { getFirestoreDb } from '@/lib/firebase/config'
+import { doc, getDoc } from 'firebase/firestore'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -17,26 +18,25 @@ const DEFAULTS: Record<string, string> = {
   avatar_5_url:      '',
 }
 
+const COLLECTION = 'community'
+const DOC_ID = 'settings'
+
 export async function GET() {
   try {
-    const supabase = createServiceClient()
-    if (!supabase) {
+    const db = getFirestoreDb()
+    if (!db) {
       return NextResponse.json({ config: DEFAULTS })
     }
 
-    const { data, error } = await supabase
-      .from('community_settings')
-      .select('key, value')
+    const docRef = doc(db, COLLECTION, DOC_ID)
+    const docSnap = await getDoc(docRef)
 
-    if (error) {
-      console.error('[community-settings] GET error:', error.message)
+    if (!docSnap.exists()) {
       return NextResponse.json({ config: DEFAULTS })
     }
 
-    const config = { ...DEFAULTS }
-    for (const row of data ?? []) {
-      config[row.key] = row.value
-    }
+    const data = docSnap.data()
+    const config = { ...DEFAULTS, ...data }
 
     return NextResponse.json({ config })
   } catch (err) {
