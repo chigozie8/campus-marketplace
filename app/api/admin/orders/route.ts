@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 
-const adminClient = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function makeAdminClient() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 async function getAdminUser() {
+  const adminClient = makeAdminClient()
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
@@ -16,7 +19,8 @@ async function getAdminUser() {
   return role ? user : null
 }
 
-async function releaseSellerEarnings(sellerId: string, orderId: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function releaseSellerEarnings(adminClient: any, sellerId: string, orderId: string) {
   const PLATFORM_FEE = 100
 
   const { data: wallet } = await adminClient
@@ -65,6 +69,7 @@ async function releaseSellerEarnings(sellerId: string, orderId: string) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const adminClient = makeAdminClient()
   const admin = await getAdminUser()
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -90,7 +95,7 @@ export async function PATCH(req: NextRequest) {
 
   if (status === 'completed' && updatedOrder?.seller_id) {
     try {
-      await releaseSellerEarnings(updatedOrder.seller_id, order_id)
+      await releaseSellerEarnings(adminClient, updatedOrder.seller_id, order_id)
     } catch (err) {
       console.error('[admin/orders] Wallet release failed:', err)
     }
@@ -100,6 +105,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const adminClient = makeAdminClient()
   const admin = await getAdminUser()
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 

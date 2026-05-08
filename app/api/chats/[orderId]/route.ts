@@ -3,13 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 import { sendNotification } from '@/lib/send-notification'
 
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
+function makeAdminDb() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 /** Verify caller is buyer or seller of this order */
 async function getOrderParties(orderId: string, userId: string) {
+  const adminDb = makeAdminDb()
   const { data: order } = await adminDb
     .from('orders')
     .select('buyer_id, seller_id')
@@ -25,6 +28,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
+  const adminDb = makeAdminDb()
   const { orderId } = await params
   const supabase = await createClient()
   if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -58,6 +62,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ orderId: string }> },
 ) {
+  const adminDb = makeAdminDb()
   const { orderId } = await params
   const supabase = await createClient()
   if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

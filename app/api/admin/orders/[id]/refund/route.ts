@@ -3,12 +3,15 @@ import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdmin } from '@supabase/supabase-js'
 import { sendNotification } from '@/lib/send-notification'
 
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
+function makeAdminDb() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 async function getAdminUser() {
+  const adminDb = makeAdminDb()
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,6 +24,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const adminDb = makeAdminDb()
   const adminUser = await getAdminUser()
   if (!adminUser) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
