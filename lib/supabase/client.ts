@@ -38,14 +38,19 @@ function silenceHarmlessLockWarning() {
   }
 }
 
+// Fallback URL in case environment variable is not set
+const FALLBACK_SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+
 export function createClient(): SupabaseClient {
   silenceHarmlessLockWarning()
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL
 
   if (typeof window === 'undefined') {
     // SSR path — shouldn't normally be reached (use lib/supabase/server.ts for
     // server components), but create an ephemeral client just in case.
     return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
   }
@@ -53,7 +58,7 @@ export function createClient(): SupabaseClient {
   const win = window as typeof window & { [WIN_KEY]?: SupabaseClient }
   if (!win[WIN_KEY]) {
     win[WIN_KEY] = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
   }
