@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 function getAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
   return createClient(url, key, { auth: { persistSession: false } })
 }

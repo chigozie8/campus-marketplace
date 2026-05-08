@@ -17,7 +17,7 @@ function isTrustedImageUrl(url: string | null | undefined): url is string {
   try {
     const u = new URL(url)
     if (u.protocol !== 'https:') return false
-    const allowedHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').host
+    const allowedHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co').host
     return !!allowedHost && u.host === allowedHost
   } catch {
     return false

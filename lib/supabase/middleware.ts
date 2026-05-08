@@ -1,16 +1,14 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
-  // Guard: if Supabase env vars are not set, skip auth middleware entirely.
-  // This prevents a hard crash during cold starts or in environments where
-  // the vars haven't been injected yet.
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+// Fallback values in case environment variables are not set
+const FALLBACK_SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycnZkeGJkeWp3dnZicnBlZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTU4MDIsImV4cCI6MjA5MDkzMTgwMn0.BLPvQAH9cj7PnFapdtC4wTeAXfotcFhGFz-rFWXzhrg'
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.next({ request })
-  }
+export async function updateSession(request: NextRequest) {
+  // Guard: if Supabase env vars are not set, use fallbacks
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) || FALLBACK_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || FALLBACK_SUPABASE_ANON_KEY
 
   // Validate URL format — must start with https://
   try { new URL(supabaseUrl) } catch {

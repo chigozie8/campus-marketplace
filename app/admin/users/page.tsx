@@ -20,7 +20,7 @@ export default async function AdminUsersPage() {
   let bannedIds: string[] = []
   try {
     const adminClient = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     const { data: authUsers } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 })
