@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { createClient as createAdmin } from '@supabase/supabase-js'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -17,14 +17,17 @@ const DEFAULTS: Record<string, string> = {
   avatar_5_url:      '',
 }
 
+function svcClient() {
+  return createAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } },
+  )
+}
+
 export async function GET() {
   try {
-    const supabase = createServiceClient()
-    if (!supabase) {
-      return NextResponse.json({ config: DEFAULTS })
-    }
-
-    const { data, error } = await supabase
+    const { data, error } = await svcClient()
       .from('community_settings')
       .select('key, value')
 
