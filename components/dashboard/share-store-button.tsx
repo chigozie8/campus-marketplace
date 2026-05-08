@@ -23,7 +23,6 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
   async function handleShare() {
     setLoading(true)
     try {
-      // Generate OG image
       const res = await fetch(`/api/og/store/${userId}`)
       if (!res.ok) throw new Error('Could not generate the share image.')
       const blob = await res.blob()
@@ -41,28 +40,7 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
         return
       }
 
-      // Fallback: Upload to Firebase and copy link
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('type', 'store')
-
-      const uploadRes = await fetch('/api/firebase/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!uploadRes.ok) {
-        const error = await uploadRes.json()
-        throw new Error(error.error || 'Upload failed')
-      }
-
-      const { url: firebaseUrl } = await uploadRes.json()
-
-      // Copy link to clipboard
-      await navigator.clipboard.writeText(`${storeUrl}\n\nCheck out my store on VendoorX 🛍️`)
-      toast.success('Link copied! Share manually to WhatsApp.')
-
-      // Also trigger download as backup
+      // Fallback: trigger a download
       const downloadUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = downloadUrl
@@ -71,6 +49,7 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
       a.click()
       a.remove()
       URL.revokeObjectURL(downloadUrl)
+      toast.success('Image downloaded — share it to WhatsApp!')
     } catch (err) {
       console.error('[share-store] error:', err)
       toast.error(err instanceof Error ? err.message : 'Could not share the store image.')
