@@ -8,7 +8,7 @@ const DEFAULT_PLATFORM_FEE_NAIRA = 100
 
 function db() {
   return createAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } },
   )
@@ -39,7 +39,7 @@ export async function POST(
     if (bearerToken) {
       // Client sent a Bearer token — verify it using the anon client
       const anonClient = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         { auth: { persistSession: false } },
       )

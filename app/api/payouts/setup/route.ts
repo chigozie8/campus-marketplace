@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
   if (res.ok && data.success) {
     const admin = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     await admin.auth.admin.updateUserById(session.user.id, {
