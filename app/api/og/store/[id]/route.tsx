@@ -56,7 +56,55 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       .limit(1),
   ])
 
-  if (!profile) return new Response('Not found', { status: 404 })
+  // If no profile exists yet, return a generic branded share image
+  if (!profile) {
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #ffffff 100%)',
+            padding: 64,
+            fontFamily: 'system-ui, sans-serif',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div style={{ fontSize: 72, fontWeight: 900, color: '#030712', letterSpacing: '-0.02em', marginBottom: 24 }}>
+            Vendoor<span style={{ color: '#16a34a' }}>X</span>
+          </div>
+          <div style={{ fontSize: 32, color: '#6b7280', fontWeight: 600, marginBottom: 48, textAlign: 'center' }}>
+            Campus Marketplace
+          </div>
+          <div style={{
+            padding: '24px 48px',
+            background: '#030712',
+            borderRadius: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <div style={{ fontSize: 28, color: 'white', fontWeight: 700 }}>
+              Join the marketplace
+            </div>
+          </div>
+          <div style={{ fontSize: 22, color: '#16a34a', fontWeight: 800, marginTop: 32 }}>
+            vendoorx.ng
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+        headers: {
+          'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        },
+      },
+    )
+  }
 
   // Owners can always render their own card (so a brand-new seller can share
   // before they have listings). For everyone else, require seller signal to
