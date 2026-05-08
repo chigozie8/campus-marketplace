@@ -64,7 +64,7 @@ export async function POST(req: Request) {
             value: String(value),
             updated_at: new Date().toISOString(),
           },
-          { onConflict: 'key' }
+          { onConflict: ['key'] }
         )
 
       if (upsertError) {
