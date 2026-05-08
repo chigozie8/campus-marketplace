@@ -156,17 +156,32 @@ export default function AdminCommunitySettingsPage() {
     setSaving(true)
     setStatus('idle')
     setErrMsg('')
+    
     try {
-      const res  = await fetch('/api/admin/community-settings', {
+      console.log('[v0] Saving community settings:', config)
+      
+      const res = await fetch('/api/admin/community-settings', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(config),
       })
+      
+      console.log('[v0] Response status:', res.status)
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Save failed')
+      console.log('[v0] Response data:', data)
+      
+      if (!res.ok) {
+        const errorMsg = data.error || data.message || `HTTP ${res.status}`
+        throw new Error(errorMsg)
+      }
+      
       setStatus('success')
+      // Clear success message after 3 seconds
+      setTimeout(() => setStatus('idle'), 3000)
     } catch (err) {
-      setErrMsg(err instanceof Error ? err.message : 'Unknown error')
+      console.error('[v0] Error saving settings:', err)
+      const message = err instanceof Error ? err.message : 'Unknown error occurred'
+      setErrMsg(message)
       setStatus('error')
     } finally {
       setSaving(false)
