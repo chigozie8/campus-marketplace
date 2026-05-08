@@ -35,6 +35,7 @@ import {
   ListChecks,
   Mail,
   Sparkles,
+  Code,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -72,6 +73,7 @@ const NAV_ITEMS = [
   { label: 'Contact Us',      href: '/admin/contact',           icon: Phone },
   { label: 'Careers',         href: '/admin/careers',           icon: Briefcase },
   { label: 'Integrations',    href: '/admin/integrations',      icon: MessageCircle },
+  { label: 'Tech Stack',      href: '/admin/tech-stack',        icon: Code },
   { label: 'Settings',        href: '/admin/settings',          icon: Settings },
 ]
 
