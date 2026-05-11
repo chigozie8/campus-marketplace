@@ -7,10 +7,11 @@ import { parseSectionVisibility, parseEscrowSteps, parseHiwSteps, parseFaqs } fr
 
 /* ── Above the fold — eager imports (critical for LCP) ── */
 import { LandingNav } from '@/components/landing/landing-nav'
-import { HeroSectionV2 } from '@/components/landing/hero-section-v2'
+import { HeroSection } from '@/components/landing/hero-section'
 import { StatsBar } from '@/components/landing/stats-bar'
 
 /* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
+const HeroTrustSection       = lazyLoad(() => import('@/components/landing/hero-trust-section').then(m => ({ default: m.HeroTrustSection })))
 const TrendingProducts       = lazyLoad(() => import('@/components/landing/trending-products').then(m => ({ default: m.TrendingProducts })))
 const TrustedBySection       = lazyLoad(() => import('@/components/landing/trusted-by-section').then(m => ({ default: m.TrustedBySection })))
 const ProblemSolutionSection = lazyLoad(() => import('@/components/landing/problem-solution-section').then(m => ({ default: m.ProblemSolutionSection })))
@@ -203,7 +204,8 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <LandingNav user={user} />
-      <HeroSectionV2 user={user} settings={settings} visitorCampus={visitorCampus} />
+      <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
+      <HeroTrustSection />
       <StatsBar stats={[
         { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
         { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
