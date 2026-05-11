@@ -59,9 +59,9 @@ const QUICK_ACTIONS = [
 ]
 
 const PRODUCTS = [
-  { name: 'Canvas Sneaker', price: '₦28,000' },
-  { name: 'Urban Runner', price: '₦29,500' },
-  { name: 'Street Low Top', price: '₦26,000' },
+  { name: 'MacBook Pro', price: '₦850,000', emoji: '💻' },
+  { name: 'Smart TV 55"', price: '₦320,000', emoji: '📺' },
+  { name: 'Designer Jacket', price: '₦45,000', emoji: '🧥' },
 ]
 
 export function IPhone3DMockup() {
@@ -276,31 +276,31 @@ export function IPhone3DMockup() {
                 width: 36,
                 height: 36,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
+                background: 'linear-gradient(135deg, #111 0%, #1a1a1a 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 800,
-                color: 'white',
-                border: '2px solid rgba(255,255,255,0.2)',
+                color: '#25D366',
+                border: '2px solid #25D366',
                 flexShrink: 0,
                 letterSpacing: '-0.5px',
               }}
             >
-              <ShoppingBag style={{ width: 16, height: 16, color: 'white' }} />
+              VX
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ color: 'white', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>
-                  Your Store
+                  Vendoor X
                 </span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="#53bdeb">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
               <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 10, marginTop: 1 }}>
-                +234 803 123 4567
+                +1 (579) 258-3013
               </div>
             </div>
             <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
@@ -338,7 +338,7 @@ export function IPhone3DMockup() {
               <IncomingBubble time="9:41 AM">
                 <p style={{ fontSize: 12.5, color: '#111', lineHeight: 1.45, margin: 0 }}>
                   Hi 👋<br />
-                  Welcome to Your Store!<br />
+                  Welcome to Vendoor X!<br />
                   What would you like to do today?
                 </p>
               </IncomingBubble>
@@ -379,7 +379,7 @@ export function IPhone3DMockup() {
             {/* User message */}
             <div className="chat-bubble">
               <OutgoingBubble time="9:42 AM">
-                <p style={{ fontSize: 12.5, color: '#111', margin: 0 }}>Show me shoes under ₦30,000</p>
+                <p style={{ fontSize: 12.5, color: '#111', margin: 0 }}>Show me your best deals</p>
               </OutgoingBubble>
             </div>
 
@@ -387,7 +387,7 @@ export function IPhone3DMockup() {
             <div className="chat-bubble">
               <IncomingBubble time="9:42 AM">
                 <p style={{ fontSize: 12.5, color: '#111', lineHeight: 1.45, margin: 0 }}>
-                  Here are some shoes you&apos;ll love 👇
+                  Here are our top picks for you 👇
                 </p>
               </IncomingBubble>
             </div>
@@ -402,7 +402,7 @@ export function IPhone3DMockup() {
                         key={product.name}
                         style={{
                           minWidth: 80,
-                          background: index === 0 ? '#F0F9F4' : index === 1 ? '#FEF3E7' : '#F0F4F8',
+                          background: index === 0 ? '#F0F4F8' : index === 1 ? '#FEF3E7' : '#F5F0F9',
                           borderRadius: 10,
                           padding: 8,
                           textAlign: 'center',
@@ -421,7 +421,7 @@ export function IPhone3DMockup() {
                             fontSize: 24,
                           }}
                         >
-                          👟
+                          {product.emoji}
                         </div>
                         <p style={{ fontSize: 9, fontWeight: 600, color: '#111', margin: 0, lineHeight: 1.2 }}>{product.name}</p>
                         <p style={{ fontSize: 10, fontWeight: 700, color: '#25D366', margin: '3px 0 6px' }}>{product.price}</p>
