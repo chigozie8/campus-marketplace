@@ -253,7 +253,7 @@ export default function CommunityComingSoonPage() {
             >
               {config.hero_title_accent}
             </span>
-            <span className="text-slate-300 dark:text-slate-700 block">Awaits.</span>
+            <span className="text-slate-800 dark:text-slate-200 block">Awaits.</span>
           </h1>
 
           {/* Subtitle */}
