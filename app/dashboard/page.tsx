@@ -505,11 +505,11 @@ export default async function DashboardPage({
                   <p className="text-[11px] text-gray-400 mt-0.5">Send buyers directly to your listings</p>
                 </div>
                 <CopyStoreLink userId={user.id} fullName={profile?.full_name} />
-                {/* <ShareStoreButton
+                <ShareStoreButton
                   userId={user.id}
                   storeName={profile?.full_name || 'My VendoorX Store'}
                   storeUrl={storeUrl}
-                /> */}
+                />
                 <div className="pt-1 border-t border-gray-100 dark:border-border">
                   <p className="text-[10px] text-gray-400 mb-1.5 uppercase font-bold tracking-wide">Feature your store</p>
                   <BoostStoreButton storeBoostExpiresAt={user.user_metadata?.store_boost_expires_at as string | undefined} />
