@@ -8,7 +8,7 @@ type TrendingProduct = {
   title: string
   price: number
   images: string[] | null
-  category: string | null
+  category_id: string | null
   views: number | null
   seller_id: string
 }
@@ -28,7 +28,7 @@ export async function TrendingProducts() {
 
   const { data } = await sc
     .from('products')
-    .select('id, title, price, images, category, views, seller_id')
+    .select('id, title, price, images, category_id, views, seller_id')
     .eq('is_available', true)
     .order('views', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
@@ -90,8 +90,8 @@ export async function TrendingProducts() {
                 <p className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                   {p.title}
                 </p>
-                {p.category && (
-                  <p className="text-[10px] text-muted-foreground mt-1 capitalize">{p.category}</p>
+                {p.category_id && (
+                  <p className="text-[10px] text-muted-foreground mt-1 capitalize">{p.category_id}</p>
                 )}
               </div>
             </Link>
