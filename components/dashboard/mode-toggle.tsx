@@ -1,8 +1,8 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEffect } from 'react'
-import { Store, ShoppingBag } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Store, ShoppingBag, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Mode = 'seller' | 'buyer'
@@ -24,6 +24,7 @@ export function DashboardModeToggle({ currentMode, showSellerOption = true }: Pr
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
+  const [isLoading, setIsLoading] = useState(false)
 
   // First-load redirect: if no `view` param yet but localStorage has one,
   // honour it. Done in an effect (after hydration) to avoid SSR mismatches.
@@ -41,11 +42,14 @@ export function DashboardModeToggle({ currentMode, showSellerOption = true }: Pr
   }, [])
 
   function setMode(next: Mode) {
-    if (next === currentMode) return
+    if (next === currentMode || isLoading) return
+    setIsLoading(true)
     try { localStorage.setItem('vx_dashboard_view', next) } catch {}
     const sp = new URLSearchParams(params.toString())
     sp.set('view', next)
     router.replace(`${pathname}?${sp.toString()}`, { scroll: false })
+    // Keep loading state active for smooth transition
+    setTimeout(() => setIsLoading(false), 500)
   }
 
   return (
@@ -54,30 +58,40 @@ export function DashboardModeToggle({ currentMode, showSellerOption = true }: Pr
         <button
           type="button"
           onClick={() => setMode('seller')}
+          disabled={isLoading}
           aria-pressed={currentMode === 'seller'}
           className={cn(
-            'flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all',
+            'flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60',
             currentMode === 'seller'
               ? 'bg-white dark:bg-card text-gray-950 dark:text-white shadow-sm'
               : 'text-gray-500 hover:text-gray-700 dark:hover:text-foreground',
           )}
         >
-          <Store className="w-3.5 h-3.5" />
+          {isLoading && currentMode === 'seller' ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Store className="w-3.5 h-3.5" />
+          )}
           Selling
         </button>
       )}
       <button
         type="button"
         onClick={() => setMode('buyer')}
+        disabled={isLoading}
         aria-pressed={currentMode === 'buyer'}
         className={cn(
-          'flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all',
+          'flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60',
           currentMode === 'buyer'
             ? 'bg-white dark:bg-card text-gray-950 dark:text-white shadow-sm'
             : 'text-gray-500 hover:text-gray-700 dark:hover:text-foreground',
         )}
       >
-        <ShoppingBag className="w-3.5 h-3.5" />
+        {isLoading && currentMode === 'buyer' ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <ShoppingBag className="w-3.5 h-3.5" />
+        )}
         Buying
       </button>
     </div>
