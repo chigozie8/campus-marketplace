@@ -62,7 +62,7 @@ export async function TrendingProducts() {
           {products.map(p => (
             <Link
               key={p.id}
-              href={`/products/${p.id}`}
+              href={`/marketplace/${p.id}`}
               className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative aspect-square bg-muted overflow-hidden">
@@ -90,9 +90,6 @@ export async function TrendingProducts() {
                 <p className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                   {p.title}
                 </p>
-                {p.category_id && (
-                  <p className="text-[10px] text-muted-foreground mt-1 capitalize">{p.category_id}</p>
-                )}
               </div>
             </Link>
           ))}
