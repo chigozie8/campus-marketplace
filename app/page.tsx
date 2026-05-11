@@ -11,6 +11,7 @@ import { HeroSection } from '@/components/landing/hero-section'
 import { StatsBar } from '@/components/landing/stats-bar'
 
 /* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
+const HeroTrustSection       = lazyLoad(() => import('@/components/landing/hero-trust-section').then(m => ({ default: m.HeroTrustSection })))
 const TrendingProducts       = lazyLoad(() => import('@/components/landing/trending-products').then(m => ({ default: m.TrendingProducts })))
 const TrustedBySection       = lazyLoad(() => import('@/components/landing/trusted-by-section').then(m => ({ default: m.TrustedBySection })))
 const ProblemSolutionSection = lazyLoad(() => import('@/components/landing/problem-solution-section').then(m => ({ default: m.ProblemSolutionSection })))
@@ -204,6 +205,7 @@ export default async function Home() {
       />
       <LandingNav user={user} />
       <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
+      <HeroTrustSection />
       <StatsBar stats={[
         { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
         { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
