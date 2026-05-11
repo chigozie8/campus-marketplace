@@ -8,7 +8,6 @@ import { parseSectionVisibility, parseEscrowSteps, parseHiwSteps, parseFaqs } fr
 /* ── Above the fold — eager imports (critical for LCP) ── */
 import { LandingNav } from '@/components/landing/landing-nav'
 import { HeroSection } from '@/components/landing/hero-section'
-import { StatsBar } from '@/components/landing/stats-bar'
 
 /* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
 const TrendingProducts       = lazyLoad(() => import('@/components/landing/trending-products').then(m => ({ default: m.TrendingProducts })))
@@ -204,12 +203,6 @@ export default async function Home() {
       />
       <LandingNav user={user} />
       <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
-      <StatsBar stats={[
-        { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
-        { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },
-        { value: settings.stat_transactions,    label: 'Sales Processed',   sublabel: settings.stat_transactions_sub },
-        { value: settings.stat_rating,          label: 'Average Rating',    sublabel: settings.stat_rating_sub },
-      ]} />
       {visible.trending && trendingEnabled && <TrendingProducts />}
       {visible.trustedBy       && <TrustedBySection />}
       {visible.problemSolution && <ProblemSolutionSection />}

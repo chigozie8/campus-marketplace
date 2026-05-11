@@ -10,139 +10,143 @@ import {
   TrendingUp,
   Users,
   Bot,
+  ShoppingBag,
+  Zap,
 } from 'lucide-react'
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
-  }),
-}
+const MAIN_FEATURES = [
+  {
+    icon: Bot,
+    title: 'AI Customer Conversations',
+    description: 'VendoorX AI replies to buyers on your behalf — answering product questions, handling enquiries, and guiding them to checkout 24/7.',
+    tags: ['Auto-replies', '24/7 coverage', 'Zero missed leads'],
+    highlight: true,
+    span: 2,
+  },
+  {
+    icon: MessageCircle,
+    title: 'WhatsApp-Powered Orders',
+    description: 'Every product gets a smart link. Buyers tap once and land in your store — the AI walks them through checkout with zero friction.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Payments via Chat',
+    description: 'Accept secure card payments directly through WhatsApp — no bank app needed. Money lands instantly and you get an alert every time.',
+  },
+  {
+    icon: LayoutDashboard,
+    title: 'Your Seller Dashboard',
+    description: 'Products, orders, earnings, and customers — all in one place. Know exactly what\'s selling and how your business is growing.',
+  },
+  {
+    icon: Package,
+    title: 'Automated Order Flow',
+    description: 'Every order moves from pending to paid to delivered automatically. No lost chats, no missed orders — ever.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Sales Analytics',
+    description: 'Revenue, best-sellers, and buyer behaviour — in real time. Use real data to sell smarter every week.',
+  },
+  {
+    icon: Share2,
+    title: 'Multi-Platform Sharing',
+    description: 'Push your listings to WhatsApp Status, Instagram Stories, Facebook, and TikTok in one tap. Maximum reach, zero extra effort.',
+    span: 2,
+  },
+  {
+    icon: Users,
+    title: 'Built-in Customer List',
+    description: 'Every buyer is automatically saved with their name, number, and order history. Build loyalty — not just a scattered contacts list.',
+  },
+]
 
 export function Features() {
   return (
     <LazyMotion features={domAnimation} strict>
-    <section id="features" className="py-24 bg-background scroll-mt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <m.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="inline-flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-[0.18em] mb-4 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-            Built for You
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-balance mb-4 tracking-tight">
-            Every tool your business needs to sell on WhatsApp
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance leading-relaxed">
-            Stop duct-taping your business together with manual chats and spreadsheets. VendoorX gives you one powerful AI-driven platform to sell, automate, and grow.
-          </p>
-        </m.div>
-
-        {/* Bento grid — hero card top-left, secondary cards fill the rest */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-          {/* Hero card — AI Conversations: spans 2 cols on lg */}
+      <section id="features" className="py-20 sm:py-24 bg-background scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
           <m.div
-            className="lg:col-span-2 relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 dark:bg-primary/10 p-8 flex flex-col gap-4 group hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
-            custom={0}
-            variants={cardVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
+            className="text-center mb-12 sm:mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 relative z-10">
-              <Bot className="w-7 h-7 text-primary" />
-            </div>
-            <div className="relative z-10">
-              <h3 className="font-black text-xl text-foreground mb-2">AI Customer Conversations</h3>
-              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base max-w-lg">
-                VendoorX AI replies to buyers on your behalf — answering product questions, handling enquiries, and guiding them to checkout 24/7. No more being glued to your phone.
-              </p>
-            </div>
-            {/* Decorative pill row */}
-            <div className="flex flex-wrap gap-2 mt-2 relative z-10">
-              {['Auto-replies', '24/7 coverage', 'Zero missed leads'].map(tag => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">{tag}</span>
-              ))}
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-widest mb-4 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+              <Zap className="w-3.5 h-3.5" />
+              Built for You
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-4 tracking-tight text-balance">
+              Every tool your business needs to sell on WhatsApp
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance leading-relaxed">
+              Stop duct-taping your business together with manual chats and spreadsheets. VendoorX gives you one powerful AI-driven platform to sell, automate, and grow.
+            </p>
           </m.div>
 
-          {/* WhatsApp Orders */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={1} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <MessageCircle className="w-5 h-5 text-teal-600" />
-            </div>
-            <h3 className="font-bold text-foreground">WhatsApp-Powered Orders</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Every product gets a smart link. Buyers tap once and land in your store — the AI walks them through checkout with zero friction.</p>
-          </m.div>
-
-          {/* Payments */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={2} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <CreditCard className="w-5 h-5 text-amber-600" />
-            </div>
-            <h3 className="font-bold text-foreground">Payments via Chat</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Accept secure card payments directly through WhatsApp — no bank app needed. Money lands instantly and you get an alert every time.</p>
-          </m.div>
-
-          {/* Dashboard */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={3} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <LayoutDashboard className="w-5 h-5 text-blue-600" />
-            </div>
-            <h3 className="font-bold text-foreground">Your Seller Dashboard</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Products, orders, earnings, and customers — all in one place. Know exactly what&apos;s selling and how your business is growing.</p>
-          </m.div>
-
-          {/* Order Flow */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={4} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <Package className="w-5 h-5 text-primary" />
-            </div>
-            <h3 className="font-bold text-foreground">Automated Order Flow</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Every order moves from pending to paid to delivered automatically. No lost chats, no missed orders — ever.</p>
-          </m.div>
-
-          {/* Analytics */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={5} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-            </div>
-            <h3 className="font-bold text-foreground">Sales Analytics</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Revenue, best-sellers, and buyer behaviour — in real time. Use real data to sell smarter every week.</p>
-          </m.div>
-
-          {/* Sharing — spans 2 cols on lg */}
-          <m.div className="lg:col-span-2 rounded-3xl border border-border bg-card p-6 flex flex-col sm:flex-row gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={6} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
-              <Share2 className="w-5 h-5 text-rose-600" />
-            </div>
-            <div>
-              <h3 className="font-bold text-foreground mb-1.5">Multi-Platform Sharing</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Push your listings to WhatsApp Status, Instagram Stories, Facebook, and TikTok in one tap. Maximum reach across every channel your buyers are on — zero extra effort.</p>
-            </div>
-          </m.div>
-
-          {/* Customer List */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={7} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <Users className="w-5 h-5 text-indigo-600" />
-            </div>
-            <h3 className="font-bold text-foreground">Built-in Customer List</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">Every buyer is automatically saved with their name, number, and order history. Build loyalty — not just a scattered contacts list.</p>
-          </m.div>
-
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {MAIN_FEATURES.map((feature, i) => {
+              const Icon = feature.icon
+              const isHighlight = feature.highlight
+              
+              return (
+                <m.div
+                  key={feature.title}
+                  className={`
+                    relative overflow-hidden rounded-2xl border p-6 flex flex-col gap-4 group transition-all duration-300
+                    ${isHighlight 
+                      ? 'lg:col-span-2 border-primary/20 bg-primary/5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10' 
+                      : feature.span === 2 
+                        ? 'lg:col-span-2 border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5'
+                        : 'border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5'
+                    }
+                  `}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                >
+                  {/* Decorative glow for highlight card */}
+                  {isHighlight && (
+                    <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+                  )}
+                  
+                  {/* Icon */}
+                  <div className={`
+                    w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 relative z-10
+                    ${isHighlight ? 'bg-primary/15' : 'bg-muted'}
+                  `}>
+                    <Icon className={`w-6 h-6 ${isHighlight ? 'text-primary' : 'text-primary'}`} />
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    <h3 className="font-bold text-lg text-foreground mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
+                  </div>
+                  
+                  {/* Tags (for highlight card) */}
+                  {feature.tags && (
+                    <div className="flex flex-wrap gap-2 relative z-10">
+                      {feature.tags.map(tag => (
+                        <span 
+                          key={tag} 
+                          className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </m.div>
+              )
+            })}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </LazyMotion>
   )
 }
