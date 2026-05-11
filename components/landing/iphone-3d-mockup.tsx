@@ -14,13 +14,13 @@ import {
   Truck,
   CreditCard,
   Headphones,
-  CheckCircle2,
   Plus
 } from 'lucide-react'
 
 interface ProductCard {
   name: string
   price: string
+  image: string
 }
 
 export function IPhone3DMockup() {
@@ -28,62 +28,64 @@ export function IPhone3DMockup() {
   const phoneRef = useRef<HTMLDivElement>(null)
 
   const quickActions = [
-    { icon: ShoppingBag, label: 'Browse Products', color: 'text-[#25D366]' },
-    { icon: Truck, label: 'Track My Order', color: 'text-orange-500' },
-    { icon: CreditCard, label: 'Make Payment', color: 'text-blue-500' },
-    { icon: Headphones, label: 'Talk to Support', color: 'text-purple-500' },
+    { icon: ShoppingBag, label: 'Browse Products', color: '#25D366' },
+    { icon: Truck, label: 'Track My Order', color: '#F97316' },
+    { icon: CreditCard, label: 'Make Payment', color: '#3B82F6' },
+    { icon: Headphones, label: 'Talk to Support', color: '#8B5CF6' },
   ]
 
   const products: ProductCard[] = [
-    { name: 'Canvas Sneaker', price: '₦28,000' },
-    { name: 'Urban Runner', price: '₦29,500' },
-    { name: 'Street Low Top', price: '₦26,000' },
+    { name: 'Canvas Sneaker', price: '₦28,000', image: '👟' },
+    { name: 'Urban Runner', price: '₦29,500', image: '👟' },
+    { name: 'Street Low Top', price: '₦26,000', image: '👟' },
   ]
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Simple entrance animation - no floating
+      // Elegant entrance animation
       gsap.fromTo(
         phoneRef.current,
         {
           opacity: 0,
-          y: 60,
-          scale: 0.95,
+          y: 40,
+          rotateX: 8,
         },
         {
           opacity: 1,
           y: 0,
-          scale: 1,
-          duration: 1,
+          rotateX: 0,
+          duration: 1.2,
           ease: 'power3.out',
-          delay: 0.2,
+          delay: 0.3,
         }
       )
 
-      // Screen content stagger animation
+      // Screen elements stagger
       gsap.fromTo(
         '.chat-bubble',
-        { opacity: 0, y: 15 },
+        { opacity: 0, y: 12, scale: 0.98 },
         {
           opacity: 1,
           y: 0,
+          scale: 1,
           duration: 0.5,
-          stagger: 0.12,
+          stagger: 0.1,
           ease: 'power2.out',
-          delay: 0.6,
+          delay: 0.8,
         }
       )
 
       gsap.fromTo(
         '.product-card',
-        { opacity: 0, x: 20 },
+        { opacity: 0, x: 15, scale: 0.95 },
         {
           opacity: 1,
           x: 0,
-          duration: 0.5,
+          scale: 1,
+          duration: 0.4,
           stagger: 0.08,
           ease: 'power2.out',
-          delay: 1,
+          delay: 1.2,
         }
       )
 
@@ -93,10 +95,10 @@ export function IPhone3DMockup() {
         {
           opacity: 1,
           scale: 1,
-          duration: 0.4,
-          stagger: 0.06,
-          ease: 'back.out(1.5)',
-          delay: 0.8,
+          duration: 0.35,
+          stagger: 0.05,
+          ease: 'back.out(1.4)',
+          delay: 1,
         }
       )
     }, containerRef)
@@ -106,143 +108,263 @@ export function IPhone3DMockup() {
 
   return (
     <div ref={containerRef} className="relative w-full h-full flex items-center justify-center">
-      {/* 3D iPhone Container - Static, no floating */}
+      {/* iPhone 15 Pro Container */}
       <div
         ref={phoneRef}
         className="relative"
         style={{
-          transform: 'perspective(1200px) rotateY(-8deg) rotateX(2deg)',
+          transform: 'perspective(1500px) rotateY(-6deg) rotateX(1deg)',
           transformStyle: 'preserve-3d',
         }}
       >
-        {/* Phone Frame - iPhone 15 Pro Style */}
+        {/* Phone Frame - Natural Titanium finish */}
         <div
-          className="relative rounded-[50px] p-[2px]"
+          className="relative"
           style={{
-            background: 'linear-gradient(145deg, #3a3a3a 0%, #1f1f1f 50%, #0f0f0f 100%)',
+            width: '280px',
+            height: '570px',
+            borderRadius: '48px',
+            background: 'linear-gradient(135deg, #8E8E93 0%, #636366 20%, #48484A 50%, #3A3A3C 80%, #2C2C2E 100%)',
+            padding: '2px',
             boxShadow: `
-              0 25px 50px -12px rgba(0, 0, 0, 0.4),
-              0 12px 24px -8px rgba(0, 0, 0, 0.3),
-              inset 0 1px 0 rgba(255, 255, 255, 0.08)
+              0 50px 100px -20px rgba(0, 0, 0, 0.35),
+              0 30px 60px -15px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.2)
             `,
           }}
         >
-          {/* Titanium Side Highlight */}
+          {/* Titanium Edge Highlights */}
           <div
-            className="absolute inset-0 rounded-[50px] pointer-events-none"
+            className="absolute inset-0 rounded-[48px] pointer-events-none"
             style={{
-              background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 0%, transparent 15%, transparent 85%, rgba(255,255,255,0.02) 100%)',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 10%, transparent 90%, rgba(255,255,255,0.03) 100%)',
             }}
           />
 
-          {/* Inner Bezel - Black edge around screen */}
-          <div 
-            className="relative rounded-[48px] bg-black overflow-hidden" 
-            style={{ width: '290px', height: '600px' }}
+          {/* Volume Buttons - Left */}
+          <div
+            className="absolute -left-[2.5px] top-[110px] rounded-l-[2px]"
+            style={{
+              width: '4px',
+              height: '24px',
+              background: 'linear-gradient(90deg, #636366 0%, #48484A 100%)',
+              boxShadow: '-1px 0 2px rgba(0,0,0,0.3)',
+            }}
+          />
+          <div
+            className="absolute -left-[2.5px] top-[145px] rounded-l-[2px]"
+            style={{
+              width: '4px',
+              height: '48px',
+              background: 'linear-gradient(90deg, #636366 0%, #48484A 100%)',
+              boxShadow: '-1px 0 2px rgba(0,0,0,0.3)',
+            }}
+          />
+
+          {/* Power Button - Right */}
+          <div
+            className="absolute -right-[2.5px] top-[140px] rounded-r-[2px]"
+            style={{
+              width: '4px',
+              height: '65px',
+              background: 'linear-gradient(270deg, #636366 0%, #48484A 100%)',
+              boxShadow: '1px 0 2px rgba(0,0,0,0.3)',
+            }}
+          />
+
+          {/* Inner Bezel */}
+          <div
+            className="relative w-full h-full rounded-[46px] bg-black overflow-hidden"
           >
             {/* Dynamic Island */}
-            <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-30">
-              <div 
-                className="w-[90px] h-[28px] bg-black rounded-full flex items-center justify-center gap-3"
+            <div className="absolute top-[12px] left-1/2 -translate-x-1/2 z-30">
+              <div
+                className="flex items-center justify-center"
                 style={{
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)'
+                  width: '120px',
+                  height: '35px',
+                  background: '#000',
+                  borderRadius: '20px',
                 }}
               >
                 {/* Front Camera */}
-                <div className="w-[8px] h-[8px] rounded-full bg-[#1a1a2e] ring-1 ring-[#2a2a3a]">
-                  <div className="w-[4px] h-[4px] rounded-full bg-[#0d1b2a] mx-auto mt-[2px]" />
+                <div
+                  className="absolute left-[22px]"
+                  style={{
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle at 30% 30%, #1D3D47 0%, #0D1B2A 70%, #000 100%)',
+                    boxShadow: 'inset 0 0 2px rgba(255,255,255,0.1), 0 0 0 1px rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <div
+                    className="absolute top-[2px] left-[2px]"
+                    style={{
+                      width: '3px',
+                      height: '3px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(100,150,200,0.4) 0%, transparent 70%)',
+                    }}
+                  />
                 </div>
-                {/* Face ID sensor */}
-                <div className="w-[5px] h-[5px] rounded-full bg-[#1a1a2e]" />
+                {/* Face ID Sensors */}
+                <div
+                  className="absolute right-[22px]"
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: '#0D1B2A',
+                    boxShadow: 'inset 0 0 1px rgba(255,255,255,0.05)',
+                  }}
+                />
               </div>
             </div>
 
-            {/* Screen Content */}
-            <div className="absolute inset-[2px] rounded-[46px] bg-white overflow-hidden">
+            {/* Screen Content Area */}
+            <div className="absolute inset-[3px] rounded-[43px] overflow-hidden bg-white">
               {/* iOS Status Bar */}
-              <div className="flex items-center justify-between px-7 pt-[14px] pb-[6px] bg-[#075E54]">
-                <span className="text-white text-[15px] font-semibold tracking-tight">9:41</span>
-                <div className="flex items-center gap-[5px]">
-                  {/* Signal Bars */}
-                  <div className="flex items-end gap-[2px]">
-                    <div className="w-[3px] h-[4px] rounded-[1px] bg-white" />
-                    <div className="w-[3px] h-[6px] rounded-[1px] bg-white" />
-                    <div className="w-[3px] h-[9px] rounded-[1px] bg-white" />
-                    <div className="w-[3px] h-[12px] rounded-[1px] bg-white" />
-                  </div>
-                  {/* WiFi Icon */}
-                  <svg className="w-[17px] h-[12px] text-white ml-[2px]" fill="currentColor" viewBox="0 0 24 18">
-                    <path d="M12 18c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4.95-5.05c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41zM12 10c-1.93 0-3.68.78-4.95 2.05l1.41 1.41C9.44 12.53 10.67 12 12 12s2.56.53 3.54 1.46l1.41-1.41C15.68 10.78 13.93 10 12 10zm7.07-2.93l-1.41 1.41C16.14 9.97 14.16 11 12 11s-4.14-1.03-5.66-2.52l-1.41 1.41C6.74 11.69 9.24 13 12 13s5.26-1.31 7.07-3.07zM12 4C8.09 4 4.55 5.58 2 8.15l1.42 1.42C5.55 7.42 8.6 6 12 6s6.45 1.42 8.58 3.57L22 8.15C19.45 5.58 15.91 4 12 4z" />
+              <div 
+                className="relative flex items-center justify-between px-8 h-[50px]"
+                style={{ backgroundColor: '#075E54' }}
+              >
+                {/* Time - Left side with notch space */}
+                <div className="flex-1 flex justify-start">
+                  <span className="text-white text-[16px] font-semibold" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+                    9:41
+                  </span>
+                </div>
+
+                {/* Center space for Dynamic Island */}
+                <div className="w-[130px]" />
+
+                {/* Status Icons - Right side */}
+                <div className="flex-1 flex items-center justify-end gap-[5px]">
+                  {/* Cellular Signal */}
+                  <svg width="18" height="12" viewBox="0 0 18 12" fill="none" className="text-white">
+                    <rect x="0" y="8" width="3" height="4" rx="0.5" fill="currentColor" />
+                    <rect x="5" y="5" width="3" height="7" rx="0.5" fill="currentColor" />
+                    <rect x="10" y="2" width="3" height="10" rx="0.5" fill="currentColor" />
+                    <rect x="15" y="0" width="3" height="12" rx="0.5" fill="currentColor" />
                   </svg>
+
+                  {/* WiFi Signal */}
+                  <svg width="16" height="12" viewBox="0 0 16 12" fill="none" className="text-white ml-[2px]">
+                    <path d="M8 2.5C10.5 2.5 12.8 3.5 14.5 5.2L15.6 4.1C13.6 2.1 10.9 1 8 1C5.1 1 2.4 2.1 0.4 4.1L1.5 5.2C3.2 3.5 5.5 2.5 8 2.5Z" fill="currentColor"/>
+                    <path d="M8 5.5C9.7 5.5 11.2 6.2 12.4 7.3L13.5 6.2C12 4.8 10.1 4 8 4C5.9 4 4 4.8 2.5 6.2L3.6 7.3C4.8 6.2 6.3 5.5 8 5.5Z" fill="currentColor"/>
+                    <path d="M8 8.5C8.9 8.5 9.7 8.8 10.3 9.4L11.4 8.3C10.5 7.4 9.3 7 8 7C6.7 7 5.5 7.4 4.6 8.3L5.7 9.4C6.3 8.8 7.1 8.5 8 8.5Z" fill="currentColor"/>
+                    <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
+                  </svg>
+
                   {/* Battery */}
                   <div className="flex items-center ml-[3px]">
-                    <div className="w-[25px] h-[12px] rounded-[3px] border-[1.5px] border-white flex items-center p-[2px]">
-                      <div className="w-full h-full bg-white rounded-[1px]" />
+                    <div
+                      className="relative flex items-center justify-start"
+                      style={{
+                        width: '25px',
+                        height: '12px',
+                        border: '1.5px solid rgba(255,255,255,0.9)',
+                        borderRadius: '4px',
+                        padding: '2px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          backgroundColor: 'white',
+                          borderRadius: '1.5px',
+                        }}
+                      />
                     </div>
-                    <div className="w-[2px] h-[5px] bg-white rounded-r-[1px] ml-[1px]" />
+                    <div
+                      style={{
+                        width: '2px',
+                        height: '5px',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        borderRadius: '0 1px 1px 0',
+                        marginLeft: '1px',
+                      }}
+                    />
                   </div>
                 </div>
               </div>
 
               {/* WhatsApp Header */}
-              <div className="flex items-center gap-2 px-2 py-[10px] bg-[#075E54]">
-                <ChevronLeft className="w-[22px] h-[22px] text-white flex-shrink-0" />
-                <div className="w-[38px] h-[38px] rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-[18px] h-[18px] text-white" />
+              <div 
+                className="flex items-center gap-[10px] px-3 py-[8px]"
+                style={{ backgroundColor: '#075E54' }}
+              >
+                <ChevronLeft className="w-[24px] h-[24px] text-white flex-shrink-0" strokeWidth={2.5} />
+                
+                {/* Profile Picture */}
+                <div
+                  className="w-[40px] h-[40px] rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#25D366' }}
+                >
+                  <ShoppingBag className="w-[20px] h-[20px] text-white" />
                 </div>
+
+                {/* Name and Status */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-[4px]">
-                    <span className="font-semibold text-white text-[16px] leading-tight">Your Store</span>
-                    <CheckCircle2 className="w-[15px] h-[15px] text-[#53BDEB]" style={{ fill: '#53BDEB' }} />
+                  <div className="flex items-center gap-[5px]">
+                    <span className="font-semibold text-white text-[17px] leading-tight">Your Store</span>
+                    {/* Verified Badge */}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#53BDEB">
+                      <path d="M12 2L13.09 4.26L15.5 3.64L14.82 6.18L17 7.5L14.82 8.82L15.5 11.36L13.09 10.74L12 13L10.91 10.74L8.5 11.36L9.18 8.82L7 7.5L9.18 6.18L8.5 3.64L10.91 4.26L12 2Z"/>
+                      <path d="M10 15L8 17L10 19L17 12L15 10L10 15Z" fill="white"/>
+                    </svg>
                   </div>
-                  <span className="text-[12px] text-white/75 leading-tight">+234 803 123 4567</span>
+                  <span className="text-[13px] text-white/80 leading-tight">+234 803 123 4567</span>
                 </div>
-                <div className="flex items-center gap-[16px] flex-shrink-0 mr-1">
-                  <Video className="w-[20px] h-[20px] text-white" />
-                  <Phone className="w-[18px] h-[18px] text-white" />
-                  <MoreVertical className="w-[20px] h-[20px] text-white" />
+
+                {/* Action Icons */}
+                <div className="flex items-center gap-[20px] flex-shrink-0">
+                  <Video className="w-[22px] h-[22px] text-white" />
+                  <Phone className="w-[20px] h-[20px] text-white" />
+                  <MoreVertical className="w-[22px] h-[22px] text-white" />
                 </div>
               </div>
 
-              {/* Chat Area - Realistic WhatsApp Background */}
-              <div 
+              {/* Chat Area */}
+              <div
                 className="relative overflow-y-auto"
-                style={{ 
-                  height: 'calc(100% - 155px)',
-                  backgroundColor: '#ECE5DD',
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4cdc4' fill-opacity='0.4'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'/%3E%3C/g%3E%3C/svg%3E")`,
+                style={{
+                  height: 'calc(100% - 165px)',
+                  backgroundColor: '#E5DDD5',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23cdc4ba' fill-opacity='0.35'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
                 }}
               >
-                <div className="px-[10px] py-[10px] space-y-[8px]">
+                <div className="px-[12px] py-[12px] space-y-[8px]">
                   {/* Bot Welcome Message */}
                   <div className="chat-bubble flex justify-start">
-                    <div 
-                      className="relative bg-white rounded-lg rounded-tl-none px-[10px] py-[6px] max-w-[85%]"
+                    <div
+                      className="relative bg-white rounded-[8px] rounded-tl-[0px] px-[12px] py-[8px] max-w-[85%]"
                       style={{ boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)' }}
                     >
-                      <p className="text-[13px] text-[#303030] leading-[18px]">
-                        Hi 👋<br />
-                        Welcome to Your Store!<br />
-                        What would you like to do today?
+                      <p className="text-[14px] text-[#303030] leading-[20px] whitespace-pre-line">
+                        {`Hi 👋\nWelcome to Your Store!\nWhat would you like to do today?`}
                       </p>
-                      <span className="text-[11px] text-[#667781] float-right mt-[2px] ml-[8px]">9:41 AM</span>
+                      <span className="text-[11px] text-[#667781] float-right mt-[4px] ml-[10px]">9:41 AM</span>
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
+                  {/* Quick Actions Grid */}
                   <div className="chat-bubble flex justify-start">
-                    <div 
-                      className="bg-white rounded-lg rounded-tl-none px-[8px] py-[8px] max-w-[95%]"
+                    <div
+                      className="bg-white rounded-[8px] rounded-tl-[0px] px-[10px] py-[10px] max-w-[95%]"
                       style={{ boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)' }}
                     >
-                      <div className="grid grid-cols-2 gap-[6px]">
+                      <div className="grid grid-cols-2 gap-[8px]">
                         {quickActions.map(({ icon: Icon, label, color }) => (
                           <button
                             key={label}
-                            className="quick-action flex items-center gap-[6px] px-[8px] py-[6px] rounded-lg border border-[#e0e0e0] bg-[#fafafa] hover:bg-[#f0f0f0] transition-colors"
+                            className="quick-action flex items-center gap-[8px] px-[10px] py-[8px] rounded-[8px] border border-[#E5E5E5] bg-white hover:bg-[#F5F5F5] transition-colors"
                           >
-                            <Icon className={`w-[14px] h-[14px] flex-shrink-0 ${color}`} />
-                            <span className="text-[11px] font-medium text-[#1f2937] whitespace-nowrap">{label}</span>
+                            <Icon className="w-[16px] h-[16px] flex-shrink-0" style={{ color }} />
+                            <span className="text-[12px] font-medium text-[#1F2937]">{label}</span>
                           </button>
                         ))}
                       </div>
@@ -251,17 +373,17 @@ export function IPhone3DMockup() {
 
                   {/* User Message */}
                   <div className="chat-bubble flex justify-end">
-                    <div 
-                      className="relative bg-[#D9FDD3] rounded-lg rounded-tr-none px-[10px] py-[6px] max-w-[80%]"
+                    <div
+                      className="relative bg-[#DCF8C6] rounded-[8px] rounded-tr-[0px] px-[12px] py-[8px] max-w-[80%]"
                       style={{ boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)' }}
                     >
-                      <p className="text-[13px] text-[#303030] leading-[18px]">Show me shoes under ₦30,000</p>
-                      <div className="flex items-center justify-end gap-[3px] mt-[2px]">
+                      <p className="text-[14px] text-[#303030] leading-[20px]">Show me shoes under ₦30,000</p>
+                      <div className="flex items-center justify-end gap-[4px] mt-[3px]">
                         <span className="text-[11px] text-[#667781]">9:42 AM</span>
-                        {/* Double check mark */}
-                        <svg className="w-[16px] h-[11px] text-[#53BDEB]" viewBox="0 0 16 11" fill="currentColor">
-                          <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-2.405-2.272a.463.463 0 0 0-.336-.146.47.47 0 0 0-.343.146l-.311.31a.445.445 0 0 0-.14.337c0 .136.047.25.14.343l2.996 2.996a.724.724 0 0 0 .512.203.646.646 0 0 0 .496-.203l6.836-8.453a.45.45 0 0 0 .14-.336.498.498 0 0 0-.14-.35l-.57-.287z" />
-                          <path d="M15.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-1.2-1.134-.612.762 1.533 1.533a.724.724 0 0 0 .512.203.646.646 0 0 0 .496-.203l6.836-8.453a.45.45 0 0 0 .14-.336.498.498 0 0 0-.14-.35l-.69-.734z" />
+                        {/* Double Blue Check */}
+                        <svg width="18" height="12" viewBox="0 0 18 12" fill="#53BDEB">
+                          <path d="M17.394 2.014a.512.512 0 0 0-.343-.118.56.56 0 0 0-.432.2l-7.018 8.658L6.97 8.185a.523.523 0 0 0-.38-.165.531.531 0 0 0-.39.166l-.352.351a.504.504 0 0 0-.159.382c0 .154.053.283.159.388l3.396 3.396c.16.16.347.24.58.23a.732.732 0 0 0 .562-.23l7.75-9.576a.51.51 0 0 0 .158-.38.566.566 0 0 0-.158-.397l-.646-.336z"/>
+                          <path d="M8.18 8.754l.352-.352a.51.51 0 0 0 .159-.381.51.51 0 0 0-.159-.381l-.352-.352a.523.523 0 0 0-.38-.165.531.531 0 0 0-.39.165l-3.395 3.396a.504.504 0 0 0-.159.382c0 .154.053.283.159.388l.352.351a.523.523 0 0 0 .38.166.531.531 0 0 0 .39-.166l3.043-3.051z"/>
                         </svg>
                       </div>
                     </div>
@@ -269,32 +391,43 @@ export function IPhone3DMockup() {
 
                   {/* Bot Response */}
                   <div className="chat-bubble flex justify-start">
-                    <div 
-                      className="bg-white rounded-lg rounded-tl-none px-[10px] py-[6px] max-w-[85%]"
+                    <div
+                      className="bg-white rounded-[8px] rounded-tl-[0px] px-[12px] py-[8px] max-w-[85%]"
                       style={{ boxShadow: '0 1px 0.5px rgba(0,0,0,0.13)' }}
                     >
-                      <p className="text-[13px] text-[#303030] leading-[18px]">Here are some shoes you&apos;ll love 👇</p>
-                      <span className="text-[11px] text-[#667781] float-right mt-[2px]">9:42 AM</span>
+                      <p className="text-[14px] text-[#303030] leading-[20px]">Here are some shoes you&apos;ll love 👇</p>
+                      <span className="text-[11px] text-[#667781] float-right mt-[3px]">9:42 AM</span>
                     </div>
                   </div>
 
-                  {/* Product Cards */}
-                  <div className="flex gap-[8px] overflow-x-auto pb-[6px] scrollbar-hide">
-                    {products.map((product) => (
-                      <div 
-                        key={product.name} 
-                        className="product-card flex-shrink-0 w-[115px] bg-white rounded-xl overflow-hidden border border-[#e5e5e5]"
-                        style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+                  {/* Product Cards Carousel */}
+                  <div className="flex gap-[10px] overflow-x-auto pb-[8px] scrollbar-hide -mx-[2px] px-[2px]">
+                    {products.map((product, index) => (
+                      <div
+                        key={product.name}
+                        className="product-card flex-shrink-0 bg-white rounded-[12px] overflow-hidden border border-[#E5E5E5]"
+                        style={{
+                          width: '120px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
+                        }}
                       >
-                        <div className="h-[70px] bg-gradient-to-br from-[#f8f8f8] to-[#efefef] flex items-center justify-center">
-                          <div className="w-[50px] h-[35px] bg-[#e0e0e0] rounded-md flex items-center justify-center">
-                            <ShoppingBag className="w-[20px] h-[20px] text-[#9ca3af]" />
-                          </div>
+                        {/* Product Image */}
+                        <div 
+                          className="h-[75px] flex items-center justify-center"
+                          style={{ 
+                            background: index === 0 ? '#F0F9F4' : index === 1 ? '#FEF3E7' : '#F0F4F8',
+                          }}
+                        >
+                          <span className="text-[36px]">{product.image}</span>
                         </div>
-                        <div className="p-[8px]">
-                          <p className="text-[11px] font-medium text-[#1f2937] truncate leading-tight">{product.name}</p>
-                          <p className="text-[12px] font-bold text-[#25D366] mt-[2px]">{product.price}</p>
-                          <button className="w-full mt-[6px] py-[4px] text-[10px] font-semibold text-[#25D366] border border-[#25D366]/40 rounded-md hover:bg-[#25D366]/5 transition-colors">
+                        
+                        {/* Product Details */}
+                        <div className="p-[10px]">
+                          <p className="text-[12px] font-semibold text-[#1F2937] truncate leading-tight">{product.name}</p>
+                          <p className="text-[13px] font-bold text-[#25D366] mt-[3px]">{product.price}</p>
+                          <button 
+                            className="w-full mt-[8px] py-[6px] text-[11px] font-semibold text-[#25D366] border border-[#25D366] rounded-[6px] hover:bg-[#25D366]/5 transition-colors"
+                          >
                             View
                           </button>
                         </div>
@@ -305,55 +438,59 @@ export function IPhone3DMockup() {
               </div>
 
               {/* Message Input Bar */}
-              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-[6px] px-[6px] py-[6px] bg-[#F0F0F0]">
-                <button className="w-[36px] h-[36px] rounded-full bg-white flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 1px 1px rgba(0,0,0,0.06)' }}>
-                  <Plus className="w-[22px] h-[22px] text-[#54656F]" />
-                </button>
-                <div 
-                  className="flex items-center gap-[8px] flex-1 bg-white rounded-full px-[12px] py-[8px]"
-                  style={{ boxShadow: '0 1px 1px rgba(0,0,0,0.06)' }}
+              <div
+                className="absolute bottom-0 left-0 right-0 flex items-center gap-[8px] px-[8px] py-[8px]"
+                style={{ backgroundColor: '#F0F0F0' }}
+              >
+                {/* Plus Button */}
+                <button
+                  className="w-[40px] h-[40px] rounded-full bg-white flex items-center justify-center flex-shrink-0"
+                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
                 >
-                  <Smile className="w-[22px] h-[22px] text-[#54656F] flex-shrink-0" />
-                  <span className="flex-1 text-[15px] text-[#8696A0]">Type a message</span>
-                  <Camera className="w-[22px] h-[22px] text-[#54656F] flex-shrink-0" />
+                  <Plus className="w-[24px] h-[24px] text-[#54656F]" />
+                </button>
+
+                {/* Input Field */}
+                <div
+                  className="flex items-center gap-[10px] flex-1 bg-white rounded-full px-[14px] py-[10px]"
+                  style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+                >
+                  <Smile className="w-[24px] h-[24px] text-[#54656F] flex-shrink-0" />
+                  <span className="flex-1 text-[16px] text-[#8696A0]">Type a message</span>
+                  <Camera className="w-[24px] h-[24px] text-[#54656F] flex-shrink-0" />
                 </div>
-                <button className="w-[42px] h-[42px] rounded-full bg-[#00A884] flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.15)' }}>
-                  <Mic className="w-[20px] h-[20px] text-white" />
+
+                {/* Mic Button */}
+                <button
+                  className="w-[44px] h-[44px] rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    backgroundColor: '#00A884',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                  }}
+                >
+                  <Mic className="w-[22px] h-[22px] text-white" />
                 </button>
               </div>
             </div>
 
             {/* Screen Glass Reflection */}
             <div
-              className="absolute inset-[2px] rounded-[46px] pointer-events-none"
+              className="absolute inset-[3px] rounded-[43px] pointer-events-none"
               style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 40%)',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, transparent 35%, transparent 100%)',
               }}
             />
           </div>
-
-          {/* Side Buttons - Volume */}
-          <div 
-            className="absolute left-[-2px] top-[120px] w-[3px] h-[28px] rounded-l-sm"
-            style={{ background: 'linear-gradient(90deg, #2a2a2a, #3a3a3a)' }}
-          />
-          <div 
-            className="absolute left-[-2px] top-[158px] w-[3px] h-[55px] rounded-l-sm"
-            style={{ background: 'linear-gradient(90deg, #2a2a2a, #3a3a3a)' }}
-          />
-          {/* Side Button - Power */}
-          <div 
-            className="absolute right-[-2px] top-[145px] w-[3px] h-[70px] rounded-r-sm"
-            style={{ background: 'linear-gradient(270deg, #2a2a2a, #3a3a3a)' }}
-          />
         </div>
 
-        {/* Subtle shadow beneath phone */}
+        {/* Ground Shadow - No floating, grounded feel */}
         <div
-          className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[200px] h-[12px] rounded-full pointer-events-none"
+          className="absolute -bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.2) 0%, transparent 70%)',
-            filter: 'blur(6px)',
+            width: '220px',
+            height: '20px',
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.08) 40%, transparent 70%)',
+            filter: 'blur(8px)',
           }}
         />
       </div>
