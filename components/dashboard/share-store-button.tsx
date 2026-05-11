@@ -23,7 +23,7 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
   async function handleShare() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/og/store/${userId}`)
+      const res = await fetch(`/api/og/store/${userId}`, { cache: 'no-store' })
       if (!res.ok) throw new Error('Could not generate the share image.')
       const blob = await res.blob()
       const file = new File([blob], `${slug(storeName)}-vendoorx.png`, { type: 'image/png' })

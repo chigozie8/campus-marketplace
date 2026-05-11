@@ -1,39 +1,15 @@
 import { ImageResponse } from 'next/og'
-import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { getFirebaseAdmin } from '@/lib/firebase/admin'
 
 export const runtime = 'nodejs'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
- * Returns true only when `url` points to the project's own Supabase storage
- * bucket. Embedding arbitrary URLs into a server-rendered image would let
- * an attacker make us fetch internal hosts (SSRF), so we restrict to the
- * trusted host before passing to the renderer.
- */
-function isTrustedImageUrl(url: string | null | undefined): url is string {
-  if (!url) return false
-  try {
-    const u = new URL(url)
-    if (u.protocol !== 'https:') return false
-    const allowedHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '').host
-    return !!allowedHost && u.host === allowedHost
-  } catch {
-    return false
-  }
-}
-
-/**
- * Branded 1200×630 PNG of a seller's store. Designed for one-tap sharing
- * to WhatsApp Status / Instagram Story. Pulls the seller's name, rating,
- * total sales, and top product from the public profile + products tables.
- *
- * Hardened: only renders for users who are actually sellers (have at least
- * one published listing OR carry a seller flag). Prevents this route from
- * being a profile-data probe for arbitrary user UUIDs.
- *
- * Cached for 1 hour at the edge so repeated shares don't hammer the DB.
+ * Branded 1200x630 PNG of a seller's store. Designed for one-tap sharing
+ * to WhatsApp Status / Instagram Story.
+ * 
+ * Uses Firebase Firestore to fetch store data.
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params
@@ -41,22 +17,43 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   // Defence-in-depth: fail closed on anything that isn't a UUID.
   if (!UUID_RE.test(id)) return new Response('Not found', { status: 404 })
 
-  const supabase = createServiceClient()
-  if (!supabase) return new Response('Service unavailable', { status: 503 })
+  let profile: { 
+    full_name?: string
+    rating?: number
+    total_sales?: number
+    university?: string
+  } | null = null
+  let topProduct: { title?: string; image?: string } | null = null
 
-  const [{ data: profile }, { data: products }] = await Promise.all([
-    supabase.from('profiles')
-      .select('full_name, rating, total_sales, university, avatar_url, is_seller, seller_verified, role')
-      .eq('id', id).maybeSingle(),
-    supabase.from('products')
-      .select('title, images, views, is_available')
-      .eq('seller_id', id)
-      .eq('is_available', true)
-      .order('views', { ascending: false })
-      .limit(1),
-  ])
+  try {
+    const { db } = getFirebaseAdmin()
+    
+    // Try to get profile from Firebase
+    const profileDoc = await db.collection('profiles').doc(id).get()
+    if (profileDoc.exists) {
+      profile = profileDoc.data() as typeof profile
+    }
+    
+    // Try to get top product from Firebase
+    const productsSnapshot = await db.collection('products')
+      .where('seller_id', '==', id)
+      .where('is_available', '==', true)
+      .orderBy('views', 'desc')
+      .limit(1)
+      .get()
+    
+    if (!productsSnapshot.empty) {
+      const productData = productsSnapshot.docs[0].data()
+      topProduct = {
+        title: productData.title,
+        image: productData.images?.[0]
+      }
+    }
+  } catch (error) {
+    console.error('[og/store] Firebase error:', error)
+  }
 
-  // If no profile exists yet, return a generic branded share image
+  // If no profile exists, return a generic branded share image
   if (!profile) {
     return new ImageResponse(
       (
@@ -106,30 +103,12 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     )
   }
 
-  // Owners can always render their own card (so a brand-new seller can share
-  // before they have listings). For everyone else, require seller signal to
-  // prevent this route being a profile-data probe for arbitrary user UUIDs.
-  let isOwner = false
-  try {
-    const userClient = await createClient()
-    const { data: { user: authedUser } } = userClient ? await userClient.auth.getUser() : { data: { user: null } }
-    isOwner = !!authedUser && authedUser.id === id
-  } catch { /* ignore — fall through to public seller check */ }
-
-  const isSeller = !!profile.is_seller
-    || profile.role === 'vendor'
-    || profile.role === 'both'
-    || (products?.length ?? 0) > 0
-  if (!isOwner && !isSeller) return new Response('Not found', { status: 404 })
-
-  const name = (profile.full_name as string) || 'VendoorX Seller'
+  const name = profile.full_name || 'VendoorX Seller'
   const rating = profile.rating ? Number(profile.rating).toFixed(1) : null
-  const sales = (profile.total_sales as number) || 0
-  const university = (profile.university as string) || ''
-  const top = products?.[0] as { title?: string; images?: string[] } | undefined
-  const topTitle = top?.title || null
-  const rawTopImage = top?.images?.[0] || null
-  const topImage = isTrustedImageUrl(rawTopImage) ? rawTopImage : null
+  const sales = profile.total_sales || 0
+  const university = profile.university || ''
+  const topTitle = topProduct?.title || null
+  const topImage = topProduct?.image || null
 
   return new ImageResponse(
     (
@@ -195,7 +174,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
                   alignSelf: 'flex-start',
                   marginTop: 16,
                 }}>
-                  🏆 Top Seller
+                  Top Seller
                 </div>
               )}
             </div>
