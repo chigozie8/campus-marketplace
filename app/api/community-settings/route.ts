@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getFirestoreDb } from '@/lib/firebase/admin'
+import { getFirebaseAdmin } from '@/lib/firebase/admin'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -19,7 +19,7 @@ const DEFAULTS: Record<string, string> = {
 
 export async function GET() {
   try {
-    const db = getFirestoreDb()
+    const { db } = getFirebaseAdmin()
     const docRef = db.collection('settings').doc('community_settings')
     const doc = await docRef.get()
 
