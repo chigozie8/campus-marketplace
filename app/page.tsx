@@ -7,7 +7,7 @@ import { parseSectionVisibility, parseEscrowSteps, parseHiwSteps, parseFaqs } fr
 
 /* ── Above the fold — eager imports (critical for LCP) ── */
 import { LandingNav } from '@/components/landing/landing-nav'
-import { HeroSection } from '@/components/landing/hero-section'
+import { HeroSectionV2 } from '@/components/landing/hero-section-v2'
 import { StatsBar } from '@/components/landing/stats-bar'
 
 /* ── Below the fold — lazy JS chunks (faster initial bundle) ── */
@@ -203,7 +203,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <LandingNav user={user} />
-      <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
+      <HeroSectionV2 user={user} settings={settings} visitorCampus={visitorCampus} />
       <StatsBar stats={[
         { value: settings.stat_active_vendors, label: 'Active Vendors',   sublabel: settings.stat_active_vendors_sub },
         { value: settings.stat_campuses,        label: 'Nigerian Campuses', sublabel: settings.stat_campuses_sub },

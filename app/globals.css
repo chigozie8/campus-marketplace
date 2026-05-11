@@ -164,6 +164,21 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* 3D Perspective utilities */
+  .perspective-\[2000px\] {
+    perspective: 2000px;
+  }
+  .perspective-\[1000px\] {
+    perspective: 1000px;
+  }
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
   .hero-gradient {
     background: linear-gradient(135deg, oklch(0.50 0.19 152) 0%, oklch(0.58 0.17 162) 50%, oklch(0.46 0.15 145) 100%);
   }
