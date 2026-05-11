@@ -47,7 +47,7 @@ export function LiveActivityTicker() {
   return (
     <LazyMotion features={domAnimation} strict>
       <div
-        className="fixed bottom-6 left-4 z-50 pointer-events-none"
+        className="fixed bottom-24 left-4 lg:bottom-6 z-50 pointer-events-none hidden sm:block"
         aria-live="polite"
         aria-atomic="true"
       >

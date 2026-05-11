@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { FloatingNav } from '@/components/floating-nav'
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
-
+import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { SplashScreen } from '@/components/splash-screen'
 import { CookieConsent } from '@/components/cookie-consent'
@@ -435,6 +435,7 @@ export default function RootLayout({
             <PageTransitionWrapper>{children}</PageTransitionWrapper>
             <FloatingNav />
             <ServiceWorkerRegistration />
+            <PwaInstallPrompt />
             <CookieConsent />
             <Toaster richColors position="top-right" />
             {process.env.NODE_ENV === 'production' && <Analytics />}
