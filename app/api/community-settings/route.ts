@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { getFirestoreDb } from '@/lib/firebase/admin'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -19,24 +19,16 @@ const DEFAULTS: Record<string, string> = {
 
 export async function GET() {
   try {
-    const supabase = createServiceClient()
-    if (!supabase) {
+    const db = getFirestoreDb()
+    const docRef = db.collection('settings').doc('community_settings')
+    const doc = await docRef.get()
+
+    if (!doc.exists) {
       return NextResponse.json({ config: DEFAULTS })
     }
 
-    const { data, error } = await supabase
-      .from('community_settings')
-      .select('key, value')
-
-    if (error) {
-      console.error('[community-settings] GET error:', error.message)
-      return NextResponse.json({ config: DEFAULTS })
-    }
-
-    const config = { ...DEFAULTS }
-    for (const row of data ?? []) {
-      config[row.key] = row.value
-    }
+    const data = doc.data() as Record<string, string>
+    const config = { ...DEFAULTS, ...data }
 
     return NextResponse.json({ config })
   } catch (err) {
