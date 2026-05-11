@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/service'
+import { db } from '@/lib/firebase/config'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -17,33 +18,25 @@ const DEFAULTS: Record<string, string> = {
   avatar_5_url:      '',
 }
 
+const SETTINGS_DOC = 'community_settings'
+const SETTINGS_COLLECTION = 'settings'
+
 export async function GET() {
   try {
-    const supabase = createServiceClient()
-    if (!supabase) {
-      console.log('[community-settings] No supabase client, returning defaults')
-      return NextResponse.json({ config: DEFAULTS })
+    const docRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC)
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      const data = docSnap.data() as Record<string, string>
+      const config = { ...DEFAULTS, ...data }
+      return NextResponse.json({ config })
     }
 
-    const { data, error } = await supabase
-      .from('community_settings')
-      .select('key, value')
-
-    if (error) {
-      console.error('[community-settings] GET error:', error.message)
-      // Table doesn't exist or other error - return defaults
-      return NextResponse.json({ config: DEFAULTS })
-    }
-
-    const config = { ...DEFAULTS }
-    if (data && Array.isArray(data)) {
-      for (const row of data) {
-        config[row.key] = row.value
-      }
-    }
-    return NextResponse.json({ config })
+    // Document doesn't exist, return defaults
+    return NextResponse.json({ config: DEFAULTS })
   } catch (err) {
-    console.error('[community-settings] GET unexpected error:', err)
+    console.error('[community-settings] GET error:', err)
+    // Return defaults on error
     return NextResponse.json({ config: DEFAULTS })
   }
 }
@@ -55,50 +48,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    const supabase = createServiceClient()
-    if (!supabase) {
-      console.error('[community-settings] No supabase client')
-      return NextResponse.json({ error: 'Database unavailable' }, { status: 503 })
+    const docRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC)
+    
+    // Convert all values to strings and add timestamp
+    const dataToSave: Record<string, string> = {}
+    for (const [key, value] of Object.entries(body as Record<string, string>)) {
+      dataToSave[key] = String(value)
     }
+    dataToSave.updated_at = new Date().toISOString()
 
-    // Try to delete all existing rows first
-    const { error: deleteError } = await supabase
-      .from('community_settings')
-      .delete()
-      .gt('id', '00000000-0000-0000-0000-000000000000') // Delete all rows
+    // Save to Firestore (overwrites the document)
+    await setDoc(docRef, dataToSave)
 
-    if (deleteError && deleteError.code !== 'PGRST116') {
-      // PGRST116 means table doesn't exist, which is ok
-      console.error('[community-settings] DELETE error:', deleteError.message)
-      // Don't fail here, try to insert anyway
-    }
-
-    // Insert all new values
-    const entries = Object.entries(body as Record<string, string>)
-    const rowsToInsert = entries.map(([key, value]) => ({
-      key,
-      value: String(value),
-      updated_at: new Date().toISOString(),
-    }))
-
-    const { error: insertError, data: insertedData } = await supabase
-      .from('community_settings')
-      .insert(rowsToInsert)
-      .select()
-
-    if (insertError) {
-      console.error('[community-settings] INSERT error:', insertError)
-      return NextResponse.json({
-        error: `Failed to save settings: ${insertError.message}`,
-        code: insertError.code,
-      }, { status: 500 })
-    }
-
-    console.log('[community-settings] Successfully saved', rowsToInsert.length, 'settings')
-    return NextResponse.json({ success: true, saved: insertedData?.length || 0 })
+    console.log('[community-settings] Successfully saved settings to Firebase')
+    return NextResponse.json({ success: true, saved: Object.keys(dataToSave).length })
   } catch (err) {
-    console.error('[community-settings] POST unexpected error:', err)
+    console.error('[community-settings] POST error:', err)
     const message = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: `Unexpected error: ${message}` }, { status: 500 })
+    return NextResponse.json({ error: `Failed to save settings: ${message}` }, { status: 500 })
   }
 }
