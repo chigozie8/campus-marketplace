@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/firebase/config'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { getFirebaseAdmin } from '@/lib/firebase/admin'
 
 const DEFAULTS: Record<string, string> = {
   launch_date:       '2027-01-01T00:00:00Z',
@@ -23,10 +22,11 @@ const SETTINGS_COLLECTION = 'settings'
 
 export async function GET() {
   try {
-    const docRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC)
-    const docSnap = await getDoc(docRef)
+    const { db } = getFirebaseAdmin()
+    const docRef = db.collection(SETTINGS_COLLECTION).doc(SETTINGS_DOC)
+    const docSnap = await docRef.get()
 
-    if (docSnap.exists()) {
+    if (docSnap.exists) {
       const data = docSnap.data() as Record<string, string>
       const config = { ...DEFAULTS, ...data }
       return NextResponse.json({ config })
@@ -48,7 +48,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    const docRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC)
+    const { db } = getFirebaseAdmin()
+    const docRef = db.collection(SETTINGS_COLLECTION).doc(SETTINGS_DOC)
     
     // Convert all values to strings and add timestamp
     const dataToSave: Record<string, string> = {}
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     dataToSave.updated_at = new Date().toISOString()
 
     // Save to Firestore (overwrites the document)
-    await setDoc(docRef, dataToSave)
+    await docRef.set(dataToSave)
 
     console.log('[community-settings] Successfully saved settings to Firebase')
     return NextResponse.json({ success: true, saved: Object.keys(dataToSave).length })
