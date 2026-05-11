@@ -5,11 +5,12 @@ import { useState } from 'react'
 import {
   ArrowRight, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp,
   ChevronRight, Phone, Mail, Loader2, CheckCircle2, Lock, ShoppingBag, Tag,
-  LayoutDashboard, HelpCircle,
+  LayoutDashboard, HelpCircle, MessageCircle,
 } from 'lucide-react'
 import type { SiteSettings, FooterSocial } from '@/lib/site-settings-defaults'
 import { parseFooterSocials } from '@/lib/site-settings-defaults'
 import { getSocialChip } from '@/components/landing/social-icons'
+import { WhatsAppCtaButton } from '@/components/whatsapp-cta-button'
 
 const LINKS = {
   Marketplace: [
@@ -274,6 +275,41 @@ export function LandingFooter({ settings, userEmail, userFirstName }: FooterProp
             <p className="text-xs text-muted-foreground">
               No spam. Unsubscribe anytime. We respect your privacy.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA BANNER ── */}
+      <div className="bg-gradient-to-r from-[#128C7E]/10 to-primary/10 border-y border-[#128C7E]/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <div className="flex flex-col items-center gap-4 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#128C7E]/10 border border-[#128C7E]/20">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-[#128C7E]">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.971 1.203l-.36.214-.373-.058c-1.25-.196-2.458-.666-3.426-1.43l-.04-.032-.046.016A9.884 9.884 0 002.25 12c0 5.514 4.486 10 10 10 5.514 0 10-4.486 10-10S17.764 2 12.25 2c-.508 0-1.01.041-1.502.122l-.064.011-.064.011z" />
+              </svg>
+              <span className="text-sm font-semibold text-[#128C7E]">Ready to start selling?</span>
+            </div>
+            <h3 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
+              Join thousands of sellers<br />
+              <span className="text-[#128C7E]">making money on WhatsApp</span>
+            </h3>
+            <p className="text-muted-foreground text-lg max-w-xl">
+              Start your campus store today — zero commission, free to list, free to start selling. No credit card required.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+              <WhatsAppCtaButton
+                text="Start Selling Now"
+                href="/auth/sign-up"
+                size="lg"
+              />
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-border hover:border-primary hover:bg-muted/50 text-foreground font-semibold transition-all"
+              >
+                Browse Marketplace
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

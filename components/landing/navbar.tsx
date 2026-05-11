@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppCtaButton } from '@/components/whatsapp-cta-button'
 import { cn } from '@/lib/utils'
 
 export function Navbar() {
@@ -55,9 +56,12 @@ export function Navbar() {
             <Button variant="ghost" size="sm" asChild>
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button size="sm" className="hero-gradient border-0 text-white hover:opacity-90" asChild>
-              <Link href="/auth/sign-up">Get Started Free</Link>
-            </Button>
+            <WhatsAppCtaButton
+              text="Start Selling"
+              href="/auth/sign-up"
+              size="sm"
+              showArrow={false}
+            />
           </div>
 
           {/* Mobile menu button */}
@@ -88,9 +92,11 @@ export function Navbar() {
               <Button variant="outline" size="sm" asChild>
                 <Link href="/auth/login">Sign In</Link>
               </Button>
-              <Button size="sm" className="hero-gradient border-0 text-white" asChild>
-                <Link href="/auth/sign-up">Get Started Free</Link>
-              </Button>
+              <WhatsAppCtaButton
+                text="Start Selling"
+                href="/auth/sign-up"
+                size="sm"
+              />
             </div>
           </div>
         </div>

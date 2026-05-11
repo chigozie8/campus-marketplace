@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Users, GraduationCap, TrendingUp, Star, Zap, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppCtaButton } from '@/components/whatsapp-cta-button'
 import type { User } from '@supabase/supabase-js'
 
 interface CtaSectionProps {
@@ -189,16 +190,11 @@ export function CtaSection({ user }: CtaSectionProps) {
             </>
           ) : (
             <>
-              <Button
-                size="lg"
-                className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
-                asChild
-              >
-                <Link href="/auth/sign-up">
-                  Start Selling on Campus
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
+              <WhatsAppCtaButton
+                text="Start Selling Now"
+                href="/auth/sign-up"
+                size="xl"
+              />
               <Button
                 size="lg"
                 variant="outline"
