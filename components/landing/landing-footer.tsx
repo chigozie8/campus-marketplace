@@ -5,11 +5,12 @@ import { useState } from 'react'
 import {
   ArrowRight, MapPin, Star, ShieldCheck, Zap, BookOpen, Users, TrendingUp,
   ChevronRight, Phone, Mail, Loader2, CheckCircle2, Lock, ShoppingBag, Tag,
-  LayoutDashboard, HelpCircle,
+  LayoutDashboard, HelpCircle, MessageCircle,
 } from 'lucide-react'
 import type { SiteSettings, FooterSocial } from '@/lib/site-settings-defaults'
 import { parseFooterSocials } from '@/lib/site-settings-defaults'
 import { getSocialChip } from '@/components/landing/social-icons'
+import { WhatsAppCtaButton } from '@/components/whatsapp-cta-button'
 
 const LINKS = {
   Marketplace: [
@@ -274,6 +275,39 @@ export function LandingFooter({ settings, userEmail, userFirstName }: FooterProp
             <p className="text-xs text-muted-foreground">
               No spam. Unsubscribe anytime. We respect your privacy.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA BANNER ── */}
+      <div className="bg-gradient-to-r from-[#25D366]/10 to-primary/10 border-y border-[#25D366]/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <div className="flex flex-col items-center gap-4 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366]/10 border border-[#25D366]/20">
+              <MessageCircle className="w-4 h-4 text-[#25D366]" />
+              <span className="text-sm font-semibold text-[#25D366]">Ready to start selling?</span>
+            </div>
+            <h3 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
+              Join thousands of sellers<br />
+              <span className="text-[#25D366]">making money on WhatsApp</span>
+            </h3>
+            <p className="text-muted-foreground text-lg max-w-xl">
+              Start your campus store today — zero commission, free to list, free to start selling. No credit card required.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+              <WhatsAppCtaButton
+                text="Start Selling Now"
+                href="/auth/sign-up"
+                size="lg"
+              />
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border-2 border-border hover:border-primary hover:bg-muted/50 text-foreground font-semibold transition-all"
+              >
+                Browse Marketplace
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

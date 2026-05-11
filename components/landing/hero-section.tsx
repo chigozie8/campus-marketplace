@@ -9,6 +9,7 @@ import {
   TrendingUp, type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppCtaButton } from '@/components/whatsapp-cta-button'
 import type { User } from '@supabase/supabase-js'
 import type { SiteSettings } from '@/lib/site-settings-defaults'
 import { DEFAULT_SETTINGS, parseHeroFeatures } from '@/lib/site-settings-defaults'
@@ -274,16 +275,11 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                 </>
               ) : (
                 <>
-                  <Button
+                  <WhatsAppCtaButton
+                    text={heroCtaPrimary}
+                    href="/auth/sign-up"
                     size="lg"
-                    className="group rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 h-13 text-base shadow-xl shadow-primary/25 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/30 w-full sm:w-auto"
-                    asChild
-                  >
-                    <Link href="/auth/sign-up" className="flex items-center gap-2">
-                      {heroCtaPrimary}
-                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </Button>
+                  />
                   <Button
                     size="lg"
                     variant="outline"

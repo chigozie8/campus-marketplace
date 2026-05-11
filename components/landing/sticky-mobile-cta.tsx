@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, X } from 'lucide-react'
+import { X, MessageCircle } from 'lucide-react'
 
 const STORAGE_KEY = 'vendoorx_mobile_cta_dismissed_v1'
 
@@ -32,10 +32,12 @@ export function StickyMobileCta({ isAuthed }: { isAuthed: boolean }) {
 
   return (
     <div className="md:hidden fixed bottom-3 inset-x-3 z-50 animate-in slide-in-from-bottom-4 duration-300">
-      <div className="flex items-center gap-2 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/25 pl-5 pr-2 py-2">
-        <Link href="/auth/sign-up" className="flex-1 flex items-center justify-between gap-2 text-sm font-bold">
-          Start selling free
-          <ArrowRight className="w-4 h-4" />
+      <div className="flex items-center gap-2 rounded-full bg-[#25D366] text-white shadow-2xl shadow-[#25D366]/25 pl-5 pr-2 py-2">
+        <Link href="/auth/sign-up" className="flex-1 flex items-center justify-between gap-3 text-sm font-bold">
+          <span className="flex items-center gap-2">
+            <MessageCircle className="w-4 h-4" />
+            Start Selling Now
+          </span>
         </Link>
         <button
           type="button"
