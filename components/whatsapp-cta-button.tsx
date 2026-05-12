@@ -21,26 +21,38 @@ const sizeClasses = {
   xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-3',
 }
 
-// Official WhatsApp Logo Component
+// Official WhatsApp App Icon Component (rounded square with phone symbol)
 function WhatsAppLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const sizeMap = {
     sm: 18,
     md: 20,
-    lg: 20,
-    xl: 24,
+    lg: 24,
+    xl: 28,
   }
   const dimension = sizeMap[size]
   
   return (
-    <svg
-      width={dimension}
-      height={dimension}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className="flex-shrink-0"
-    >
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.971 1.203l-.36.214-.373-.058c-1.25-.196-2.458-.666-3.426-1.43l-.04-.032-.046.016A9.884 9.884 0 002.25 12c0 5.514 4.486 10 10 10 5.514 0 10-4.486 10-10S17.764 2 12.25 2c-.508 0-1.01.041-1.502.122l-.064.011-.064.011z" />
-    </svg>
+    <div className="flex-shrink-0 relative" style={{ width: dimension, height: dimension }}>
+      <svg
+        width={dimension}
+        height={dimension}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Rounded green square background */}
+        <rect width="100" height="100" rx="20" fill="#25D366" />
+        
+        {/* White phone symbol */}
+        <g transform="translate(25, 25) scale(1.25)">
+          <path
+            d="M8 2C7.45 2 7 2.45 7 3V13C7 13.55 7.45 14 8 14H16C16.55 14 17 13.55 17 13V3C17 2.45 16.55 2 16 2H8ZM8 4H16V12.5H8V4Z"
+            fill="white"
+          />
+          <circle cx="12" cy="13.5" r="0.5" fill="white" />
+        </g>
+      </svg>
+    </div>
   )
 }
 
