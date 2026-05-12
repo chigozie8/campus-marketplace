@@ -277,7 +277,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                 <>
                   <WhatsAppCtaButton
                     text={heroCtaPrimary}
-                    href="/auth/sign-up"
+                    href="https://wa.me/15792583013"
                     size="lg"
                   />
                   <Button
