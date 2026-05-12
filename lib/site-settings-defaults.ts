@@ -279,7 +279,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   min_withdrawal_ngn: '1000',
   /* contact */
   support_phone: '07082039150',
-  support_whatsapp_url: 'https://wa.me/2347082039250',
+  support_whatsapp_url: 'https://wa.me/15792583013',
   contact_email: 'support@vendoorx.ng',
   contact_hero_subtitle: "Got a question, bug report, or partnership idea? We're all ears. Our team usually responds within 2 hours.",
   contact_response_time: '2 hours',
@@ -393,7 +393,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   help_contact_title: 'Still need help?',
   help_contact_subtitle: 'Our Nigerian support team is available Mon–Sat 8am–10pm WAT. We typically respond within 2 hours.',
   help_contact_phone: '07082039150',
-  help_contact_whatsapp_url: 'https://wa.me/2347082039150?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
+  help_contact_whatsapp_url: 'https://wa.me/15792583013?text=Hi%20VendoorX%20Support%2C%20I%20need%20help%20with...',
   help_contact_email: 'support@vendoorx.ng',
   /* Status page */
   status_overall_message: '',
