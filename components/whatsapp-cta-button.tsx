@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, MessageCircle } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa'
 import { cn } from '@/lib/utils'
 
 interface WhatsAppCtaButtonProps {
@@ -21,7 +22,7 @@ const sizeClasses = {
   xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-3',
 }
 
-// Official WhatsApp App Icon Component using lucide-react
+// WhatsApp Icon Component using react-icons
 function WhatsAppLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const sizeMap = {
     sm: 18,
@@ -32,10 +33,9 @@ function WhatsAppLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const dimension = sizeMap[size]
   
   return (
-    <MessageCircle 
+    <FaWhatsapp 
       size={dimension} 
-      className="flex-shrink-0 text-white fill-white"
-      strokeWidth={1.5}
+      className="flex-shrink-0 text-white"
     />
   )
 }
