@@ -192,7 +192,7 @@ export function CtaSection({ user }: CtaSectionProps) {
             <>
               <WhatsAppCtaButton
                 text="Start Selling Now"
-                href="/auth/sign-up"
+                href="https://wa.me/15792583013"
                 size="xl"
               />
               <Button

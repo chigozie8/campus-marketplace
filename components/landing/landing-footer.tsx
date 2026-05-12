@@ -299,7 +299,7 @@ export function LandingFooter({ settings, userEmail, userFirstName }: FooterProp
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <WhatsAppCtaButton
                 text="Start Selling Now"
-                href="/auth/sign-up"
+                href="https://wa.me/15792583013"
                 size="lg"
               />
               <Link
