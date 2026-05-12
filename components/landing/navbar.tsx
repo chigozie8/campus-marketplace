@@ -58,7 +58,7 @@ export function Navbar() {
             </Button>
             <WhatsAppCtaButton
               text="Start Selling"
-              href="/auth/sign-up"
+              href="https://wa.me/15792583013"
               size="sm"
               showArrow={false}
             />
@@ -94,7 +94,7 @@ export function Navbar() {
               </Button>
               <WhatsAppCtaButton
                 text="Start Selling"
-                href="/auth/sign-up"
+                href="https://wa.me/15792583013"
                 size="sm"
               />
             </div>
