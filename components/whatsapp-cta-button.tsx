@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface WhatsAppCtaButtonProps {
@@ -21,7 +21,7 @@ const sizeClasses = {
   xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-3',
 }
 
-// Official WhatsApp App Icon Component (rounded square with phone symbol)
+// Official WhatsApp App Icon Component using lucide-react
 function WhatsAppLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const sizeMap = {
     sm: 18,
@@ -32,27 +32,11 @@ function WhatsAppLogo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const dimension = sizeMap[size]
   
   return (
-    <div className="flex-shrink-0 relative" style={{ width: dimension, height: dimension }}>
-      <svg
-        width={dimension}
-        height={dimension}
-        viewBox="0 0 100 100"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Rounded green square background */}
-        <rect width="100" height="100" rx="20" fill="#25D366" />
-        
-        {/* White phone symbol */}
-        <g transform="translate(25, 25) scale(1.25)">
-          <path
-            d="M8 2C7.45 2 7 2.45 7 3V13C7 13.55 7.45 14 8 14H16C16.55 14 17 13.55 17 13V3C17 2.45 16.55 2 16 2H8ZM8 4H16V12.5H8V4Z"
-            fill="white"
-          />
-          <circle cx="12" cy="13.5" r="0.5" fill="white" />
-        </g>
-      </svg>
-    </div>
+    <MessageCircle 
+      size={dimension} 
+      className="flex-shrink-0 text-white fill-white"
+      strokeWidth={1.5}
+    />
   )
 }
 
