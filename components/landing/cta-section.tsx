@@ -62,20 +62,20 @@ function StatCard({
 
   return (
     <div
-      className="group flex flex-col items-center gap-2 p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1"
+      className="group flex flex-col items-center gap-3 p-6 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1"
       style={{
         opacity:    visible ? 1 : 0,
         transform:  visible ? 'translateY(0px)' : 'translateY(20px)',
         transition: 'opacity 0.55s ease, transform 0.55s ease',
       }}
     >
-      <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+      <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         <Icon className="w-5 h-5 text-primary" />
       </div>
       <p className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
         {fmt(val)}
       </p>
-      <p className="text-xs text-white/50 font-medium text-center leading-tight">{label}</p>
+      <p className="text-xs text-white/50 font-medium text-center leading-snug">{label}</p>
     </div>
   )
 }
@@ -114,15 +114,15 @@ export function CtaSection({ user }: CtaSectionProps) {
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center">
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-primary/40 bg-primary/10 mb-8">
-          <Zap className="w-4 h-4 text-primary" />
+        <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-primary/40 bg-primary/10 mb-10">
+          <Zap className="w-4 h-4 text-primary flex-shrink-0" />
           <span className="text-sm font-semibold text-primary tracking-wide">
             {isAuthed ? 'Your campus store is live and ready to grow' : 'The marketplace built for Nigerian university campuses'}
           </span>
         </div>
 
         {/* Headline */}
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-6 tracking-tight">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white text-balance leading-[1.06] mb-8 tracking-tight">
           {isAuthed ? (
             <>Keep growing your{' '}<span className="text-primary">campus store.</span></>
           ) : (
@@ -131,7 +131,7 @@ export function CtaSection({ user }: CtaSectionProps) {
         </h2>
 
         {/* Sub-copy */}
-        <p className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-10">
+        <p className="text-white/60 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance mb-12">
           {isAuthed ? (
               <>
               Everything you need is in your dashboard. Boost your listings, track your orders, and{' '}
@@ -148,16 +148,16 @@ export function CtaSection({ user }: CtaSectionProps) {
         </p>
 
         {/* Stats */}
-        <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-3xl mb-12">
+        <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 w-full max-w-3xl mb-14">
           {STATS.map((stat, i) => (
             <StatCard key={stat.label} end={stat.end} fmt={stat.fmt} label={stat.label} icon={stat.icon} decimal={stat.decimal} delay={i * 150} triggered={triggered} />
           ))}
         </div>
 
         {/* Perks row */}
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-12">
+        <div className="flex flex-wrap justify-center gap-x-8 sm:gap-x-10 gap-y-4 mb-14">
           {PERKS.map((perk) => (
-            <div key={perk} className="flex items-center gap-2">
+            <div key={perk} className="flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
               <span className="text-sm text-white/70 font-medium">{perk}</span>
             </div>

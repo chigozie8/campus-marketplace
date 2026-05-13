@@ -246,7 +246,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
 
             {/* CTA Buttons */}
             <m.div
-              className="flex flex-col sm:flex-row items-center lg:items-start gap-3 w-full sm:w-auto"
+              className="flex flex-col sm:flex-row items-center lg:items-start gap-4 w-full sm:w-auto"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.44, ease: [0.22, 1, 0.36, 1] }}
@@ -261,7 +261,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                   <Button
                     size="lg"
                     variant="outline"
-                    className="rounded-full font-semibold px-8 h-13 text-base border-border hover:bg-muted/50 transition-all w-full sm:w-auto"
+                    className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all w-full sm:w-auto"
                     asChild
                   >
                     <Link href="/marketplace">Browse Marketplace</Link>
@@ -277,11 +277,11 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                   <Button
                     size="lg"
                     variant="outline"
-                    className="rounded-full font-semibold px-8 h-13 text-base border-border hover:bg-muted/50 transition-all w-full sm:w-auto"
+                    className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all w-full sm:w-auto"
                     asChild
                   >
-                    <Link href="/#how-it-works" className="flex items-center gap-2">
-                      <Play className="w-4 h-4 text-primary" />
+                    <Link href="/#how-it-works" className="flex items-center gap-2.5">
+                      <Play className="w-4 h-4 text-primary flex-shrink-0" />
                       {heroCtaSecondary}
                     </Link>
                   </Button>
