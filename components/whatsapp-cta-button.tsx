@@ -66,7 +66,7 @@ export function WhatsAppCtaButton({
     <div className="flex items-center justify-center w-full h-full gap-inherit">
       {/* WhatsApp Icon - Standalone with clear separation */}
       <m.div
-        className="flex-shrink-0 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7"
+        className="flex-shrink-0 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 pr-1 sm:pr-1.5"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.05 }}
