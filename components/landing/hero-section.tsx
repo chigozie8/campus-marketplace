@@ -280,7 +280,7 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
                     className="rounded-full font-semibold px-8 h-14 text-base border-border hover:bg-muted/50 transition-all w-full sm:w-auto"
                     asChild
                   >
-                    <Link href="/#how-it-works" className="flex items-center gap-2.5">
+                    <Link href="/#how-it-works" className="flex items-center gap-3">
                       <Play className="w-4 h-4 text-primary flex-shrink-0" />
                       {heroCtaSecondary}
                     </Link>
@@ -301,13 +301,13 @@ export function HeroSection({ user, settings, visitorCampus }: HeroSectionProps)
 
             {/* Social proof row */}
             <m.div
-              className="flex flex-col sm:flex-row items-center lg:items-start gap-3 pt-5 border-t border-border/50 w-full"
+              className="flex flex-col sm:flex-row items-center lg:items-start gap-6 pt-8 border-t border-border/50 w-full"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <HeroAvatarStack avatars={AVATARS} />
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
                 <div
                   className="flex items-center gap-1"
                   role="img"

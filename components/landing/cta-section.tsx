@@ -155,17 +155,17 @@ export function CtaSection({ user }: CtaSectionProps) {
         </div>
 
         {/* Perks row */}
-        <div className="flex flex-wrap justify-center gap-x-8 sm:gap-x-10 gap-y-4 mb-14">
+        <div className="flex flex-wrap justify-center gap-x-10 sm:gap-x-12 gap-y-5 mb-16">
           {PERKS.map((perk) => (
-            <div key={perk} className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-[#16a34a] flex-shrink-0" />
+            <div key={perk} className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-[#16a34a] flex-shrink-0" />
               <span className="text-sm text-white/70 font-medium">{perk}</span>
             </div>
           ))}
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-5 w-full justify-center">
           {isAuthed ? (
             <>
               <Button
@@ -173,10 +173,10 @@ export function CtaSection({ user }: CtaSectionProps) {
                 className="group bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-14 sm:h-16 px-10 sm:px-14 text-base sm:text-lg rounded-2xl shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 hover:scale-[1.03] w-full sm:w-auto"
                 asChild
               >
-                <Link href="/dashboard">
-                  <LayoutDashboard className="mr-2 w-5 h-5" />
+                <Link href="/dashboard" className="flex items-center gap-3">
+                  <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
                   Go to Dashboard
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1 flex-shrink-0" />
                 </Link>
               </Button>
               <Button
