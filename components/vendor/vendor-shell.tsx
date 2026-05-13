@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Plus, LogOut, Tag, Loader2 } from 'lucide-react'
+import { Plus, LogOut, Loader2 } from 'lucide-react'
 import { VendorSidebar } from './vendor-sidebar'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import { MessageIcon } from '@/components/notifications/message-icon'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -62,12 +63,7 @@ export function VendorShell({
         </Link>
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <Link href="/my-offers" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors">
-            <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            {unreadInbox > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-            )}
-          </Link>
+          <MessageIcon />
           <Link href="/seller/new" className="flex items-center gap-1 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg">
             <Plus className="w-3.5 h-3.5" /> Sell
           </Link>
