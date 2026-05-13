@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { buildMetadata } from '@/lib/seo'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,7 +145,10 @@ const COMPARE = [
   { feature: 'Verified-seller marketplace', vx: true, others: false },
 ]
 
-export default function FeaturesPage() {
+export default async function FeaturesPage() {
+  const supabase = await createClient()
+  const user = supabase ? (await supabase.auth.getUser()).data.user : null
+
   return (
     <main className="bg-background">
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
@@ -169,11 +173,20 @@ export default function FeaturesPage() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/auth/sign-up"
+              href={user ? "/dashboard" : "/auth/sign-up"}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all"
             >
-              Start selling free
-              <ArrowRight className="w-4 h-4" />
+              {user ? (
+                <>
+                  Go to Dashboard
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  Start selling free
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Link>
             <Link
               href="/marketplace"
@@ -300,11 +313,20 @@ export default function FeaturesPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  href="/auth/sign-up"
+                  href={user ? "/dashboard" : "/auth/sign-up"}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white text-primary font-bold text-sm shadow-lg hover:bg-white/95 transition-all"
                 >
-                  Create your free store
-                  <ArrowRight className="w-4 h-4" />
+                  {user ? (
+                    <>
+                      Go to Dashboard
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      Create your free store
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </Link>
                 <Link
                   href="/pricing"
