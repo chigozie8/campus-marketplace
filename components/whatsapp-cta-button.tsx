@@ -17,10 +17,10 @@ interface WhatsAppCtaButtonProps {
 }
 
 const sizeClasses = {
-  sm: 'h-10 px-4 text-sm gap-2.5',
-  md: 'h-12 px-6 text-base gap-3',
-  lg: 'h-14 px-7 text-base gap-3.5',
-  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-4',
+  sm: 'h-10 px-4 text-sm gap-3',
+  md: 'h-12 px-6 text-base gap-3.5',
+  lg: 'h-14 px-7 text-base gap-4',
+  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-5',
 }
 
 // WhatsApp Icon Component using react-icons
