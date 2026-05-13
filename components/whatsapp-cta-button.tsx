@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
+import { m } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface WhatsAppCtaButtonProps {
@@ -65,21 +66,49 @@ export function WhatsAppCtaButton({
     <>
       <WhatsAppLogo size={size} />
       {text}
-      {showArrow && <ArrowRight className="w-5 h-5 flex-shrink-0 transition-transform group-hover:translate-x-1" />}
+      {showArrow && (
+        <m.div
+          className="flex-shrink-0 overflow-hidden"
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 'auto', opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <m.div
+            className="w-5 h-5"
+            whileHover={{ x: [0, 4, 2], transition: { duration: 0.5, ease: 'easeInOut' } }}
+            whileTap={{ x: -2 }}
+          >
+            <ArrowRight className="w-5 h-5" />
+          </m.div>
+        </m.div>
+      )}
     </>
   )
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={cn(combinedClasses, 'group cursor-pointer')}>
+      <m.button 
+        onClick={onClick} 
+        className={cn(combinedClasses, 'group cursor-pointer')}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
         {content}
-      </button>
+      </m.button>
     )
   }
 
   return (
     <Link href={href} className={cn(combinedClasses, 'group')}>
-      {content}
+      <m.div
+        className="inline-flex items-center justify-center w-full h-full gap-inherit"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      >
+        {content}
+      </m.div>
     </Link>
   )
 }
