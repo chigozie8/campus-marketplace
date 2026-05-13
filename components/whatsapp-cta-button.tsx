@@ -17,10 +17,10 @@ interface WhatsAppCtaButtonProps {
 }
 
 const sizeClasses = {
-  sm: 'h-10 px-4 text-sm gap-3',
-  md: 'h-12 px-6 text-base gap-3.5',
-  lg: 'h-14 px-7 text-base gap-4',
-  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-5',
+  sm: 'h-10 px-4 text-sm gap-3.5',
+  md: 'h-12 px-6 text-base gap-4',
+  lg: 'h-14 px-7 text-base gap-5',
+  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-6',
 }
 
 // WhatsApp Icon Component using react-icons
@@ -63,21 +63,21 @@ export function WhatsAppCtaButton({
   const combinedClasses = cn(baseClasses, sizeClass, variantClasses, className)
 
   const content = (
-    <>
-      {/* WhatsApp Icon - Centered with breathing room */}
+    <div className="flex items-center justify-center w-full h-full gap-inherit">
+      {/* WhatsApp Icon - Standalone with clear separation */}
       <m.div
-        className="flex-shrink-0 flex items-center justify-center"
+        className="flex-shrink-0 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.05 }}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.15 }}
       >
         <WhatsAppLogo size={size} />
       </m.div>
       
-      {/* Text - Clear and prominent */}
+      {/* Text - Clear and prominent with dedicated space */}
       <m.span
-        className="font-bold tracking-tight"
+        className="font-bold tracking-tight flex-1 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
@@ -85,16 +85,15 @@ export function WhatsAppCtaButton({
         {text}
       </m.span>
       
-      {/* Arrow Icon - Animated and distinct */}
+      {/* Arrow Icon - Animated and distinct with dedicated space */}
       {showArrow && (
         <m.div
-          className="flex-shrink-0 overflow-hidden ml-1"
+          className="flex-shrink-0 w-5 h-5 flex items-center justify-center ml-1"
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: 'auto', opacity: 1 }}
+          animate={{ width: 20, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.15 }}
         >
           <m.div
-            className="w-5 h-5 flex items-center justify-center"
             whileHover={{ x: [0, 4, 2], transition: { duration: 0.5, ease: 'easeInOut' } }}
             whileTap={{ x: -2 }}
           >
@@ -102,7 +101,7 @@ export function WhatsAppCtaButton({
           </m.div>
         </m.div>
       )}
-    </>
+    </div>
   )
 
   if (onClick) {
@@ -121,14 +120,7 @@ export function WhatsAppCtaButton({
 
   return (
     <Link href={href} className={cn(combinedClasses, 'group')}>
-      <m.div
-        className="inline-flex items-center justify-center w-full h-full gap-inherit"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      >
-        {content}
-      </m.div>
+      {content}
     </Link>
   )
 }

@@ -68,9 +68,9 @@ export function Features() {
               </p>
             </div>
             {/* Decorative pill row */}
-            <div className="flex flex-wrap gap-2.5 mt-2 relative z-10">
+            <div className="flex flex-wrap gap-3 mt-4 relative z-10">
               {['Auto-replies', '24/7 coverage', 'Zero missed leads'].map(tag => (
-                <span key={tag} className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                <span key={tag} className="px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
                   {tag}
                 </span>
               ))}
@@ -78,45 +78,45 @@ export function Features() {
           </m.div>
 
           {/* WhatsApp Orders */}
-          <m.div className="rounded-3xl border border-border bg-card p-7 sm:p-8 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={1} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <MessageCircle className="w-5 h-5 text-teal-600" />
+          <m.div className="rounded-3xl border border-border bg-card p-8 sm:p-9 flex flex-col gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={1} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+            <div className="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <MessageCircle className="w-6 h-6 text-teal-600" />
             </div>
-            <h3 className="font-bold text-foreground">WhatsApp-Powered Orders</h3>
+            <h3 className="font-bold text-lg text-foreground">WhatsApp-Powered Orders</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">Every product gets a smart link. Buyers tap once and land in your store — the AI walks them through checkout with zero friction.</p>
           </m.div>
 
           {/* Payments */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={2} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <CreditCard className="w-5 h-5 text-amber-600" />
+          <m.div className="rounded-3xl border border-border bg-card p-8 sm:p-9 flex flex-col gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={2} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+            <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <CreditCard className="w-6 h-6 text-amber-600" />
             </div>
-            <h3 className="font-bold text-foreground">Payments via Chat</h3>
+            <h3 className="font-bold text-lg text-foreground">Payments via Chat</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">Accept secure card payments directly through WhatsApp — no bank app needed. Money lands instantly and you get an alert every time.</p>
           </m.div>
 
           {/* Dashboard */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={3} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <LayoutDashboard className="w-5 h-5 text-blue-600" />
+          <m.div className="rounded-3xl border border-border bg-card p-8 sm:p-9 flex flex-col gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={3} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <LayoutDashboard className="w-6 h-6 text-blue-600" />
             </div>
-            <h3 className="font-bold text-foreground">Your Seller Dashboard</h3>
+            <h3 className="font-bold text-lg text-foreground">Your Seller Dashboard</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">Products, orders, earnings, and customers — all in one place. Know exactly what&apos;s selling and how your business is growing.</p>
           </m.div>
 
           {/* Order Flow */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={4} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <Package className="w-5 h-5 text-primary" />
+          <m.div className="rounded-3xl border border-border bg-card p-8 sm:p-9 flex flex-col gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={4} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <Package className="w-6 h-6 text-primary" />
             </div>
-            <h3 className="font-bold text-foreground">Automated Order Flow</h3>
+            <h3 className="font-bold text-lg text-foreground">Automated Order Flow</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">Every order moves from pending to paid to delivered automatically. No lost chats, no missed orders — ever.</p>
           </m.div>
 
           {/* Analytics */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={5} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
-            <div className="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+          <m.div className="rounded-3xl border border-border bg-card p-8 sm:p-9 flex flex-col gap-5 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={5} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <TrendingUp className="w-6 h-6 text-purple-600" />
             </div>
             <h3 className="font-bold text-foreground">Sales Analytics</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">Revenue, best-sellers, and buyer behaviour — in real time. Use real data to sell smarter every week.</p>
