@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import { Plus, LogOut, Loader2, Tag } from 'lucide-react'
 import { VendorSidebar } from './vendor-sidebar'
 import { NotificationBell } from '@/components/notifications/notification-bell'
-import { MessageIcon } from '@/components/notifications/message-icon'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -63,8 +62,7 @@ export function VendorShell({
         </Link>
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <MessageIcon />
-          <Link href="/offers" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+          <Link href="/dashboard/offers" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors">
             <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </Link>
           <Link href="/seller/new" className="flex items-center gap-1 bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg">
