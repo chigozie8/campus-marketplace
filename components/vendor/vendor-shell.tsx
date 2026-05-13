@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Plus, LogOut, Inbox, Loader2 } from 'lucide-react'
+import { Plus, LogOut, Inbox, Loader2, Tag } from 'lucide-react'
 import { VendorSidebar } from './vendor-sidebar'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { createClient } from '@/lib/supabase/client'
@@ -62,6 +62,9 @@ export function VendorShell({
         </Link>
         <div className="flex items-center gap-2">
           <NotificationBell />
+          <Link href="/dashboard/offers" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors" aria-label="Offers">
+            <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </Link>
           <Link href="/inbox" className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-muted transition-colors">
             <Inbox className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             {unreadInbox > 0 && (
@@ -90,6 +93,9 @@ export function VendorShell({
             <div className="flex items-center gap-2">
               {pageAction}
               <NotificationBell />
+              <Link href="/dashboard/offers" className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors" aria-label="Offers">
+                <Tag className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </Link>
             </div>
           </div>
         )}
