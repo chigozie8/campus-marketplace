@@ -28,29 +28,29 @@ export function Features() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <m.div
-          className="text-center mb-14"
+          className="text-center mb-16 sm:mb-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="inline-flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-[0.18em] mb-4 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+          <span className="inline-flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-[0.18em] mb-5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
             Built for You
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-balance mb-4 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-balance mb-6 tracking-tight leading-tight">
             Every tool your business needs to sell on WhatsApp
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto text-balance leading-relaxed">
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto text-balance leading-relaxed">
             Stop duct-taping your business together with manual chats and spreadsheets. VendoorX gives you one powerful AI-driven platform to sell, automate, and grow.
           </p>
         </m.div>
 
         {/* Bento grid — hero card top-left, secondary cards fill the rest */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
           {/* Hero card — AI Conversations: spans 2 cols on lg */}
           <m.div
-            className="lg:col-span-2 relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 dark:bg-primary/10 p-8 flex flex-col gap-4 group hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
+            className="lg:col-span-2 relative overflow-hidden rounded-3xl border border-primary/20 bg-primary/5 dark:bg-primary/10 p-8 sm:p-10 flex flex-col gap-6 group hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300"
             custom={0}
             variants={cardVariants}
             initial="hidden"
@@ -58,25 +58,27 @@ export function Features() {
             viewport={{ once: true, amount: 0.15 }}
           >
             <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-            <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 relative z-10">
-              <Bot className="w-7 h-7 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 relative z-10 shadow-lg shadow-primary/20">
+              <Bot className="w-8 h-8 text-primary" />
             </div>
             <div className="relative z-10">
-              <h3 className="font-black text-xl text-foreground mb-2">AI Customer Conversations</h3>
-              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base max-w-lg">
+              <h3 className="font-black text-2xl text-foreground mb-3">AI Customer Conversations</h3>
+              <p className="text-muted-foreground leading-relaxed text-base max-w-lg">
                 VendoorX AI replies to buyers on your behalf — answering product questions, handling enquiries, and guiding them to checkout 24/7. No more being glued to your phone.
               </p>
             </div>
             {/* Decorative pill row */}
-            <div className="flex flex-wrap gap-2 mt-2 relative z-10">
+            <div className="flex flex-wrap gap-2.5 mt-2 relative z-10">
               {['Auto-replies', '24/7 coverage', 'Zero missed leads'].map(tag => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">{tag}</span>
+                <span key={tag} className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+                  {tag}
+                </span>
               ))}
             </div>
           </m.div>
 
           {/* WhatsApp Orders */}
-          <m.div className="rounded-3xl border border-border bg-card p-6 flex flex-col gap-3 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={1} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
+          <m.div className="rounded-3xl border border-border bg-card p-7 sm:p-8 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300" custom={1} variants={cardVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }}>
             <div className="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/30 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <MessageCircle className="w-5 h-5 text-teal-600" />
             </div>

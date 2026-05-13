@@ -17,10 +17,10 @@ interface WhatsAppCtaButtonProps {
 }
 
 const sizeClasses = {
-  sm: 'h-9 px-4 text-sm gap-2',
-  md: 'h-11 px-6 text-base gap-2',
-  lg: 'h-13 px-8 text-lg gap-3',
-  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-3',
+  sm: 'h-10 px-4 text-sm gap-2.5',
+  md: 'h-12 px-6 text-base gap-3',
+  lg: 'h-14 px-7 text-base gap-3.5',
+  xl: 'h-16 px-10 sm:px-14 text-base sm:text-lg gap-4',
 }
 
 // WhatsApp Icon Component using react-icons
@@ -64,21 +64,41 @@ export function WhatsAppCtaButton({
 
   const content = (
     <>
-      <WhatsAppLogo size={size} />
-      {text}
+      {/* WhatsApp Icon - Centered with breathing room */}
+      <m.div
+        className="flex-shrink-0 flex items-center justify-center"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+        whileHover={{ scale: 1.1 }}
+      >
+        <WhatsAppLogo size={size} />
+      </m.div>
+      
+      {/* Text - Clear and prominent */}
+      <m.span
+        className="font-bold tracking-tight"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        {text}
+      </m.span>
+      
+      {/* Arrow Icon - Animated and distinct */}
       {showArrow && (
         <m.div
-          className="flex-shrink-0 overflow-hidden"
+          className="flex-shrink-0 overflow-hidden ml-1"
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: 'auto', opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
         >
           <m.div
-            className="w-5 h-5"
+            className="w-5 h-5 flex items-center justify-center"
             whileHover={{ x: [0, 4, 2], transition: { duration: 0.5, ease: 'easeInOut' } }}
             whileTap={{ x: -2 }}
           >
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
           </m.div>
         </m.div>
       )}
