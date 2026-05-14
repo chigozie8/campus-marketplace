@@ -15,7 +15,7 @@ export function OffersBadge() {
   useEffect(() => {
     setMounted(true)
     fetchUnreadOffers()
-    setupRealtimeListener()
+    const unsubscribe = setupRealtimeListener()
 
     const handleVisibility = () => {
       if (!document.hidden) {
@@ -24,7 +24,10 @@ export function OffersBadge() {
     }
 
     document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      if (unsubscribe) unsubscribe()
+    }
   }, [])
 
   async function fetchUnreadOffers() {
@@ -51,25 +54,30 @@ export function OffersBadge() {
   }
 
   function setupRealtimeListener() {
-    const supabase = supabaseRef.current
-    const channel = supabase
-      .channel('offers-badge')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `type=in.(offer,new_offer)`,
-        },
-        () => {
-          fetchUnreadOffers()
-        }
-      )
-      .subscribe()
+    try {
+      const supabase = supabaseRef.current
+      const channel = supabase
+        .channel('offers-badge')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `type=in.(offer,new_offer)`,
+          },
+          () => {
+            fetchUnreadOffers()
+          }
+        )
+        .subscribe()
 
-    return () => {
-      channel.unsubscribe()
+      return () => {
+        channel.unsubscribe()
+      }
+    } catch (error) {
+      // Silently handle realtime setup errors
+      return () => {}
     }
   }
 
