@@ -2,8 +2,31 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createPublicClient } from '@/lib/supabase/public'
 import { mintVerifyPollToken } from '@/lib/auth-tokens'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 export async function POST(req: Request) {
+  const ip = clientIp(req)
+
+  // Rate limit: 5 registrations per IP per hour to prevent spam/bot attacks
+  const ipLimit = await rateLimit({
+    key: `register:ip:${ip}`,
+    limit: 5,
+    windowSeconds: 3600, // 1 hour
+  })
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many registration attempts. Please try again later.' },
+      { status: 429 },
+    )
+  }
+
+  let body: Record<string, unknown>
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 })
+  }
+
   const {
     email,
     password,
@@ -13,10 +36,32 @@ export async function POST(req: Request) {
     role,
     referred_by,
     is_student_verified,
-  } = await req.json()
+  } = body as {
+    email?: string
+    password?: string
+    full_name?: string
+    whatsapp_number?: string
+    university?: string
+    role?: string
+    referred_by?: string
+    is_student_verified?: boolean
+  }
 
   if (!email || !password || !full_name || !role) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
+  }
+
+  // Rate limit per email: 3 attempts per email per hour to prevent enumeration
+  const emailLimit = await rateLimit({
+    key: `register:email:${email.toLowerCase()}`,
+    limit: 3,
+    windowSeconds: 3600,
+  })
+  if (!emailLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many attempts for this email. Please try again later.' },
+      { status: 429 },
+    )
   }
 
   const publicClient = createPublicClient()
