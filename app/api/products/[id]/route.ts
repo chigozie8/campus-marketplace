@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 function serviceClient() {
   return createClient(
@@ -10,15 +11,33 @@ function serviceClient() {
 
 const LOW_STOCK_THRESHOLD = 5
 
+/**
+ * Authenticate user from session (not from request body).
+ * This prevents attackers from spoofing user IDs.
+ */
+async function authenticateUser(): Promise<{ userId: string | null; error?: string }> {
+  const supabase = await createServerClient()
+  if (!supabase) return { userId: null, error: 'Service unavailable' }
+  
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return { userId: null, error: 'Unauthorized' }
+  
+  return { userId: user.id }
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  const { userId } = await req.json().catch(() => ({}))
 
   if (!id) return NextResponse.json({ error: 'Missing product id' }, { status: 400 })
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Authenticate from session, NOT from request body
+  const { userId, error: authError } = await authenticateUser()
+  if (!userId) {
+    return NextResponse.json({ error: authError || 'Unauthorized' }, { status: 401 })
+  }
 
   const supabase = serviceClient()
 
@@ -50,11 +69,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  const body = await req.json().catch(() => ({}))
-  const { userId, ...updates } = body
 
   if (!id) return NextResponse.json({ error: 'Missing product id' }, { status: 400 })
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Authenticate from session, NOT from request body
+  const { userId, error: authError } = await authenticateUser()
+  if (!userId) {
+    return NextResponse.json({ error: authError || 'Unauthorized' }, { status: 401 })
+  }
+
+  // Parse body and remove any userId if client sent it (ignore it)
+  const body = await req.json().catch(() => ({}))
+  const { userId: _ignoredUserId, ...updates } = body
 
   const supabase = serviceClient()
 

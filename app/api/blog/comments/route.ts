@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 function adminClient() {
   return createClient(
@@ -11,6 +12,21 @@ function adminClient() {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req)
+
+  // Rate limit: 10 comments per IP per hour (generous for legit users, blocks spam)
+  const ipLimit = await rateLimit({
+    key: `blog-comment:ip:${ip}`,
+    limit: 10,
+    windowSeconds: 3600,
+  })
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many comments. Please try again later.' },
+      { status: 429 },
+    )
+  }
+
   const body = await req.json()
   const { postId, content, guestName, guestEmail, parentId } = body
 
@@ -21,6 +37,20 @@ export async function POST(req: NextRequest) {
   const user = supabase
     ? (await supabase.auth.getUser()).data.user
     : null
+
+  // Additional rate limit per user/email to prevent single-user spam
+  const userKey = user?.id || guestEmail?.toLowerCase() || ip
+  const userLimit = await rateLimit({
+    key: `blog-comment:user:${userKey}`,
+    limit: 5,
+    windowSeconds: 1800, // 5 comments per 30 minutes per user
+  })
+  if (!userLimit.allowed) {
+    return NextResponse.json(
+      { error: 'You are commenting too frequently. Please slow down.' },
+      { status: 429 },
+    )
+  }
 
   if (!user && !guestName?.trim()) {
     return NextResponse.json({ error: 'Name is required for guest comments' }, { status: 400 })
