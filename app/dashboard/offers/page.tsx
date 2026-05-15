@@ -43,6 +43,23 @@ export default function OffersPage() {
     }
   }
 
+  // Mark offer notifications as read when user visits this page
+  useEffect(() => {
+    const markNotificationsAsRead = async () => {
+      try {
+        await fetch('/api/notifications/mark-as-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'offer' }),
+        })
+      } catch {
+        // Silently fail
+      }
+    }
+
+    markNotificationsAsRead()
+  }, [])
+
   useEffect(() => { load(tab) }, [tab])
 
   return (
