@@ -1,40 +1,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, TrendingUp } from 'lucide-react'
-import { createServiceClient } from '@/lib/supabase/service'
-
-type TrendingProduct = {
-  id: string
-  title: string
-  price: number
-  images: string[] | null
-  category_id: string | null
-  views: number | null
-  seller_id: string
-}
+import { getTrendingProducts, type TrendingProduct } from '@/lib/cached-data'
 
 /**
  * "Trending on campus right now" strip — proves there's a real marketplace
- * behind the marketing copy. Pulled server-side via service-role to bypass
- * RLS, capped at 8 items, ordered by views desc + recency. Whole section
- * disappears cleanly if no products exist yet.
+ * behind the marketing copy. Uses cached data fetching to ensure the section
+ * keeps working even when the database is temporarily unavailable.
  *
- * Uses the parent route's `revalidate = 300` cadence (5-minute cache) to
- * avoid hammering Supabase on every visit.
+ * Capped at 8 items, ordered by views desc + recency. Whole section
+ * disappears cleanly if no products exist yet.
  */
 export async function TrendingProducts() {
-  const sc = createServiceClient()
-  if (!sc) return null
-
-  const { data } = await sc
-    .from('products')
-    .select('id, title, price, images, category_id, views, seller_id')
-    .eq('is_available', true)
-    .order('views', { ascending: false, nullsFirst: false })
-    .order('created_at', { ascending: false })
-    .limit(8)
-
-  const products = (data as TrendingProduct[] | null) ?? []
+  const products = await getTrendingProducts(8)
   if (products.length === 0) return null
 
   return (
