@@ -12,6 +12,68 @@ function db() {
   )
 }
 
+export async function GET(req: Request) {
+  try {
+    const supabase = await createClient()
+    if (!supabase) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+
+    const url = new URL(req.url)
+    const page = parseInt(url.searchParams.get('page') || '1', 10)
+    const limit = parseInt(url.searchParams.get('limit') || '20', 10)
+    const offset = (page - 1) * limit
+
+    const admin = db()
+
+    // Get total count
+    const { count } = await admin
+      .from('orders')
+      .select('id', { count: 'exact' })
+      .eq('buyer_id', user.id)
+
+    // Get paginated orders
+    const { data: orders, error } = await admin
+      .from('orders')
+      .select(`
+        *,
+        products:product_id (
+          id,
+          title,
+          price,
+          images,
+          seller_id
+        ),
+        seller:seller_id (
+          id,
+          user_metadata
+        )
+      `)
+      .eq('buyer_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        pages: Math.ceil((count || 0) / limit),
+      },
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Server error'
+    return NextResponse.json({ success: false, message: msg }, { status: 500 })
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient()
