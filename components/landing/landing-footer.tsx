@@ -25,6 +25,7 @@ const LINKS = {
     { label: 'Chat on WhatsApp',     href: 'https://wa.me/15792583013', icon: Phone },
     { label: 'Trust & Safety',       href: '/trust',                  icon: ShieldCheck },
     { label: 'Dispute Resolution',   href: '/dispute',                icon: Users },
+    { label: 'Trust & Safety: 07082039150', href: 'tel:07082039150',  icon: Phone },
   ],
   Company: [
     { label: 'About VendoorX',   href: '/about',        icon: ShieldCheck },
