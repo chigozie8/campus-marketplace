@@ -3,8 +3,6 @@ import { CheckCircle2, Activity } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
 import { parseStatusServices, parseStatusIncidents } from '@/lib/site-settings-defaults'
 
-export const revalidate = 60
-
 export const metadata: Metadata = {
   title: 'System Status | VendoorX',
   description: 'Check the current status of VendoorX platform services.',

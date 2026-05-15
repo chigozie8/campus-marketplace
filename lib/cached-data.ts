@@ -52,7 +52,6 @@ export const getTrendingProducts = cache(async function fetchTrendingProducts(
       return (data as TrendingProduct[]) ?? []
     },
     {
-      staleTime: 300, // 5 minutes
       maxAge: 3600, // 1 hour
       fallback: [], // Empty array if all else fails
     }
@@ -78,7 +77,6 @@ export const getCategories = cache(async function fetchCategories(): Promise<Cat
       return (data as CategoryInfo[]) ?? []
     },
     {
-      staleTime: 600, // 10 minutes
       maxAge: 86400, // 24 hours
       fallback: [], // Empty array fallback
     }
@@ -157,7 +155,6 @@ export const getMarketplaceProducts = cache(async function fetchMarketplaceProdu
       }
     },
     {
-      staleTime: 60, // 1 minute (marketplace needs fresher data)
       maxAge: 1800, // 30 minutes
       fallback: { products: [], total: 0 },
     }
@@ -190,7 +187,6 @@ export const getProductById = cache(async function fetchProductById(
       return data as Product
     },
     {
-      staleTime: 60, // 1 minute
       maxAge: 1800, // 30 minutes
       fallback: null,
     }
@@ -225,7 +221,6 @@ export const getPlatformStats = cache(async function fetchPlatformStats(): Promi
       }
     },
     {
-      staleTime: 300, // 5 minutes
       maxAge: 3600, // 1 hour
       fallback: {
         totalProducts: 0,

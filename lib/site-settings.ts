@@ -30,7 +30,6 @@ export const getSiteSettings = cache(async function fetchSiteSettings(): Promise
       return { ...DEFAULT_SETTINGS, ...map } as SiteSettings
     },
     {
-      staleTime: 300, // Consider stale after 5 minutes
       maxAge: 86400, // Keep in cache up to 24 hours (for disaster recovery)
       fallback: DEFAULT_SETTINGS, // Use defaults if all else fails
     }

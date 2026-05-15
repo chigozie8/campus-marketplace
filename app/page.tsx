@@ -28,7 +28,7 @@ const StickyMobileCta        = lazyLoad(() => import('@/components/landing/stick
 import { AdPopupClient as AdPopup } from '@/components/landing/ad-popup-client'
 import { LiveActivityTicker } from '@/components/landing/live-activity-ticker'
 
-export const revalidate = 300
+// Caching is now handled by lib/cache.ts with stale-while-revalidate semantics
 
 export const metadata: Metadata = buildMetadata({
   title: 'Vendoor X — AI-Powered WhatsApp Commerce Platform | Automate Sales on WhatsApp',

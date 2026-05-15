@@ -4,8 +4,6 @@ import { ArrowRight, Handshake, Building2, Zap, Megaphone, ShieldCheck, Star, He
 import { getSiteSettings } from '@/lib/site-settings'
 import { parsePartnershipTypes } from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
-
 export const metadata: Metadata = {
   title: 'Partnerships | VendoorX',
   description: "Partner with VendoorX to grow your reach across Nigeria's AI-powered WhatsApp commerce platform.",

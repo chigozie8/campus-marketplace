@@ -58,12 +58,6 @@ const nextConfig: NextConfig = {
     ? { allowedDevOrigins: [process.env.REPLIT_DEV_DOMAIN] }
     : {}),
 
-  // Enable experimental cache components for "use cache" directive
-  // This provides stale-while-revalidate caching behavior
-  experimental: {
-    cacheComponents: true,
-  },
-
   // Suppress TS and ESLint errors during builds (carried over from original config)
   typescript: {
     ignoreBuildErrors: true,
