@@ -22,6 +22,11 @@ export const SITE_KEYWORDS = [
   'VendoorX store',
   'vendoorx.ng',
 
+  // Founder keywords
+  'Kenneth Okoronkwo',
+  'Kenneth Okoronkwo VendoorX',
+  'Okoronkwo VendoorX founder',
+
   // WhatsApp commerce
   'WhatsApp marketplace Nigeria',
   'WhatsApp vendor Nigeria',
@@ -173,6 +178,11 @@ export const ORGANISATION_JSONLD = {
   description: SITE_DESCRIPTION,
   foundingDate: '2024',
   foundingLocation: 'Nigeria',
+  founder: {
+    '@type': 'Person',
+    name: 'Kenneth Okoronkwo',
+    url: `${SITE_URL}/press`,
+  },
   areaServed: 'Nigeria',
   sameAs: [
     'https://twitter.com/vendoorx',
