@@ -111,8 +111,12 @@ export const ordersApi = {
       body: JSON.stringify(data),
     }),
 
-  getMyOrders: (page = 1, limit = 20) =>
-    request<PaginatedResponse<BackendOrder>>(`/orders/me?page=${page}&limit=${limit}`),
+  getMyOrders: async (page = 1, limit = 20) => {
+    const token = await getAuthToken()
+    return directRequest<{ success: boolean; data: BackendOrder[]; pagination: { page: number; limit: number; total: number; pages: number } }>(`/api/orders?page=${page}&limit=${limit}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+  },
 
   getById: (id: string) =>
     request<{ success: boolean; data: BackendOrder }>(`/orders/${id}`),
