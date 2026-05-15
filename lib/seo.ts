@@ -20,7 +20,6 @@ export const SITE_KEYWORDS = [
   'VendoorX Nigeria',
   'VendoorX app',
   'VendoorX store',
-  'vendoorx.ng',
 
   // Founder keywords
   'Kenneth Okoronkwo',
