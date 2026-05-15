@@ -40,6 +40,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'PerplexityBot',   disallow: '/' },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    // Canonical host — tell Google to only crawl www.vendoorx.ng (not vendoorx.ng)
+    host: 'https://www.vendoorx.ng',
   }
 }
