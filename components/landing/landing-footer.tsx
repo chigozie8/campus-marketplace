@@ -18,7 +18,7 @@ const LINKS = {
     { label: 'Categories',           href: '/marketplace?view=cats',  icon: Tag },
     { label: 'Start Selling',        href: '/seller/new',             icon: TrendingUp },
     { label: 'Seller Dashboard',     href: '/dashboard',              icon: LayoutDashboard },
-    { label: 'My Orders',            href: '/orders',                 icon: ShoppingBag },
+    { label: 'My Orders',            href: '/dashboard/orders',       icon: ShoppingBag },
   ],
   Support: [
     { label: 'Help Centre',          href: '/help',                   icon: HelpCircle },

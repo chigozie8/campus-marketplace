@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { BlogPostGrid } from '@/components/blog/blog-post-grid'
 import { BlogPostGridSkeleton } from '@/components/ui/skeletons'
+import { BlogSubscribeForm } from '@/components/blog/blog-subscribe-form'
 
 export const dynamic = 'force-dynamic'
 
@@ -207,24 +208,7 @@ async function BlogSidebar() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-5 text-white">
-        <h3 className="text-base font-black mb-1">Get updates first</h3>
-        <p className="text-white/80 text-xs leading-relaxed mb-4">
-          New posts, seller tips & exclusive deals — straight to your inbox. No spam.
-        </p>
-        <form action="/api/newsletter" method="POST" className="flex flex-col gap-2">
-          <input
-            type="email"
-            name="email"
-            placeholder="your@email.com"
-            required
-            className="w-full px-3.5 py-2.5 rounded-xl bg-white/20 border border-white/30 focus:border-white text-white placeholder:text-white/50 outline-none text-sm"
-          />
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-white text-primary font-bold text-sm hover:bg-white/90 transition-colors">
-            Subscribe
-          </button>
-        </form>
-      </div>
+      <BlogSubscribeForm />
 
       <div className="rounded-2xl border border-border bg-card p-5">
         <h3 className="text-sm font-black text-foreground uppercase tracking-wide mb-4">Quick links</h3>
