@@ -3,8 +3,6 @@ import { LegalPageTemplate } from '@/components/legal/legal-page-template'
 import { getSiteSettings } from '@/lib/site-settings'
 import { LEGAL_DOCS, resolveLegalMarkdown } from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
-
 export const metadata: Metadata = {
   title: 'Dispute Resolution | VendoorX',
   description: 'How VendoorX mediates buyer/seller disputes — a clear, time-bound process with a final appeal stage.',

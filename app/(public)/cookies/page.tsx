@@ -3,8 +3,6 @@ import { LegalPageTemplate } from '@/components/legal/legal-page-template'
 import { getSiteSettings } from '@/lib/site-settings'
 import { LEGAL_DOCS, resolveLegalMarkdown } from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
-
 export const metadata: Metadata = {
   title: 'Cookie Policy | VendoorX',
   description: 'How VendoorX uses cookies and similar technologies — and how you can manage them.',

@@ -3,8 +3,6 @@ import { LegalPageTemplate } from '@/components/legal/legal-page-template'
 import { getSiteSettings } from '@/lib/site-settings'
 import { LEGAL_DOCS, resolveLegalMarkdown } from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
-
 export const metadata: Metadata = {
   title: 'Terms of Service | VendoorX',
   description: 'Read the VendoorX Terms of Service — the rules everyone agrees to when using the platform.',

@@ -3,8 +3,6 @@ import { LegalPageTemplate } from '@/components/legal/legal-page-template'
 import { getSiteSettings } from '@/lib/site-settings'
 import { LEGAL_DOCS, resolveLegalMarkdown } from '@/lib/site-settings-defaults'
 
-export const revalidate = 300
-
 export const metadata: Metadata = {
   title: 'Trust & Safety | VendoorX',
   description: 'Learn how VendoorX keeps buying and selling on Nigerian campuses safe — escrow, verified sellers, and 24/7 support.',

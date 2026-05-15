@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/marketplace/product-card'
 import { MarketplaceFilters } from '@/components/marketplace/filters'
 import { SearchAutocomplete } from '@/components/marketplace/search-autocomplete'
 import { FlashSalesSection } from '@/components/features/flash-sales-section'
+import { getMarketplaceProducts } from '@/lib/cached-data'
 import type { Product } from '@/lib/types'
 import type { Metadata } from 'next'
 import { buildMetadata, SITE_URL } from '@/lib/seo'
@@ -174,64 +175,21 @@ function PaginationNav({
 }
 
 async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = await createClient()
-
-  if (!supabase) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-        <div className="w-20 h-20 rounded-3xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-5">
-          <ShoppingBag className="w-10 h-10 text-gray-300 dark:text-muted-foreground" />
-        </div>
-        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Service unavailable</h3>
-        <p className="text-gray-500 dark:text-muted-foreground text-sm max-w-xs leading-relaxed">
-          Database connection is not configured. Please check your environment variables.
-        </p>
-      </div>
-    )
-  }
-
   const currentPage = Math.max(1, parseInt(searchParams.page ?? '1', 10) || 1)
   const from = (currentPage - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
 
-  // Resolve category filter
-  let categoryId: string | null = null
-  if (searchParams.category && searchParams.category !== 'all') {
-    const { data: cat } = await supabase
-      .from('categories').select('id').eq('slug', searchParams.category).single()
-    categoryId = cat?.id ?? null
-  }
+  // Use cached data fetcher - keeps working even when DB is down
+  const { products, total } = await getMarketplaceProducts({
+    categorySlug: searchParams.category,
+    search: searchParams.q,
+    sort: searchParams.sort,
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+  })
 
-  // Count query (head-only, no data transfer)
-  let countQuery = supabase
-    .from('products')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_available', true)
-  if (categoryId) countQuery = countQuery.eq('category_id', categoryId)
-  if (searchParams.q) countQuery = countQuery.ilike('title', `%${searchParams.q}%`)
-  const { count: totalCount } = await countQuery
-  const total = totalCount ?? 0
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
-  // Data query with sort + range
-  let dataQuery = supabase
-    .from('products')
-    .select('*, profiles(*), categories(*)')
-    .eq('is_available', true)
-  if (categoryId) dataQuery = dataQuery.eq('category_id', categoryId)
-  if (searchParams.q) dataQuery = dataQuery.ilike('title', `%${searchParams.q}%`)
-  // Pinned products always rise to the top — invisible promotion (no badge shown to buyers)
-  dataQuery = dataQuery.order('is_pinned', { ascending: false })
-  if (searchParams.sort === 'price_asc') dataQuery = dataQuery.order('price', { ascending: true })
-  else if (searchParams.sort === 'price_desc') dataQuery = dataQuery.order('price', { ascending: false })
-  else if (searchParams.sort === 'popular') dataQuery = dataQuery.order('views', { ascending: false })
-  else dataQuery = dataQuery.order('created_at', { ascending: false })
-
-  dataQuery = dataQuery.range(from, to)
-
-  const { data: products, error } = await dataQuery
-
-  if (error || !products || products.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center px-4">
         <div className="w-20 h-20 rounded-3xl bg-gray-100 dark:bg-muted flex items-center justify-center mb-5">
@@ -254,6 +212,8 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     )
   }
 
+  const to = from + PAGE_SIZE - 1
+
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -261,7 +221,7 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
     description: 'Buy and sell items from verified student sellers across Nigerian universities',
     url: `${SITE_URL}/marketplace`,
     numberOfItems: total,
-    itemListElement: (products as Product[]).map((product, index) => ({
+    itemListElement: products.map((product, index) => ({
       '@type': 'ListItem',
       position: from + index + 1,
       url: `${SITE_URL}/marketplace/${product.id}`,
@@ -297,7 +257,7 @@ async function ProductGrid({ searchParams }: { searchParams: SearchParams }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }}
       />
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
-        {(products as Product[]).map(product => (
+        {products.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
