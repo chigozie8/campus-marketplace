@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-export const SITE_NAME = 'VendoorX'
+export const SITE_NAME = 'Vendoor X'
 export const SITE_TAGLINE = "Nigeria's #1 AI-Powered WhatsApp Vendor Marketplace"
 export const SITE_DESCRIPTION =
   'VendoorX is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI-powered automation — product discovery, orders, payments, and delivery tracking all handled through WhatsApp. Join thousands of vendors and buyers on VendoorX.'
@@ -11,16 +11,16 @@ export const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 export const SITE_KEYWORDS = [
   // Brand keywords
+  'Vendoor X',
   'VendoorX',
   'Vendoorx',
   'vendoorx',
   'Vendoor',
   'vendoor',
   'vendoor marketplace',
-  'VendoorX Nigeria',
-  'VendoorX app',
-  'VendoorX store',
-  'vendoorx.ng',
+  'Vendoor X Nigeria',
+  'Vendoor X app',
+  'Vendoor X store',
 
   // Founder keywords
   'Kenneth Okoronkwo',
@@ -171,8 +171,8 @@ export function buildMetadata({
 export const ORGANISATION_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'VendoorX',
-  alternateName: ['Vendoor', 'VendoorX Nigeria', 'Vendoorx'],
+  name: 'Vendoor X',
+  alternateName: ['Vendoor X', 'Vendoor', 'VendoorX', 'Vendoorx'],
   url: SITE_URL,
   logo: `${SITE_URL}/icon-512`,
   description: SITE_DESCRIPTION,
@@ -201,7 +201,7 @@ export const ORGANISATION_JSONLD = {
 export const WEBSITE_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'VendoorX',
+  name: 'Vendoor X',
   alternateName: 'Vendoor',
   url: SITE_URL,
   description: SITE_DESCRIPTION,
@@ -220,7 +220,7 @@ export const WEBSITE_JSONLD = {
 export const MARKETPLACE_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'VendoorX Marketplace — Buy & Sell on WhatsApp',
-  description: 'Browse thousands of products from verified vendors across Nigeria. Shop electronics, fashion, food, textbooks and more on VendoorX.',
+  name: 'Vendoor X Marketplace — Buy & Sell on WhatsApp',
+  description: 'Browse thousands of products from verified vendors across Nigeria. Shop electronics, fashion, food, textbooks and more on Vendoor X.',
   url: `${SITE_URL}/marketplace`,
 }

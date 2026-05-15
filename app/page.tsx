@@ -31,9 +31,9 @@ import { LiveActivityTicker } from '@/components/landing/live-activity-ticker'
 export const revalidate = 300
 
 export const metadata: Metadata = buildMetadata({
-  title: 'VendoorX — AI-Powered WhatsApp Commerce Platform | Automate Sales on WhatsApp',
+  title: 'Vendoor X — AI-Powered WhatsApp Commerce Platform | Automate Sales on WhatsApp',
   description:
-    'VendoorX is a conversational commerce platform that automates sales, support, and transactions across messaging channels. Let AI handle customer conversations, product discovery, order flow, and payments via WhatsApp. Free to start, zero commission.',
+    'Vendoor X is a conversational commerce platform that automates sales, support, and transactions across messaging channels. Let AI handle customer conversations, product discovery, order flow, and payments via WhatsApp. Free to start, zero commission.',
   path: '/',
   keywords: [
     'WhatsApp commerce Nigeria',

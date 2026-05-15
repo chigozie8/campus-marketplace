@@ -51,8 +51,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_NG',
     url: siteUrl,
-    siteName: 'VendoorX',
-    title: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
+    siteName: 'Vendoor X',
+    title: 'Vendoor X — Nigeria\'s #1 WhatsApp Vendor Marketplace',
     description:
       'VendoorX is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI automation — browse products, place orders, pay securely, and track delivery all through WhatsApp. Join VendoorX today.',
     images: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
+        alt: 'Vendoor X — Nigeria\'s #1 WhatsApp Vendor Marketplace',
         type: 'image/png',
       },
     ],
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'VendoorX — Nigeria\'s #1 WhatsApp Vendor Marketplace',
     description:
-      'VendoorX is Nigeria\'s #1 WhatsApp vendor marketplace. Buy & sell with AI. Thousands of vendors on VendoorX — electronics, fashion, food & more. Free to join.',
+      'Vendoor X is Nigeria\'s #1 WhatsApp vendor marketplace. Buy & sell with AI. Thousands of vendors on Vendoor X — electronics, fashion, food & more. Free to join.',
     images: [`${siteUrl}/opengraph-image`],
     creator: '@vendoorx',
     site: '@vendoorx',
@@ -123,9 +123,9 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': `${siteUrl}/#website`,
       url: siteUrl,
-      name: 'VendoorX',
-      alternateName: ['Vendoor', 'VendoorX Nigeria', 'Vendoorx', 'WhatsApp Vendor Marketplace Nigeria'],
-      description: 'VendoorX is Nigeria\'s #1 WhatsApp vendor marketplace — buy and sell with AI-powered automation for product discovery, orders, payments, and delivery tracking.',
+      name: 'Vendoor X',
+      alternateName: ['Vendoor', 'Vendoor X Nigeria', 'Vendoorx', 'WhatsApp Vendor Marketplace Nigeria'],
+      description: 'Vendoor X is Nigeria\'s #1 WhatsApp vendor marketplace — buy and sell with AI-powered automation for product discovery, orders, payments, and delivery tracking.',
       publisher: {
         '@id': `${siteUrl}/#organization`,
       },
@@ -142,7 +142,7 @@ const jsonLd = {
     {
       '@type': 'Organization',
       '@id': `${siteUrl}/#organization`,
-      name: 'VendoorX',
+      name: 'Vendoor X',
       url: siteUrl,
       logo: {
         '@type': 'ImageObject',
@@ -169,7 +169,7 @@ const jsonLd = {
     {
       '@type': 'WebApplication',
       '@id': `${siteUrl}/#webapp`,
-      name: 'VendoorX',
+      name: 'Vendoor X',
       url: siteUrl,
       applicationCategory: 'ShoppingApplication',
       operatingSystem: 'Any',
