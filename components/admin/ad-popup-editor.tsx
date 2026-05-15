@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Save, Loader2, CheckCircle2 } from 'lucide-react'
+import { ImageUploadField } from './image-upload-field'
 
 interface Props {
   initialValues: {
@@ -121,11 +122,12 @@ export function AdPopupEditor({ initialValues }: Props) {
         </div>
 
         <Field
-          label="Image URL (optional)"
+          label="Image (optional)"
           placeholder="https://..."
           value={v.image_url}
           onChange={(val) => field('image_url', val)}
           help="A 16:9 banner shown above the title. Leave blank for no image."
+          isImageField
         />
 
         <Field
@@ -166,10 +168,26 @@ export function AdPopupEditor({ initialValues }: Props) {
 }
 
 /* — small primitives — */
-function Field({ label, value, onChange, placeholder, type = 'text', help, rows = 2 }: {
+function Field({ label, value, onChange, placeholder, type = 'text', help, rows = 2, isImageField = false }: {
   label: string; value: string; onChange: (v: string) => void
-  placeholder?: string; type?: string; help?: string; rows?: number
+  placeholder?: string; type?: string; help?: string; rows?: number; isImageField?: boolean
 }) {
+  if (isImageField) {
+    return (
+      <div>
+        <ImageUploadField
+          value={value}
+          onChange={onChange}
+          label={label}
+          shape="square"
+          previewSize={80}
+          className="mb-0"
+        />
+        {help && <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">{help}</p>}
+      </div>
+    )
+  }
+
   return (
     <div>
       <label className="text-xs font-bold text-foreground block mb-1">{label}</label>
