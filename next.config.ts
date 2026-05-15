@@ -134,9 +134,25 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // Canonical redirects — add production domain redirects here when deployed
+  // Canonical redirects — enforce www.vendoorx.ng and HTTPS
   async redirects() {
-    return []
+    return [
+      // Force HTTP → HTTPS (all routes)
+      {
+        source: '/:path*',
+        destination: 'https://:host/:path*',
+        permanent: true,
+        has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }],
+      },
+      // Remove www subdomain redirect (keep www)
+      // This ensures: vendoorx.ng → www.vendoorx.ng (canonical)
+      {
+        source: '/:path*',
+        destination: 'https://www.vendoorx.ng/:path*',
+        permanent: true,
+        has: [{ type: 'host', value: 'vendoorx.ng' }],
+      },
+    ]
   },
 }
 

@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const SITE_NAME = 'Vendoor X'
 export const SITE_TAGLINE = "Nigeria's #1 AI-Powered WhatsApp Vendor Marketplace"
 export const SITE_DESCRIPTION =
-  'VendoorX is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI-powered automation — product discovery, orders, payments, and delivery tracking all handled through WhatsApp. Join thousands of vendors and buyers on VendoorX.'
+  'Vendoor X is Nigeria\'s leading WhatsApp vendor marketplace. Buy and sell with AI-powered automation — product discovery, orders, payments, and delivery tracking all handled through WhatsApp. Join thousands of vendors and buyers on Vendoor X.'
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vendoorx.ng'
 export const SITE_TWITTER = '@vendoorx'
