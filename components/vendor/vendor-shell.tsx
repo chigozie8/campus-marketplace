@@ -55,7 +55,7 @@ export function VendorShell({
       />
 
       {/* ── Mobile + tablet topbar (≤1023px). Sidebar takes over at lg. ── */}
-      <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-white dark:bg-background border-b border-gray-100 dark:border-border h-14 flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 inset-x-0 z-50 bg-white dark:bg-background border-b border-gray-100 dark:border-border h-14 flex items-center justify-between px-4">
         <Link href="/" className="select-none">
           <span className="text-xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
             Vendoor<span className="text-primary">X</span>
