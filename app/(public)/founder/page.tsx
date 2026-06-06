@@ -156,33 +156,33 @@ export default function FounderPage() {
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden bg-card border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
 
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-8">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-6 sm:mb-8">
             <Building2 className="w-3 h-3" />
             The Founder
           </span>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-foreground leading-[0.93] tracking-tighter mb-6 text-balance">
-            VendoorX was built by a<br />
-            <span className="text-primary">Nigerian builder</span><br />
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black text-foreground leading-tight tracking-tighter mb-5 sm:mb-6 text-balance">
+            VendoorX was built by a{' '}
+            <span className="text-primary">Nigerian builder</span>{' '}
             who ships.
           </h1>
 
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mb-10">
+          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-2xl mb-8 sm:mb-10">
             Not a business school project. Not a VC-funded concept. VendoorX is a working product, architected and shipped end-to-end by one engineer who saw a real problem on Nigerian campuses and built the solution.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col xs:flex-row gap-3">
             <Link
               href="/marketplace"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
             >
               Browse the Marketplace <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/press"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-border hover:border-primary/60 text-foreground font-semibold text-sm transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl border border-border hover:border-primary/60 text-foreground font-semibold text-sm transition-all"
             >
               Press &amp; Media
             </Link>
@@ -193,23 +193,31 @@ export default function FounderPage() {
       {/* ── STATS STRIP ── */}
       <section className="border-b border-border bg-card">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-border">
+          <div className="grid grid-cols-2 lg:grid-cols-4">
             {[
-              { value: '50K+',   label: 'Active Vendors' },
-              { value: '120+',   label: 'Universities' },
-              { value: '₦2B+',   label: 'Transactions' },
-              { value: '1',      label: 'Founding Engineer' },
+              { value: '50K+', label: 'Active Vendors' },
+              { value: '120+', label: 'Universities' },
+              { value: '₦2B+', label: 'Transactions' },
+              { value: '1',    label: 'Founding Engineer' },
             ].map(({ value, label }, i) => (
-              <div key={label} className="flex flex-col items-center justify-center gap-1 py-10 px-4 text-center">
-                <p className="text-4xl sm:text-5xl font-black text-primary leading-none">{value}</p>
-                <p className="text-sm font-bold text-foreground mt-1">{label}</p>
+              <div
+                key={label}
+                className={`flex flex-col items-center justify-center gap-1 py-8 sm:py-10 px-4 text-center border-border
+                  ${i % 2 === 0 ? 'border-r' : ''}
+                  ${i < 2 ? 'border-b lg:border-b-0' : ''}
+                  ${i === 1 ? 'lg:border-r' : ''}
+                  ${i === 2 ? 'lg:border-r' : ''}
+                `}
+              >
+                <p className="text-3xl sm:text-5xl font-black text-primary leading-none">{value}</p>
+                <p className="text-xs sm:text-sm font-bold text-foreground mt-1">{label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 flex flex-col gap-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16 flex flex-col gap-14 sm:gap-20">
 
         {/* ── FOUNDER QUOTE ── */}
         <section className="rounded-3xl border border-border bg-card p-7 sm:p-10 relative overflow-hidden">
@@ -313,30 +321,25 @@ export default function FounderPage() {
             </h2>
           </div>
 
-          <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-[39px] top-0 bottom-0 w-px bg-border hidden sm:block" aria-hidden="true" />
-
-            <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
               {TIMELINE.map(({ year, heading, body }) => (
-                <div key={year} className="flex gap-5 sm:gap-7">
+                <div key={year} className="flex gap-4 sm:gap-6">
                   {/* Year badge */}
-                  <div className="relative shrink-0 w-20 flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white text-xs font-black shadow-md shadow-primary/30 z-10">
-                      <Award className="w-4 h-4" />
+                  <div className="shrink-0 flex flex-col items-center gap-1.5 pt-0.5">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-md shadow-primary/30">
+                      <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </div>
-                    <span className="text-xs font-black text-primary mt-1.5">{year}</span>
+                    <span className="text-[10px] sm:text-xs font-black text-primary">{year}</span>
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 pb-2">
-                    <h3 className="text-base font-black text-foreground mb-1">{heading}</h3>
+                  <div className="flex-1 border-l border-border pl-4 sm:pl-6 pb-2">
+                    <h3 className="text-sm sm:text-base font-black text-foreground mb-1">{heading}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
         </section>
 
         {/* ── QUICK FACTS ── */}
@@ -370,19 +373,19 @@ export default function FounderPage() {
         </section>
 
         {/* ── CTA ── */}
-        <section className="rounded-3xl border border-primary/20 bg-primary/5 p-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 sm:p-10 flex flex-col gap-6">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-foreground leading-tight mb-2">
+            <h2 className="text-xl sm:text-3xl font-black text-foreground leading-tight mb-2">
               Want to reach the founder?
             </h2>
             <p className="text-sm text-muted-foreground max-w-sm">
               For press, partnerships, engineering collaborations, or investor enquiries — reach out directly.
             </p>
           </div>
-          <div className="flex flex-col sm:items-end gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row gap-3">
             <a
               href="mailto:press@vendoorx.ng"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
             >
               <Mail className="w-4 h-4" />
               press@vendoorx.ng
