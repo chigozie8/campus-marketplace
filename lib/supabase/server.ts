@@ -7,10 +7,10 @@ import { cookies } from 'next/headers'
  * it.
  */
 export async function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!url || !key) {
+  if (!key) {
     return null
   }
 
