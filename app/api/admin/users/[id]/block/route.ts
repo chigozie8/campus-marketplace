@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
-
-const adminClient = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createServiceClient } from '@/lib/supabase/service'
 
 async function assertAdmin(req: NextRequest) {
+  const adminClient = createServiceClient()
+  if (!adminClient) return null
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data: role } = await adminClient
-    .from('admin_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single()
+  const { data: role } = await adminClient.from('admin_roles').select('role').eq('user_id', user.id).single()
   return role ? user : null
 }
 
@@ -24,21 +17,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: targetUserId } = await params
   const admin = await assertAdmin(req)
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
   const { action, reason } = await req.json()
-
   if (action === 'block') {
-    const { error } = await adminClient
-      .from('profiles')
-      .update({
-        is_blocked: true,
-        blocked_at: new Date().toISOString(),
-        blocked_reason: typeof reason === 'string' ? reason : null,
-      })
-      .eq('id', targetUserId)
+    const { error } = await adminClient.from('profiles').update({
+      is_blocked: true,
+      blocked_at: new Date().toISOString(),
+      blocked_reason: typeof reason === 'string' ? reason : null,
+    }).eq('id', targetUserId)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-    // Notify the blocked user so they understand why actions fail
     await adminClient.from('notifications').insert({
       user_id: targetUserId,
       title: 'Account restricted',
@@ -46,21 +34,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       type: 'info',
       data: { url: '/help' },
     })
-
     return NextResponse.json({ blocked: true })
   }
-
   if (action === 'unblock') {
-    const { error } = await adminClient
-      .from('profiles')
-      .update({
-        is_blocked: false,
-        blocked_at: null,
-        blocked_reason: null,
-      })
-      .eq('id', targetUserId)
+    const { error } = await adminClient.from('profiles').update({
+      is_blocked: false,
+      blocked_at: null,
+      blocked_reason: null,
+    }).eq('id', targetUserId)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
     await adminClient.from('notifications').insert({
       user_id: targetUserId,
       title: 'Account restored',
@@ -68,9 +50,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       type: 'info',
       data: { url: '/dashboard' },
     })
-
     return NextResponse.json({ blocked: false })
   }
-
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }

@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
-
-const adminClient = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createServiceClient } from '@/lib/supabase/service'
 
 async function getAdminUser() {
+  const adminClient = createServiceClient()
+  if (!adminClient) return null
   const supabase = await createClient()
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
@@ -18,13 +15,10 @@ async function getAdminUser() {
 
 async function releaseSellerEarnings(sellerId: string, orderId: string) {
   const PLATFORM_FEE = 100
+  const adminClient = createServiceClient()
+  if (!adminClient) return
 
-  const { data: wallet } = await adminClient
-    .from('wallets')
-    .select('*')
-    .eq('user_id', sellerId)
-    .single()
-
+  const { data: wallet } = await adminClient.from('wallets').select('*').eq('user_id', sellerId).single()
   if (!wallet) return
 
   const { data: txn } = await adminClient
@@ -35,38 +29,31 @@ async function releaseSellerEarnings(sellerId: string, orderId: string) {
     .eq('type', 'pending')
     .eq('status', 'pending')
     .single()
-
   if (!txn) return
 
   const now = new Date().toISOString()
-
-  await adminClient
-    .from('wallets')
-    .update({
-      available: wallet.available + txn.amount,
-      pending: Math.max(0, wallet.pending - txn.amount),
-      updated_at: now,
-    })
-    .eq('id', wallet.id)
-
-  await adminClient
-    .from('wallet_transactions')
-    .update({ status: 'completed' })
-    .eq('id', txn.id)
-
+  await adminClient.from('wallets').update({
+    available: wallet.available + txn.amount,
+    pending: Math.max(0, wallet.pending - txn.amount),
+    updated_at: now,
+  }).eq('id', wallet.id)
+  await adminClient.from('wallet_transactions').update({ status: 'completed' }).eq('id', txn.id)
   await adminClient.from('wallet_transactions').insert({
     wallet_id: wallet.id,
     order_id: orderId,
     type: 'release',
     amount: txn.amount,
     status: 'completed',
-    description: `Earnings released by admin — order completed (₦${PLATFORM_FEE} VAT already deducted)`,
+    description: `Earnings released by admin — order completed (\u20a6${PLATFORM_FEE} VAT already deducted)`,
   })
 }
 
 export async function PATCH(req: NextRequest) {
   const admin = await getAdminUser()
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   const { order_id, status, payment_status } = await req.json()
   if (!order_id) return NextResponse.json({ error: 'order_id required' }, { status: 400 })
@@ -102,6 +89,9 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const admin = await getAdminUser()
   if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   const { order_id } = await req.json()
   if (!order_id) return NextResponse.json({ error: 'order_id required' }, { status: 400 })

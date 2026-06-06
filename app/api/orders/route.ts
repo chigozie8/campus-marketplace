@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendNotification } from '@/lib/send-notification'
 import { sendOrderPlacedEmail } from '@/lib/email'
 

@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
-
-const adminClient = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createServiceClient } from '@/lib/supabase/service'
 
 export async function GET() {
   const supabase = await createClient()
@@ -13,6 +8,9 @@ export async function GET() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ isAdmin: false })
+
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ isAdmin: false })
 
   const { data } = await adminClient
     .from('admin_roles')

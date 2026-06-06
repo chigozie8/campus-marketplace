@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001'
 

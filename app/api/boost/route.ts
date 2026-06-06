@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 function adminClient() {
   return createAdminClient(
@@ -149,6 +149,9 @@ export async function POST(req: Request) {
       const expiresIso = boostExpires.toISOString()
 
       if (meta?.boost_type === 'store' || boostType === 'store') {
+        const adminClient = createServiceClient()
+        if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
         const admin = adminClient()
 
         await admin.auth.admin.updateUserById(user.id, {

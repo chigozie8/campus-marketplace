@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
     const { postId } = await req.json()
     if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
 
+    const adminClient = createServiceClient()
+    if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
     await adminClient().rpc('increment_blog_views', { post_id: postId })
     return NextResponse.json({ ok: true })
   } catch {

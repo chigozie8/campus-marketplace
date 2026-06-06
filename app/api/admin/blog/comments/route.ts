@@ -23,6 +23,9 @@ export async function GET() {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const { data, error } = await adminClient()
     .from('blog_comments')
     .select(`*, blog_posts(title, slug), profiles(full_name)`)

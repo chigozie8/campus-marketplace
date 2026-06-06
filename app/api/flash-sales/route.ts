@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 function db() {
   return createAdmin(

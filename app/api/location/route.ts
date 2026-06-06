@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
-
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
-
-async function ensureTable() {
-  // vendor_locations: one row per vendor, upserted on each update
-  await adminDb.from('vendor_locations').select('vendor_id').limit(1).catch(() => null)
-}
+import { createServiceClient } from '@/lib/supabase/service'
 
 // POST /api/location  — vendor updates their location
 export async function POST(req: NextRequest) {
@@ -19,6 +9,9 @@ export async function POST(req: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const adminDb = createServiceClient()
+  if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   const { lat, lng, accuracy, heading } = await req.json()
 
@@ -78,6 +71,9 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const adminDb = createServiceClient()
+  if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const { data: role } = await adminDb
     .from('admin_roles')
     .select('role')
@@ -114,6 +110,9 @@ export async function PATCH() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const adminDb = createServiceClient()
+  if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   await adminDb
     .from('vendor_locations')

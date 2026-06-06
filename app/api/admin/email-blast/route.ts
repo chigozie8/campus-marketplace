@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // ─── Mailtrap helpers (mirrors lib/email.ts approach) ─────────────────────────
 

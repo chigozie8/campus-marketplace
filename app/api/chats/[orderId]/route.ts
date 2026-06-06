@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendNotification } from '@/lib/send-notification'
-
-const adminDb = createAdmin(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
 
 /** Verify caller is buyer or seller of this order */
 async function getOrderParties(orderId: string, userId: string) {
+  const adminDb = createServiceClient()
+  if (!adminDb) return null
   const { data: order } = await adminDb
     .from('orders')
     .select('buyer_id, seller_id')
@@ -34,6 +31,9 @@ export async function GET(
 
   const order = await getOrderParties(orderId, user.id)
   if (!order) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const adminDb = createServiceClient()
+  if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
   const { data: messages } = await adminDb
     .from('order_chats')
@@ -68,6 +68,9 @@ export async function POST(
   const order = await getOrderParties(orderId, user.id)
   if (!order) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
+  const adminDb = createServiceClient()
+  if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const { message } = await req.json()
   if (!message?.trim()) return NextResponse.json({ error: 'Message is required' }, { status: 400 })
 
@@ -101,7 +104,7 @@ export async function POST(
     userId: receiverId,
     type: 'new_chat_message',
     title: `New message from ${senderName}`,
-    body: message.trim().slice(0, 80) + (message.trim().length > 80 ? '…' : ''),
+    body: message.trim().slice(0, 80) + (message.trim().length > 80 ? '...' : ''),
     data: { url: chatUrl, orderId, senderId: user.id },
   })
 
