@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
 import { Download, Smartphone, Share, X } from 'lucide-react'
 import { isNative } from '@/lib/capacitor'
 
@@ -12,8 +13,11 @@ interface BeforeInstallPromptEvent extends Event {
 type Platform = 'android' | 'ios' | 'other'
 
 // Public export — suppresses the prompt inside the Capacitor native shell
+// and on all /dashboard routes to avoid obstructing the dashboard navbar.
 export function PwaInstallPrompt() {
+  const pathname = usePathname()
   if (isNative()) return null
+  if (pathname?.startsWith('/dashboard')) return null
   return <PwaInstallPromptCore />
 }
 

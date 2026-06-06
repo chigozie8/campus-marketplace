@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import Image from 'next/image'
+import Script from 'next/script'
 import {
   ArrowRight, Download, Mail, FileText, Phone,
   Smartphone, Sparkles, Award, Twitter, Linkedin,
@@ -10,17 +11,28 @@ import {
 import { getSiteSettings } from '@/lib/site-settings'
 import { parsePressAssets, parseCoFounders } from '@/lib/site-settings-defaults'
 import { CountUp } from '@/components/ui/count-up'
+import { SITE_URL } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = buildMetadata({
-  title: 'Newsroom | VendoorX',
+  title: 'Kenneth Okoronkwo — Founder & Senior Software Engineer | VendoorX',
   description:
-    'VendoorX brand assets, company story, founder details, and media contact information — everything journalists and partners need in one place.',
+    'Kenneth Okoronkwo is the founder, CEO, and senior software engineer behind VendoorX — Nigeria\'s #1 campus marketplace. Learn about Kenneth\'s background, vision, and the story of VendoorX.',
   path: '/press',
   keywords: [
-    'vendoorx press', 'vendoorx newsroom', 'vendoorx media kit',
-    'nigeria whatsapp commerce news', 'vendoorx brand assets',
+    'Kenneth Okoronkwo',
+    'Kenneth Okoronkwo founder',
+    'Kenneth Okoronkwo VendoorX',
+    'Kenneth Okoronkwo software engineer',
+    'Kenneth Okoronkwo Nigeria',
+    'VendoorX founder',
+    'VendoorX CEO',
+    'vendoorx press',
+    'vendoorx newsroom',
+    'nigeria whatsapp commerce',
+    'campus marketplace Nigeria founder',
+    'Nigerian software engineer entrepreneur',
   ],
 })
 
@@ -28,6 +40,37 @@ export default async function PressPage() {
   const settings = await getSiteSettings()
   const assets   = parsePressAssets(settings.press_assets)
   const cofounders = parseCoFounders(settings.press_cofounders)
+
+  // JSON-LD: Person schema for Kenneth Okoronkwo
+  const founderJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${SITE_URL}/press#kenneth-okoronkwo`,
+    name: 'Kenneth Okoronkwo',
+    jobTitle: 'Founder, CEO & Senior Software Engineer',
+    description: 'Kenneth Okoronkwo is the founder, CEO, and senior software engineer of VendoorX — Nigeria\'s #1 campus marketplace. He built the platform from the ground up, combining deep full-stack engineering with a vision to bring professional commerce infrastructure to Nigerian university students.',
+    worksFor: {
+      '@type': 'Organization',
+      name: 'VendoorX',
+      url: SITE_URL,
+    },
+    url: `${SITE_URL}/press`,
+    alumniOf: {
+      '@type': 'Organization',
+      name: 'VendoorX Technologies Ltd',
+    },
+    knowsAbout: [
+      'Full-Stack Software Engineering',
+      'Next.js',
+      'TypeScript',
+      'Product Architecture',
+      'WhatsApp Commerce',
+      'E-commerce Platforms',
+      'Nigerian Tech Ecosystem',
+      'Campus Marketplaces',
+    ],
+    nationality: 'Nigerian',
+  }
 
   const STATS = [
     { value: settings.stat_active_vendors,  label: 'Active Vendors',  sub: settings.stat_active_vendors_sub },
@@ -60,6 +103,14 @@ export default async function PressPage() {
   return (
     <div className="bg-background min-h-screen">
 
+      {/* Person structured data for Kenneth Okoronkwo */}
+      <Script
+        id="founder-jsonld"
+        type="application/ld+json"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(founderJsonLd) }}
+      />
+
       {/* ── HERO BANNER ── */}
       <section className="relative overflow-hidden bg-card border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
@@ -68,13 +119,13 @@ export default async function PressPage() {
             <div className="flex-1">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-6">
                 <FileText className="w-3 h-3" />
-                Media &amp; Press
+                Founder &amp; Newsroom
               </span>
               <h1 className="text-5xl sm:text-6xl lg:text-8xl font-black text-foreground leading-[0.92] tracking-tighter mb-5">
-                News<span className="text-primary">room</span>
+                Kenneth<br /><span className="text-primary">Okoronkwo</span>
               </h1>
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-lg">
-                Writing about VendoorX? We&apos;ve got everything you need — brand assets, key statistics, company background, founder details, and media contact.
+                Founder, CEO &amp; Senior Software Engineer at VendoorX — Nigeria&apos;s #1 campus marketplace. Writing about engineering, product, and African tech.
               </p>
             </div>
 
@@ -177,8 +228,11 @@ export default async function PressPage() {
           <div className="mb-8">
             <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Leadership</p>
             <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
-              {allFounders.length > 1 ? 'Founders & Leadership' : 'Founder & Leadership'}
+              Kenneth Okoronkwo — Founder &amp; Senior Software Engineer
             </h2>
+            <p className="text-muted-foreground text-sm mt-2 max-w-2xl">
+              Kenneth Okoronkwo is the technical and strategic founder of VendoorX. As a senior software engineer, he architected and built the entire platform — from the marketplace and seller dashboard to the WhatsApp commerce engine and payment infrastructure.
+            </p>
           </div>
 
           <div className="flex flex-col gap-6">
