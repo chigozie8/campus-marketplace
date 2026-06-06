@@ -32,7 +32,7 @@ const LINKS = {
     { label: 'Community',        href: '/community',    icon: Users },
     { label: 'Blog & Updates',   href: '/blog',         icon: BookOpen },
     { label: 'Careers',          href: '/careers',      icon: Users },
-    { label: 'Founder',          href: '/press',        icon: TrendingUp },
+    { label: 'Founder',          href: '/founder',      icon: TrendingUp },
   ],
   Legal: [
     { label: 'Privacy Policy',      href: '/privacy',   icon: ShieldCheck },
