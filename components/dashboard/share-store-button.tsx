@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Loader2, Image as ImageIcon, Share2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -21,7 +20,7 @@ export function ShareStoreButton({ userId, storeName, storeUrl }: Props) {
   const [loading, setLoading] = useState(false)
 
   async function handleShare() {
-    toast.info('Coming soon...')
+    // Share functionality coming soon
   }
 
   return (
