@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#ffffff;">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="robots" content="noindex" />
+  <title>VendoorX — Campus Marketplace</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root { color-scheme: light only; }
+
+    html, body {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: 3px;
+      background: linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
+      flex-shrink: 0;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      padding: 14px 24px;
+      background: #ffffff;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .wordmark {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: #0f172a;
+      text-decoration: none;
+      line-height: 1;
+    }
+    .wordmark em { color: #16a34a; font-style: normal; }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Skeleton nav pills */
+    .nav-pill {
+      height: 32px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    /* ── Offline banner ── */
+    .offline-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      background: #fefce8;
+      border-bottom: 1px solid #fde68a;
+      font-size: 0.82rem;
+      color: #92400e;
+      font-weight: 500;
+    }
+
+    .offline-banner svg {
+      flex-shrink: 0;
+      color: #d97706;
+    }
+
+    .offline-banner span { line-height: 1.4; }
+
+    .banner-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #d97706;
+      flex-shrink: 0;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Page content wrapper ── */
+    .content {
+      flex: 1;
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Section header skeleton ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .skeleton-title {
+      height: 24px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    .skeleton-badge {
+      height: 22px;
+      width: 56px;
+      border-radius: 99px;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    /* ── Filter bar skeleton ── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .filter-chip {
+      height: 34px;
+      border-radius: 99px;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    /* ── Product grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+    }
+
+    /* ── Product card skeleton ── */
+    .card {
+      border-radius: 14px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .card-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    .card-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-line {
+      height: 13px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    .card-line.short  { width: 60%; }
+    .card-line.medium { width: 80%; }
+    .card-line.price  { width: 40%; height: 16px; background: #dcfce7; animation: shimmer 1.5s ease-in-out infinite; }
+
+    /* ── Stagger animation delays for cards ── */
+    .card:nth-child(1)  { animation-delay: 0ms; }
+    .card:nth-child(2)  { animation-delay: 60ms; }
+    .card:nth-child(3)  { animation-delay: 120ms; }
+    .card:nth-child(4)  { animation-delay: 180ms; }
+    .card:nth-child(5)  { animation-delay: 240ms; }
+    .card:nth-child(6)  { animation-delay: 300ms; }
+    .card:nth-child(7)  { animation-delay: 360ms; }
+    .card:nth-child(8)  { animation-delay: 420ms; }
+    .card:nth-child(9)  { animation-delay: 480ms; }
+    .card:nth-child(10) { animation-delay: 540ms; }
+    .card:nth-child(11) { animation-delay: 600ms; }
+    .card:nth-child(12) { animation-delay: 660ms; }
+
+    /* ── Shimmer keyframe ── */
+    @keyframes shimmer {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.55; }
+      100% { opacity: 1; }
+    }
+
+    /* ── Reconnecting notice (replaces banner when online) ── */
+    .reconnecting {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      background: #f0fdf4;
+      border-bottom: 1px solid #bbf7d0;
+      font-size: 0.82rem;
+      color: #15803d;
+      font-weight: 600;
+    }
+    .reconnecting.show { display: flex; }
+  </style>
+</head>
+<body>
+  <div class="topbar"></div>
+
+  <nav class="nav">
+    <a href="/" class="wordmark">Vendoor<em>X</em></a>
+    <div class="nav-actions">
+      <div class="nav-pill" style="width:68px;"></div>
+      <div class="nav-pill" style="width:36px;border-radius:50%;"></div>
+    </div>
+  </nav>
+
+  <!-- Offline banner — non-blocking, top of content -->
+  <div class="offline-banner" id="offlineBanner">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"/>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+      <line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>
+    <span class="banner-dot"></span>
+    <span>You&apos;re offline &mdash; showing available cached content. The page will reload automatically when connection returns.</span>
+  </div>
+
+  <div class="reconnecting" id="reconnecting">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Connected &mdash; reloading&hellip;
+  </div>
+
+  <main class="content">
+    <!-- Section header skeleton -->
+    <div class="section-header">
+      <div class="skeleton-title" style="width:160px;"></div>
+      <div class="skeleton-badge"></div>
+    </div>
+
+    <!-- Filter chips skeleton -->
+    <div class="filter-bar">
+      <div class="filter-chip" style="width:72px;"></div>
+      <div class="filter-chip" style="width:88px;"></div>
+      <div class="filter-chip" style="width:64px;"></div>
+      <div class="filter-chip" style="width:80px;"></div>
+      <div class="filter-chip" style="width:72px;"></div>
+    </div>
+
+    <!-- Product grid skeleton (12 cards) -->
+    <div class="grid" id="grid">
+    </div>
+
+    <!-- Second section -->
+    <div class="section-header" style="margin-top:8px;">
+      <div class="skeleton-title" style="width:120px;"></div>
+      <div class="skeleton-badge"></div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-chip" style="width:64px;"></div>
+      <div class="filter-chip" style="width:96px;"></div>
+      <div class="filter-chip" style="width:72px;"></div>
+    </div>
+    <div class="grid" id="grid2">
+    </div>
+  </main>
+
+  <script>
+    // Populate skeleton cards
+    function makeCard() {
+      return '<div class="card">' +
+        '<div class="card-img"></div>' +
+        '<div class="card-body">' +
+          '<div class="card-line medium"></div>' +
+          '<div class="card-line short"></div>' +
+          '<div class="card-line price"></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    var html = '';
+    for (var i = 0; i < 12; i++) html += makeCard();
+    document.getElementById('grid').innerHTML = html;
+
+    var html2 = '';
+    for (var j = 0; j < 8; j++) html2 += makeCard();
+    document.getElementById('grid2').innerHTML = html2;
+
+    // Auto-reload when the connection returns
+    window.addEventListener('online', function () {
+      document.getElementById('offlineBanner').style.display = 'none';
+      document.getElementById('reconnecting').classList.add('show');
+      setTimeout(function () { window.location.reload(); }, 1000);
+    });
+
+    // If we somehow got here while online, go back
+    if (navigator.onLine) {
+      setTimeout(function () { window.location.reload(); }, 300);
+    }
+  </script>
+</body>
+</html>
