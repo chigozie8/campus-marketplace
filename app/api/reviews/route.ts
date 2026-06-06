@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { checkAndNotifySellerMilestones } from '@/lib/trust-milestones'
 
 function adminClient() {
@@ -62,6 +62,9 @@ export async function POST(req: Request) {
     if (user.id === sellerId) {
       return NextResponse.json({ error: "You can't review your own listing" }, { status: 400 })
     }
+
+    const adminClient = createServiceClient()
+    if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
     const admin = adminClient()
 

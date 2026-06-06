@@ -20,6 +20,9 @@ export async function POST(req: NextRequest) {
   const { postId } = await req.json()
   if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
 
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const admin = adminClient()
   const { data: existing } = await admin
     .from('blog_likes')

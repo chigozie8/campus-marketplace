@@ -45,7 +45,7 @@ export function createClient(): SupabaseClient {
     // SSR path — shouldn't normally be reached (use lib/supabase/server.ts for
     // server components), but create an ephemeral client just in case.
     return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
   }
@@ -53,7 +53,7 @@ export function createClient(): SupabaseClient {
   const win = window as typeof window & { [WIN_KEY]?: SupabaseClient }
   if (!win[WIN_KEY]) {
     win[WIN_KEY] = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co',
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
@@ -33,6 +33,9 @@ export async function POST(req: Request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalised)) {
       return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
     }
+
+    const adminDb = createServiceClient()
+    if (!adminDb) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
 
     const supabase = adminDb()
 

@@ -25,6 +25,15 @@ export function ServiceWorkerRegistration() {
       .catch(() => {
         // SW registration failed silently — app works fine without it
       })
+
+    // When a new SW takes control (after SKIP_WAITING), reload so the page
+    // uses the freshest assets and page cache from the updated service worker.
+    let refreshing = false
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return
+      refreshing = true
+      window.location.reload()
+    })
   }, [])
 
   return null

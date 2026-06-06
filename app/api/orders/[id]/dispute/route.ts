@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 function adminClient() {
   return createAdmin(
@@ -21,6 +21,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   // Authz: only the buyer, seller, or an admin may read this dispute.
   // Without this check, any logged-in user could read disputes by guessing
   // an order id (the route uses service-role for the underlying read).
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const { data: order, error: orderErr } = await adminClient()
     .from('orders')
     .select('buyer_id, seller_id')

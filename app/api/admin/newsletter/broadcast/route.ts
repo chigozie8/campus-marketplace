@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendNewsletterBroadcastEmail } from '@/lib/email'
 
 function adminClient() {
@@ -16,6 +16,9 @@ async function requireAdmin() {
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const { data } = await adminClient()
     .from('admin_roles').select('role').eq('user_id', user.id).single()
   return data ? user : null

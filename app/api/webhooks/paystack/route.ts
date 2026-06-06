@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac } from 'crypto'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 import { markOrderPaidAndNotify } from '@/lib/order-payment'
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!

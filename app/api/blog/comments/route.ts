@@ -56,6 +56,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Name is required for guest comments' }, { status: 400 })
   }
 
+  const adminClient = createServiceClient()
+  if (!adminClient) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
   const admin = adminClient()
   const { data, error } = await admin.from('blog_comments').insert({
     post_id: postId,

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdmin } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 function svcClient() {
   return createAdmin(
