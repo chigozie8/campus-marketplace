@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Script from 'next/script'
 import {
-  ArrowRight, Code2, Layers, Cpu, Globe, Zap,
+  ArrowRight, Code2, Layers, Cpu, Globe,
   Award, Building2, Mail, Quote, ShieldCheck,
 } from 'lucide-react'
 import { buildMetadata, SITE_URL } from '@/lib/seo'
@@ -165,8 +165,8 @@ export default function FounderPage() {
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-foreground leading-[0.93] tracking-tighter mb-6 text-balance">
             VendoorX was built by a<br />
-            <span className="text-primary">senior software engineer</span><br />
-            in Nigeria.
+            <span className="text-primary">Nigerian builder</span><br />
+            who ships.
           </h1>
 
           <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl mb-10">
@@ -255,32 +255,51 @@ export default function FounderPage() {
           </div>
         </section>
 
-        {/* ── TECH STACK ── */}
+        {/* ── WHAT WE STAND FOR ── */}
         <section>
           <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Stack</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Values</p>
             <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
-              Built with modern tooling
+              What we stand for
             </h2>
             <p className="text-muted-foreground text-sm mt-3 max-w-xl">
-              Every layer of VendoorX was chosen deliberately by an engineer who owns the full stack — from database to deployment.
+              VendoorX was built on a handful of convictions that still drive every decision we make.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              'Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4',
-              'Supabase', 'PostgreSQL', 'Paystack', 'WhatsApp API',
-              'Capacitor', 'Upstash Redis', 'BullMQ', 'Vercel',
-              'shadcn/ui', 'Framer Motion', 'Sentry', 'Firebase FCM',
-            ].map(tech => (
-              <span
-                key={tech}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border bg-card text-sm font-bold text-foreground hover:border-primary/40 hover:text-primary transition-all"
+              {
+                number: '01',
+                title: 'Campus students deserve real tools',
+                body: 'Selling through group chats is chaotic and unprofessional. Every student vendor deserves a proper storefront, payment flow, and order management — not just a pinned post.',
+              },
+              {
+                number: '02',
+                title: 'Africa does not need to wait for Silicon Valley',
+                body: 'World-class commerce infrastructure can be built in Nigeria, for Nigeria. We do not need permission or foreign investment to ship something excellent.',
+              },
+              {
+                number: '03',
+                title: 'Simplicity beats feature bloat',
+                body: 'Every feature on VendoorX exists because a real vendor needed it. We cut anything that adds complexity without adding genuine value to the student on the other end.',
+              },
+              {
+                number: '04',
+                title: 'Trust is the product',
+                body: 'Escrow payments, verified vendors, dispute resolution — none of this is optional. On a platform where buyer and seller often never meet in person, trust is the entire product.',
+              },
+            ].map(({ number, title, body }) => (
+              <div
+                key={number}
+                className="flex flex-col gap-3 p-6 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all"
               >
-                <Zap className="w-3 h-3 text-primary" />
-                {tech}
-              </span>
+                <span className="text-3xl font-black text-primary/20 leading-none">{number}</span>
+                <div>
+                  <h3 className="text-base font-black text-foreground mb-1">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
