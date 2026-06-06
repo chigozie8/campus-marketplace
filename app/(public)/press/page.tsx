@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Script from 'next/script'
 import {
   ArrowRight, Download, Mail, FileText, Phone,
-  Smartphone, Sparkles, Award, Twitter, Linkedin,
+  Smartphone, Award, Twitter, Linkedin,
   ExternalLink, Quote, Building2, Zap, Globe,
 } from 'lucide-react'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -228,11 +228,8 @@ export default async function PressPage() {
           <div className="mb-8">
             <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Leadership</p>
             <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
-              Kenneth Okoronkwo — Founder &amp; Senior Software Engineer
+              Founder &amp; Leadership
             </h2>
-            <p className="text-muted-foreground text-sm mt-2 max-w-2xl">
-              Kenneth Okoronkwo is the technical and strategic founder of VendoorX. As a senior software engineer, he architected and built the entire platform — from the marketplace and seller dashboard to the WhatsApp commerce engine and payment infrastructure.
-            </p>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -241,83 +238,48 @@ export default async function PressPage() {
                 key={idx}
                 className="group relative rounded-3xl border border-border bg-card overflow-hidden hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all"
               >
-                {/* Top accent line on hover */}
                 <div className="absolute inset-x-0 top-0 h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
 
                 <div className="flex flex-col sm:flex-row">
 
-                  {/* Left column — avatar, name, socials */}
-                  <div className="flex sm:flex-col items-center sm:items-center gap-5 sm:gap-5 p-6 sm:p-8 sm:w-56 lg:w-64 sm:border-b-0 border-b sm:border-r border-border shrink-0 bg-muted/20">
-
-                    {/* Avatar */}
+                  {/* Left — avatar, name, socials */}
+                  <div className="flex sm:flex-col items-center gap-5 p-6 sm:p-8 sm:w-56 lg:w-64 border-b sm:border-b-0 sm:border-r border-border shrink-0 bg-muted/20">
                     <div className="relative shrink-0">
-                      <div className="w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-2xl overflow-hidden ring-2 ring-border shadow-lg">
+                      <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden ring-2 ring-border shadow-lg">
                         {founder.photo ? (
-                          <Image
-                            src={founder.photo}
-                            alt={founder.name}
-                            width={128}
-                            height={128}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
+                          <Image src={founder.photo} alt={founder.name} width={112} height={112} className="w-full h-full object-cover" unoptimized />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-primary text-white text-2xl sm:text-3xl font-black">
                             {founder.initials || founder.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
                         )}
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center shadow ring-2 ring-card">
-                        <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
+                      <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow ring-2 ring-card">
+                        <Award className="w-3 h-3 text-white" />
                       </div>
                     </div>
 
-                    {/* Name / title */}
                     <div className="sm:text-center min-w-0">
                       <h3 className="text-base sm:text-lg font-black text-foreground leading-tight">{founder.name}</h3>
                       <p className="text-xs sm:text-sm font-bold text-primary mt-0.5">{founder.title}</p>
-
-                      {/* Socials — shown inline on mobile, stacked on sm+ */}
                       {(founder.linkedinUrl || founder.twitterUrl) && (
                         <div className="flex gap-2 mt-3 sm:justify-center">
                           {founder.linkedinUrl && (
-                            <a
-                              href={founder.linkedinUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`${founder.name} on LinkedIn`}
-                              className="w-8 h-8 rounded-lg border border-border hover:border-primary/40 bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                            >
+                            <a href={founder.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={`${founder.name} on LinkedIn`} className="w-8 h-8 rounded-lg border border-border hover:border-primary/40 bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-all">
                               <Linkedin className="w-3.5 h-3.5" />
                             </a>
                           )}
                           {founder.twitterUrl && (
-                            <a
-                              href={founder.twitterUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`${founder.name} on X / Twitter`}
-                              className="w-8 h-8 rounded-lg border border-border hover:border-primary/40 bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                            >
+                            <a href={founder.twitterUrl} target="_blank" rel="noopener noreferrer" aria-label={`${founder.name} on X / Twitter`} className="w-8 h-8 rounded-lg border border-border hover:border-primary/40 bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-all">
                               <Twitter className="w-3.5 h-3.5" />
                             </a>
                           )}
                         </div>
                       )}
                     </div>
-
-                    {/* Interview CTA — hidden on mobile row, shown on sm+ */}
-                    <Link
-                      href={`/contact?subject=Press+Enquiry+-+Interview+with+${encodeURIComponent(founder.name)}`}
-                      className="hidden sm:flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs transition-all shadow-md shadow-primary/20"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Request Interview
-                    </Link>
-
                   </div>
 
-                  {/* Right column — quote + bio */}
+                  {/* Right — quote + bio */}
                   <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 min-w-0">
                     {founder.quote && (
                       <div className="mb-5 pl-4 border-l-4 border-primary">
@@ -325,12 +287,9 @@ export default async function PressPage() {
                         <p className="text-base sm:text-lg font-bold text-foreground leading-relaxed italic">
                           &ldquo;{founder.quote}&rdquo;
                         </p>
-                        <p className="text-primary text-xs font-bold mt-2">
-                          — {founder.name}, {founder.title}
-                        </p>
+                        <p className="text-primary text-xs font-bold mt-2">— {founder.name}, {founder.title}</p>
                       </div>
                     )}
-
                     {founder.bio && (
                       <div className="space-y-2.5">
                         {founder.bio.split('\n\n').filter(Boolean).map((para, i) => (
@@ -338,15 +297,6 @@ export default async function PressPage() {
                         ))}
                       </div>
                     )}
-
-                    {/* Mobile-only interview CTA */}
-                    <Link
-                      href={`/contact?subject=Press+Enquiry+-+Interview+with+${encodeURIComponent(founder.name)}`}
-                      className="sm:hidden mt-5 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs transition-all"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Request Interview
-                    </Link>
                   </div>
 
                 </div>
