@@ -86,9 +86,10 @@ function formatPrice(price: number) {
 
 interface PricingSectionProps {
   plans?: Plan[]
+  isAuthenticated?: boolean
 }
 
-export function PricingSection({ plans: initialPlans }: PricingSectionProps = {}) {
+export function PricingSection({ plans: initialPlans, isAuthenticated = false }: PricingSectionProps = {}) {
   const [annual, setAnnual] = useState(false)
   const [plans] = useState<Plan[]>(initialPlans?.length ? initialPlans : FALLBACK_PLANS)
 
@@ -143,6 +144,8 @@ export function PricingSection({ plans: initialPlans }: PricingSectionProps = {}
           {plans.map((plan) => {
               const Icon = getPlanIcon(plan.id)
               const price = annual ? plan.annual_price : plan.monthly_price
+              // Authenticated users go to dashboard; guests go to sign-up
+              const ctaHref = isAuthenticated ? '/dashboard' : (plan.cta_href || '/auth/sign-up')
 
               return (
                 <div
@@ -212,7 +215,7 @@ export function PricingSection({ plans: initialPlans }: PricingSectionProps = {}
                       )}
                       asChild
                     >
-                      <Link href={plan.cta_href}>
+                      <Link href={ctaHref}>
                         {plan.cta_text}
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>

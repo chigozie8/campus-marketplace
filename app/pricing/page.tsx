@@ -38,7 +38,7 @@ export default async function PricingPage() {
     <main className="min-h-screen bg-background">
       <LandingNav user={user} />
       <div className="pt-24">
-        <PricingSection plans={plans} />
+        <PricingSection plans={plans} isAuthenticated={!!user} />
         <FaqSection />
       </div>
       <LandingFooterServer settings={settings} />
