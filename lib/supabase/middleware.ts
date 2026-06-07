@@ -1,20 +1,21 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Hardcoded fallback prevents "Supabase URL is required" on cold starts or
+// environments where the env var hasn't been injected yet.
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+
 export async function updateSession(request: NextRequest) {
-  // Guard: if Supabase env vars are not set, skip auth middleware entirely.
-  // This prevents a hard crash during cold starts or in environments where
-  // the vars haven't been injected yet.
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  // Guard: if the anon key is not set, skip auth middleware entirely.
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseAnonKey) {
     return NextResponse.next({ request })
   }
 
   // Validate URL format — must start with https://
-  try { new URL(supabaseUrl) } catch {
-    console.error('NEXT_PUBLIC_SUPABASE_URL is not a valid URL:', supabaseUrl)
+  try { new URL(SUPABASE_URL) } catch {
+    console.error('NEXT_PUBLIC_SUPABASE_URL is not a valid URL:', SUPABASE_URL)
     return NextResponse.next({ request })
   }
 
@@ -25,7 +26,7 @@ export async function updateSession(request: NextRequest) {
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
-    supabaseUrl,
+    SUPABASE_URL,
     supabaseAnonKey,
     {
       cookies: {

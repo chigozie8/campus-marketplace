@@ -133,7 +133,7 @@ export default async function SellerProfilePage({ params }: Props) {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 pb-20">
+      <main className="max-w-4xl mx-auto px-4 py-6" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
         {/* Seller hero card */}
         <div className="bg-[#0a0a0a] rounded-2xl p-6 mb-6 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
