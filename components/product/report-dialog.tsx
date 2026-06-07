@@ -85,7 +85,7 @@ export function ReportDialog({ productId, productTitle, currentUserId }: Props) 
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.97 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative z-10 w-full max-w-md bg-white dark:bg-card rounded-3xl shadow-2xl p-6"
+              className="relative z-10 w-full max-w-md bg-white dark:bg-card rounded-3xl shadow-2xl p-6 overflow-y-auto max-h-[90dvh]"
             >
               <button
                 onClick={handleClose}

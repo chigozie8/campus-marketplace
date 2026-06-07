@@ -110,8 +110,15 @@ export default async function ProductDetailPage({ params }: Props) {
     initialLiked = !!fav
   }
 
-  const whatsappMessage = `Hi VendoorX! I'm interested in "${p.title}" (listing #${p.id}) for ₦${p.price.toLocaleString()}.`
-  const whatsappUrl = botWhatsappUrl(whatsappMessage)
+  const whatsappMessage = `Hi, I'm interested in your listing "${p.title}" (₦${p.price.toLocaleString()}) on VendoorX. Is it still available?`
+
+  // Prefer the seller's registered WhatsApp number; fall back to the VendoorX bot.
+  const sellerWhatsapp = (p.profiles as { whatsapp_number?: string | null } | null)?.whatsapp_number
+  const sellerPhone    = (p.profiles as { phone?: string | null } | null)?.phone
+  const rawNumber      = sellerWhatsapp || sellerPhone
+  const whatsappUrl    = rawNumber
+    ? `https://wa.me/${rawNumber.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
+    : botWhatsappUrl(whatsappMessage)
 
   const sellerName = p.profiles?.full_name || 'Unknown Seller'
   const sellerRating = p.profiles?.rating || 0
