@@ -1,9 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-// Hardcoded fallback ensures no "Supabase URL is required" error even when the
-// env var is missing during build or cold start.
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
