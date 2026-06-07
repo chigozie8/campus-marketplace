@@ -156,33 +156,33 @@ export default function FounderPage() {
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden bg-card border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
+        <div className="max-w-5xl mx-auto px-5 sm:px-6 py-12 sm:py-20 lg:py-28">
 
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-6 sm:mb-8">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-7 sm:mb-8">
             <Building2 className="w-3 h-3" />
             The Founder
           </span>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black text-foreground leading-tight tracking-tighter mb-5 sm:mb-6 text-balance">
+          <h1 className="text-2xl sm:text-5xl lg:text-7xl font-black text-foreground leading-snug sm:leading-tight tracking-tight sm:tracking-tighter mb-5 sm:mb-6 text-balance max-w-3xl">
             VendoorX was built by a{' '}
             <span className="text-primary">Nigerian builder</span>{' '}
             who ships.
           </h1>
 
-          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-2xl mb-8 sm:mb-10">
+          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xl mb-8 sm:mb-10">
             Not a business school project. Not a VC-funded concept. VendoorX is a working product, architected and shipped end-to-end by one engineer who saw a real problem on Nigerian campuses and built the solution.
           </p>
 
-          <div className="flex flex-col xs:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Link
               href="/marketplace"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all shadow-lg shadow-primary/20"
             >
               Browse the Marketplace <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/press"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 rounded-2xl border border-border hover:border-primary/60 text-foreground font-semibold text-sm transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border border-border hover:border-primary/60 text-foreground font-semibold text-sm transition-all"
             >
               Press &amp; Media
             </Link>
@@ -217,17 +217,17 @@ export default function FounderPage() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16 flex flex-col gap-14 sm:gap-20">
+      <div className="max-w-5xl mx-auto px-5 sm:px-6 py-10 sm:py-16 flex flex-col gap-12 sm:gap-20">
 
         {/* ── FOUNDER QUOTE ── */}
-        <section className="rounded-3xl border border-border bg-card p-7 sm:p-10 relative overflow-hidden">
+        <section className="rounded-3xl border border-border bg-card p-6 sm:p-10 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-3xl" />
-          <div className="pl-4">
-            <Quote className="w-8 h-8 text-primary/20 mb-4" />
-            <blockquote className="text-xl sm:text-2xl lg:text-3xl font-black text-foreground leading-tight italic mb-5 text-balance">
+          <div className="pl-4 sm:pl-5">
+            <Quote className="w-7 h-7 text-primary/20 mb-4" />
+            <blockquote className="text-base sm:text-2xl lg:text-3xl font-black text-foreground leading-snug sm:leading-tight italic mb-4 sm:mb-5 text-balance">
               &ldquo;Every Nigerian campus has thousands of students with products to sell and zero tools to do it professionally. VendoorX changes that — one campus at a time.&rdquo;
             </blockquote>
-            <p className="text-primary text-sm font-bold">
+            <p className="text-primary text-xs sm:text-sm font-bold">
               — Founder &amp; CEO, VendoorX
             </p>
           </div>
@@ -235,12 +235,12 @@ export default function FounderPage() {
 
         {/* ── ENGINEERING PILLARS ── */}
         <section>
-          <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Engineering Philosophy</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight text-balance">
+          <div className="mb-7 sm:mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2.5">Engineering Philosophy</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-foreground leading-snug sm:leading-tight text-balance">
               How VendoorX was built
             </h2>
-            <p className="text-muted-foreground text-sm mt-3 max-w-xl">
+            <p className="text-muted-foreground text-sm mt-3 max-w-xl leading-relaxed">
               The platform was designed, architected, and shipped by a single senior software engineer with a bias for fast iteration, zero technical debt on core paths, and a deep understanding of the Nigerian student market.
             </p>
           </div>
@@ -265,12 +265,12 @@ export default function FounderPage() {
 
         {/* ── WHAT WE STAND FOR ── */}
         <section>
-          <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Values</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
+          <div className="mb-7">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2.5">Values</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-foreground leading-snug sm:leading-tight">
               What we stand for
             </h2>
-            <p className="text-muted-foreground text-sm mt-3 max-w-xl">
+            <p className="text-muted-foreground text-sm mt-3 max-w-xl leading-relaxed">
               VendoorX was built on a handful of convictions that still drive every decision we make.
             </p>
           </div>
@@ -314,9 +314,9 @@ export default function FounderPage() {
 
         {/* ── TIMELINE ── */}
         <section>
-          <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Story</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">
+          <div className="mb-7 sm:mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2.5">Story</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-foreground leading-snug sm:leading-tight">
               From idea to platform
             </h2>
           </div>
@@ -345,8 +345,8 @@ export default function FounderPage() {
         {/* ── QUICK FACTS ── */}
         <section>
           <div className="mb-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Company</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground leading-tight">Quick facts</h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2.5">Company</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-foreground leading-snug sm:leading-tight">Quick facts</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -373,12 +373,12 @@ export default function FounderPage() {
         </section>
 
         {/* ── CTA ── */}
-        <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 sm:p-10 flex flex-col gap-6">
+        <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 sm:p-10 flex flex-col gap-5">
           <div>
-            <h2 className="text-xl sm:text-3xl font-black text-foreground leading-tight mb-2">
+            <h2 className="text-xl sm:text-3xl font-black text-foreground leading-snug sm:leading-tight mb-2">
               Want to reach the founder?
             </h2>
-            <p className="text-sm text-muted-foreground max-w-sm">
+            <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
               For press, partnerships, engineering collaborations, or investor enquiries — reach out directly.
             </p>
           </div>
