@@ -184,11 +184,10 @@ export function LandingNav({ user, profile }: LandingNavProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="group flex items-center gap-1 rounded-xl ring-1 ring-border hover:ring-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 transition-all duration-200 p-1"
+                        className="rounded-xl ring-1 ring-border hover:ring-primary/50 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 transition-all duration-200 p-1"
                         aria-label="Account menu"
                       >
                         <NavAvatar avatarUrl={avatarUrl} fullName={fullName} initials={initials} size="sm" />
-                        <ChevronDown className="w-3 h-3 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform duration-200 mr-0.5" />
                       </button>
                     </DropdownMenuTrigger>
 
