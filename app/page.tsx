@@ -167,15 +167,17 @@ export default async function Home() {
   // Pull the visitor's campus + name for hero/footer personalization (optional).
   let visitorCampus: string | null = null
   let visitorFirstName: string | null = null
+  let navProfile: { full_name: string | null; avatar_url: string | null } | null = null
   if (supabase && user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('university, full_name')
+      .select('university, full_name, avatar_url')
       .eq('id', user.id)
       .maybeSingle()
     visitorCampus = (profile?.university as string | undefined) ?? null
     const fullName = (profile?.full_name as string | undefined) ?? ''
     visitorFirstName = fullName.trim().split(/\s+/)[0] || null
+    navProfile = profile ? { full_name: profile.full_name ?? null, avatar_url: profile.avatar_url ?? null } : null
   }
 
   const visible = parseSectionVisibility(settings.homepage_sections_visible)
@@ -202,7 +204,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <LandingNav user={user} />
+      <LandingNav user={user} profile={navProfile} />
       <HeroSection user={user} settings={settings} visitorCampus={visitorCampus} />
       <HeroTrustSection />
       <StatsBar stats={[
