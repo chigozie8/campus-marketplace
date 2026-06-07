@@ -314,7 +314,7 @@ export default function ProfilePage() {
       if (user) {
         const { error } = await supabase.from('profiles').update({ avatar_url: url, updated_at: new Date().toISOString() }).eq('id', user.id)
         if (error) toast.error('Photo saved locally but DB update failed — press Save to persist.')
-        else toast.success('Profile photo updated!')
+        else { toast.success('Profile photo updated!'); router.refresh() }
       }
     } catch {
       setLocalAvatar(form.avatar_url) // revert preview on failure
