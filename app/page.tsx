@@ -24,7 +24,6 @@ const EscrowFlowSection      = lazyLoad(() => import('@/components/landing/escro
 const FaqSection             = lazyLoad(() => import('@/components/landing/faq-section').then(m => ({ default: m.FaqSection })))
 const CtaSection             = lazyLoad(() => import('@/components/landing/cta-section').then(m => ({ default: m.CtaSection })))
 const LandingFooter          = lazyLoad(() => import('@/components/landing/landing-footer').then(m => ({ default: m.LandingFooter })))
-const StickyMobileCta        = lazyLoad(() => import('@/components/landing/sticky-mobile-cta').then(m => ({ default: m.StickyMobileCta })))
 import { AdPopupClient as AdPopup } from '@/components/landing/ad-popup-client'
 import { LiveActivityTicker } from '@/components/landing/live-activity-ticker'
 
@@ -228,7 +227,6 @@ export default async function Home() {
         userEmail={user?.email ?? null}
         userFirstName={visitorFirstName}
       />
-      <StickyMobileCta isAuthed={!!user} />
       <LiveActivityTicker />
       <AdPopup
         enabled={settings.ad_popup_enabled === '1' && (settings.ad_popup_title || '').trim().length > 0}
