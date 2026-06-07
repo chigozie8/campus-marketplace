@@ -136,19 +136,17 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {/* Header */}
         <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Link href="/marketplace"
-                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-              <span className="text-sm font-semibold text-gray-600 dark:text-muted-foreground hidden sm:block truncate max-w-[240px]">
-                {p.title}
-              </span>
-            </div>
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+            {/* Left — back arrow only */}
+            <Link href="/marketplace"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            {/* Center — logo */}
             <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none">
               Vendoor<span className="text-primary">X</span>
             </Link>
+            {/* Right — share */}
             <ShareButton title={p.title} />
           </div>
         </header>
