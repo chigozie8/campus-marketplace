@@ -52,10 +52,9 @@ export function WhatsAppCtaButton({
 }: WhatsAppCtaButtonProps) {
   const baseClasses = 'inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-300 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none'
 
-  // Darker, richer WhatsApp green (#128C7E is WhatsApp's original brand green)
-  const primaryClasses = 'bg-[#128C7E] hover:bg-[#0f6d56] text-white shadow-2xl shadow-[#128C7E]/40 hover:shadow-[#128C7E]/60 hover:scale-[1.03]'
-  
-  const secondaryClasses = 'border-2 border-[#128C7E] text-[#128C7E] bg-white hover:bg-[#128C7E]/5 shadow-lg shadow-[#128C7E]/20 hover:shadow-[#128C7E]/40'
+  const primaryClasses = 'bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-2xl shadow-[#25D366]/40 hover:shadow-[#25D366]/60 hover:scale-[1.03]'
+
+  const secondaryClasses = 'border-2 border-[#25D366] text-[#25D366] bg-white hover:bg-[#25D366]/5 shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/40'
 
   const variantClasses = secondary ? secondaryClasses : primaryClasses
   const sizeClass = sizeClasses[size]
