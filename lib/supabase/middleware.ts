@@ -1,31 +1,17 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_URL  = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycnZkeGJkeWp3dnZicnBlZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTU4MDIsImV4cCI6MjA5MDkzMTgwMn0.BLPvQAH9cj7PnFapdtC4wTeAXfotcFhGFz-rFWXzhrg'
 
 export async function updateSession(request: NextRequest) {
-  // Guard: if the anon key is not set, skip auth middleware entirely.
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
-
-  if (!supabaseAnonKey) {
-    return NextResponse.next({ request })
-  }
-
-  // Validate URL format — must start with https://
-  try { new URL(SUPABASE_URL) } catch {
-    console.error('NEXT_PUBLIC_SUPABASE_URL is not a valid URL:', SUPABASE_URL)
-    return NextResponse.next({ request })
-  }
-
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let supabaseResponse = NextResponse.next({ request })
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
     SUPABASE_URL,
-    supabaseAnonKey,
+    SUPABASE_ANON,
     {
       cookies: {
         getAll() {

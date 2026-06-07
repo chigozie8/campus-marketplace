@@ -7,7 +7,8 @@ type SupabaseClient = ReturnType<typeof createBrowserClient>
 // Without this, every hot-reload creates a second client that immediately
 // races the first for the auth token refresh lock, producing:
 //   "Lock … was released because another request stole it"
-const WIN_KEY = '__vx_supabase_client__'
+const SUPABASE_URL  = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycnZkeGJkeWp3dnZicnBlZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTU4MDIsImV4cCI6MjA5MDkzMTgwMn0.BLPvQAH9cj7PnFapdtC4wTeAXfotcFhGFz-rFWXzhrg'
 const PATCH_KEY = '__vx_supabase_console_patched__'
 
 /**
@@ -44,18 +45,12 @@ export function createClient(): SupabaseClient {
   if (typeof window === 'undefined') {
     // SSR path — shouldn't normally be reached (use lib/supabase/server.ts for
     // server components), but create an ephemeral client just in case.
-    return createBrowserClient(
-      'https://nrrvdxbdyjwvvbrpedua.supabase.co',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    return createBrowserClient(SUPABASE_URL, SUPABASE_ANON)
   }
 
   const win = window as typeof window & { [WIN_KEY]?: SupabaseClient }
   if (!win[WIN_KEY]) {
-    win[WIN_KEY] = createBrowserClient(
-      'https://nrrvdxbdyjwvvbrpedua.supabase.co',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    win[WIN_KEY] = createBrowserClient(SUPABASE_URL, SUPABASE_ANON)
   }
   return win[WIN_KEY]!
 }

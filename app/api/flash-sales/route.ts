@@ -1,20 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
-function db() {
-  return createAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-  )
-}
-
 export const revalidate = 60
 
 export async function GET() {
   try {
+    const db = createServiceClient()
     const now = new Date().toISOString()
-    const { data, error } = await db()
+    const { data, error } = await db
       .from('flash_sales')
       .select('id, product_id, sale_price, start_at, end_at, products(id, title, price, images, is_available)')
       .eq('is_active', true)

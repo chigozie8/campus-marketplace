@@ -1,7 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_URL  = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ycnZkeGJkeWp3dnZicnBlZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNTU4MDIsImV4cCI6MjA5MDkzMTgwMn0.BLPvQAH9cj7PnFapdtC4wTeAXfotcFhGFz-rFWXzhrg'
 
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -9,17 +10,11 @@ const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
  * it.
  */
 export async function createClient() {
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!key) {
-    return null
-  }
-
   const cookieStore = await cookies()
 
   return createServerClient(
     SUPABASE_URL,
-    key,
+    SUPABASE_ANON,
     {
       cookies: {
         getAll() {
