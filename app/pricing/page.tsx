@@ -34,11 +34,25 @@ export default async function PricingPage() {
   ])
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
 
+  // Fetch the user's active subscription so PricingSection can show "Current Plan"
+  let currentPlanId: string | null = null
+  if (user && supabase) {
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('plan_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+    currentPlanId = sub?.plan_id ?? null
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <LandingNav user={user} />
       <div className="pt-24">
-        <PricingSection plans={plans} isAuthenticated={!!user} />
+        <PricingSection plans={plans} isAuthenticated={!!user} currentPlanId={currentPlanId} />
         <FaqSection />
       </div>
       <LandingFooterServer settings={settings} />

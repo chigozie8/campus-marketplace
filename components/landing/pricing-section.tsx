@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { Check, X, Zap, Crown, Sparkles, ArrowRight, Star } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Check, X, Zap, Crown, Sparkles, ArrowRight, Star, Loader2, BadgeCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface Feature { text: string; included: boolean }
 interface Plan {
@@ -87,11 +88,60 @@ function formatPrice(price: number) {
 interface PricingSectionProps {
   plans?: Plan[]
   isAuthenticated?: boolean
+  currentPlanId?: string | null
 }
 
-export function PricingSection({ plans: initialPlans, isAuthenticated = false }: PricingSectionProps = {}) {
+export function PricingSection({ plans: initialPlans, isAuthenticated = false, currentPlanId = null }: PricingSectionProps = {}) {
+  const router = useRouter()
   const [annual, setAnnual] = useState(false)
   const [plans] = useState<Plan[]>(initialPlans?.length ? initialPlans : FALLBACK_PLANS)
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
+
+  async function handleSubscribe(plan: Plan) {
+    if (!isAuthenticated) {
+      router.push('/auth/sign-up')
+      return
+    }
+
+    const billingCycle = annual ? 'annual' : 'monthly'
+
+    // Free starter plan — no payment
+    if (plan.id === 'starter') {
+      setLoadingPlanId(plan.id)
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ planId: 'starter', billingCycle }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed')
+        toast.success('You are on the Starter plan.')
+        router.push('/dashboard?subscription=success&plan=starter')
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Something went wrong')
+      } finally {
+        setLoadingPlanId(null)
+      }
+      return
+    }
+
+    // Paid plan — initiate Paystack
+    setLoadingPlanId(plan.id)
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: plan.id, billingCycle }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Payment init failed')
+      window.location.href = data.authorizationUrl
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
+      setLoadingPlanId(null)
+    }
+  }
 
   return (
     <section id="pricing" className="py-24 sm:py-32 px-4 sm:px-6 relative overflow-hidden bg-background">
@@ -144,8 +194,9 @@ export function PricingSection({ plans: initialPlans, isAuthenticated = false }:
           {plans.map((plan) => {
               const Icon = getPlanIcon(plan.id)
               const price = annual ? plan.annual_price : plan.monthly_price
-              // Authenticated users go to dashboard; guests go to sign-up
-              const ctaHref = isAuthenticated ? '/dashboard' : (plan.cta_href || '/auth/sign-up')
+              const isCurrentPlan = isAuthenticated && currentPlanId === plan.id
+              const isLoading = loadingPlanId === plan.id
+              const isOtherLoading = loadingPlanId !== null && loadingPlanId !== plan.id
 
               return (
                 <div
@@ -203,23 +254,37 @@ export function PricingSection({ plans: initialPlans, isAuthenticated = false }:
                       )}
                     </div>
 
-                    <Button
-                      size="lg"
-                      className={cn(
-                        'w-full rounded-2xl font-bold h-12 text-sm mb-7 transition-all duration-200',
+                    {isCurrentPlan ? (
+                      <div className={cn(
+                        'w-full rounded-2xl h-12 text-sm mb-7 flex items-center justify-center gap-2 font-bold border-2',
                         plan.is_highlighted
-                          ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/30 hover:scale-[1.02]'
-                          : plan.id === 'pro'
-                          ? 'bg-foreground hover:bg-foreground/90 text-background hover:scale-[1.02]'
-                          : 'border border-border bg-muted hover:bg-muted/80 text-foreground',
-                      )}
-                      asChild
-                    >
-                      <Link href={ctaHref}>
-                        {plan.cta_text}
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
+                          ? 'border-primary text-primary bg-primary/10'
+                          : 'border-foreground/20 text-foreground/70 bg-muted',
+                      )}>
+                        <BadgeCheck className="w-4 h-4" />
+                        Current Plan
+                      </div>
+                    ) : (
+                      <Button
+                        size="lg"
+                        disabled={isLoading || isOtherLoading}
+                        onClick={() => handleSubscribe(plan)}
+                        className={cn(
+                          'w-full rounded-2xl font-bold h-12 text-sm mb-7 transition-all duration-200',
+                          plan.is_highlighted
+                            ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/30 hover:scale-[1.02]'
+                            : plan.id === 'pro'
+                            ? 'bg-foreground hover:bg-foreground/90 text-background hover:scale-[1.02]'
+                            : 'border border-border bg-muted hover:bg-muted/80 text-foreground',
+                          (isLoading || isOtherLoading) && 'opacity-70 cursor-not-allowed scale-100',
+                        )}
+                      >
+                        {isLoading
+                          ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Processing...</>
+                          : <>{plan.cta_text}<ArrowRight className="ml-2 w-4 h-4" /></>
+                        }
+                      </Button>
+                    )}
 
                     <ul className="flex flex-col gap-2.5 flex-1">
                       {plan.features.map((feature, fi) => (
