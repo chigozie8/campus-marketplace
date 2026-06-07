@@ -129,13 +129,13 @@ export default async function PressPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 lg:items-end shrink-0">
+            <div className="flex flex-col gap-3 shrink-0">
               <a
-                href={`mailto:${settings.press_contact_email}`}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all"
+                href="mailto:press@vendoorx.ng"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition-all"
               >
                 <Mail className="w-4 h-4" />
-                {settings.press_contact_email}
+                press@vendoorx.ng
               </a>
               <Link
                 href="/contact?subject=Press Enquiry"
@@ -422,13 +422,13 @@ export default async function PressPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 shrink-0 lg:items-end">
+                <div className="flex flex-col gap-3 shrink-0">
                   <a
-                    href={`mailto:${settings.press_contact_email}`}
+                    href="mailto:press@vendoorx.ng"
                     className="flex items-center gap-3 px-5 py-3 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 text-foreground transition-all"
                   >
                     <Mail className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-sm font-semibold">{settings.press_contact_email}</span>
+                    <span className="text-sm font-semibold">press@vendoorx.ng</span>
                   </a>
                   {settings.support_phone && (
                     <a

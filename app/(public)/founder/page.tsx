@@ -351,10 +351,9 @@ export default function FounderPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { icon: Building2,   label: 'Founded',        value: '2022, Lagos Nigeria' },
-              { icon: Code2,       label: 'Engineering',    value: 'Senior Software Engineer — full-stack' },
-              { icon: Globe,       label: 'Model',          value: 'WhatsApp Commerce SaaS' },
-              { icon: ShieldCheck, label: 'Stage',          value: 'Growth — Series A Ready' },
+              { icon: Building2,   label: 'Founded',  value: '2022, Lagos Nigeria' },
+              { icon: Globe,       label: 'Model',    value: 'WhatsApp Commerce SaaS' },
+              { icon: ShieldCheck, label: 'Stage',    value: 'Growth — Series A Ready' },
             ].map(({ icon: Icon, label, value }) => (
               <div
                 key={label}
