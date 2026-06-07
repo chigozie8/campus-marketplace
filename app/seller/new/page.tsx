@@ -216,7 +216,7 @@ export default function NewListingPage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 pb-28">
+      <main className="max-w-3xl mx-auto px-4 py-6" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
         {isBlocked && (
           <div className="mb-4 rounded-2xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700/50 p-4 flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">

@@ -122,7 +122,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-background">
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-6 pb-20">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-6" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <Link

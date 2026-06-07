@@ -192,7 +192,7 @@ export default function EditListingPage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 pb-28">
+      <main className="max-w-3xl mx-auto px-4 py-6" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Availability toggle */}

@@ -1,13 +1,14 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+
 /**
  * Especially important if using Fluid compute: Don't put this client in a
  * global variable. Always create a new client within each function when using
  * it.
  */
 export async function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!key) {
@@ -17,7 +18,7 @@ export async function createClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
-    url,
+    SUPABASE_URL,
     key,
     {
       cookies: {

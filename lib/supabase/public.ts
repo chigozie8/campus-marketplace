@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
+const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+
 export function createPublicClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) return null
-  return createClient(url, key)
+  if (!key) return null
+  return createClient(SUPABASE_URL, key)
 }

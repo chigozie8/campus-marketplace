@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
+const SUPABASE_URL = 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
+
 export function createServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? 'https://nrrvdxbdyjwvvbrpedua.supabase.co'
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key, { 
+  if (!key) return null
+  return createClient(SUPABASE_URL, key, {
     auth: { persistSession: false },
-    db: { schema: 'public' }
+    db: { schema: 'public' },
   })
 }
