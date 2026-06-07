@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Heart, Bell, BellOff, ShoppingCart, Loader2, AlertCircle, Package, ArrowUpRight, X } from 'lucide-react'
 import Link from 'next/link'
+import { SafeImage } from '@/components/ui/safe-image'
 
 type WishlistItem = {
   id: string
@@ -113,13 +114,12 @@ export default function WishlistPage() {
               className={`flex gap-4 p-4 rounded-2xl border ${isOutOfStock ? 'border-muted bg-muted/20' : 'border-border bg-card'}`}
             >
               <div className="w-20 h-20 rounded-xl bg-muted overflow-hidden flex-shrink-0">
-                {image ? (
-                  <img src={image} alt={p.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-8 h-8 text-muted-foreground/40" />
-                  </div>
-                )}
+                <SafeImage
+                  src={image}
+                  alt={p.title}
+                  className="w-full h-full object-cover"
+                  showLabel={false}
+                />
               </div>
 
               <div className="flex-1 min-w-0 space-y-1">

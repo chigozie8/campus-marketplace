@@ -3,6 +3,7 @@
 import type { Conversation } from '@/lib/types'
 import { PlatformBadge, platformLabel } from './platform-badge'
 import { Phone, MessageCircle, Package } from 'lucide-react'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface Props {
   conversation: Conversation
@@ -81,7 +82,7 @@ export function CustomerPanel({ conversation, products }: Props) {
               <div key={p.id} className="flex items-center gap-2.5 group">
                 <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
                   {p.images?.[0]
-                    ? <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
+                    ? <SafeImage src={p.images[0]} alt={p.title} className="w-full h-full object-cover" showLabel={false} />
                     : <Package className="w-4 h-4 text-gray-400 m-auto mt-2" />
                   }
                 </div>

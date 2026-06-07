@@ -12,6 +12,7 @@ import { m, LazyMotion, domAnimation, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { OrderChat } from '@/components/features/order-chat'
+import { SafeImage } from '@/components/ui/safe-image'
 
 async function getToken() {
   const supabase = createClient()
@@ -320,13 +321,12 @@ function OrderCard({ order, onRefund, onDeliveryConfirmed, currentUserId }: { or
       >
         {/* Product image */}
         <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-muted flex-shrink-0 overflow-hidden">
-          {order.products?.images?.[0] ?? order.products?.image_url ? (
-            <img src={order.products?.images?.[0] ?? order.products?.image_url!} alt={order.products?.title ?? order.products?.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package className="w-6 h-6 text-muted-foreground" />
-            </div>
-          )}
+          <SafeImage
+            src={order.products?.images?.[0] ?? order.products?.image_url ?? null}
+            alt={order.products?.title ?? order.products?.name ?? 'Order item'}
+            className="w-full h-full object-cover"
+            showLabel={false}
+          />
         </div>
 
         <div className="flex-1 min-w-0">

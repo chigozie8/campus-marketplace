@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Play, Image as ImageIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { SafeImage } from '@/components/ui/safe-image'
 
 type MediaItem = { src: string; type: 'image' | 'video' }
 
@@ -44,7 +45,7 @@ export function ProductGallery({ images, title, isFeatured }: Props) {
             className="w-full h-full object-contain bg-black"
           />
         ) : (
-          <img
+          <SafeImage
             src={current.src}
             alt={title}
             className="w-full h-full object-cover"
@@ -108,7 +109,7 @@ export function ProductGallery({ images, title, isFeatured }: Props) {
                   <Play className="w-5 h-5 text-white" />
                 </div>
               ) : (
-                <img src={item.src} alt={`${title} ${i + 1}`} className="w-full h-full object-cover" />
+                <SafeImage src={item.src} alt={`${title} ${i + 1}`} className="w-full h-full object-cover" showLabel={false} />
               )}
             </button>
           ))}

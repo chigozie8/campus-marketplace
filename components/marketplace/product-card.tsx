@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { Heart, MessageCircle, MapPin, Star, BadgeCheck, GraduationCap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import type { Product } from '@/lib/types'
@@ -14,6 +13,7 @@ import { botWhatsappUrl } from '@/lib/whatsapp-bot'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { EASE, SPRING_TAP } from '@/lib/motion'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface ProductCardProps {
   product: Product
@@ -109,7 +109,7 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
   }
 
-  const imageUrl = product.images?.[0] || `/placeholder.svg?height=240&width=320`
+  const imageUrl = product.images?.[0] || null
   const sellerName = product.profiles?.full_name || 'Unknown Seller'
   const sellerRating = product.profiles?.rating || 0
   const isVerified = product.profiles?.seller_verified || false
@@ -195,13 +195,10 @@ export function ProductCard({ product, isFavorited = false, onToggleFavorite, in
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-secondary/30">
         <Link href={`/marketplace/${product.id}`} className="absolute inset-0">
-          <Image
+          <SafeImage
             src={imageUrl}
             alt={product.title}
-            fill
-            priority={index === 0}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         </Link>
 

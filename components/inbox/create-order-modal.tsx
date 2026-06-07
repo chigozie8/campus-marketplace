@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X, ShoppingCart, Package, Check } from 'lucide-react'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface Props {
   customerName: string
@@ -70,7 +71,7 @@ export function CreateOrderModal({ customerName, products, onClose }: Props) {
                   >
                     <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
                       {p.images?.[0]
-                        ? <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
+                        ? <SafeImage src={p.images[0]} alt={p.title} className="w-full h-full object-cover" showLabel={false} />
                         : <Package className="w-4 h-4 text-gray-400 m-auto mt-2.5" />
                       }
                     </div>

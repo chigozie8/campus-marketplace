@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Zap, Clock } from 'lucide-react'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface FlashSaleProduct {
   id: string
@@ -51,17 +52,14 @@ function SaleCard({ sale }: { sale: FlashSale }) {
       className="flex-shrink-0 w-44 rounded-2xl overflow-hidden border border-amber-200 dark:border-amber-800 bg-white dark:bg-card shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group"
     >
       <div className="relative">
-        {product.images?.[0] ? (
-          <img
-            src={product.images[0]}
+        <div className="w-full h-32 overflow-hidden">
+          <SafeImage
+            src={product.images?.[0]}
             alt={product.title}
-            className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            showLabel={false}
           />
-        ) : (
-          <div className="w-full h-32 bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center">
-            <Zap className="w-8 h-8 text-amber-400" />
-          </div>
-        )}
+        </div>
         <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-lg bg-red-500 text-white text-xs font-black">
           -{discount}%
         </div>

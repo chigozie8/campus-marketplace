@@ -7,6 +7,7 @@ import { MapPin, Star, BadgeCheck, MessageCircle, Package, Zap, GraduationCap } 
 import type { Product, Profile } from '@/lib/types'
 import { StoreShareWidget } from '@/components/store/store-share-widget'
 import { botWhatsappUrl } from '@/lib/whatsapp-bot'
+import { SafeImage } from '@/components/ui/safe-image'
 
 export const dynamic = 'force-dynamic'
 
@@ -192,7 +193,7 @@ export default async function StorePage({ params }: PageProps) {
             <div className="flex items-start gap-3 sm:gap-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
                 {seller.avatar_url ? (
-                  <img src={seller.avatar_url} alt={name} className="w-full h-full object-cover" />
+                  <SafeImage src={seller.avatar_url} alt={name} className="w-full h-full object-cover" showLabel={false} />
                 ) : (
                   <span className="text-lg sm:text-xl font-black text-primary">{initials}</span>
                 )}
@@ -285,13 +286,12 @@ export default async function StorePage({ params }: PageProps) {
                       className="bg-white dark:bg-card rounded-2xl border border-border overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all group"
                     >
                       <div className="relative aspect-square bg-muted overflow-hidden">
-                        {image ? (
-                          <img src={image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                            <Package className="w-8 h-8" />
-                          </div>
-                        )}
+                        <SafeImage
+                          src={image}
+                          alt={product.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          showLabel={false}
+                        />
                         {discount > 0 && (
                           <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-lg">
                             -{discount}%

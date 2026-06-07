@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, X, Loader2 } from 'lucide-react'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { SafeImage } from '@/components/ui/safe-image'
 
 interface Suggestion {
   id: string
@@ -130,20 +130,13 @@ export function SearchAutocomplete({ defaultValue = '', className, placeholder =
                 onMouseDown={() => handleSelect(item)}
                 className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-muted transition-colors text-left"
               >
-                <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-muted flex-shrink-0 relative">
-                  {item.images?.[0] ? (
-                    <Image
-                      src={item.images[0]}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      <Search className="w-4 h-4" />
-                    </div>
-                  )}
+                <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-muted flex-shrink-0">
+                  <SafeImage
+                    src={item.images?.[0]}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                    showLabel={false}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.title}</p>

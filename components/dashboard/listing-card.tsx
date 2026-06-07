@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Eye, Edit2, Trash2, Package, Loader2,
+  Eye, Edit2, Trash2, Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import type { Product } from '@/lib/types'
 import { useConfirm } from '@/components/ui/confirm-dialog'
+import { SafeImage } from '@/components/ui/safe-image'
 
 type Props = { product: Product }
 
@@ -82,13 +83,12 @@ export function ListingCard({ product }: Props) {
 
         {/* Thumbnail */}
         <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
-          {product.images?.[0] ? (
-            <img src={product.images[0]} alt={product.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package className="w-4 h-4 text-gray-400" />
-            </div>
-          )}
+          <SafeImage
+            src={product.images?.[0]}
+            alt={product.title}
+            className="w-full h-full object-cover"
+            showLabel={false}
+          />
         </div>
 
         {/* Title + price */}

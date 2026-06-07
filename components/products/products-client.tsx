@@ -4,11 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   Plus, Grid3X3, List, Eye, MessageCircle,
-  Package, Edit, Share2, ExternalLink,
+  Edit, Share2, ExternalLink,
 } from 'lucide-react'
 import { VendorShell } from '@/components/vendor/vendor-shell'
 import { DashboardActions } from '@/components/dashboard-actions'
 import { EmptyState } from '@/components/empty-state'
+import { SafeImage } from '@/components/ui/safe-image'
 import type { Product } from '@/lib/types'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://vendoorx.ng'
@@ -115,10 +116,12 @@ export function ProductsClient({ products, initials, fullName, email }: Props) {
                 <div key={p.id} className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all">
                   {/* Image */}
                   <div className="relative aspect-square bg-gray-100 dark:bg-muted overflow-hidden">
-                    {p.images?.[0]
-                      ? <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      : <div className="w-full h-full flex items-center justify-center"><Package className="w-8 h-8 text-gray-300" /></div>
-                    }
+                    <SafeImage
+                      src={p.images?.[0]}
+                      alt={p.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      showLabel={false}
+                    />
                     <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       p.is_available ? 'bg-emerald-500 text-white' : 'bg-gray-800 text-white'
                     }`}>
@@ -179,10 +182,12 @@ export function ProductsClient({ products, initials, fullName, email }: Props) {
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-muted flex-shrink-0 overflow-hidden">
-                            {p.images?.[0]
-                              ? <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
-                              : <Package className="w-4 h-4 text-gray-400 m-auto mt-2.5" />
-                            }
+                            <SafeImage
+                              src={p.images?.[0]}
+                              alt={p.title}
+                              className="w-full h-full object-cover"
+                              showLabel={false}
+                            />
                           </div>
                           <div className="min-w-0">
                             <p className="font-semibold text-gray-900 dark:text-white truncate max-w-[140px]">{p.title}</p>

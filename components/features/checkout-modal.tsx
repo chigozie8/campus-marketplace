@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCreateOrder, useInitializePayment } from '@/hooks/use-orders'
+import { SafeImage } from '@/components/ui/safe-image'
 import { toast } from 'sonner'
 import { hapticImpact, hapticNotification } from '@/lib/capacitor'
 import { SavedAddressesPicker } from '@/components/orders/saved-addresses-picker'
@@ -186,7 +187,7 @@ export function CheckoutModal({ open, onClose, product, onPaystackRedirect }: Ch
         {/* Product summary */}
         <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
           {product.images?.[0] ? (
-            <img src={product.images[0]} alt={product.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+            <SafeImage src={product.images[0]} alt={product.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" showLabel={false} />
           ) : (
             <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
               <ShoppingCart className="w-5 h-5 text-muted-foreground" />

@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ArrowLeft, BadgeCheck, Star, Package, MapPin,
   GraduationCap, MessageCircle, ShoppingBag, User,
@@ -8,6 +7,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { Badge } from '@/components/ui/badge'
+import { SafeImage } from '@/components/ui/safe-image'
 import type { Product } from '@/lib/types'
 import { AdminBadgesList } from '@/components/TrustBadge'
 import { SellerJsonLd } from '@/components/seo/seller-jsonld'
@@ -141,7 +141,7 @@ export default async function SellerProfilePage({ params }: Props) {
           <div className="relative z-10 flex items-center gap-5">
             <div className="w-20 h-20 rounded-2xl ring-4 ring-white/10 overflow-hidden bg-white/10 flex-shrink-0">
               {profile.avatar_url ? (
-                <Image src={profile.avatar_url} alt={profile.full_name || 'Seller'} width={80} height={80} className="w-full h-full object-cover" />
+                <SafeImage src={profile.avatar_url} alt={profile.full_name || 'Seller'} className="w-full h-full object-cover" showLabel={false} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white text-2xl font-black">{initials}</div>
               )}
@@ -230,19 +230,12 @@ export default async function SellerProfilePage({ params }: Props) {
                 className="bg-white dark:bg-card rounded-2xl border border-gray-100 dark:border-border shadow-sm overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all"
               >
                 <div className="relative aspect-square bg-gray-100 dark:bg-muted overflow-hidden">
-                  {product.images?.[0] ? (
-                    <Image
-                      src={product.images[0]}
-                      alt={product.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="w-8 h-8 text-gray-300" />
-                    </div>
-                  )}
+                  <SafeImage
+                    src={product.images?.[0]}
+                    alt={product.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    showLabel={false}
+                  />
                   <div className="absolute top-2 left-2">
                     <Badge variant="secondary" className="text-[10px] font-semibold py-0.5 px-1.5 bg-white/90 text-gray-700 border-0">
                       {conditionLabels[product.condition] || product.condition}
@@ -306,7 +299,7 @@ export default async function SellerProfilePage({ params }: Props) {
                       {/* Avatar */}
                       <div className="w-9 h-9 rounded-xl overflow-hidden bg-gray-100 dark:bg-muted flex-shrink-0 flex items-center justify-center">
                         {reviewer?.avatar_url ? (
-                          <Image src={reviewer.avatar_url} alt={reviewerName} width={36} height={36} className="w-full h-full object-cover" />
+                          <SafeImage src={reviewer.avatar_url} alt={reviewerName} className="w-full h-full object-cover" showLabel={false} />
                         ) : (
                           <span className="text-xs font-black text-gray-500 dark:text-muted-foreground">{reviewerInitials || <User className="w-4 h-4 text-gray-400" />}</span>
                         )}
