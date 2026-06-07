@@ -4,15 +4,25 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Info, HelpCircle, ChevronDown, LogOut } from 'lucide-react'
+import { Menu, X, ArrowRight, LayoutDashboard, ShoppingBag, Info, HelpCircle, ChevronDown, LogOut, User as UserIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/lib/types'
 
 interface LandingNavProps {
   user: User | null
+  profile?: Pick<Profile, 'full_name' | 'avatar_url'> | null
 }
 
 const NAV_LINKS = [
@@ -36,7 +46,7 @@ function VxLogo() {
   )
 }
 
-export function LandingNav({ user }: LandingNavProps) {
+export function LandingNav({ user, profile }: LandingNavProps) {
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -66,8 +76,10 @@ export function LandingNav({ user }: LandingNavProps) {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
-  const fullName = (user?.user_metadata?.full_name as string | undefined) || user?.email?.split('@')[0] || 'You'
+  // Prefer DB profile data (real uploaded avatar) over OAuth metadata
+  const avatarUrl = profile?.avatar_url || (user?.user_metadata?.avatar_url as string | undefined)
+  const fullName = profile?.full_name || (user?.user_metadata?.full_name as string | undefined) || user?.email?.split('@')[0] || 'You'
+  const userEmail = user?.email ?? ''
   const initials = fullName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
 
   return (
@@ -127,27 +139,121 @@ export function LandingNav({ user }: LandingNavProps) {
                       Dashboard
                     </Button>
                   </Link>
-                  {/* Avatar */}
-                  <Link href="/profile" className="shrink-0">
-                    <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-primary/30 hover:ring-primary/60 transition-all">
-                      {avatarUrl ? (
-                        <Image src={avatarUrl} alt={fullName} width={36} height={36} className="object-cover w-full h-full" />
-                      ) : (
-                        <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-black">
-                          {initials}
+
+                  {/* Avatar dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="group flex items-center gap-1.5 rounded-xl p-0.5 ring-2 ring-primary/30 hover:ring-primary/60 focus-visible:outline-none focus-visible:ring-primary/70 transition-all duration-200"
+                        aria-label="Account menu"
+                      >
+                        <div className="w-8 h-8 rounded-[10px] overflow-hidden shrink-0">
+                          {avatarUrl ? (
+                            <Image
+                              src={avatarUrl}
+                              alt={fullName}
+                              width={32}
+                              height={32}
+                              className="object-cover w-full h-full"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-black tracking-wide">
+                              {initials}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </Link>
-                  {/* Logout */}
-                  <button
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    title="Sign out"
-                    className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
+                        <ChevronDown className="w-3 h-3 text-gray-400 group-data-[state=open]:rotate-180 transition-transform duration-200 mr-0.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent
+                      align="end"
+                      sideOffset={10}
+                      className="w-64 rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white/98 dark:bg-gray-950/98 backdrop-blur-xl shadow-2xl shadow-black/[0.12] dark:shadow-black/50 p-1.5"
+                    >
+                      {/* Identity header */}
+                      <div className="flex items-center gap-3 px-3 py-3 mb-1">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-2 ring-primary/25">
+                          {avatarUrl ? (
+                            <Image
+                              src={avatarUrl}
+                              alt={fullName}
+                              width={40}
+                              height={40}
+                              className="object-cover w-full h-full"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-black">
+                              {initials}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">{fullName}</p>
+                          <p className="text-[11px] text-muted-foreground truncate leading-tight mt-0.5">{userEmail}</p>
+                        </div>
+                      </div>
+
+                      <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800/80 mx-1" />
+
+                      <DropdownMenuGroup className="py-1">
+                        <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer gap-3 hover:bg-gray-50 dark:hover:bg-gray-900/60 focus:bg-gray-50 dark:focus:bg-gray-900/60">
+                          <Link href="/profile">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 dark:bg-primary/15 shrink-0">
+                              <UserIcon className="w-3.5 h-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">View Profile</span>
+                              <span className="text-[11px] text-muted-foreground leading-tight">Manage your public profile</span>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer gap-3 hover:bg-gray-50 dark:hover:bg-gray-900/60 focus:bg-gray-50 dark:focus:bg-gray-900/60">
+                          <Link href="/dashboard">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/30 shrink-0">
+                              <LayoutDashboard className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">Dashboard</span>
+                              <span className="text-[11px] text-muted-foreground leading-tight">Your listings & analytics</span>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer gap-3 hover:bg-gray-50 dark:hover:bg-gray-900/60 focus:bg-gray-50 dark:focus:bg-gray-900/60">
+                          <Link href="/marketplace">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/30 shrink-0">
+                              <ShoppingBag className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">Marketplace</span>
+                              <span className="text-[11px] text-muted-foreground leading-tight">Browse campus listings</span>
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-800/80 mx-1" />
+
+                      <DropdownMenuGroup className="py-1">
+                        <DropdownMenuItem
+                          onSelect={handleLogout}
+                          disabled={loggingOut}
+                          className="rounded-xl px-3 py-2.5 cursor-pointer gap-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 focus:bg-red-50 dark:focus:bg-red-950/30 focus:text-red-600 dark:focus:text-red-400 disabled:opacity-50"
+                        >
+                          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/30 shrink-0">
+                            <LogOut className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
+                          </div>
+                          <span className="text-sm font-semibold leading-tight">
+                            {loggingOut ? 'Signing out…' : 'Sign Out'}
+                          </span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
