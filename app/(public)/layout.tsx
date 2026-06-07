@@ -3,6 +3,9 @@ import { LandingNav } from '@/components/landing/landing-nav'
 import { LandingFooterServer } from '@/components/landing/landing-footer-server'
 import type { Profile } from '@/lib/types'
 
+// Always fetch fresh session + profile so avatar updates reflect immediately
+export const dynamic = 'force-dynamic'
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const user = supabase ? (await supabase.auth.getUser()).data.user : null
