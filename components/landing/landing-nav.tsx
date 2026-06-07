@@ -37,6 +37,46 @@ const MOBILE_NAV_EXTRAS = [
   { href: '/help', label: 'Help Center', icon: HelpCircle },
 ]
 
+// ---------------------------------------------------------------------------
+// NavAvatar — shared avatar placeholder used in trigger, dropdown, and drawer
+// ---------------------------------------------------------------------------
+interface NavAvatarProps {
+  avatarUrl?: string
+  fullName: string
+  initials: string
+  size: 'sm' | 'md'
+}
+
+function NavAvatar({ avatarUrl, fullName, initials, size }: NavAvatarProps) {
+  const dim = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10'
+  const imgSize = size === 'sm' ? 32 : 40
+  const textSize = size === 'sm' ? 'text-[11px]' : 'text-[13px]'
+
+  return (
+    <div className={`${dim} rounded-xl overflow-hidden shrink-0 bg-primary`}>
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt={fullName}
+          width={imgSize}
+          height={imgSize}
+          className="object-cover w-full h-full"
+          unoptimized
+        />
+      ) : (
+        <div
+          className={`w-full h-full flex items-center justify-center text-primary-foreground ${textSize} font-bold tracking-wider select-none`}
+          aria-hidden="true"
+        >
+          {initials}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
 function VxLogo() {
   return (
     <div className="relative w-8 h-8 shrink-0">
@@ -144,26 +184,11 @@ export function LandingNav({ user, profile }: LandingNavProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="group flex items-center gap-1.5 rounded-xl p-0.5 ring-2 ring-primary/30 hover:ring-primary/60 focus-visible:outline-none focus-visible:ring-primary/70 transition-all duration-200"
+                        className="group flex items-center gap-1 rounded-xl ring-1 ring-border hover:ring-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 transition-all duration-200 p-1"
                         aria-label="Account menu"
                       >
-                        <div className="w-8 h-8 rounded-[10px] overflow-hidden shrink-0">
-                          {avatarUrl ? (
-                            <Image
-                              src={avatarUrl}
-                              alt={fullName}
-                              width={32}
-                              height={32}
-                              className="object-cover w-full h-full"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-[11px] font-black tracking-wide">
-                              {initials}
-                            </div>
-                          )}
-                        </div>
-                        <ChevronDown className="w-3 h-3 text-gray-400 group-data-[state=open]:rotate-180 transition-transform duration-200 mr-0.5" />
+                        <NavAvatar avatarUrl={avatarUrl} fullName={fullName} initials={initials} size="sm" />
+                        <ChevronDown className="w-3 h-3 text-muted-foreground group-data-[state=open]:rotate-180 transition-transform duration-200 mr-0.5" />
                       </button>
                     </DropdownMenuTrigger>
 
@@ -174,22 +199,7 @@ export function LandingNav({ user, profile }: LandingNavProps) {
                     >
                       {/* Identity header */}
                       <div className="flex items-center gap-3 px-3 py-3 mb-1">
-                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-2 ring-primary/25">
-                          {avatarUrl ? (
-                            <Image
-                              src={avatarUrl}
-                              alt={fullName}
-                              width={40}
-                              height={40}
-                              className="object-cover w-full h-full"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-black">
-                              {initials}
-                            </div>
-                          )}
-                        </div>
+                        <NavAvatar avatarUrl={avatarUrl} fullName={fullName} initials={initials} size="md" />
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">{fullName}</p>
                           <p className="text-[11px] text-muted-foreground truncate leading-tight mt-0.5">{userEmail}</p>
@@ -329,15 +339,7 @@ export function LandingNav({ user, profile }: LandingNavProps) {
             {user && (
               <div className="px-5 py-4 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 dark:border-primary/20">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-2 ring-primary/30">
-                    {avatarUrl ? (
-                      <Image src={avatarUrl} alt={fullName} width={40} height={40} className="object-cover w-full h-full" />
-                    ) : (
-                      <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-black">
-                        {initials}
-                      </div>
-                    )}
-                  </div>
+                  <NavAvatar avatarUrl={avatarUrl} fullName={fullName} initials={initials} size="md" />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{fullName}</p>
                     <p className="text-xs text-primary font-medium">Logged in</p>
