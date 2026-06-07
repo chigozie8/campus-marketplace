@@ -151,7 +151,7 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </header>
 
-        <main className="max-w-5xl mx-auto px-4 py-6 pb-28">
+        <main className="max-w-5xl mx-auto px-4 py-6" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
             {/* ── Left: Gallery ── */}

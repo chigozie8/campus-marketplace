@@ -1,17 +1,26 @@
 // VendoorX Service Worker — Offline caching + Web Push
 // Capacitor native app uses @capacitor/push-notifications — web push is skipped there.
-// v15: Full offline support — asset caching, page caching, image caching, app-shell fallback.
+// v16: Full offline support — asset caching, page caching, image caching, app-shell fallback.
+//      Added per-entry expiration to prevent stale cache conflicts.
 
-const CACHE_VERSION   = 'v15'
+const CACHE_VERSION   = 'v16'
 const OFFLINE_CACHE   = `vendoorx-offline-${CACHE_VERSION}`
 const PAGES_CACHE     = `vendoorx-pages-${CACHE_VERSION}`
 const ASSETS_CACHE    = `vendoorx-assets-${CACHE_VERSION}`
 const IMAGES_CACHE    = `vendoorx-images-${CACHE_VERSION}`
 const FLAGS_CACHE     = 'vendoorx-flags'
+const META_CACHE      = 'vendoorx-cache-meta'
 const NATIVE_FLAG_KEY = '/native-mode'
 
 // Maximum number of images to keep in the images cache before evicting oldest.
 const MAX_IMAGES = 60
+
+// Cache TTLs (in milliseconds)
+const TTL = {
+  pages:  60 * 60 * 1000,          // 1 hour  — page HTML
+  assets: 30 * 24 * 60 * 60 * 1000, // 30 days — hashed JS/CSS
+  images: 7  * 24 * 60 * 60 * 1000, // 7 days  — remote images
+}
 
 let nativeModeActive = false
 
@@ -57,6 +66,7 @@ self.addEventListener('activate', (event) => {
     ASSETS_CACHE,
     IMAGES_CACHE,
     FLAGS_CACHE,
+    META_CACHE,
   ])
   event.waitUntil(
     caches.keys()
@@ -71,11 +81,33 @@ self.addEventListener('activate', (event) => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+// Write a cache-timestamp entry to META_CACHE so we can check expiry later.
+async function writeMeta(url) {
+  try {
+    const cache = await caches.open(META_CACHE)
+    await cache.put(url, new Response(String(Date.now()), { status: 200 }))
+  } catch {}
+}
+
+// Return true when the cached entry for `url` is older than `ttlMs`.
+async function isExpired(url, ttlMs) {
+  try {
+    const cache = await caches.open(META_CACHE)
+    const res = await cache.match(url)
+    if (!res) return true
+    const ts = parseInt(await res.text(), 10)
+    return isNaN(ts) || (Date.now() - ts) > ttlMs
+  } catch {
+    return true
+  }
+}
+
 // Store a clone of the response and return the original.
-async function cacheAndReturn(cacheName, request, response) {
+async function cacheAndReturn(cacheName, request, response, ttlMs) {
   try {
     const cache = await caches.open(cacheName)
     await cache.put(request, response.clone())
+    if (ttlMs) await writeMeta(request.url ?? request)
   } catch {}
   return response
 }
@@ -142,10 +174,11 @@ self.addEventListener('fetch', (event) => {
 // Cache-first: serve from ASSETS_CACHE, fall back to network and store result.
 async function handleAsset(request) {
   const cached = await caches.match(request, { cacheName: ASSETS_CACHE })
+  // _next/static/ chunks have hashed filenames — they're immutable, skip TTL check
   if (cached) return cached
   try {
     const response = await fetch(request)
-    if (response.ok) await cacheAndReturn(ASSETS_CACHE, request, response.clone())
+    if (response.ok) await cacheAndReturn(ASSETS_CACHE, request, response.clone(), TTL.assets)
     return response
   } catch {
     return new Response('', { status: 503 })
@@ -155,30 +188,35 @@ async function handleAsset(request) {
 // Cache-first: serve from ASSETS_CACHE for public static files.
 async function handlePublicAsset(request) {
   const cached = await caches.match(request, { cacheName: ASSETS_CACHE })
-  if (cached) return cached
+  const expired = cached ? await isExpired(request.url, TTL.assets) : true
+  if (cached && !expired) return cached
   try {
     const response = await fetch(request)
-    if (response.ok) await cacheAndReturn(ASSETS_CACHE, request, response.clone())
+    if (response.ok) await cacheAndReturn(ASSETS_CACHE, request, response.clone(), TTL.assets)
     return response
   } catch {
-    return new Response('', { status: 503 })
+    return cached ?? new Response('', { status: 503 })
   }
 }
 
 // Stale-while-revalidate for cross-origin images (Supabase CDN, etc.)
 async function handleRemoteImage(request) {
   const cached = await caches.match(request, { cacheName: IMAGES_CACHE })
+  const expired = cached ? await isExpired(request.url, TTL.images) : true
+
   const fetchPromise = fetch(request)
     .then(async (response) => {
       if (response.ok) {
-        await cacheAndReturn(IMAGES_CACHE, request, response.clone())
+        await cacheAndReturn(IMAGES_CACHE, request, response.clone(), TTL.images)
         await evictOldest(IMAGES_CACHE, MAX_IMAGES)
       }
       return response
     })
     .catch(() => null)
 
-  return cached ?? await fetchPromise ?? new Response('', { status: 503 })
+  // Serve stale immediately; if expired force-await fresh response
+  if (cached && !expired) return cached
+  return await fetchPromise ?? cached ?? new Response('', { status: 503 })
 }
 
 // Network-first with page cache fallback and app-shell last resort.
@@ -187,11 +225,11 @@ async function handleNavigation(request, url) {
     const response = await fetch(request)
     // Only cache successful HTML responses (not redirects, not errors).
     if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
-      await cacheAndReturn(PAGES_CACHE, request, response.clone())
+      await cacheAndReturn(PAGES_CACHE, request, response.clone(), TTL.pages)
     }
     return response
   } catch {
-    // Try the exact cached page for this URL first.
+    // Try the exact cached page for this URL — honour TTL (serve even if stale when offline)
     const cachedPage = await caches.match(request, { cacheName: PAGES_CACHE })
     if (cachedPage) return cachedPage
 

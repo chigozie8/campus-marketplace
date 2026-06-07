@@ -18,15 +18,18 @@ export async function POST(req: Request) {
       .from('products')
       .select('id, title, seller_id')
       .eq('id', productId)
-      .single()
+      .maybeSingle()
 
-    if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    // Allow reporting even if the product record is no longer findable (e.g. deleted/RLS hidden)
+    // We still record the dispute so admins can investigate
+    const resolvedSellerId = product?.seller_id ?? null
+    const resolvedTitle    = product?.title    ?? 'Unknown listing'
 
     const { error: insertError } = await supabase.from('disputes').insert({
       product_id: productId,
       order_id: orderId || null,
       reporter_id: user.id,
-      seller_id: product.seller_id,
+      seller_id: resolvedSellerId,
       reason,
       details: details || null,
       status: 'open',
@@ -40,7 +43,7 @@ export async function POST(req: Request) {
       await supabase.from('notifications').insert({
         user_id: user.id,
         title: 'Dispute Submitted',
-        body: `Your dispute for "${product.title}" has been received. Our team will review it within 24 hours.`,
+        body: `Your dispute for "${resolvedTitle}" has been received. Our team will review it within 24 hours.`,
         type: 'dispute_opened',
         data: { url: '/dashboard/orders', productId },
       })
