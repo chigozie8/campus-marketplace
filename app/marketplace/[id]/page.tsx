@@ -136,20 +136,25 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {/* Header */}
         <header className="sticky top-0 z-40 bg-white dark:bg-card border-b border-gray-100 dark:border-border shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="max-w-5xl mx-auto px-4 h-14 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            {/* Left — back + title */}
+            <div className="flex items-center gap-2 min-w-0">
               <Link href="/marketplace"
-                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors">
+                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-muted transition-colors shrink-0">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <span className="text-sm font-semibold text-gray-600 dark:text-muted-foreground hidden sm:block truncate max-w-[240px]">
+              <span className="text-sm font-semibold text-gray-600 dark:text-muted-foreground hidden sm:block truncate">
                 {p.title}
               </span>
             </div>
-            <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none">
+            {/* Center — logo, always centered */}
+            <Link href="/" className="text-xl font-black tracking-tight text-gray-950 dark:text-white select-none whitespace-nowrap justify-self-center">
               Vendoor<span className="text-primary">X</span>
             </Link>
-            <ShareButton title={p.title} />
+            {/* Right — share, right-aligned */}
+            <div className="flex justify-end">
+              <ShareButton title={p.title} />
+            </div>
           </div>
         </header>
 
