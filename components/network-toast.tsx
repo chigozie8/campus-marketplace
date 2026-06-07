@@ -3,16 +3,56 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
+const CACHE_TOAST_ID = 'cache-served'
+const NETWORK_TOAST_ID = 'network-status'
+
+/**
+ * Probes whether the page was served from the SW cache (poor/no connectivity)
+ * by attempting a short-timeout HEAD request to /api/health (or favicon as fallback).
+ * If the probe fails while navigator.onLine is true, the browser is online but
+ * the actual network is unreachable — meaning the SW served cached content.
+ */
+async function probeConnection(): Promise<'online' | 'cached' | 'offline'> {
+  if (!navigator.onLine) return 'offline'
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 3000)
+    const probe = await fetch('/api/health', {
+      method: 'HEAD',
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+    return probe.ok ? 'online' : 'cached'
+  } catch {
+    return 'cached'
+  }
+}
+
 export function NetworkToast() {
   const wasOnline = useRef(true)
+  const cacheToastShown = useRef(false)
 
   useEffect(() => {
     wasOnline.current = navigator.onLine
 
+    // On mount, probe connectivity — show cache toast if page was served stale
+    probeConnection().then((status) => {
+      if (status === 'cached' && !cacheToastShown.current) {
+        cacheToastShown.current = true
+        toast.warning('Showing cached content', {
+          id: CACHE_TOAST_ID,
+          description: 'Your connection is unstable. Some content may be out of date.',
+          duration: 6000,
+        })
+      }
+    })
+
     function handleOffline() {
       wasOnline.current = false
-      toast.error('You\'re offline', {
-        id: 'network-status',
+      toast.dismiss(CACHE_TOAST_ID)
+      toast.error("You're offline", {
+        id: NETWORK_TOAST_ID,
         description: 'Check your internet connection.',
         duration: Infinity,
         icon: (
@@ -29,8 +69,9 @@ export function NetworkToast() {
 
     function handleOnline() {
       if (!wasOnline.current) {
+        toast.dismiss(CACHE_TOAST_ID)
         toast.success('Back online!', {
-          id: 'network-status',
+          id: NETWORK_TOAST_ID,
           description: 'Your connection has been restored.',
           duration: 3000,
           icon: (
@@ -42,6 +83,7 @@ export function NetworkToast() {
             </svg>
           ),
         })
+        cacheToastShown.current = false
       }
       wasOnline.current = true
     }
