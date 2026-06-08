@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // POST /api/disputes — submit a product/listing report from the report-dialog.
 // This is NOT an order dispute; order disputes live in order_disputes and are
@@ -91,7 +92,11 @@ export async function GET(req: Request) {
     const url = new URL(req.url)
     const status = url.searchParams.get('status') || 'all'
 
-    let query = supabase
+    // Use service client so RLS doesn't filter out other users' reports
+    const svc = createServiceClient()
+    if (!svc) return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+
+    let query = svc
       .from('product_reports')
       .select('*, products(id, title, images), profiles!product_reports_reporter_id_fkey(full_name)')
       .order('created_at', { ascending: false })

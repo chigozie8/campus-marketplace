@@ -5,11 +5,9 @@ import { checkAndNotifyBuyerMilestones, checkAndNotifySellerMilestones } from '@
 import { releaseSellerEarnings, reversePendingCredit } from '@/lib/wallet-service'
 
 function svc() {
-  return createAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } },
-  )
+  const client = createServiceClient()
+  if (!client) throw new Error('Service client unavailable — SUPABASE_SERVICE_ROLE_KEY missing')
+  return client
 }
 
 async function requireAdmin() {
@@ -17,8 +15,12 @@ async function requireAdmin() {
   if (!supabase) return null
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await svc().from('admin_roles').select('role').eq('user_id', user.id).single()
-  return data ? user : null
+  const { data: profile } = await svc()
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  return profile?.role === 'admin' ? user : null
 }
 
 export async function GET(req: Request) {
