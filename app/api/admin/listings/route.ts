@@ -1,11 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { NextRequest, NextResponse } from 'next/server'
 
 async function assertAdmin(supabase: any) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('admin_roles').select('role').eq('user_id', user.id).single()
-  return data ? user : null
+  const svc = createServiceClient()
+  if (!svc) return null
+  const { data: profile } = await svc.from('profiles').select('role').eq('id', user.id).single()
+  return profile?.role === 'admin' ? user : null
 }
 
 // PATCH /api/admin/listings — toggle is_available, is_featured
