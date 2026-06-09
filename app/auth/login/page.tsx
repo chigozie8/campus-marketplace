@@ -6,8 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
   ShieldCheck, Users, Zap, CheckCircle2, Lock,
-  MessageCircle,
 } from 'lucide-react'
+import { VendoorXIcon } from '@/components/vendoorx-logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -100,14 +100,8 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex flex-col h-full p-10 xl:p-14">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center gap-2.5 group w-fit">
-            {/* WhatsApp-style icon mark */}
-            <div className="w-9 h-9 rounded-xl bg-[#25D366] flex items-center justify-center shadow-lg shadow-[#25D366]/30">
-              <MessageCircle className="w-5 h-5 text-white fill-white" />
-            </div>
-            <span className="text-xl font-black tracking-tight text-white leading-none">
-              Vendoor<span className="text-[#25D366]">X</span>
-            </span>
+          <Link href="/" className="inline-flex w-fit">
+            <VendoorXIcon height={36} />
           </Link>
 
           {/* Main content */}
@@ -201,13 +195,10 @@ export default function LoginPage() {
           <div className="w-full max-w-[420px]">
 
             {/* Mobile logo */}
-            <div className="lg:hidden mb-7 flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#25D366] flex items-center justify-center shadow-md shadow-[#25D366]/30">
-                <MessageCircle className="w-5 h-5 text-white fill-white" />
+            <div className="lg:hidden mb-7">
+              <div className="inline-flex items-center rounded-xl bg-[#0a0a0a] px-3 py-2">
+                <VendoorXIcon height={28} />
               </div>
-              <span className="text-xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
-                Vendoor<span className="text-[#25D366]">X</span>
-              </span>
             </div>
 
             {/* Header */}
