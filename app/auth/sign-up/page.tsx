@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Eye, EyeOff, Loader2, ArrowRight, ArrowLeft,
-  CheckCircle2, ShieldCheck, Sparkles, Lock,
-  ShoppingBag, Store, Repeat, GraduationCap, Phone
+  CheckCircle2, ShieldCheck, Lock,
+  ShoppingBag, Store, Repeat, GraduationCap, Phone,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,10 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { detectUniversity } from '@/lib/universities'
 import { Web3WalletButtons } from '@/components/auth/web3-wallet-buttons'
+import { AuthSidePanel } from '@/components/auth/auth-side-panel'
+import { WhatsAppMark } from '@/app/auth/login/page'
 
+/* ── Password strength indicator ── */
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
     { label: '8+ chars', pass: password.length >= 8 },
@@ -24,50 +27,32 @@ function PasswordStrength({ password }: { password: string }) {
     { label: 'Symbol', pass: /[^A-Za-z0-9]/.test(password) },
   ]
   const score = checks.filter(c => c.pass).length
-  // score 0 → none, 1 → Weak, 2 → Medium, 3 → Strong, 4 → Perfect (all required reqs met)
-  const tiers = [
-    { label: '', textColor: '' },
-    { label: 'Weak', textColor: 'text-red-500' },
-    { label: 'Medium', textColor: 'text-orange-500' },
-    { label: 'Strong', textColor: 'text-amber-500' },
-    { label: 'Perfect', textColor: 'text-green-600' },
-  ]
-  // Use standard Tailwind palette so JIT picks these up reliably (arbitrary
-  // hex values inside dynamic arrays can fall through the content scanner).
-  const barColor = ['bg-red-400', 'bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-green-500'][score]
-  const tier = tiers[score]
+  const barColors = ['bg-red-400', 'bg-red-400', 'bg-orange-400', 'bg-amber-400', 'bg-green-500']
+  const labels = ['', 'Weak', 'Fair', 'Strong', 'Perfect']
+  const labelColors = ['', 'text-red-500', 'text-orange-500', 'text-amber-500', 'text-green-600']
   if (!password) return null
   return (
     <div className="mt-2 space-y-1.5">
       <div className="flex gap-1">
         {[0, 1, 2, 3].map(i => (
-          <div
-            key={i}
-            className={cn(
-              'h-1.5 flex-1 rounded-full transition-all duration-300',
-              i < score ? barColor : 'bg-gray-200 dark:bg-muted'
-            )}
-          />
+          <div key={i} className={cn(
+            'h-1 flex-1 rounded-full transition-all duration-300',
+            i < score ? barColors[score] : 'bg-gray-200 dark:bg-muted'
+          )} />
         ))}
       </div>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between">
         <div className="flex gap-3 flex-wrap">
           {checks.map(({ label, pass }) => (
-            <span
-              key={label}
-              className={cn(
-                'text-[10px] flex items-center gap-1 transition-colors',
-                pass ? 'text-[#16a34a]' : 'text-gray-400'
-              )}
-            >
+            <span key={label} className={cn('text-[10px] flex items-center gap-1', pass ? 'text-[#128C7E]' : 'text-gray-400')}>
               <CheckCircle2 className="w-2.5 h-2.5" />
               {label}
             </span>
           ))}
         </div>
-        {tier.label && (
-          <span className={cn('text-[11px] font-bold uppercase tracking-wider', tier.textColor)}>
-            {tier.label}
+        {labels[score] && (
+          <span className={cn('text-[11px] font-bold uppercase tracking-wider', labelColors[score])}>
+            {labels[score]}
           </span>
         )}
       </div>
@@ -81,16 +66,18 @@ function SignUpPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const referralCode = searchParams.get('ref') || ''
+
   const [role, setRole] = useState<Role>('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
-  const [detectedUniversity, setDetectedUniversity] = useState<string | null>(null)
   const [university, setUniversity] = useState('')
+  const [detectedUniversity, setDetectedUniversity] = useState<string | null>(null)
   const [whatsapp, setWhatsapp] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+
   function handleEmailChange(val: string) {
     setEmail(val)
     const uni = detectUniversity(val)
@@ -102,12 +89,12 @@ function SignUpPageInner() {
     e.preventDefault()
     if (!role) { toast.error('Please select your account type'); return }
     if (password.length < 8) { toast.error('Password must be at least 8 characters'); return }
-    if (!/[A-Z]/.test(password)) { toast.error('Password must contain at least one uppercase letter'); return }
-    if (!/[0-9]/.test(password)) { toast.error('Password must contain at least one number'); return }
-    if (!/[^A-Za-z0-9]/.test(password)) { toast.error('Password must contain at least one special character (e.g. !@#$%)'); return }
+    if (!/[A-Z]/.test(password)) { toast.error('Password needs at least one uppercase letter'); return }
+    if (!/[0-9]/.test(password)) { toast.error('Password needs at least one number'); return }
+    if (!/[^A-Za-z0-9]/.test(password)) { toast.error('Password needs at least one special character (e.g. !@#$%)'); return }
     if (!agreedToTerms) { toast.error('Please agree to the Terms & Privacy Policy'); return }
     if (whatsapp.trim() && !/^\+?[\d\s\-()]{10,15}$/.test(whatsapp.trim())) {
-      toast.error('Enter a valid WhatsApp number, e.g. 08012345678 or +2348012345678')
+      toast.error('Enter a valid WhatsApp number, e.g. 08012345678')
       return
     }
     setLoading(true)
@@ -134,7 +121,6 @@ function SignUpPageInner() {
       setLoading(false)
       return
     }
-
     toast.dismiss(toastId)
     toast.success('Account created! Check your email for a confirmation link.')
     const tokenParam = result.verifyToken ? `&token=${encodeURIComponent(result.verifyToken)}` : ''
@@ -143,155 +129,88 @@ function SignUpPageInner() {
 
   return (
     <div className="min-h-screen flex bg-white dark:bg-background">
-      {/* ── Left panel ── */}
-      <div className="hidden lg:flex lg:w-[46%] bg-[#0a0a0a] relative overflow-hidden flex-col">
-        <div
-          className="absolute inset-0 opacity-[0.18]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#16a34a]/20 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-52 h-52 bg-[#16a34a]/10 rounded-full blur-2xl" />
-        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-[#16a34a]/8 rounded-full blur-2xl" />
+      <AuthSidePanel mode="signup" />
 
-        <div className="relative z-10 flex flex-col h-full p-12">
-          <Link href="/" className="inline-flex items-center w-fit">
-            <span className="text-2xl font-black tracking-tight text-white leading-none">
-              Vendoor<span className="text-[#16a34a]">X</span>
-            </span>
-          </Link>
-
-          <div className="flex-1 flex flex-col justify-center">
-            <span className="inline-flex items-center gap-1.5 bg-[#16a34a]/20 text-[#4ade80] text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full border border-[#16a34a]/30 w-fit mb-4">
-              <Sparkles className="w-3 h-3" />
-              Free forever
-            </span>
-            <h1 className="text-4xl xl:text-[2.75rem] font-black text-white leading-[1.1] tracking-tight mb-5">
-              Start selling in<br />under{' '}
-              <span className="text-[#16a34a]">60 seconds.</span>
-            </h1>
-            <p className="text-white/50 text-base leading-relaxed mb-10 max-w-xs">
-              List items for free, connect buyers directly on WhatsApp, and get paid — zero commissions.
-            </p>
-
-            <div className="space-y-3 mb-12">
-              {[
-                'Free to join, free to list forever',
-                'Direct WhatsApp buyer connections',
-                'Seller analytics & verified badge',
-                'Trusted seller community',
-                'Instant buyer notifications',
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-[#4ade80]" />
-                  </div>
-                  <span className="text-white/70 text-sm">{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-8 pt-8 border-t border-white/10">
-              {[
-                { value: '₦0', label: 'Commission' },
-                { value: '60s', label: 'To list' },
-                { value: '50K+', label: 'Buyers' },
-              ].map(({ value, label }) => (
-                <div key={label}>
-                  <p className="text-2xl font-black text-white">{value}</p>
-                  <p className="text-white/40 text-xs mt-0.5 uppercase tracking-wider">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <p className="text-white/80 text-sm leading-relaxed italic mb-3">
-              &quot;I listed my textbooks and got 4 messages in an hour. VendoorX is the real deal!&quot;
-            </p>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#16a34a]/30 border border-[#16a34a]/40 flex items-center justify-center flex-shrink-0">
-                <span className="text-[#4ade80] text-xs font-bold">AO</span>
-              </div>
-              <div>
-                <p className="text-white text-xs font-semibold">Adaeze O.</p>
-                <p className="text-white/40 text-[11px]">Enugu</p>
-              </div>
-              <div className="ml-auto flex gap-0.5">
-                {[...Array(5)].map((_, i) => <span key={i} className="text-[#16a34a] text-xs">★</span>)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Right panel: form ── */}
+      {/* Right panel */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 sm:py-5 lg:px-10">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-5 sm:px-8 lg:px-12 py-5 flex-shrink-0">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white transition-colors group"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            Back to home
+            Home
           </Link>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-muted-foreground whitespace-nowrap">
+          {/* Mobile logo */}
+          <Link href="/" className="lg:hidden">
+            <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">
+              Vendoor<span className="text-[#25D366]">X</span>
+            </span>
+          </Link>
+          <p className="text-sm text-gray-400 dark:text-muted-foreground">
             Have an account?{' '}
-            <Link href="/auth/login" className="font-semibold text-[#16a34a] hover:text-[#15803d] transition-colors">
+            <Link
+              href="/auth/login"
+              className="font-semibold text-[#128C7E] hover:text-[#075E54] dark:text-[#25D366] dark:hover:text-[#1ebe57] transition-colors"
+            >
               Sign in
             </Link>
           </p>
         </div>
 
-        <div className="flex-1 flex items-start justify-center px-4 sm:px-6 py-4 sm:py-6 lg:px-16">
-          <div className="w-full max-w-[440px] pb-10">
-            {/* Mobile wordmark */}
-            <div className="lg:hidden mb-6 sm:mb-8">
-              <span className="text-2xl font-black tracking-tight text-gray-950 dark:text-white leading-none">
-                Vendoor<span className="text-[#16a34a]">X</span>
-              </span>
-            </div>
+        {/* Form */}
+        <div className="flex-1 flex items-start justify-center px-5 sm:px-8 lg:px-16 py-4 sm:py-6">
+          <div className="w-full max-w-[420px] pb-10">
 
-            <div className="mb-6 sm:mb-7">
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight mb-1.5">Create account</h2>
-              <p className="text-gray-500 dark:text-muted-foreground text-sm">Free forever. No credit card required.</p>
+            {/* Header */}
+            <div className="mb-6">
+              <div className="inline-flex items-center gap-2 bg-[#25D366]/10 border border-[#25D366]/20 text-[#128C7E] dark:text-[#25D366] rounded-full px-3 py-1 text-xs font-semibold tracking-wide mb-4">
+                <WhatsAppMark size={13} />
+                Free forever — no credit card
+              </div>
+              <h2 className="text-2xl sm:text-[1.75rem] font-black text-gray-950 dark:text-white tracking-tight leading-tight mb-1.5">
+                Create your account
+              </h2>
+              <p className="text-gray-500 dark:text-muted-foreground text-sm leading-relaxed">
+                List items, connect with buyers on WhatsApp, and get paid — in minutes.
+              </p>
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-4">
-              {/* Role selector */}
-              <div className="space-y-1.5">
+
+              {/* Role picker */}
+              <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700 dark:text-foreground">I want to</Label>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  {[
+                <div className="grid grid-cols-3 gap-2">
+                  {([
                     { value: 'buyer' as Role, icon: ShoppingBag, label: 'Buy', sub: 'Browse & buy' },
                     { value: 'seller' as Role, icon: Store, label: 'Sell', sub: 'List & earn' },
                     { value: 'both' as Role, icon: Repeat, label: 'Both', sub: 'Buy & sell' },
-                  ].map(({ value, icon: Icon, label, sub }) => (
+                  ] as const).map(({ value, icon: Icon, label, sub }) => (
                     <button
                       key={value}
                       type="button"
                       onClick={() => setRole(value)}
                       className={cn(
-                        'relative flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 text-center',
+                        'relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 text-center',
                         role === value
-                          ? 'border-[#16a34a] bg-[#16a34a]/5 text-[#16a34a]'
-                          : 'border-gray-200 dark:border-border hover:border-gray-300 dark:hover:border-border/80 text-gray-600 dark:text-muted-foreground bg-gray-50 dark:bg-muted'
+                          ? 'border-[#25D366] bg-[#25D366]/6 text-[#128C7E]'
+                          : 'border-gray-200 dark:border-border bg-gray-50 dark:bg-muted text-gray-500 hover:border-gray-300'
                       )}
                     >
                       <div className={cn(
                         'w-9 h-9 rounded-lg flex items-center justify-center transition-colors',
-                        role === value ? 'bg-[#16a34a]/15' : 'bg-gray-200 dark:bg-muted'
+                        role === value ? 'bg-[#25D366]/15' : 'bg-gray-200/80 dark:bg-muted'
                       )}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
                         <p className="text-sm font-bold leading-none">{label}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-muted-foreground mt-0.5">{sub}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>
                       </div>
                       {role === value && (
-                        <CheckCircle2 className="w-4 h-4 text-[#16a34a] absolute top-2 right-2" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#25D366] absolute top-1.5 right-1.5" />
                       )}
                     </button>
                   ))}
@@ -299,8 +218,7 @@ function SignUpPageInner() {
               </div>
 
               {/* Full name */}
-              <div className="space-y-1.5">
-                <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700 dark:text-foreground">Full name</Label>
+              <FieldWrap label="Full name" htmlFor="fullName">
                 <Input
                   id="fullName"
                   type="text"
@@ -308,73 +226,74 @@ function SignUpPageInner() {
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
+                  className={INPUT_CLS}
                 />
-              </div>
+              </FieldWrap>
 
               {/* Email */}
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-foreground">Email address</Label>
+              <FieldWrap label="Email address" htmlFor="reg-email">
                 <Input
-                  id="email"
+                  id="reg-email"
                   type="email"
                   placeholder="you@email.com"
                   value={email}
                   onChange={e => handleEmailChange(e.target.value)}
                   required
-                  className="h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
+                  className={INPUT_CLS}
                 />
                 {detectedUniversity && (
-                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[#16a34a] font-semibold">
+                  <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[#128C7E] font-semibold">
                     <GraduationCap className="w-3.5 h-3.5" />
                     Institution detected — {detectedUniversity}
                   </div>
                 )}
-              </div>
+              </FieldWrap>
 
-              {/* University */}
-              <div className="space-y-1.5">
-                <Label htmlFor="university" className="text-sm font-semibold text-gray-700 dark:text-foreground">
-                  Organisation / Business <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
-                </Label>
+              {/* Organisation */}
+              <FieldWrap label="Organisation / Business" htmlFor="university" optional>
                 <div className="relative">
-                  <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
+                  <GraduationCap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     id="university"
                     type="text"
                     placeholder="e.g. Your business or school name"
                     value={university}
                     onChange={e => setUniversity(e.target.value)}
-                    className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
+                    className={cn(INPUT_CLS, 'pl-10')}
                   />
                 </div>
-              </div>
+              </FieldWrap>
 
-              {/* WhatsApp */}
+              {/* WhatsApp — primary field, highlighted */}
               <div className="space-y-1.5">
-                <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700 dark:text-foreground">
-                  WhatsApp number <span className="text-gray-400 dark:text-muted-foreground font-normal">(optional)</span>
+                <Label htmlFor="whatsapp" className="text-sm font-semibold text-gray-700 dark:text-foreground flex items-center gap-1.5">
+                  <WhatsAppMark size={14} color="#25D366" />
+                  WhatsApp number
+                  <span className="text-[11px] font-medium text-[#128C7E] bg-[#25D366]/10 rounded-full px-2 py-0.5">recommended</span>
                 </Label>
                 <div className="relative">
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-muted-foreground" />
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     id="whatsapp"
                     type="tel"
                     placeholder="+234 800 000 0000"
                     value={whatsapp}
                     onChange={e => setWhatsapp(e.target.value)}
-                    className="h-12 pl-10 pr-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
+                    className={cn(
+                      INPUT_CLS,
+                      'pl-10 border-[#25D366]/30 focus:border-[#25D366] focus:ring-[#25D366]/10 bg-[#f0fdf4]/60 dark:bg-[#052e16]/20'
+                    )}
                   />
                 </div>
-                <p className="text-[11px] text-gray-400 dark:text-muted-foreground">Buyers will contact you directly via WhatsApp</p>
+                <p className="text-[11px] text-gray-400">Buyers will contact you directly — this is how deals get done on VendoorX.</p>
               </div>
 
               {/* Password */}
               <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-foreground">Password</Label>
+                <Label htmlFor="reg-password" className="text-sm font-semibold text-gray-700 dark:text-foreground">Password</Label>
                 <div className="relative">
                   <Input
-                    id="password"
+                    id="reg-password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
                     placeholder="At least 8 characters"
@@ -382,12 +301,13 @@ function SignUpPageInner() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="h-12 px-4 pr-12 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#16a34a] focus:ring-[#16a34a]/20 focus:bg-white dark:focus:bg-muted transition-all rounded-xl"
+                    className={cn(INPUT_CLS, 'pr-12')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-muted-foreground hover:text-gray-600 dark:hover:text-foreground transition-colors p-1"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -395,7 +315,7 @@ function SignUpPageInner() {
                 <PasswordStrength password={password} />
               </div>
 
-              {/* Terms checkbox */}
+              {/* Terms */}
               <div className="flex items-start gap-2.5 pt-1">
                 <button
                   type="button"
@@ -403,17 +323,18 @@ function SignUpPageInner() {
                   className={cn(
                     'w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0',
                     agreedToTerms
-                      ? 'bg-[#16a34a] border-[#16a34a]'
-                      : 'border-gray-300 bg-white dark:bg-muted hover:border-[#16a34a]/50'
+                      ? 'bg-[#25D366] border-[#25D366]'
+                      : 'border-gray-300 dark:border-border bg-white dark:bg-muted hover:border-[#25D366]/50'
                   )}
+                  aria-label="Agree to Terms of Service"
                 >
                   {agreedToTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                 </button>
                 <span className="text-sm text-gray-600 dark:text-muted-foreground leading-snug select-none">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-[#16a34a] hover:underline font-medium">Terms of Service</Link>
+                  <Link href="/terms" className="text-[#128C7E] dark:text-[#25D366] hover:underline font-medium">Terms of Service</Link>
                   {' '}and{' '}
-                  <Link href="/privacy" className="text-[#16a34a] hover:underline font-medium">Privacy Policy</Link>
+                  <Link href="/privacy" className="text-[#128C7E] dark:text-[#25D366] hover:underline font-medium">Privacy Policy</Link>
                 </span>
               </div>
 
@@ -421,42 +342,32 @@ function SignUpPageInner() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-[#0a0a0a] hover:bg-[#1a1a1a] text-white font-bold text-sm rounded-xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl mt-1"
+                className="w-full h-12 font-bold text-sm rounded-xl shadow-md transition-all hover:-translate-y-px hover:shadow-lg mt-1 text-white"
+                style={{
+                  background: loading ? '#1a6e40' : '#128C7E',
+                }}
               >
                 {loading ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating account...</>
                 ) : (
-                  <>Create Free Account <ArrowRight className="w-4 h-4 ml-2" /></>
+                  <>
+                    <WhatsAppMark size={17} color="white" />
+                    <span className="ml-2">Create Free Account</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
                 )}
               </Button>
             </form>
 
             {/* Web3 wallet sign up */}
             <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
-              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">OR CONNECT WALLET</span>
-              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
+              <div className="flex-1 h-px bg-gray-100 dark:bg-border" />
+              <span className="text-[11px] font-semibold text-gray-400 tracking-widest uppercase">or connect wallet</span>
+              <div className="flex-1 h-px bg-gray-100 dark:bg-border" />
             </div>
-
             <Web3WalletButtons mode="signup" />
 
-            <div className="flex items-center gap-3 my-6">
-              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
-              <span className="text-xs text-gray-400 dark:text-muted-foreground font-medium">ALREADY REGISTERED?</span>
-              <div className="flex-1 h-px bg-gray-200 dark:bg-border" />
-            </div>
-
-            <Button
-              asChild
-              variant="outline"
-              className="w-full h-12 border-2 border-gray-200 dark:border-border hover:border-[#16a34a] hover:text-[#16a34a] font-semibold text-sm rounded-xl transition-all"
-            >
-              <Link href="/auth/login">
-                Sign in to existing account
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
-
+            {/* Trust row */}
             <div className="mt-7 flex items-center justify-center gap-4 text-xs text-gray-400 dark:text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Lock className="w-3 h-3" />
@@ -482,5 +393,23 @@ export default function SignUpPage() {
     <Suspense>
       <SignUpPageInner />
     </Suspense>
+  )
+}
+
+/* ── Small helpers ── */
+const INPUT_CLS =
+  'h-12 px-4 bg-gray-50 dark:bg-muted border-gray-200 dark:border-border text-gray-900 dark:text-foreground placeholder:text-gray-400 focus:border-[#128C7E] focus:ring-[#25D366]/10 focus:bg-white dark:focus:bg-muted transition-all rounded-xl'
+
+function FieldWrap({
+  label, htmlFor, optional, children,
+}: { label: string; htmlFor: string; optional?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={htmlFor} className="text-sm font-semibold text-gray-700 dark:text-foreground">
+        {label}
+        {optional && <span className="text-gray-400 font-normal ml-1">(optional)</span>}
+      </Label>
+      {children}
+    </div>
   )
 }
