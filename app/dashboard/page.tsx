@@ -16,6 +16,8 @@ import { DashboardTrustPanel } from '@/components/dashboard/trust-panel'
 import { BoostListingButton } from '@/components/dashboard/boost-listing-button'
 import { BoostStoreButton } from '@/components/dashboard/boost-store-button'
 import { BoostCallbackToast } from '@/components/dashboard/boost-callback-toast'
+import { SubscriptionCallbackToast } from '@/components/dashboard/subscription-callback-toast'
+import { PlanCard } from '@/components/dashboard/plan-card'
 import { PayoutSetupCard } from '@/components/dashboard/payout-setup-card'
 import { DashboardModeToggle } from '@/components/dashboard/mode-toggle'
 import { StatCard } from '@/components/dashboard/stat-card'
@@ -45,7 +47,7 @@ function deltaLabel(current: number, prior: number, suffix = 'this week'): { val
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>
+  searchParams: Promise<{ view?: string; subscription?: string; plan?: string }>
 }) {
   const sp = await searchParams
   const supabase = await createClient()
@@ -60,6 +62,16 @@ export default async function DashboardPage({
   const isBuyerOnly = role === 'buyer'
   const requestedView = sp?.view === 'buyer' || sp?.view === 'seller' ? (sp.view as Mode) : null
   const view: Mode = requestedView ?? (isBuyerOnly ? 'buyer' : 'seller')
+
+  // ── Active subscription for the plan card in the sidebar.
+  const { data: activeSubscription } = await supabase
+    .from('subscriptions')
+    .select('plan_id, billing_cycle, expires_at, status')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   // ── Date windows for delta math.
   const now = new Date()
@@ -376,6 +388,7 @@ export default async function DashboardPage({
     >
       <Suspense fallback={null}>
         <BoostCallbackToast />
+        <SubscriptionCallbackToast />
       </Suspense>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 lg:pb-10 space-y-5" style={{ paddingBottom: 'max(7rem, calc(env(safe-area-inset-bottom) + 6rem))' }}>
 
@@ -516,6 +529,9 @@ export default async function DashboardPage({
                 </div>
               </div>
             </div>
+
+            {/* Current Plan */}
+            <PlanCard subscription={activeSubscription ?? null} />
 
             {/* Payout Setup */}
             <PayoutSetupCard

@@ -101,6 +101,21 @@ export type ChatMessage = {
   platform: Platform
 }
 
+export type Subscription = {
+  id: string
+  user_id: string
+  plan_id: string
+  billing_cycle: 'monthly' | 'annual'
+  status: 'pending' | 'active' | 'expired' | 'cancelled'
+  payment_ref: string | null
+  amount_kobo: number | null
+  started_at: string | null
+  expires_at: string | null
+  created_at: string
+  updated_at: string
+  pricing_plans?: { id: string; name: string }
+}
+
 export type Order = {
   id: string
   buyer_id: string
